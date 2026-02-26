@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Minus, Plus } from "lucide-vue-next";
+import { formatManWon } from "@/lib/utils";
 
 const props = defineProps<{
   annualGross: number;
@@ -20,12 +21,12 @@ const emit = defineEmits<{
 
 // 빠른 선택 버튼 (만원 단위 표시, 실제값은 원)
 const quickAmounts = [
-  { label: "2천", value: 20_000_000 },
-  { label: "3천", value: 30_000_000 },
-  { label: "4천", value: 40_000_000 },
-  { label: "5천", value: 50_000_000 },
-  { label: "7천", value: 70_000_000 },
-  { label: "1억", value: 100_000_000 },
+  20_000_000,
+  30_000_000,
+  40_000_000,
+  50_000_000,
+  70_000_000,
+  100_000_000,
 ] as const;
 
 const inputIds = {
@@ -42,6 +43,19 @@ const grossInManWon = computed({
     emit("update:annualGross", safe * 10_000);
   },
 });
+
+// 천단위 콤마 포맷
+const formattedGrossManWon = computed(() =>
+  grossInManWon.value.toLocaleString("ko-KR")
+);
+
+function onGrossInput(event: Event): void {
+  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
+  const value = parseInt(raw, 10);
+  if (Number.isFinite(value)) {
+    grossInManWon.value = value;
+  }
+}
 
 const nonTaxableManWon = computed({
   get: () => Math.round(props.nonTaxableMonthly / 10_000),
@@ -80,10 +94,9 @@ function updateRetirementIncluded(value: boolean): void {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">급여 정보 입력</h2>
-      <span class="retro-kbd">INPUT</span>
     </div>
 
-    <div class="retro-panel-content space-y-5">
+    <div class="retro-panel-content space-y-4">
       <div>
         <label :for="inputIds.annualGross" class="mb-2 block text-caption font-semibold text-foreground">
           연봉 (만원)
@@ -91,13 +104,12 @@ function updateRetirementIncluded(value: boolean): void {
         <div class="space-y-2">
           <input
             :id="inputIds.annualGross"
-            v-model.number="grossInManWon"
-            type="number"
-            class="retro-input text-h2 font-bold tabular-nums"
-            placeholder="3000"
-            min="1000"
-            max="300000"
+            :value="formattedGrossManWon"
+            type="text"
+            class="retro-input text-heading font-bold tabular-nums"
+            placeholder="3,000"
             inputmode="numeric"
+            @input="onGrossInput"
           />
           <input
             :id="inputIds.annualGrossRange"
@@ -114,17 +126,17 @@ function updateRetirementIncluded(value: boolean): void {
         <div class="mt-3 flex flex-wrap gap-1.5">
           <button
             v-for="item in quickAmounts"
-            :key="item.value"
+            :key="item"
             type="button"
             :class="[
               'touch-target rounded border px-3 py-1.5 text-caption font-semibold transition-colors',
-              props.annualGross === item.value
+              props.annualGross === item
                 ? 'border-primary bg-primary text-primary-foreground'
                 : 'border-border text-muted-foreground hover:border-primary hover:text-primary',
             ]"
-            @click="setQuickAmount(item.value)"
+            @click="setQuickAmount(item)"
           >
-            {{ item.label }}
+            {{ formatManWon(item) }}
           </button>
         </div>
       </div>
@@ -134,7 +146,7 @@ function updateRetirementIncluded(value: boolean): void {
           상세 설정
         </summary>
 
-        <div class="space-y-4 p-3">
+        <div class="space-y-3 p-3">
           <div>
             <span class="mb-2 block text-caption font-semibold text-foreground">퇴직금 포함 여부</span>
             <div class="flex gap-2">
@@ -171,7 +183,7 @@ function updateRetirementIncluded(value: boolean): void {
                 >
                   <Minus class="h-4 w-4" />
                 </button>
-                <span class="w-12 text-center text-h2 font-bold tabular-nums">{{ props.dependents }}</span>
+                <span class="w-12 text-center text-heading font-bold tabular-nums">{{ props.dependents }}</span>
                 <button
                   type="button"
                   class="inline-flex touch-target h-11 w-11 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
@@ -196,7 +208,7 @@ function updateRetirementIncluded(value: boolean): void {
                 >
                   <Minus class="h-4 w-4" />
                 </button>
-                <span class="w-12 text-center text-h2 font-bold tabular-nums">{{ props.childrenUnder20 }}</span>
+                <span class="w-12 text-center text-heading font-bold tabular-nums">{{ props.childrenUnder20 }}</span>
                 <button
                   type="button"
                   class="inline-flex touch-target h-11 w-11 items-center justify-center rounded border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"

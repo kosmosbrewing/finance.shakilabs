@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
     path: "/insurance",
     name: "Insurance",
     component: () => import("@/views/InsuranceView.vue"),
-    meta: { title: "2026 건보료로 연봉 역산 | 4대보험 계산기" },
+    meta: { title: "2026 건보료로 연봉 추정 | 4대보험 계산기" },
   },
   {
     path: "/insurance/:amount(\\d+)",
@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialHealthInsuranceFee: Number.parseInt(String(route.params.amount), 10),
     }),
-    meta: { title: "건보료 역산 상세 | 2026 연봉 계산기" },
+    meta: { title: "건보료로 연봉 추정 | 2026 연봉 계산기" },
   },
   {
     path: "/salary",

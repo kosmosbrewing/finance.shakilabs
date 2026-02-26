@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import TickerBar from "@/components/common/TickerBar.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
+
+
 import InsuranceInput from "@/components/insurance/InsuranceInput.vue";
 import InsuranceResult from "@/components/insurance/InsuranceResult.vue";
 import InsuranceTable from "@/components/insurance/InsuranceTable.vue";
-import VisitorCounter from "@/components/common/VisitorCounter.vue";
+
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
@@ -18,7 +18,7 @@ import {
   DEFAULT_INSURANCE_PRESET,
   INSURANCE_PRESETS,
 } from "@/data/insurancePresets";
-import { insuranceTickerMessages } from "@/data/tickerMessages";
+
 import { formatManWon, formatWon, copyUsingExecCommand } from "@/lib/utils";
 import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -73,7 +73,7 @@ const activeCalc = computed(() =>
 
 const seoTitle = computed(() => {
   if (mode.value === "reverse") {
-    return `건보료 ${Math.round(healthInsuranceFee.value / 10000)}만원이면 연봉 얼마? | 2026 건보료 역산 계산기`;
+    return `건보료 ${formatWon(healthInsuranceFee.value)}면 연봉 얼마? | 2026 건보료로 연봉 추정 계산기`;
   }
 
   return `연봉 ${formatManWon(forwardCalc.annualGross.value)} 건보료 계산 | 2026 4대보험 계산기`;
@@ -164,16 +164,11 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" />
 
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <h1 class="text-h1 font-title">건보료 역산 계산기</h1>
-      <FreshBadge />
-    </div>
-
-    <TickerBar :messages="insuranceTickerMessages" />
+    <h1 class="text-h1 font-title">건보료로 연봉 추정 계산기</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="space-y-4">
           <InsuranceInput
             v-model:mode="mode"
             v-model:health-insurance-fee="healthInsuranceFee"
@@ -193,13 +188,7 @@ watch(
           />
         </div>
 
-        <CalcSourceBox />
-
-        <div class="flex flex-wrap gap-2">
-          <button type="button" class="retro-button" @click="shareInsurance">공유</button>
-          <button type="button" class="retro-button-subtle" @click="copyInsuranceLink">링크 복사</button>
-          <RouterLink class="retro-button-subtle" to="/salary">연봉 실수령 계산으로 이동</RouterLink>
-        </div>
+        <button type="button" class="retro-button-subtle" @click="shareInsurance">공유</button>
 
         <AdSlot slot="110001" label="광고 · top" />
 
@@ -207,11 +196,11 @@ watch(
 
         <AdSlot slot="110002" label="광고 · middle" />
 
+        <CalcSourceBox />
         <InternalLink current="insurance" />
 
         <AdSlot slot="110003" label="광고 · bottom" />
 
-        <VisitorCounter />
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">

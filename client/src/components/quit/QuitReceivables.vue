@@ -21,7 +21,6 @@ defineProps<{
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">받을 돈</h2>
-      <span class="retro-kbd">RECEIVE</span>
     </div>
 
     <div class="retro-panel-content space-y-3 text-caption">

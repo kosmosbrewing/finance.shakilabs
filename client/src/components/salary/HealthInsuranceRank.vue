@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { HEALTH_INSURANCE_TIERS, findPercentile } from "@/lib/health-insurance-tiers";
-import { formatWon } from "@/lib/utils";
+import { formatManWon, formatWon } from "@/lib/utils";
 import {
   Accordion,
   AccordionItem,
@@ -44,8 +44,7 @@ const rankComment = computed(() => {
 });
 
 function tierSalaryLabel(salary: number): string {
-  if (salary >= 100_000_000) return `연봉 ${salary / 100_000_000}억원+`;
-  return `연봉 ${(salary / 10_000).toLocaleString("ko-KR")}만원+`;
+  return `연봉 ${formatManWon(salary)}+`;
 }
 </script>
 
@@ -53,7 +52,6 @@ function tierSalaryLabel(salary: number): string {
   <section v-if="myPremium > 0" class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">직장인 소득 랭킹</h2>
-      <span class="retro-kbd">RANK</span>
     </div>
     <div class="retro-panel-content space-y-3">
       <!-- 요약 -->
@@ -61,11 +59,11 @@ function tierSalaryLabel(salary: number): string {
         <div class="grid grid-cols-2 gap-2">
           <div class="retro-stat">
             <p class="retro-stat-label">내 건보료</p>
-            <p class="retro-stat-value text-body tabular-nums">{{ formatWon(myPremium) }}</p>
+            <p class="retro-stat-value tabular-nums">{{ formatWon(myPremium) }}</p>
           </div>
           <div class="retro-stat">
             <p class="retro-stat-label">소득 랭킹</p>
-            <p class="retro-stat-value text-body tabular-nums">{{ result.label }}</p>
+            <p class="retro-stat-value tabular-nums">{{ result.label }}</p>
           </div>
         </div>
         <p class="text-caption text-muted-foreground">{{ rankComment }}</p>

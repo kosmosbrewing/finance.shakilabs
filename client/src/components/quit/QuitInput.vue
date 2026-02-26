@@ -54,6 +54,17 @@ const livingCostManWon = computed({
   set: (value: number) => emit("update:monthlyLivingCost", clampInt(value, 100, 10000) * 10_000),
 });
 
+// 천단위 콤마 포맷 (주요 금액 입력)
+const formattedSalary = computed(() => salaryManWon.value.toLocaleString("ko-KR"));
+const formattedBonus = computed(() => bonusManWon.value.toLocaleString("ko-KR"));
+const formattedLivingCost = computed(() => livingCostManWon.value.toLocaleString("ko-KR"));
+
+function onFormattedInput(setter: (v: number) => void, event: Event): void {
+  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
+  const value = parseInt(raw, 10);
+  if (Number.isFinite(value)) setter(value);
+}
+
 function updateDependents(value: number): void {
   const safe = clampInt(value, 1, 20);
   emit("update:dependents", safe);
@@ -86,7 +97,6 @@ const inputIds = {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">퇴사 조건 입력</h2>
-      <span class="retro-kbd">INPUT</span>
     </div>
 
     <div class="retro-panel-content space-y-4">
@@ -104,7 +114,7 @@ const inputIds = {
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label class="space-y-1" :for="inputIds.monthlySalary">
           <span class="text-caption text-muted-foreground">월급(세전, 만원)</span>
-          <input :id="inputIds.monthlySalary" v-model.number="salaryManWon" type="number" min="100" max="10000" inputmode="numeric" class="retro-input" />
+          <input :id="inputIds.monthlySalary" :value="formattedSalary" type="text" inputmode="numeric" class="retro-input tabular-nums font-bold" @input="onFormattedInput(v => salaryManWon = v, $event)" />
         </label>
         <label class="space-y-1" :for="inputIds.nonTaxableMonthly">
           <span class="text-caption text-muted-foreground">비과세(만원/월)</span>
@@ -116,7 +126,7 @@ const inputIds = {
         </label>
       </div>
 
-      <div class="space-y-2 border border-border/60 bg-muted/20 p-3">
+      <div class="space-y-2 rounded-xl border border-border/60 bg-muted/20 p-3">
         <span class="text-caption font-semibold">퇴사 사유</span>
         <div class="flex flex-wrap gap-2 text-caption">
           <label class="inline-flex items-center gap-1.5"><input type="radio" name="quit-reason" value="layoff" :checked="quitReason === 'layoff'" @change="emit('update:quitReason', 'layoff')" />권고사직</label>
@@ -143,11 +153,11 @@ const inputIds = {
           </label>
           <label class="space-y-1" :for="inputIds.annualBonus">
             <span class="text-caption text-muted-foreground">연간 상여금(만원)</span>
-            <input :id="inputIds.annualBonus" v-model.number="bonusManWon" type="number" min="0" max="100000" inputmode="numeric" class="retro-input" />
+            <input :id="inputIds.annualBonus" :value="formattedBonus" type="text" inputmode="numeric" class="retro-input tabular-nums" @input="onFormattedInput(v => bonusManWon = v, $event)" />
           </label>
           <label class="space-y-1" :for="inputIds.monthlyLivingCost">
             <span class="text-caption text-muted-foreground">월 생활비(만원)</span>
-            <input :id="inputIds.monthlyLivingCost" v-model.number="livingCostManWon" type="number" min="100" max="10000" inputmode="numeric" class="retro-input" />
+            <input :id="inputIds.monthlyLivingCost" :value="formattedLivingCost" type="text" inputmode="numeric" class="retro-input tabular-nums" @input="onFormattedInput(v => livingCostManWon = v, $event)" />
           </label>
         </div>
       </details>

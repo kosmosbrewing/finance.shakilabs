@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch, watchEffect } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import TickerBar from "@/components/common/TickerBar.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
+
+
 import QuitInput from "@/components/quit/QuitInput.vue";
 import QuitReceivables from "@/components/quit/QuitReceivables.vue";
 import QuitExpenses from "@/components/quit/QuitExpenses.vue";
 import SurvivalSimulation from "@/components/quit/SurvivalSimulation.vue";
 import QuitChecklist from "@/components/quit/QuitChecklist.vue";
-import VisitorCounter from "@/components/common/VisitorCounter.vue";
+
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
@@ -17,8 +17,8 @@ import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useRetirementCalc } from "@/composables/useRetirementCalc";
 import { useUnemploymentCalc } from "@/composables/useUnemploymentCalc";
 import { useSurvivalCalc } from "@/composables/useSurvivalCalc";
-import { quitTickerMessages } from "@/data/tickerMessages";
-import { copyUsingExecCommand, formatWon } from "@/lib/utils";
+
+import { copyUsingExecCommand, formatManWon, formatWon } from "@/lib/utils";
 import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 import type { QuitReason } from "@/data/unemploymentTable";
@@ -158,7 +158,7 @@ const seoTitle = computed(
 
 const seoDescription = computed(
   () =>
-    `퇴사 후 받을 돈은 ${Math.round(totalReceivables.value / 10_000).toLocaleString("ko-KR")}만원, 월 고정비는 ${Math.round(monthlyFixedCost.value / 10_000).toLocaleString("ko-KR")}만원으로 추정됩니다.`
+    `퇴사 후 받을 돈은 ${formatManWon(totalReceivables.value)}, 월 고정비는 ${formatManWon(monthlyFixedCost.value)}으로 추정됩니다.`
 );
 
 function getShareUrl(): string {
@@ -209,12 +209,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" />
 
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <h1 class="text-h1 font-title">퇴사 올인원 시뮬레이터</h1>
-      <FreshBadge />
-    </div>
-
-    <TickerBar :messages="quitTickerMessages" />
+    <h1 class="text-h1 font-title">퇴사 올인원 시뮬레이터</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
@@ -231,11 +226,6 @@ watch(
           v-model:annual-bonus="annualBonus"
           v-model:monthly-living-cost="monthlyLivingCost"
         />
-
-        <div class="flex flex-wrap gap-2">
-          <button type="button" class="retro-button" @click="copyQuitLink">링크 복사</button>
-          <RouterLink class="retro-button-subtle" to="/insurance">건보료 역산으로 이동</RouterLink>
-        </div>
 
         <AdSlot slot="140001" label="광고 · top" />
 
@@ -272,11 +262,12 @@ watch(
 
         <QuitChecklist />
 
+        <button type="button" class="retro-button-subtle" @click="copyQuitLink">공유</button>
+
         <InternalLink current="quit" />
 
         <AdSlot slot="140003" label="광고 · bottom" />
 
-        <VisitorCounter />
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">

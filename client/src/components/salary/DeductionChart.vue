@@ -73,7 +73,6 @@ const chartDescription = computed(() =>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">공제 비율</h2>
-      <span class="retro-kbd">CHART</span>
     </div>
     <div class="retro-panel-content">
       <div v-if="arcs.length > 0" class="flex flex-col sm:flex-row items-center gap-6">

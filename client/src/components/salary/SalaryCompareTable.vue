@@ -32,33 +32,31 @@ const rows = computed(() =>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">연봉별 실수령액 비교표</h2>
-      <span class="retro-kbd">TABLE</span>
     </div>
 
-    <p class="scroll-hint">표를 좌우로 스크롤하세요 →</p>
     <div class="overflow-x-auto">
-      <table class="min-w-[920px] w-full text-body">
-        <thead class="sticky top-0 z-10 bg-muted/70 text-foreground backdrop-blur">
-          <tr>
-            <th class="px-3 py-2.5 text-left">연봉</th>
-            <th class="px-3 py-2.5 text-right">월급(세전)</th>
-            <th class="px-3 py-2.5 text-right">4대보험계</th>
-            <th class="px-3 py-2.5 text-right">소득세계</th>
-            <th class="px-3 py-2.5 text-right">월 실수령</th>
-            <th class="px-3 py-2.5 text-right">실수령률</th>
+      <table class="w-full text-caption border-collapse">
+        <thead>
+          <tr class="border-b-2 border-primary/20 bg-muted/40">
+            <th class="px-3 py-2.5 text-left font-semibold">연봉</th>
+            <th class="px-3 py-2.5 text-right font-semibold">월급(세전)</th>
+            <th class="px-3 py-2.5 text-right font-semibold">4대보험</th>
+            <th class="px-3 py-2.5 text-right font-semibold">소득세</th>
+            <th class="px-3 py-2.5 text-right font-semibold">월 실수령</th>
+            <th class="px-3 py-2.5 text-right font-semibold">실수령률</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in rows" :key="row.annualSalary" class="border-t border-border/60 even:bg-muted/20">
-              <td class="px-3 py-2.5">
-              <RouterLink :to="`/salary/${row.manWon}`" class="font-semibold text-primary hover:underline">
+          <tr v-for="row in rows" :key="row.annualSalary" class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+            <td class="px-3 py-2.5">
+              <RouterLink :to="`/salary/${row.manWon}`" class="font-semibold text-primary hover:underline whitespace-nowrap">
                 {{ formatManWon(row.annualSalary) }}
               </RouterLink>
             </td>
-            <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(row.monthlyGross) }}</td>
-            <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(row.totalInsurance) }}</td>
-            <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(row.totalTax) }}</td>
-            <td class="px-3 py-2.5 text-right tabular-nums font-semibold">{{ formatWon(row.monthlyNet) }}</td>
+            <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(row.monthlyGross) }}</td>
+            <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(row.totalInsurance) }}</td>
+            <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(row.totalTax) }}</td>
+            <td class="px-3 py-2.5 text-right tabular-nums font-semibold whitespace-nowrap">{{ formatWon(row.monthlyNet) }}</td>
             <td class="px-3 py-2.5 text-right tabular-nums">{{ formatPercent(1 - row.effectiveRate, 1) }}</td>
           </tr>
         </tbody>

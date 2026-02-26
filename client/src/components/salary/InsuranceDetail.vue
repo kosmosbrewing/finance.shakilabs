@@ -12,53 +12,52 @@ defineProps<{
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">4대보험 상세 (근로자/사업주)</h2>
-      <span class="retro-kbd">INSURANCE</span>
     </div>
 
     <div class="retro-panel-content space-y-3">
       <div class="overflow-x-auto">
-        <table class="w-full min-w-[760px] text-body">
-          <thead class="sticky top-0 z-10 bg-muted/70 text-foreground backdrop-blur">
-            <tr>
-              <th class="px-3 py-2.5 text-left">항목</th>
-              <th class="px-3 py-2.5 text-right">근로자 요율</th>
-              <th class="px-3 py-2.5 text-right">근로자 금액(월)</th>
-              <th class="px-3 py-2.5 text-right">사업주 요율</th>
-              <th class="px-3 py-2.5 text-right">사업주 금액(월)</th>
+        <table class="w-full text-caption border-collapse">
+          <thead>
+            <tr class="border-b-2 border-primary/20 bg-muted/40">
+              <th class="px-3 py-2.5 text-left font-semibold">항목</th>
+              <th class="px-3 py-2.5 text-right font-semibold">근로자 요율</th>
+              <th class="px-3 py-2.5 text-right font-semibold">근로자(월)</th>
+              <th class="px-3 py-2.5 text-right font-semibold">사업주 요율</th>
+              <th class="px-3 py-2.5 text-right font-semibold">사업주(월)</th>
             </tr>
           </thead>
           <tbody>
-            <tr class="border-t border-border/60">
-              <td class="px-3 py-2.5">국민연금</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatPercent(RATES_2026.nationalPension.employee, 3) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(calc.nationalPension.value) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatPercent(RATES_2026.nationalPension.employer, 3) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(calc.employerCost.value.nationalPension) }}</td>
+            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+              <td class="px-3 py-2.5 whitespace-nowrap">국민연금</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatPercent(RATES_2026.nationalPension.employee, 3) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(calc.nationalPension.value) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatPercent(RATES_2026.nationalPension.employer, 3) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(calc.employerCost.value.nationalPension) }}</td>
             </tr>
-            <tr class="border-t border-border/60">
-              <td class="px-3 py-2.5">건강보험</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatPercent(RATES_2026.healthInsurance.employee, 3) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(calc.healthInsurance.value) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatPercent(RATES_2026.healthInsurance.employer, 3) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(calc.employerCost.value.healthInsurance) }}</td>
+            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+              <td class="px-3 py-2.5 whitespace-nowrap">건강보험</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatPercent(RATES_2026.healthInsurance.employee, 3) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(calc.healthInsurance.value) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatPercent(RATES_2026.healthInsurance.employer, 3) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(calc.employerCost.value.healthInsurance) }}</td>
             </tr>
-            <tr class="border-t border-border/60">
-              <td class="px-3 py-2.5">장기요양보험</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">건보의 {{ formatPercent(RATES_2026.longTermCare.rateOfHealth, 2) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(calc.longTermCare.value) }}</td>
+            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+              <td class="px-3 py-2.5 whitespace-nowrap">장기요양</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">건보의 {{ formatPercent(RATES_2026.longTermCare.rateOfHealth, 2) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(calc.longTermCare.value) }}</td>
               <td class="px-3 py-2.5 text-right tabular-nums">-</td>
               <td class="px-3 py-2.5 text-right tabular-nums">-</td>
             </tr>
-            <tr class="border-t border-border/60">
-              <td class="px-3 py-2.5">고용보험</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatPercent(RATES_2026.employmentInsurance.employee, 2) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(calc.employmentInsurance.value) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatPercent(RATES_2026.employmentInsurance.employer, 2) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(calc.employerCost.value.employmentInsurance) }}</td>
+            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+              <td class="px-3 py-2.5 whitespace-nowrap">고용보험</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatPercent(RATES_2026.employmentInsurance.employee, 2) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(calc.employmentInsurance.value) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatPercent(RATES_2026.employmentInsurance.employer, 2) }}</td>
+              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(calc.employerCost.value.employmentInsurance) }}</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr class="border-t border-border font-semibold">
+            <tr class="border-t-2 border-primary/20 bg-primary/5 font-semibold">
               <td class="px-3 py-2.5">합계</td>
               <td class="px-3 py-2.5 text-right">-</td>
               <td class="px-3 py-2.5 text-right tabular-nums">{{ formatWon(calc.totalInsurance.value) }}</td>

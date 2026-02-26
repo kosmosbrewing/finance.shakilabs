@@ -20,14 +20,13 @@ const title = computed(() => {
 </script>
 
 <template>
-  <section class="retro-panel border border-border/70">
+  <section class="retro-panel">
     <div class="retro-titlebar">
       <h2 class="retro-title">{{ title }}</h2>
-      <span class="retro-kbd">RESULT</span>
     </div>
 
     <div class="retro-panel-content space-y-3">
-      <p class="text-h2 font-title text-primary">
+      <p class="text-h1 font-title text-primary">
         추정 연봉 {{ formatManWon(mode === 'reverse' ? estimatedAnnualGross : calc.annualGross.value) }}
       </p>
 
@@ -43,7 +42,7 @@ const title = computed(() => {
       </div>
 
       <div v-if="mode === 'reverse'" class="rounded-xl border border-border/60 bg-muted/20 p-3 text-caption space-y-2">
-        <p class="font-semibold">역산 근거</p>
+        <p class="font-semibold">추정 근거</p>
         <ol class="list-decimal list-inside space-y-1 text-muted-foreground">
           <li>건강보험료 <strong class="tabular-nums text-foreground">{{ formatWon(healthInsuranceFee) }}</strong> ÷ 3.595%</li>
           <li>= 과세월급 <strong class="tabular-nums text-foreground">{{ formatWon(estimatedTaxableMonthly) }}</strong></li>

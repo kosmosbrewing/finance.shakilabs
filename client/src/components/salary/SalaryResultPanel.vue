@@ -99,14 +99,13 @@ onUnmounted(() => {
           <Share2 class="h-3 w-3 mr-1 inline" />
           공유
         </button>
-        <span class="retro-kbd">RESULT</span>
       </div>
     </div>
     <div class="retro-panel-content space-y-4">
       <!-- 월 실수령액 (메인) -->
       <div class="text-center py-4">
         <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1">월 실수령액</p>
-        <p class="text-3xl sm:text-4xl font-bold font-title text-primary tabular-nums">
+        <p class="text-display font-bold font-title text-primary tabular-nums">
           {{ formatWon(displayedMonthlyNet) }}
         </p>
         <p class="text-caption text-muted-foreground mt-1">
@@ -125,19 +124,19 @@ onUnmounted(() => {
       <div class="retro-stat-grid">
         <div class="retro-stat">
           <p class="retro-stat-label">월 급여</p>
-          <p class="retro-stat-value text-body">{{ formatWon(props.calc.monthlyGross.value) }}</p>
+          <p class="retro-stat-value">{{ formatWon(props.calc.monthlyGross.value) }}</p>
         </div>
         <div class="retro-stat">
           <p class="retro-stat-label">공제합계</p>
-          <p class="retro-stat-value text-body text-deduction">{{ formatWon(props.calc.totalDeduction.value) }}</p>
+          <p class="retro-stat-value text-deduction">{{ formatWon(props.calc.totalDeduction.value) }}</p>
         </div>
         <div class="retro-stat">
           <p class="retro-stat-label">4대보험</p>
-          <p class="retro-stat-value text-body">{{ formatWon(props.calc.totalInsurance.value) }}</p>
+          <p class="retro-stat-value">{{ formatWon(props.calc.totalInsurance.value) }}</p>
         </div>
         <div class="retro-stat">
           <p class="retro-stat-label">실효세율</p>
-          <p class="retro-stat-value text-body">{{ formatPercent(props.calc.effectiveTaxRate.value, 1) }}</p>
+          <p class="retro-stat-value">{{ formatPercent(props.calc.effectiveTaxRate.value, 1) }}</p>
         </div>
       </div>
 

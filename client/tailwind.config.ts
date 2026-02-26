@@ -18,33 +18,25 @@ const config: Config = {
       fontFamily: {
         sans: [
           "Pretendard",
-          "Inter",
-          "Noto Sans KR",
           "Apple SD Gothic Neo",
           "Malgun Gothic",
           ...fontFamily.sans,
         ],
         title: [
-          "Inter",
           "Pretendard",
-          "Noto Sans KR",
-          ...fontFamily.sans,
-        ],
-        emphasis: [
-          "Inter",
-          "Pretendard",
-          "Noto Sans KR",
+          "Apple SD Gothic Neo",
+          "Malgun Gothic",
           ...fontFamily.sans,
         ],
       },
 
       fontSize: {
-        h1: ["1.5rem", { lineHeight: "1.3", fontWeight: "700" }],
-        h2: ["1.25rem", { lineHeight: "1.35", fontWeight: "600" }],
-        heading: ["1.1875rem", { lineHeight: "1.4", fontWeight: "600" }],
-        body: ["1rem", { lineHeight: "1.6", fontWeight: "400" }],
-        caption: ["0.875rem", { lineHeight: "1.55", fontWeight: "400" }],
-        tiny: ["0.75rem", { lineHeight: "1.35", fontWeight: "400" }],
+        display: ["1.625rem", { lineHeight: "1.2", fontWeight: "700" }],
+        h1: ["1.25rem", { lineHeight: "1.3", fontWeight: "700" }],
+        heading: ["1rem", { lineHeight: "1.35", fontWeight: "600" }],
+        body: ["0.875rem", { lineHeight: "1.5", fontWeight: "400" }],
+        caption: ["0.8125rem", { lineHeight: "1.45", fontWeight: "400" }],
+        tiny: ["0.6875rem", { lineHeight: "1.35", fontWeight: "400" }],
       },
 
       colors: {

@@ -13,7 +13,6 @@ defineProps<{
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">퇴사 후 내야 할 돈 (월)</h2>
-      <span class="retro-kbd">EXPENSE</span>
     </div>
 
     <div class="retro-panel-content space-y-3 text-caption">

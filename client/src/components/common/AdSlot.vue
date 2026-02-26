@@ -42,7 +42,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section v-if="publisherId || isDev" class="retro-panel border border-border/70 p-3">
+  <section v-if="publisherId || isDev" class="retro-panel p-3">
     <p class="mb-2 text-caption text-muted-foreground">
       {{ label || "광고 영역" }}
     </p>

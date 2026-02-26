@@ -94,5 +94,6 @@ watch(() => props.pageKey, () => loadFeedback(), { immediate: true });
       title="익명 게시판"
       :max-length="300"
     />
+
   </aside>
 </template>

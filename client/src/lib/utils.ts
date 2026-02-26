@@ -17,11 +17,30 @@ export function formatWon(amount: number | null | undefined): string {
   return `${Math.round(amount).toLocaleString("ko-KR")}원`;
 }
 
-// 만원 포맷: 50000000 → "5,000만원"
+// 만원 단위 포맷: 240 -> "240만원", 10000 -> "1억원", 12500 -> "1억 2,500만원"
+export function formatManWonValue(manWon: number | null | undefined): string {
+  if (manWon == null) return "-";
+
+  const rounded = Math.round(manWon);
+  const sign = rounded < 0 ? "-" : "";
+  const absolute = Math.abs(rounded);
+
+  if (absolute >= 10_000) {
+    const eok = Math.floor(absolute / 10_000);
+    const restManWon = absolute % 10_000;
+    if (restManWon === 0) {
+      return `${sign}${eok.toLocaleString("ko-KR")}억원`;
+    }
+    return `${sign}${eok.toLocaleString("ko-KR")}억 ${restManWon.toLocaleString("ko-KR")}만원`;
+  }
+
+  return `${sign}${absolute.toLocaleString("ko-KR")}만원`;
+}
+
+// 만원 포맷: 50000000 → "5,000만원", 100000000 -> "1억원"
 export function formatManWon(amount: number | null | undefined): string {
   if (amount == null) return "-";
-  const man = Math.round(amount / 10000);
-  return `${man.toLocaleString("ko-KR")}만원`;
+  return formatManWonValue(amount / 10_000);
 }
 
 // 퍼센트 포맷: 0.1234 → "12.34%"

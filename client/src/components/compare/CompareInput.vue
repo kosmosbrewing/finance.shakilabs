@@ -97,6 +97,18 @@ const welfareBManWon = computed({
     updateCompany("companyB", { welfareMonthly: clampInt(value, 0, 1_000) * 10_000 }),
 });
 
+// 천단위 콤마 포맷 (연봉)
+const formattedAnnualA = computed(() => annualAManWon.value.toLocaleString("ko-KR"));
+const formattedAnnualB = computed(() => annualBManWon.value.toLocaleString("ko-KR"));
+
+function onAnnualInput(key: "companyA" | "companyB", event: Event): void {
+  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
+  const value = parseInt(raw, 10);
+  if (Number.isFinite(value)) {
+    updateCompany(key, { annualGross: clampInt(value, 1_000, 300_000) * 10_000 });
+  }
+}
+
 function updateDependents(value: number): void {
   const safe = clampInt(value, 1, 20);
   emit("update:dependents", safe);
@@ -129,16 +141,15 @@ const inputIds = {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">A사 vs B사 입력</h2>
-      <span class="retro-kbd">INPUT</span>
     </div>
 
     <div class="retro-panel-content space-y-4">
       <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] md:items-stretch">
-        <div class="border border-border/70 p-3 space-y-3">
+        <div class="rounded-xl border border-border/60 p-3 space-y-3 bg-muted/20">
           <h3 class="text-caption font-semibold">현재 회사 (A사)</h3>
           <label class="block space-y-1" :for="inputIds.annualA">
             <span class="text-caption text-muted-foreground">연봉 (만원)</span>
-            <input :id="inputIds.annualA" v-model.number="annualAManWon" type="number" min="1000" max="300000" class="retro-input" inputmode="numeric" />
+            <input :id="inputIds.annualA" :value="formattedAnnualA" type="text" inputmode="numeric" class="retro-input tabular-nums font-bold" @input="onAnnualInput('companyA', $event)" />
           </label>
           <label class="block space-y-1" :for="inputIds.nonTaxA">
             <span class="text-caption text-muted-foreground">비과세 (만원/월)</span>
@@ -176,11 +187,11 @@ const inputIds = {
           <span class="retro-kbd px-3 py-1 font-extrabold">VS</span>
         </div>
 
-        <div class="border border-border/70 p-3 space-y-3">
+        <div class="rounded-xl border border-border/60 p-3 space-y-3 bg-muted/20">
           <h3 class="text-caption font-semibold">이직 회사 (B사)</h3>
           <label class="block space-y-1" :for="inputIds.annualB">
             <span class="text-caption text-muted-foreground">연봉 (만원)</span>
-            <input :id="inputIds.annualB" v-model.number="annualBManWon" type="number" min="1000" max="300000" class="retro-input" inputmode="numeric" />
+            <input :id="inputIds.annualB" :value="formattedAnnualB" type="text" inputmode="numeric" class="retro-input tabular-nums font-bold" @input="onAnnualInput('companyB', $event)" />
           </label>
           <label class="block space-y-1" :for="inputIds.nonTaxB">
             <span class="text-caption text-muted-foreground">비과세 (만원/월)</span>
@@ -210,7 +221,7 @@ const inputIds = {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border border-border/60 bg-muted/20 p-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
         <label class="space-y-1" :for="inputIds.dependents">
           <span class="text-caption text-muted-foreground">부양가족 수 (공통)</span>
           <input

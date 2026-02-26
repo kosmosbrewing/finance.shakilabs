@@ -25,7 +25,6 @@ const colorByMonths = computed(() => (months: number) => {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">생존 시뮬레이션</h2>
-      <span class="retro-kbd">SURVIVAL</span>
     </div>
 
     <div class="retro-panel-content space-y-3 text-caption">

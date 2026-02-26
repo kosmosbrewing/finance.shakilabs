@@ -2,20 +2,24 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
-import TickerBar from "@/components/common/TickerBar.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
+
+
 import CompareInput from "@/components/compare/CompareInput.vue";
 import CompareResult from "@/components/compare/CompareResult.vue";
 import CompareDiffTable from "@/components/compare/CompareDiffTable.vue";
-import VisitorCounter from "@/components/common/VisitorCounter.vue";
+
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
-import { compareTickerMessages } from "@/data/tickerMessages";
-import { COMPARE_PRESETS } from "@/data/comparePresets";
-import { formatManWon, formatWon, copyUsingExecCommand } from "@/lib/utils";
+
+import {
+  copyUsingExecCommand,
+  formatManWon,
+  formatManWonValue,
+  formatWon,
+} from "@/lib/utils";
 import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 
@@ -152,17 +156,13 @@ watch(
 const monthlyNetDiff = computed(() => calcB.monthlyNet.value - calcA.monthlyNet.value);
 
 const seoTitle = computed(
-  () => `연봉 ${Math.floor(companyA.value.annualGross / 10_000).toLocaleString()} vs ${Math.floor(companyB.value.annualGross / 10_000).toLocaleString()} 이직 비교 | 실수령 차이 계산`
+  () =>
+    `연봉 ${formatManWonValue(Math.floor(companyA.value.annualGross / 10_000))} vs ${formatManWonValue(Math.floor(companyB.value.annualGross / 10_000))} 이직 비교 | 실수령 차이 계산`
 );
 
 const seoDescription = computed(
   () => `현재 ${formatManWon(companyA.value.annualGross)}에서 ${formatManWon(companyB.value.annualGross)}로 이직 시 월 실수령 차이는 ${formatWon(monthlyNetDiff.value)}입니다.`
 );
-
-function applyPreset(a: number, b: number): void {
-  companyA.value.annualGross = a * 10_000;
-  companyB.value.annualGross = b * 10_000;
-}
 
 function compareShareUrl(): string {
   const params = new URLSearchParams(route.query as Record<string, string>);
@@ -214,7 +214,7 @@ watch(
       const bManWon = Math.floor(companyB.value.annualGross / 10_000);
       addEntry({
         type: "compare",
-        label: `${aManWon.toLocaleString()}만원 vs ${bManWon.toLocaleString()}만원`,
+        label: `${formatManWonValue(aManWon)} vs ${formatManWonValue(bManWon)}`,
         path: `/compare?a=${aManWon}&b=${bManWon}`,
         summary: `차이 월 ${formatWon(Math.abs(monthlyNetDiff.value))}`,
       });
@@ -227,46 +227,16 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" />
 
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <h1 class="text-h1 font-title">이직 연봉 비교기</h1>
-      <FreshBadge />
-    </div>
-
-    <TickerBar :messages="compareTickerMessages" />
+    <h1 class="text-h1 font-title">이직 연봉 비교기</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
-        <div class="retro-panel-muted p-3 sm:p-4 space-y-3">
-          <p class="text-caption sm:text-body font-semibold text-foreground">
-            A사와 B사의 실수령 차이를 한 화면에서 비교하세요. 복지/성과급까지 반영해 실질 월소득을 보여줍니다.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <button
-              v-for="preset in COMPARE_PRESETS"
-              :key="`${preset.a}-${preset.b}`"
-              type="button"
-              class="touch-target rounded-full border border-primary/40 bg-primary/5 px-3 py-1.5 text-caption font-semibold text-primary transition-all duration-200 hover:bg-primary/12 hover:scale-[1.02]"
-              @click="applyPreset(preset.a, preset.b)"
-            >
-              {{ preset.a.toLocaleString() }} vs {{ preset.b.toLocaleString() }}
-            </button>
-          </div>
-        </div>
-
         <CompareInput
           v-model:company-a="companyA"
           v-model:company-b="companyB"
           v-model:dependents="dependents"
           v-model:children-under20="childrenUnder20"
         />
-
-        <div class="flex flex-wrap gap-2">
-          <button type="button" class="retro-button" @click="shareCompare">공유</button>
-          <button type="button" class="retro-button-subtle" @click="copyCompareLink">링크 복사</button>
-          <RouterLink class="retro-button-subtle" to="/salary">연봉 단일 계산으로 이동</RouterLink>
-        </div>
-
-        <AdSlot slot="130001" label="광고 · top" />
 
         <CompareResult
           :calc-a="calcA"
@@ -277,13 +247,16 @@ watch(
 
         <CompareDiffTable :calc-a="calcA" :calc-b="calcB" />
 
+        <button type="button" class="retro-button-subtle" @click="shareCompare">공유</button>
+
+        <AdSlot slot="130001" label="광고 · top" />
+
         <AdSlot slot="130002" label="광고 · middle" />
 
         <InternalLink current="compare" />
 
         <AdSlot slot="130003" label="광고 · bottom" />
 
-        <VisitorCounter />
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">

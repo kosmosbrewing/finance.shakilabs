@@ -27,7 +27,6 @@ function diffClass(delta: number): string {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">공제 항목 차이</h2>
-      <span class="retro-kbd">DIFF</span>
     </div>
 
     <div class="retro-panel-content">

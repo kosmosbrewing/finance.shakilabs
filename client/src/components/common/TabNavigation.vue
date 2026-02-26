@@ -5,7 +5,7 @@ import { useRoute, RouterLink } from "vue-router";
 const route = useRoute();
 
 const tabs = [
-  { label: "건보료 역산", to: "/insurance", startsWith: "/insurance" },
+  { label: "연봉 추정", to: "/insurance", startsWith: "/insurance" },
   { label: "실수령액", to: "/salary", startsWith: "/salary" },
   { label: "이직 비교", to: "/compare", startsWith: "/compare" },
   { label: "퇴사 시뮬레이터", to: "/quit", startsWith: "/quit" },

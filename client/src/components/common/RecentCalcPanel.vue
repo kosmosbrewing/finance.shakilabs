@@ -6,11 +6,11 @@ import { showDestructiveConfirm } from "@/composables/useAlert";
 
 const { entries, clearAll } = useRecentCalcs();
 
-const TYPE_BADGE: Record<string, string> = {
-  salary: "연봉",
-  insurance: "건보",
-  compare: "비교",
-  quit: "퇴사",
+const TYPE_CONFIG: Record<string, { label: string; class: string }> = {
+  salary: { label: "연봉", class: "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400" },
+  insurance: { label: "건보", class: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400" },
+  compare: { label: "비교", class: "bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-400" },
+  quit: { label: "퇴사", class: "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400" },
 };
 
 function relativeTime(ts: number): string {
@@ -50,20 +50,25 @@ async function handleClear(): Promise<void> {
         지우기
       </button>
     </div>
-    <ul class="retro-board-list">
-      <li v-for="entry in entries" :key="`${entry.type}-${entry.timestamp}`">
-        <RouterLink
-          :to="entry.path"
-          class="flex items-start gap-2 px-3 py-2.5 transition-colors hover:bg-muted/50"
+    <div class="divide-y divide-border/50">
+      <RouterLink
+        v-for="entry in entries"
+        :key="`${entry.type}-${entry.timestamp}`"
+        :to="entry.path"
+        class="flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-muted/40"
+      >
+        <span
+          class="shrink-0 rounded-md px-1.5 py-0.5 text-tiny font-semibold"
+          :class="TYPE_CONFIG[entry.type]?.class ?? 'bg-muted text-muted-foreground'"
         >
-          <span class="retro-kbd shrink-0 mt-0.5">{{ TYPE_BADGE[entry.type] ?? entry.type }}</span>
-          <div class="min-w-0 flex-1">
-            <p class="text-caption font-semibold text-foreground truncate">{{ entry.label }}</p>
-            <p class="text-caption text-muted-foreground truncate">{{ entry.summary }}</p>
-          </div>
-          <span class="shrink-0 text-caption text-muted-foreground/60 mt-0.5">{{ relativeTime(entry.timestamp) }}</span>
-        </RouterLink>
-      </li>
-    </ul>
+          {{ TYPE_CONFIG[entry.type]?.label ?? entry.type }}
+        </span>
+        <div class="min-w-0 flex-1">
+          <p class="text-caption font-semibold text-foreground truncate leading-snug">{{ entry.label }}</p>
+          <p class="text-tiny text-muted-foreground truncate leading-snug">{{ entry.summary }}</p>
+        </div>
+        <span class="shrink-0 text-tiny text-muted-foreground">{{ relativeTime(entry.timestamp) }}</span>
+      </RouterLink>
+    </div>
   </section>
 </template>

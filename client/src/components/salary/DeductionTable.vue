@@ -19,7 +19,6 @@ defineProps<{
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title">공제 내역 상세</h2>
-      <span class="retro-kbd">DETAIL</span>
     </div>
     <div class="retro-panel-content">
       <Accordion type="multiple" :default-value="['insurance', 'tax']">

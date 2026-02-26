@@ -2,8 +2,8 @@
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
-import TickerBar from "@/components/common/TickerBar.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
+
+
 import SalaryInputPanel from "@/components/salary/SalaryInputPanel.vue";
 import SalaryResultPanel from "@/components/salary/SalaryResultPanel.vue";
 import DeductionTable from "@/components/salary/DeductionTable.vue";
@@ -14,7 +14,7 @@ import HealthInsuranceRank from "@/components/salary/HealthInsuranceRank.vue";
 import SalaryRangeContent from "@/components/salary/SalaryRangeContent.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
-import VisitorCounter from "@/components/common/VisitorCounter.vue";
+
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
@@ -22,8 +22,8 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
-import { salaryTickerMessages } from "@/data/tickerMessages";
-import { formatWon } from "@/lib/utils";
+
+import { formatManWonValue, formatWon } from "@/lib/utils";
 
 const route = useRoute();
 const calc = useSalaryCalc();
@@ -44,16 +44,14 @@ watch(
 );
 
 const amountLabel = computed(() => {
-  const value = amountManWon.value;
-  if (value >= 10000) return `${value / 10000}억`;
-  return `${value.toLocaleString()}만`;
+  return formatManWonValue(amountManWon.value);
 });
 
 const pageTitle = computed(
-  () => `연봉 ${amountLabel.value}원 실수령액 · 2026 4대보험 계산기`
+  () => `연봉 ${amountLabel.value} 실수령액 · 2026 4대보험 계산기`
 );
 const pageDesc = computed(
-  () => `2026년 기준 연봉 ${amountLabel.value}원의 월 실수령액은 ${formatWon(calc.monthlyNet.value)}입니다.`
+  () => `2026년 기준 연봉 ${amountLabel.value}의 월 실수령액은 ${formatWon(calc.monthlyNet.value)}입니다.`
 );
 
 const {
@@ -76,7 +74,7 @@ watch(
       if (calc.annualGross.value <= 0) return;
       addEntry({
         type: "salary",
-        label: `연봉 ${amountLabel.value}원`,
+        label: `연봉 ${amountLabel.value}`,
         path: `/salary/${amountManWon.value}`,
         summary: `월 실수령 ${formatWon(calc.monthlyNet.value)}`,
       });
@@ -89,21 +87,13 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="pageTitle" :description="pageDesc" />
 
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <h1 class="text-h1 font-title">연봉 {{ amountLabel }}원 실수령액</h1>
-      <FreshBadge />
-    </div>
-
-    <TickerBar :messages="salaryTickerMessages" />
+    <h1 class="text-h1 font-title">연봉 {{ amountLabel }} 실수령액</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
-        <VisitorCounter />
-
+      <div class="space-y-4 order-1">
         <SalaryRangeContent :amount="amountManWon" :calc="calc" />
-        <CalcSourceBox />
 
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="space-y-4">
           <SalaryInputPanel
             v-model:annual-gross="calc.annualGross.value"
             v-model:dependents="calc.dependents.value"
@@ -125,12 +115,14 @@ watch(
         <SalaryCompareTable />
         <HealthInsuranceRank :calc="calc" />
 
+        <CalcSourceBox />
         <InternalLink current="salary" />
 
         <AdSlot slot="120103" label="광고 · bottom" />
+
       </div>
 
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
+      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
         <CommunitySidebar :page-key="`salary-${amountManWon}`" @share-request="openShare" />
         <RecentCalcPanel />
       </div>
