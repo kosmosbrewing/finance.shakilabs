@@ -289,7 +289,7 @@ watch(
               v-model="content"
               type="text"
               class="retro-input pr-14"
-              placeholder="익명으로 한마디 남겨주세요"
+              placeholder="예: 건보료 14만원이면 연봉 얼마일까?"
               :maxlength="props.maxLength"
               aria-label="댓글 내용 입력"
               @keyup.enter="handleSubmit"

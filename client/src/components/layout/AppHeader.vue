@@ -36,27 +36,23 @@ onMounted(() => {
 
 <template>
   <header class="border-b border-border/80 bg-background">
-    <div class="container py-3">
-      <div class="retro-panel-muted px-4 py-3 sm:px-5 sm:py-4">
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <p class="text-caption uppercase tracking-wide text-muted-foreground">finance.shakilabs.com</p>
-            <h1 class="text-body font-title text-foreground">2026 연봉·건보료·4대보험 계산기</h1>
-          </div>
+    <div class="container flex items-center justify-between gap-3 py-3">
+      <div>
+        <p class="text-caption uppercase tracking-wide text-muted-foreground">finance.shakilabs.com</p>
+        <p class="text-body font-title text-foreground">2026 연봉·건보료·4대보험 계산기</p>
+      </div>
 
-          <div class="flex items-center gap-2">
-            <span class="hidden sm:inline text-caption text-muted-foreground">{{ routeLabel }}</span>
-            <button
-              type="button"
-              class="inline-flex touch-target h-11 w-11 items-center justify-center rounded-lg border border-border/70 bg-background text-muted-foreground transition-all duration-200 hover:border-primary hover:text-primary hover:scale-[1.02]"
-              :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
-              @click="toggleTheme"
-            >
-              <Moon v-if="theme === 'dark'" class="h-4 w-4" />
-              <Sun v-else class="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+      <div class="flex items-center gap-2">
+        <span class="hidden sm:inline text-caption text-muted-foreground">{{ routeLabel }}</span>
+        <button
+          type="button"
+          class="inline-flex touch-target h-11 w-11 items-center justify-center rounded-lg border border-border/70 bg-background text-muted-foreground transition-all duration-200 hover:border-primary hover:text-primary hover:scale-[1.02]"
+          :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
+          @click="toggleTheme"
+        >
+          <Moon v-if="theme === 'dark'" class="h-4 w-4" />
+          <Sun v-else class="h-4 w-4" />
+        </button>
       </div>
     </div>
   </header>

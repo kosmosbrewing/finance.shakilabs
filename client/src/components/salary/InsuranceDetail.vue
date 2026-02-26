@@ -16,7 +16,7 @@ defineProps<{
     </div>
 
     <div class="retro-panel-content space-y-3">
-      <div class="overflow-x-auto rounded-xl border border-border/70">
+      <div class="overflow-x-auto">
         <table class="w-full min-w-[760px] text-body">
           <thead class="sticky top-0 z-10 bg-muted/70 text-foreground backdrop-blur">
             <tr>

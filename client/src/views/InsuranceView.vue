@@ -172,7 +172,7 @@ watch(
     <TickerBar :messages="insuranceTickerMessages" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+      <div class="space-y-4 order-1">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <InsuranceInput
             v-model:mode="mode"
@@ -193,13 +193,11 @@ watch(
           />
         </div>
 
-        <VisitorCounter />
-
         <CalcSourceBox />
 
         <div class="flex flex-wrap gap-2">
-          <button type="button" class="retro-button" @click="copyInsuranceLink">링크 복사</button>
           <button type="button" class="retro-button" @click="shareInsurance">공유</button>
+          <button type="button" class="retro-button-subtle" @click="copyInsuranceLink">링크 복사</button>
           <RouterLink class="retro-button-subtle" to="/salary">연봉 실수령 계산으로 이동</RouterLink>
         </div>
 
@@ -212,9 +210,11 @@ watch(
         <InternalLink current="insurance" />
 
         <AdSlot slot="110003" label="광고 · bottom" />
+
+        <VisitorCounter />
       </div>
 
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
+      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
         <CommunitySidebar page-key="insurance-main" @share-request="shareInsurance" />
         <RecentCalcPanel />
       </div>

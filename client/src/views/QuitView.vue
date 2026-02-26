@@ -217,7 +217,7 @@ watch(
     <TickerBar :messages="quitTickerMessages" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+      <div class="space-y-4 order-1">
         <QuitInput
           v-model:start-date="startDate"
           v-model:end-date="endDate"
@@ -231,8 +231,6 @@ watch(
           v-model:annual-bonus="annualBonus"
           v-model:monthly-living-cost="monthlyLivingCost"
         />
-
-        <VisitorCounter />
 
         <div class="flex flex-wrap gap-2">
           <button type="button" class="retro-button" @click="copyQuitLink">링크 복사</button>
@@ -277,9 +275,11 @@ watch(
         <InternalLink current="quit" />
 
         <AdSlot slot="140003" label="광고 · bottom" />
+
+        <VisitorCounter />
       </div>
 
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
+      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
         <CommunitySidebar page-key="quit-main" @share-request="copyQuitLink" />
         <RecentCalcPanel />
       </div>

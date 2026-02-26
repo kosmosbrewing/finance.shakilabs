@@ -126,7 +126,7 @@ const inputIds = {
         </div>
       </div>
 
-      <details class="border border-border/60 bg-muted/20">
+      <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden">
         <summary class="touch-target cursor-pointer px-3 py-2 text-caption font-semibold">상세 설정</summary>
         <div class="grid grid-cols-1 gap-3 p-3 sm:grid-cols-3">
           <label class="space-y-1" :for="inputIds.dependents">

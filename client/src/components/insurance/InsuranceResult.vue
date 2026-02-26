@@ -42,20 +42,23 @@ const title = computed(() => {
         </div>
       </div>
 
-      <div v-if="mode === 'reverse'" class="space-y-1 border border-border/60 bg-muted/20 p-3 text-caption">
+      <div v-if="mode === 'reverse'" class="rounded-xl border border-border/60 bg-muted/20 p-3 text-caption space-y-2">
         <p class="font-semibold">역산 근거</p>
-        <p>건강보험료 {{ formatWon(healthInsuranceFee) }} ÷ 3.595% = 과세월급 {{ formatWon(estimatedTaxableMonthly) }}</p>
-        <p>과세월급 + 비과세 반영 후 연봉 환산 = {{ formatManWon(estimatedAnnualGross) }}</p>
+        <ol class="list-decimal list-inside space-y-1 text-muted-foreground">
+          <li>건강보험료 <strong class="tabular-nums text-foreground">{{ formatWon(healthInsuranceFee) }}</strong> ÷ 3.595%</li>
+          <li>= 과세월급 <strong class="tabular-nums text-foreground">{{ formatWon(estimatedTaxableMonthly) }}</strong></li>
+          <li>비과세 반영 후 연봉 환산 = <strong class="tabular-nums text-foreground">{{ formatManWon(estimatedAnnualGross) }}</strong></li>
+        </ol>
       </div>
 
-      <div class="space-y-1 border border-border/60 p-3 text-caption">
-        <p class="flex items-center justify-between"><span>국민연금</span><strong>{{ formatWon(calc.nationalPension.value) }}</strong></p>
-        <p class="flex items-center justify-between"><span>건강보험</span><strong>{{ formatWon(calc.healthInsurance.value) }}</strong></p>
-        <p class="flex items-center justify-between"><span>장기요양</span><strong>{{ formatWon(calc.longTermCare.value) }}</strong></p>
-        <p class="flex items-center justify-between"><span>고용보험</span><strong>{{ formatWon(calc.employmentInsurance.value) }}</strong></p>
-        <p class="flex items-center justify-between"><span>소득세</span><strong>{{ formatWon(calc.monthlyIncomeTax.value) }}</strong></p>
-        <p class="flex items-center justify-between"><span>지방소득세</span><strong>{{ formatWon(calc.monthlyLocalTax.value) }}</strong></p>
-        <p class="mt-2 flex items-center justify-between border-t border-border/60 pt-2 text-foreground"><span>총 공제</span><strong>{{ formatWon(calc.totalDeduction.value) }}</strong></p>
+      <div class="retro-board-list text-caption">
+        <div class="retro-board-item"><span>국민연금</span><strong class="tabular-nums">{{ formatWon(calc.nationalPension.value) }}</strong></div>
+        <div class="retro-board-item"><span>건강보험</span><strong class="tabular-nums">{{ formatWon(calc.healthInsurance.value) }}</strong></div>
+        <div class="retro-board-item"><span>장기요양</span><strong class="tabular-nums">{{ formatWon(calc.longTermCare.value) }}</strong></div>
+        <div class="retro-board-item"><span>고용보험</span><strong class="tabular-nums">{{ formatWon(calc.employmentInsurance.value) }}</strong></div>
+        <div class="retro-board-item"><span>소득세</span><strong class="tabular-nums">{{ formatWon(calc.monthlyIncomeTax.value) }}</strong></div>
+        <div class="retro-board-item"><span>지방소득세</span><strong class="tabular-nums">{{ formatWon(calc.monthlyLocalTax.value) }}</strong></div>
+        <div class="retro-board-item bg-primary/5 text-body font-bold text-foreground"><span>총 공제</span><strong class="tabular-nums text-primary">{{ formatWon(calc.totalDeduction.value) }}</strong></div>
       </div>
     </div>
   </section>

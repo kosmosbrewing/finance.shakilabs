@@ -144,7 +144,7 @@ const inputIds = {
             <span class="text-caption text-muted-foreground">비과세 (만원/월)</span>
             <input :id="inputIds.nonTaxA" v-model.number="nonTaxAManWon" type="number" min="0" max="500" class="retro-input" inputmode="numeric" />
           </label>
-          <details class="border border-border/60 bg-muted/20">
+          <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden">
             <summary class="touch-target cursor-pointer px-2 py-1.5 text-caption font-semibold">상세</summary>
             <div class="space-y-2 p-2">
               <label class="block space-y-1" :for="inputIds.bonusA">
@@ -186,7 +186,7 @@ const inputIds = {
             <span class="text-caption text-muted-foreground">비과세 (만원/월)</span>
             <input :id="inputIds.nonTaxB" v-model.number="nonTaxBManWon" type="number" min="0" max="500" class="retro-input" inputmode="numeric" />
           </label>
-          <details class="border border-border/60 bg-muted/20">
+          <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden">
             <summary class="touch-target cursor-pointer px-2 py-1.5 text-caption font-semibold">상세</summary>
             <div class="space-y-2 p-2">
               <label class="block space-y-1" :for="inputIds.bonusB">

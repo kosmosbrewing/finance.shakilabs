@@ -83,7 +83,7 @@ watch(
     <TickerBar :messages="salaryTickerMessages" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+      <div class="space-y-4 order-1">
         <div class="retro-panel-muted p-3 sm:p-4 space-y-3">
           <p class="text-caption sm:text-body font-semibold text-foreground">
             연봉 제안이 들어왔을 때, 세전 금액이 아닌 실제 통장 입금액 기준으로 판단해보세요.
@@ -115,8 +115,6 @@ watch(
           <SalaryResultPanel :calc="calc" @share="openShare" />
         </div>
 
-        <VisitorCounter />
-
         <AdSlot slot="120001" label="광고 · top" />
 
         <InsuranceDetail :calc="calc" />
@@ -131,9 +129,11 @@ watch(
         <InternalLink current="salary" />
 
         <AdSlot slot="120003" label="광고 · bottom" />
+
+        <VisitorCounter />
       </div>
 
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
+      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
         <CommunitySidebar page-key="salary-calc" @share-request="openShare" />
         <RecentCalcPanel />
       </div>

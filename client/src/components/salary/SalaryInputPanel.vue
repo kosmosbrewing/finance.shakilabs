@@ -129,7 +129,7 @@ function updateRetirementIncluded(value: boolean): void {
         </div>
       </div>
 
-      <details class="border border-border/60 bg-muted/20" open>
+      <details class="rounded-xl border border-border/60 bg-muted/20 overflow-hidden" open>
         <summary class="cursor-pointer px-3 py-2 text-caption font-semibold text-foreground">
           상세 설정
         </summary>

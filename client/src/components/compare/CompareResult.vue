@@ -62,7 +62,7 @@ const realMonthlyDiffClass = computed(() => {
       </p>
 
       <p class="scroll-hint">표를 좌우로 스크롤하세요 →</p>
-      <div class="overflow-x-auto rounded-xl border border-border/70">
+      <div class="overflow-x-auto">
         <table class="w-full min-w-[760px] text-body">
           <thead class="sticky top-0 z-10 bg-muted/70 text-foreground backdrop-blur">
             <tr>

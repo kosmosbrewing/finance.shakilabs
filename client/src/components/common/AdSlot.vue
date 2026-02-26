@@ -13,6 +13,7 @@ const props = defineProps<{
 }>();
 
 const publisherId = (import.meta.env.VITE_ADSENSE_PUBLISHER_ID || "").trim();
+const isDev = import.meta.env.DEV;
 
 function ensureAdsenseScript(): void {
   if (!publisherId) return;
@@ -41,7 +42,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="retro-panel border border-border/70 p-3">
+  <section v-if="publisherId || isDev" class="retro-panel border border-border/70 p-3">
     <p class="mb-2 text-caption text-muted-foreground">
       {{ label || "광고 영역" }}
     </p>
@@ -57,8 +58,8 @@ onMounted(() => {
       ></ins>
     </div>
 
-    <div v-else class="flex min-h-[80px] items-center justify-center border border-dashed border-border/60 text-caption text-muted-foreground">
-      AdSense 미설정 (VITE_ADSENSE_PUBLISHER_ID)
+    <div v-else-if="isDev" class="flex min-h-[80px] items-center justify-center border border-dashed border-border/60 rounded-lg text-caption text-muted-foreground">
+      광고 영역 (개발 모드)
     </div>
   </section>
 </template>

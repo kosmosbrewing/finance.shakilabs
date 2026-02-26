@@ -235,7 +235,7 @@ watch(
     <TickerBar :messages="compareTickerMessages" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+      <div class="space-y-4 order-1">
         <div class="retro-panel-muted p-3 sm:p-4 space-y-3">
           <p class="text-caption sm:text-body font-semibold text-foreground">
             A사와 B사의 실수령 차이를 한 화면에서 비교하세요. 복지/성과급까지 반영해 실질 월소득을 보여줍니다.
@@ -260,11 +260,9 @@ watch(
           v-model:children-under20="childrenUnder20"
         />
 
-        <VisitorCounter />
-
         <div class="flex flex-wrap gap-2">
-          <button type="button" class="retro-button" @click="copyCompareLink">링크 복사</button>
           <button type="button" class="retro-button" @click="shareCompare">공유</button>
+          <button type="button" class="retro-button-subtle" @click="copyCompareLink">링크 복사</button>
           <RouterLink class="retro-button-subtle" to="/salary">연봉 단일 계산으로 이동</RouterLink>
         </div>
 
@@ -284,9 +282,11 @@ watch(
         <InternalLink current="compare" />
 
         <AdSlot slot="130003" label="광고 · bottom" />
+
+        <VisitorCounter />
       </div>
 
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
+      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
         <CommunitySidebar page-key="compare-main" @share-request="shareCompare" />
         <RecentCalcPanel />
       </div>
