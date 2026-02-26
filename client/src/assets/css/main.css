@@ -1,0 +1,168 @@
+/* Critical CSS는 index.html에 inline으로 이동 */
+
+/* 로컬 폰트 — CDN 의존 없이 /public/fonts/ 서빙 */
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/Pretendard-Regular-subset.woff2") format("woff2"),
+       url("/fonts/Pretendard-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/Pretendard-Bold-subset.woff2") format("woff2"),
+       url("/fonts/Pretendard-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --status-success: 148 61% 36%;
+    --status-warning: 43 88% 43%;
+    --status-caution: 28 82% 48%;
+    --status-danger: 0 70% 52%;
+    --status-info: 212 83% 45%;
+    --chart-net: 172 74% 36%;
+    --chart-pension: 212 83% 45%;
+    --chart-health: 142 71% 45%;
+    --chart-care: 174 72% 46%;
+    --chart-employment: 28 89% 55%;
+    --chart-tax: 0 84% 60%;
+    --chart-local-tax: 328 83% 60%;
+  }
+
+  .dark {
+    --status-success: 148 63% 66%;
+    --status-warning: 43 95% 70%;
+    --status-caution: 28 91% 66%;
+    --status-danger: 0 86% 73%;
+    --status-info: 205 90% 72%;
+    --chart-net: 172 66% 64%;
+    --chart-pension: 212 84% 70%;
+    --chart-health: 142 61% 62%;
+    --chart-care: 174 64% 60%;
+    --chart-employment: 28 89% 67%;
+    --chart-tax: 0 87% 70%;
+    --chart-local-tax: 328 84% 72%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  :where(
+      a,
+      button,
+      input,
+      select,
+      textarea,
+      summary,
+      [role="button"],
+      [tabindex]:not([tabindex="-1"])
+    ):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .retro-panel-content {
+    @apply px-4 py-3 sm:px-5 sm:py-4;
+  }
+
+  .retro-panel {
+    @apply rounded-2xl border border-border bg-card shadow-sm;
+  }
+
+  .retro-panel-muted {
+    @apply rounded-2xl border border-border bg-muted/30 shadow-sm;
+  }
+
+  .retro-titlebar {
+    @apply flex items-center justify-between gap-3 border-b border-border/70 bg-muted/35 px-4 py-3 sm:px-5 sm:py-3.5 text-foreground;
+  }
+
+  .retro-title {
+    @apply text-heading font-semibold tracking-normal font-title;
+  }
+
+  .retro-kbd {
+    @apply inline-flex items-center rounded-full border border-border/80 bg-background/60 px-2.5 py-1 text-tiny font-semibold text-muted-foreground;
+  }
+
+  .retro-link {
+    @apply font-semibold text-primary hover:text-primary/80 hover:underline underline-offset-2;
+  }
+
+  .retro-input {
+    @apply w-full rounded-xl border border-input bg-background px-3 py-2.5 text-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
+  }
+
+  .touch-target {
+    @apply min-h-11 min-w-11;
+  }
+
+  .scroll-hint {
+    @apply px-3 py-1 text-tiny text-muted-foreground sm:hidden;
+  }
+
+  .retro-button {
+    @apply inline-flex items-center justify-center rounded-lg border border-primary bg-primary px-4 py-2 text-body font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02];
+  }
+
+  .retro-button-subtle {
+    @apply inline-flex items-center justify-center rounded-lg border border-border/70 bg-card px-3 py-2 text-body font-medium text-foreground transition-all duration-200 hover:border-primary/50 hover:text-primary hover:scale-[1.02];
+  }
+
+  .retro-chip {
+    @apply inline-flex items-center text-caption font-medium text-muted-foreground;
+  }
+
+  .retro-stat-grid {
+    @apply grid grid-cols-2 gap-2 sm:grid-cols-4;
+  }
+
+  .retro-stat {
+    @apply retro-panel-muted p-3.5;
+  }
+
+  .retro-stat-label {
+    @apply text-caption uppercase tracking-wide text-muted-foreground;
+  }
+
+  .retro-stat-value {
+    @apply mt-1 text-heading font-bold tabular-nums;
+  }
+
+  .retro-board-list {
+    @apply overflow-hidden divide-y divide-border/80 rounded-xl border border-border/70 bg-background;
+  }
+
+  .retro-board-item {
+    @apply flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-3.5 text-body transition-colors hover:bg-accent/25;
+  }
+}

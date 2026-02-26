@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Host: https://finance.shakilabs.com
+Sitemap: https://finance.shakilabs.com/sitemap.xml

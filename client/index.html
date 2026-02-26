@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2026 연봉·건보료·4대보험 종합 계산기</title>
+    <meta name="description" content="건보료 역산, 연봉 실수령액 계산, 이직 비교, 퇴사 시뮬레이션을 finance.shakilabs.com에서 제공합니다." />
+    <link rel="canonical" href="https://finance.shakilabs.com/insurance" />
+
+    <!-- GA4 preconnect -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
+
+    <!-- 로컬 폰트 preload -->
+    <link rel="preload" href="/fonts/Pretendard-Regular-subset.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- OG 태그 -->
+    <meta property="og:title" content="2026 연봉·건보료·4대보험 종합 계산기" />
+    <meta property="og:description" content="건보료 역산, 연봉 실수령액 계산, 이직 비교, 퇴사 시뮬레이션을 finance.shakilabs.com에서 제공합니다." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content="finance.shakilabs.com" />
+    <meta property="og:url" content="https://finance.shakilabs.com/insurance" />
+    <meta property="og:image" content="https://finance.shakilabs.com/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="2026 연봉·건보료·4대보험 종합 계산기" />
+    <meta name="twitter:description" content="건보료 역산, 연봉 실수령액 계산, 이직 비교, 퇴사 시뮬레이션을 finance.shakilabs.com에서 제공합니다." />
+    <meta name="twitter:image" content="https://finance.shakilabs.com/og-image.png" />
+
+    <!-- GEO / 언어 -->
+    <meta name="content-language" content="ko" />
+    <meta name="geo.region" content="KR" />
+    <meta name="geo.placename" content="대한민국" />
+    <link rel="alternate" hreflang="ko" href="https://finance.shakilabs.com/insurance" />
+    <link rel="alternate" hreflang="x-default" href="https://finance.shakilabs.com/insurance" />
+
+    <!-- OG 이미지 크기 -->
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- 테마 -->
+    <meta name="theme-color" content="hsl(168, 72%, 28%)" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="hsl(222, 47%, 11%)" media="(prefers-color-scheme: dark)" />
+
+    <!-- 검색엔진 인증 (실제 코드 발급 후 교체) -->
+    <meta name="naver-site-verification" content="NAVER_VERIFICATION_CODE" />
+    <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE" />
+
+    <script>
+      (() => {
+        try {
+          const key = "salary-calc:theme:v1";
+          const saved = localStorage.getItem(key);
+          const prefersDark =
+            typeof window.matchMedia === "function" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const theme =
+            saved === "dark" || saved === "light"
+              ? saved
+              : prefersDark
+                ? "dark"
+                : "light";
+
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          }
+        } catch {
+          // no-op
+        }
+      })();
+    </script>
+    <!-- Critical CSS: finance 테마 (indigo/emerald 기조) -->
+    <style>
+      :root {
+        --background: 210 40% 98%;
+        --foreground: 222 47% 11%;
+        --muted: 210 40% 96%;
+        --muted-foreground: 215 16% 37%;
+        --card: 0 0% 100%;
+        --card-foreground: 222 47% 11%;
+        --primary: 243 75% 59%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 214 32% 91%;
+        --secondary-foreground: 222 47% 11%;
+        --accent: 160 84% 95%;
+        --accent-foreground: 160 84% 26%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222 47% 11%;
+        --destructive: 0 72% 52%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 214 25% 86%;
+        --input: 214 25% 86%;
+        --ring: 243 75% 59%;
+        --radius: 0.85rem;
+        --deduction: 0 62% 52%;
+        --deduction-foreground: 0 0% 100%;
+        --highlight: 160 84% 39%;
+        --highlight-foreground: 0 0% 100%;
+      }
+
+      .dark {
+        --background: 222 47% 11%;
+        --foreground: 210 40% 96%;
+        --muted: 217 33% 17%;
+        --muted-foreground: 215 20% 72%;
+        --card: 217 33% 17%;
+        --card-foreground: 210 40% 96%;
+        --primary: 243 75% 64%;
+        --primary-foreground: 222 47% 11%;
+        --secondary: 217 28% 21%;
+        --secondary-foreground: 210 40% 96%;
+        --accent: 160 42% 21%;
+        --accent-foreground: 158 64% 78%;
+        --popover: 217 33% 17%;
+        --popover-foreground: 210 40% 96%;
+        --destructive: 0 72% 58%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 217 25% 26%;
+        --input: 217 25% 30%;
+        --ring: 243 75% 64%;
+        --deduction: 0 62% 58%;
+        --deduction-foreground: 0 0% 100%;
+        --highlight: 160 64% 44%;
+        --highlight-foreground: 0 0% 100%;
+      }
+
+      html {
+        scroll-behavior: auto;
+        font-size: 16px;
+      }
+
+      #app:not(:empty) + [data-seo-prerender] {
+        display: none;
+      }
+
+      body {
+        background: hsl(var(--background));
+        color: hsl(var(--foreground));
+        font-family: "Pretendard", "Inter", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+        margin: 0;
+        color-scheme: light dark;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>
+      <section style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+        <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">2026 연봉·건보료·4대보험 종합 계산기</h1>
+        <p style="margin:0 0 10px;">
+          건보료 역산, 실수령액 계산, 이직 비교, 퇴사 시뮬레이션을 한곳에서 확인하세요.
+        </p>
+        <ul style="margin:0 0 10px;padding-left:20px;">
+          <li><a href="/insurance">건보료 역산 계산기</a></li>
+          <li><a href="/insurance/140000">건보료 14만원 역산 결과</a></li>
+          <li><a href="/salary">연봉 실수령액 계산기</a></li>
+          <li><a href="/salary/5000">연봉 5000만원 실수령액</a></li>
+          <li><a href="/privacy">개인정보처리방침</a></li>
+        </ul>
+      </section>
+    </noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
