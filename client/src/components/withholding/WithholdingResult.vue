@@ -18,8 +18,6 @@ const showDiffWarning = computed(() => taxDiff.value >= 5_000 && props.monthlyIn
 // 애니메이션 카운트업 (InsuranceResult 동일 패턴)
 const displayedMonthlyNet = ref(0);
 const hasAnimatedInitial = ref(false);
-const monthlyNetDiff = ref(0);
-let previousMonthlyNet: number | null = null;
 let rafId: number | null = null;
 
 function animateInitialMonthlyNet(target: number): void {
@@ -46,27 +44,10 @@ function animateInitialMonthlyNet(target: number): void {
 }
 
 watchEffect(() => {
-  const next = props.calc.monthlyNet.value;
-  if (previousMonthlyNet !== null) {
-    monthlyNetDiff.value = next - previousMonthlyNet;
-  }
-  previousMonthlyNet = next;
-
   if (hasAnimatedInitial.value) {
-    displayedMonthlyNet.value = next;
+    displayedMonthlyNet.value = props.calc.monthlyNet.value;
   }
 });
-
-const showNetDiff = computed(() =>
-  hasAnimatedInitial.value && monthlyNetDiff.value !== 0
-);
-const netDiffLabel = computed(() => {
-  const sign = monthlyNetDiff.value > 0 ? "+" : "-";
-  return `${sign}${formatWon(Math.abs(monthlyNetDiff.value))}`;
-});
-const netDiffClass = computed(() =>
-  monthlyNetDiff.value > 0 ? "text-status-success" : "text-status-danger"
-);
 
 onMounted(() => {
   if (
@@ -88,67 +69,91 @@ onUnmounted(() => {
 <template>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
-      <h2 class="retro-title">소득세 {{ formatWon(monthlyIncomeTax) }} 기준 역산 결과</h2>
+      <h2 class="retro-title">소득세 {{ formatWon(monthlyIncomeTax) }} 기준 계산 결과</h2>
     </div>
 
-    <div class="retro-panel-content space-y-4">
+    <div class="retro-panel-content space-y-3">
       <!-- 핵심 배너: 추정 연봉 -->
-      <div class="text-center py-4">
+      <div class="text-center py-3">
         <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1">추정 연봉</p>
         <p class="text-display font-bold font-title text-primary tabular-nums">
           {{ formatKrwAuto(estimatedAnnualGross) }}
         </p>
-        <p class="text-caption text-muted-foreground mt-1">
-          추정 월 실수령액: {{ formatWon(displayedMonthlyNet) }}
+        <p class="text-body text-muted-foreground mt-1.5">
+          추정 월 실수령액
+          <strong class="tabular-nums text-foreground font-semibold">{{ formatWon(displayedMonthlyNet) }}</strong>
         </p>
-        <Transition name="fade">
-          <p
-            v-if="showNetDiff"
-            class="text-caption mt-1 font-semibold"
-            :class="netDiffClass"
-          >
-            직전 입력 대비 {{ netDiffLabel }}
-          </p>
-        </Transition>
       </div>
 
-      <!-- 요약 stat-grid -->
-      <div class="retro-stat-grid">
-        <div class="retro-stat">
+      <!-- 요약 stat-grid (3열) -->
+      <div class="grid grid-cols-3 gap-1.5">
+        <div class="retro-stat p-2.5">
           <p class="retro-stat-label">월 급여</p>
           <p class="retro-stat-value">{{ formatWon(calc.monthlyGross.value) }}</p>
         </div>
-        <div class="retro-stat">
-          <p class="retro-stat-label">공제합계</p>
+        <div class="retro-stat p-2.5">
+          <p class="retro-stat-label">공제 합계</p>
           <p class="retro-stat-value text-deduction">{{ formatWon(calc.totalDeduction.value) }}</p>
         </div>
-        <div class="retro-stat">
-          <p class="retro-stat-label">4대보험</p>
-          <p class="retro-stat-value">{{ formatWon(calc.totalInsurance.value) }}</p>
-        </div>
-        <div class="retro-stat">
-          <p class="retro-stat-label">실효세율</p>
+        <div class="retro-stat p-2.5">
+          <p class="retro-stat-label">공제 비율</p>
           <p class="retro-stat-value">{{ formatPercent(calc.effectiveTaxRate.value, 1) }}</p>
         </div>
       </div>
 
-      <!-- 공제 상세 텍스트 목록 -->
+      <!-- 공제 내역 통합 섹션 -->
       <div class="retro-board-list text-caption">
-        <div class="retro-board-item"><span>국민연금</span><strong class="tabular-nums">{{ formatWon(calc.nationalPension.value) }}</strong></div>
-        <div class="retro-board-item"><span>건강보험</span><strong class="tabular-nums">{{ formatWon(calc.healthInsurance.value) }}</strong></div>
-        <div class="retro-board-item"><span>장기요양</span><strong class="tabular-nums">{{ formatWon(calc.longTermCare.value) }}</strong></div>
-        <div class="retro-board-item"><span>고용보험</span><strong class="tabular-nums">{{ formatWon(calc.employmentInsurance.value) }}</strong></div>
-        <div class="retro-board-item"><span>소득세</span><strong class="tabular-nums">{{ formatWon(calc.monthlyIncomeTax.value) }}</strong></div>
-        <div class="retro-board-item"><span>지방소득세</span><strong class="tabular-nums">{{ formatWon(calc.monthlyLocalTax.value) }}</strong></div>
         <div class="retro-board-item bg-primary/5 text-body font-bold text-foreground">
-          <span>총 공제</span>
+          <span>공제 내역</span>
           <strong class="tabular-nums text-primary">{{ formatWon(calc.totalDeduction.value) }}</strong>
+        </div>
+        <div class="px-3 py-1.5">
+          <div class="retro-chart-bar">
+            <div class="bg-chart-pension retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.nationalPension.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="국민연금" />
+            <div class="bg-chart-health retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.healthInsurance.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="건강보험" />
+            <div class="bg-chart-care retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.longTermCare.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="장기요양" />
+            <div class="bg-chart-employment retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.employmentInsurance.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="고용보험" />
+            <div class="bg-chart-tax retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.monthlyIncomeTax.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="소득세" />
+            <div class="bg-chart-localTax retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.monthlyLocalTax.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="지방소득세" />
+          </div>
+        </div>
+        <div class="retro-board-item bg-muted/30 font-semibold">
+          <span>4대보험</span>
+          <strong class="tabular-nums">{{ formatWon(calc.totalInsurance.value) }}</strong>
+        </div>
+        <div class="retro-board-item">
+          <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-pension" />국민연금</span>
+          <strong class="tabular-nums">{{ formatWon(calc.nationalPension.value) }}</strong>
+        </div>
+        <div class="retro-board-item">
+          <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-health" />건강보험</span>
+          <strong class="tabular-nums">{{ formatWon(calc.healthInsurance.value) }}</strong>
+        </div>
+        <div class="retro-board-item">
+          <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-care" />장기요양</span>
+          <strong class="tabular-nums">{{ formatWon(calc.longTermCare.value) }}</strong>
+        </div>
+        <div class="retro-board-item">
+          <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-employment" />고용보험</span>
+          <strong class="tabular-nums">{{ formatWon(calc.employmentInsurance.value) }}</strong>
+        </div>
+        <div class="retro-board-item bg-muted/30 font-semibold">
+          <span>세금</span>
+          <strong class="tabular-nums">{{ formatWon(calc.totalTax.value) }}</strong>
+        </div>
+        <div class="retro-board-item">
+          <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-tax" />소득세</span>
+          <strong class="tabular-nums">{{ formatWon(calc.monthlyIncomeTax.value) }}</strong>
+        </div>
+        <div class="retro-board-item">
+          <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-localTax" />지방소득세</span>
+          <strong class="tabular-nums">{{ formatWon(calc.monthlyLocalTax.value) }}</strong>
         </div>
       </div>
 
       <!-- 검산 row -->
-      <div class="rounded-xl border border-border/60 bg-muted/20 p-3 text-caption space-y-2">
-        <p class="font-semibold">역산 검산</p>
+      <div class="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-caption space-y-1.5">
+        <p class="font-semibold">계산 검산</p>
         <div class="space-y-1 text-muted-foreground">
           <div class="flex justify-between">
             <span>입력한 소득세</span>

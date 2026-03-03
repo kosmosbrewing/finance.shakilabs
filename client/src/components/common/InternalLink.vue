@@ -11,28 +11,28 @@ const suggestions = computed(() => {
     return [
       { to: "/salary", label: "연봉 실수령액 계산기" },
       { to: "/comprehensive-tax", label: "종합소득세 계산기" },
-      { to: "/compare", label: "이직 연봉 비교" },
+      { to: "/compare", label: "이직 연봉 비교 계산기" },
       { to: "/quit", label: "퇴사 계산기" },
-      { to: "/withholding", label: "원천세 역산 계산기" },
+      { to: "/withholding", label: "원천세 계산기" },
     ];
   }
 
   if (props.current === "salary") {
     return [
       { to: "/comprehensive-tax", label: "종합소득세 계산기" },
-      { to: "/compare", label: "이직 연봉 비교" },
+      { to: "/compare", label: "이직 연봉 비교 계산기" },
       { to: "/quit", label: "퇴사 계산기" },
-      { to: "/insurance", label: "건보료 연봉 역산" },
-      { to: "/withholding", label: "원천세 역산 계산기" },
+      { to: "/insurance", label: "건강보험료 연봉 계산기" },
+      { to: "/withholding", label: "원천세 계산기" },
     ];
   }
 
   if (props.current === "comprehensive-tax") {
     return [
       { to: "/salary", label: "연봉 실수령액 계산기" },
-      { to: "/insurance", label: "건보료 연봉 역산" },
+      { to: "/insurance", label: "건강보험료 연봉 계산기" },
       { to: "/quit", label: "퇴사 계산기" },
-      { to: "/withholding", label: "원천세 역산 계산기" },
+      { to: "/withholding", label: "원천세 계산기" },
     ];
   }
 
@@ -40,27 +40,27 @@ const suggestions = computed(() => {
     return [
       { to: "/comprehensive-tax", label: "종합소득세 계산기" },
       { to: "/quit", label: "퇴사 계산기" },
-      { to: "/insurance", label: "건보료 연봉 역산" },
+      { to: "/insurance", label: "건강보험료 연봉 계산기" },
       { to: "/salary", label: "연봉 실수령액 계산기" },
-      { to: "/withholding", label: "원천세 역산 계산기" },
+      { to: "/withholding", label: "원천세 계산기" },
     ];
   }
 
   if (props.current === "withholding") {
     return [
-      { to: "/insurance", label: "건보료 연봉 역산" },
+      { to: "/insurance", label: "건강보험료 연봉 계산기" },
       { to: "/salary", label: "연봉 실수령액 계산기" },
       { to: "/comprehensive-tax", label: "종합소득세 계산기" },
-      { to: "/compare", label: "이직 연봉 비교" },
+      { to: "/compare", label: "이직 연봉 비교 계산기" },
     ];
   }
 
   return [
     { to: "/comprehensive-tax", label: "종합소득세 계산기" },
-    { to: "/insurance", label: "건보료 연봉 역산" },
+    { to: "/insurance", label: "건강보험료 연봉 계산기" },
     { to: "/salary", label: "연봉 실수령액 계산기" },
-    { to: "/compare", label: "이직 연봉 비교" },
-    { to: "/withholding", label: "원천세 역산 계산기" },
+    { to: "/compare", label: "이직 연봉 비교 계산기" },
+    { to: "/withholding", label: "원천세 계산기" },
   ];
 });
 </script>
@@ -69,7 +69,7 @@ const suggestions = computed(() => {
   <div class="flex flex-wrap gap-2">
     <RouterLink
       v-for="item in suggestions"
-      :key="item.to"
+      :key="item.label"
       :to="item.to"
       class="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-caption font-semibold text-foreground transition-colors hover:border-primary/50 hover:text-primary"
     >

@@ -1,4 +1,4 @@
-import { computed, watch, type Ref } from "vue";
+import { computed, watch, type ComputedRef, type Ref } from "vue";
 import { calculateSalaryBreakdown } from "@/utils/calculator";
 import { useSalaryCalc, type SalaryCalcResult } from "@/composables/useSalaryCalc";
 
@@ -9,11 +9,11 @@ type WithholdingReverseInput = {
 };
 
 export type WithholdingReverseResult = {
-  estimatedAnnualGross: Readonly<{ value: number }>;
+  estimatedAnnualGross: ComputedRef<number>;
   calc: SalaryCalcResult;
 };
 
-// 소득세는 누진세 → 선형 역산 불가, 이진탐색으로 역산
+// 소득세는 누진세 → 선형 계산 불가, 이진탐색으로 계산
 function findAnnualGrossFromMonthlyIncomeTax(
   target: number,
   dependents: number,
@@ -53,7 +53,7 @@ export function useWithholdingReverse(input: WithholdingReverseInput): Withholdi
     initialRetirementIncluded: false,
   });
 
-  // 역산값 변경 시 정방향 계산기에 동기화
+  // 계산값 변경 시 정방향 계산기에 동기화
   watch(
     [estimatedAnnualGross, input.dependents, input.nonTaxableMonthly],
     ([gross, dep, nonTax]) => {

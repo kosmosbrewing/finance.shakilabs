@@ -93,8 +93,10 @@ watch(
             v-model:non-taxable-monthly="calc.nonTaxableMonthly.value"
             v-model:retirement-included="calc.retirementIncluded.value"
           />
-          <SalaryResultPanel :calc="calc" @share="openShare" />
+          <SalaryResultPanel :calc="calc" />
         </div>
+
+        <HealthInsuranceRank :calc="calc" />
 
         <AdSlot slot="120001" label="광고 · top" />
 
@@ -105,7 +107,6 @@ watch(
 
         <DeductionChart :calc="calc" />
         <SalaryCompareTable />
-        <HealthInsuranceRank :calc="calc" />
 
         <CalcSourceBox />
         <InternalLink current="salary" />

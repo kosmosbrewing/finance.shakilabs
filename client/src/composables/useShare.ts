@@ -1,7 +1,8 @@
 import { computed, ref } from "vue";
 import { showAlert } from "./useAlert";
-import { formatWon, formatManWon, copyUsingExecCommand } from "@/lib/utils";
+import { formatWon, formatManWon } from "@/lib/utils";
 import type { SalaryCalcResult } from "./useSalaryCalc";
+import { buildAbsoluteUrl, copyToClipboard } from "@/lib/routeState";
 
 declare global {
   interface Window {
@@ -47,16 +48,17 @@ export function useShare(calc: SalaryCalcResult) {
   }
 
   function getShareUrl(): string {
-    const base = window.location.origin;
     const path = window.location.pathname || "/";
-    const params = new URLSearchParams();
-    params.set("gross", String(calc.annualGross.value));
-    if (calc.dependents.value !== 1) params.set("dep", String(calc.dependents.value));
-    if (calc.childrenUnder20.value !== 0) params.set("child", String(calc.childrenUnder20.value));
-    if (calc.nonTaxableMonthly.value !== 200_000) params.set("nontax", String(calc.nonTaxableMonthly.value));
-    if (calc.retirementIncluded.value) params.set("retire", "1");
-    const query = params.toString();
-    return query ? `${base}${path}?${query}` : `${base}${path}`;
+    return buildAbsoluteUrl(path, {
+      gross: calc.annualGross.value,
+      dep: calc.dependents.value !== 1 ? calc.dependents.value : null,
+      child: calc.childrenUnder20.value !== 0 ? calc.childrenUnder20.value : null,
+      nontax:
+        calc.nonTaxableMonthly.value !== 200_000
+          ? calc.nonTaxableMonthly.value
+          : null,
+      retire: calc.retirementIncluded.value ? 1 : null,
+    });
   }
 
   function getShareText(): string {
@@ -66,10 +68,9 @@ export function useShare(calc: SalaryCalcResult) {
 
   async function copyLink(): Promise<void> {
     const shareUrl = getShareUrl();
+    const copied = await copyToClipboard(shareUrl);
     try {
-      if (window.isSecureContext && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
-      } else if (!copyUsingExecCommand(shareUrl)) {
+      if (!copied) {
         throw new Error("Clipboard API unavailable");
       }
       showAlert("링크가 복사되었습니다");

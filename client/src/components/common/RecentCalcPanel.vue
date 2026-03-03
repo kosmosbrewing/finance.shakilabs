@@ -13,6 +13,7 @@ const TYPE_CONFIG: Record<string, { label: string; class: string }> = {
   freelance: { label: "프리", class: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400" },
   compare: { label: "비교", class: "bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-400" },
   quit: { label: "퇴사", class: "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400" },
+  withholding: { label: "원천", class: "bg-orange-50 text-orange-600 dark:bg-orange-950/50 dark:text-orange-400" },
 };
 
 function relativeTime(ts: number): string {

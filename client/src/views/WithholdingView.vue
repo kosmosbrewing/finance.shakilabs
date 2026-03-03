@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { computed, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
 import WithholdingInput from "@/components/withholding/WithholdingInput.vue";
 import WithholdingResult from "@/components/withholding/WithholdingResult.vue";
@@ -10,26 +10,30 @@ import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import { useWithholdingReverse } from "@/composables/useWithholdingReverse";
-import { formatManWon, formatWon, copyUsingExecCommand } from "@/lib/utils";
+import { formatManWon, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
+import {
+  buildAbsoluteUrl,
+  buildQuery,
+  copyToClipboard,
+  isSameQuery,
+  parseQueryInt,
+} from "@/lib/routeState";
 
 const props = defineProps<{
   initialAmountWon?: number;
 }>();
 
 const route = useRoute();
+const router = useRouter();
 
 const monthlyIncomeTax = ref(100_000);
 const dependents = ref(1);
 const nonTaxableMonthly = ref(200_000);
-
-function parseQueryInt(value: unknown): number | null {
-  const raw = Array.isArray(value) ? value[0] : value;
-  const parsed = Number.parseInt(String(raw), 10);
-  return Number.isFinite(parsed) ? parsed : null;
-}
+const initialized = ref(false);
+const applyingRoute = ref(false);
 
 // URL 파라미터 → 초기값
 watch(
@@ -42,27 +46,36 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  const hasPathAmount =
-    typeof props.initialAmountWon === "number" &&
-    Number.isFinite(props.initialAmountWon) &&
-    props.initialAmountWon > 0;
+watch(
+  [() => route.query, () => props.initialAmountWon],
+  ([query, initialAmount]) => {
+    applyingRoute.value = true;
 
-  const taxFromQuery = parseQueryInt(route.query.tax);
-  if (!hasPathAmount && taxFromQuery !== null && taxFromQuery > 0) {
-    monthlyIncomeTax.value = Math.min(taxFromQuery, 10_000_000);
-  }
+    const hasPathAmount =
+      typeof initialAmount === "number" &&
+      Number.isFinite(initialAmount) &&
+      initialAmount > 0;
 
-  const depFromQuery = parseQueryInt(route.query.dep);
-  if (depFromQuery !== null) {
-    dependents.value = Math.max(1, Math.min(20, depFromQuery));
-  }
+    const taxFromQuery = parseQueryInt(query.tax);
+    if (!hasPathAmount && taxFromQuery !== null && taxFromQuery > 0) {
+      monthlyIncomeTax.value = Math.min(taxFromQuery, 10_000_000);
+    }
 
-  const nonTaxFromQuery = parseQueryInt(route.query.nontax);
-  if (nonTaxFromQuery !== null) {
-    nonTaxableMonthly.value = Math.max(0, Math.min(5_000_000, nonTaxFromQuery));
-  }
-});
+    const depFromQuery = parseQueryInt(query.dep);
+    if (depFromQuery !== null) {
+      dependents.value = Math.max(1, Math.min(20, depFromQuery));
+    }
+
+    const nonTaxFromQuery = parseQueryInt(query.nontax);
+    if (nonTaxFromQuery !== null) {
+      nonTaxableMonthly.value = Math.max(0, Math.min(5_000_000, nonTaxFromQuery));
+    }
+
+    initialized.value = true;
+    applyingRoute.value = false;
+  },
+  { immediate: true }
+);
 
 const { estimatedAnnualGross, calc } = useWithholdingReverse({
   monthlyIncomeTax,
@@ -71,11 +84,11 @@ const { estimatedAnnualGross, calc } = useWithholdingReverse({
 });
 
 const seoTitle = computed(() =>
-  `소득세 ${formatWon(monthlyIncomeTax.value)} → 연봉 역산 | 2026 원천세 계산기`
+  `소득세 ${formatWon(monthlyIncomeTax.value)} → 연봉 계산 | 2026 원천세 계산기`
 );
 
 const seoDescription = computed(() =>
-  `월 소득세 ${formatWon(monthlyIncomeTax.value)} 기준 추정 연봉은 ${formatManWon(estimatedAnnualGross.value)}. 4대보험과 월 실수령액을 함께 역산합니다.`
+  `월 소득세 ${formatWon(monthlyIncomeTax.value)} 기준 추정 연봉은 ${formatManWon(estimatedAnnualGross.value)}. 4대보험과 월 실수령액을 함께 계산합니다.`
 );
 
 const breadcrumbJsonLd = computed(() => ({
@@ -86,27 +99,50 @@ const breadcrumbJsonLd = computed(() => ({
     {
       "@type": "ListItem",
       position: 2,
-      name: "원천세 역산",
+      name: "원천세 계산",
       item: `${DEFAULT_SITE_URL}${route.path}`,
     },
   ],
 }));
 
+function buildWithholdingRouteState(): {
+  path: string;
+  query: Record<string, string>;
+} {
+  return {
+    path: `/withholding/${Math.max(1, Math.floor(monthlyIncomeTax.value))}`,
+    query: buildQuery({
+      dep: dependents.value !== 1 ? dependents.value : null,
+      nontax: nonTaxableMonthly.value !== 200_000 ? nonTaxableMonthly.value : null,
+    }),
+  };
+}
+
+watch(
+  [monthlyIncomeTax, dependents, nonTaxableMonthly],
+  () => {
+    if (!initialized.value || applyingRoute.value) return;
+
+    const nextRoute = buildWithholdingRouteState();
+    if (route.path === nextRoute.path && isSameQuery(route.query, nextRoute.query)) {
+      return;
+    }
+
+    router.replace(nextRoute);
+  },
+  { flush: "post" }
+);
+
 function getShareUrl(): string {
-  const params = new URLSearchParams();
-  if (dependents.value !== 1) params.set("dep", String(dependents.value));
-  if (nonTaxableMonthly.value !== 200_000) params.set("nontax", String(nonTaxableMonthly.value));
-  const qs = params.toString();
-  const basePath = `${window.location.origin}/withholding/${monthlyIncomeTax.value}`;
-  return qs ? `${basePath}?${qs}` : basePath;
+  const nextRoute = buildWithholdingRouteState();
+  return buildAbsoluteUrl(nextRoute.path, nextRoute.query);
 }
 
 async function copyWithholdingLink(): Promise<void> {
   try {
     const link = getShareUrl();
-    if (window.isSecureContext && navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(link);
-    } else if (!copyUsingExecCommand(link)) {
+    const copied = await copyToClipboard(link);
+    if (!copied) {
       throw new Error("clipboard unavailable");
     }
     showAlert("링크를 복사했습니다");
@@ -154,7 +190,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <h1 class="text-h1 font-title">2026 원천세 역산 계산기 — 소득세로 연봉 추정</h1>
+    <h1 class="text-h1 font-title">2026 원천세 계산기 — 소득세로 연봉 추정</h1>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
@@ -166,11 +202,9 @@ watch(
 
         <WithholdingResult
           :monthly-income-tax="monthlyIncomeTax"
-          :estimated-annual-gross="estimatedAnnualGross.value"
+          :estimated-annual-gross="estimatedAnnualGross"
           :calc="calc"
         />
-
-        <button type="button" class="retro-button-subtle" @click="shareWithholding">공유</button>
 
         <AdSlot slot="160001" label="광고 · top" />
 

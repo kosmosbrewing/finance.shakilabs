@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from "vue";
+import { computed, onUnmounted, ref, watch, watchEffect } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 
 
@@ -18,17 +18,26 @@ import { useRetirementCalc } from "@/composables/useRetirementCalc";
 import { useUnemploymentCalc } from "@/composables/useUnemploymentCalc";
 import { useSurvivalCalc } from "@/composables/useSurvivalCalc";
 
-import { copyUsingExecCommand, formatManWon, formatWon } from "@/lib/utils";
+import { formatManWon, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 import type { QuitReason } from "@/data/unemploymentTable";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import {
+  buildAbsoluteUrl,
+  buildQuery,
+  copyToClipboard,
+  isSameQuery,
+  parseQueryInt,
+  queryFirst,
+} from "@/lib/routeState";
 
 const props = defineProps<{
   initialYears?: number;
 }>();
 const route = useRoute();
+const router = useRouter();
 
 function toDateInput(date: Date): string {
   const year = date.getFullYear();
@@ -50,34 +59,55 @@ const endDate = ref(todayInput);
 const monthlySalary = ref(3_500_000);
 const nonTaxableMonthly = ref(200_000);
 const age = ref(35);
-const quitReason = ref<QuitReason>("layoff");
+const quitReason = ref<QuitReason>("voluntary");
 const dependents = ref(1);
 const childrenUnder20 = ref(0);
 const unusedLeaveDays = ref(12);
 const annualBonus = ref(4_000_000);
 const monthlyLivingCost = ref(2_500_000);
 const isRangeUpdating = ref(false);
+const initialized = ref(false);
+const applyingRoute = ref(false);
 let rangeUpdatingTimer: ReturnType<typeof setTimeout> | null = null;
 
-onMounted(() => {
-  const q = route.query;
-  if (typeof q.start === "string") startDate.value = q.start;
-  if (typeof q.end === "string") endDate.value = q.end;
-  if (typeof q.salary === "string") {
-    const value = Number.parseInt(q.salary, 10);
-    if (Number.isFinite(value) && value > 0) monthlySalary.value = value * 10_000;
-  }
-  if (typeof q.reason === "string") {
-    const reason = q.reason as QuitReason;
-    if (["layoff", "dismissal", "contract_end", "voluntary"].includes(reason)) {
+watch(
+  [() => route.query, () => props.initialYears],
+  ([query, initialYears]) => {
+    applyingRoute.value = true;
+
+    const start = queryFirst(query.start);
+    if (start) startDate.value = start;
+
+    const end = queryFirst(query.end);
+    if (end) endDate.value = end;
+
+    const salary = parseQueryInt(query.salary);
+    if (salary !== null && salary > 0) {
+      monthlySalary.value = Math.floor(salary * 10_000);
+    }
+
+    const reason = queryFirst(query.reason) as QuitReason | null;
+    if (
+      reason &&
+      ["layoff", "dismissal", "contract_end", "voluntary"].includes(reason)
+    ) {
       quitReason.value = reason;
     }
-  }
 
-  if (props.initialYears && Number.isFinite(props.initialYears) && props.initialYears > 0) {
-    startDate.value = subtractYears(endDate.value, Math.floor(props.initialYears));
-  }
-});
+    if (
+      (!start || !end) &&
+      typeof initialYears === "number" &&
+      Number.isFinite(initialYears) &&
+      initialYears > 0
+    ) {
+      startDate.value = subtractYears(endDate.value, Math.floor(initialYears));
+    }
+
+    initialized.value = true;
+    applyingRoute.value = false;
+  },
+  { immediate: true }
+);
 
 onUnmounted(() => {
   if (rangeUpdatingTimer) {
@@ -162,7 +192,7 @@ const survival = useSurvivalCalc(
 );
 
 const seoTitle = computed(
-  () => `${insuranceYears.value}년 근속 퇴사 계산기 | 퇴직금·실업급여·생존기간 2026`
+  () => `2026 ${insuranceYears.value}년 근속 퇴사 계산기 | 퇴직금·실업급여·생존기간`
 );
 
 const seoDescription = computed(
@@ -184,16 +214,29 @@ const breadcrumbJsonLd = computed(() => ({
   ],
 }));
 
+function buildQuitQuery(): Record<string, string> {
+  return buildQuery({
+    start: startDate.value,
+    end: endDate.value,
+    salary: Math.max(1, Math.floor(monthlySalary.value / 10_000)),
+    reason: quitReason.value,
+  });
+}
+
+watch(
+  [startDate, endDate, monthlySalary, quitReason],
+  () => {
+    if (!initialized.value || applyingRoute.value) return;
+
+    const nextQuery = buildQuitQuery();
+    if (isSameQuery(route.query, nextQuery)) return;
+    router.replace({ path: "/quit", query: nextQuery });
+  },
+  { flush: "post" }
+);
+
 function getShareUrl(): string {
-  const query = new URLSearchParams();
-  query.set("start", startDate.value);
-  query.set("end", endDate.value);
-  query.set("salary", String(Math.floor(monthlySalary.value / 10_000)));
-  query.set("reason", quitReason.value);
-  const qs = query.toString();
-  return qs
-    ? `${window.location.origin}/quit?${qs}`
-    : `${window.location.origin}/quit`;
+  return buildAbsoluteUrl("/quit", buildQuitQuery());
 }
 
 function handleRangeApply(range: { startDate: string; endDate: string }): void {
@@ -210,9 +253,8 @@ function handleRangeApply(range: { startDate: string; endDate: string }): void {
 async function copyQuitLink(): Promise<void> {
   try {
     const link = getShareUrl();
-    if (window.isSecureContext && navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(link);
-    } else if (!copyUsingExecCommand(link)) {
+    const copied = await copyToClipboard(link);
+    if (!copied) {
       throw new Error("clipboard unavailable");
     }
     showAlert("퇴사 시뮬레이션 링크를 복사했습니다");
@@ -244,7 +286,7 @@ watch(
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
     <div class="flex items-center justify-between gap-2">
-      <h1 class="text-h1 font-title">퇴사 계산기 | 퇴직금·실업급여·생존기간</h1>
+      <h1 class="text-h1 font-title">2026 퇴사 계산기 — 퇴직금·실업급여·생존기간</h1>
       <span
         v-if="isRangeUpdating"
         class="text-caption text-muted-foreground"
@@ -287,6 +329,7 @@ watch(
           :final-monthly-net="salaryCalc.monthlyNet.value"
           :total-receivables="totalReceivables"
           :unemployment-end-date-label="unemployment.endDateLabel"
+          :quit-reason="quitReason"
         />
 
         <AdSlot slot="140002" label="광고 · middle" />
@@ -306,8 +349,6 @@ watch(
         />
 
         <QuitChecklist />
-
-        <button type="button" class="retro-button-subtle" @click="copyQuitLink">공유</button>
 
         <InternalLink current="quit" />
 

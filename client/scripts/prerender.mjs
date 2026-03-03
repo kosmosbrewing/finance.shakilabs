@@ -132,7 +132,7 @@ function buildMeta(route) {
 
   if (route === "/about") {
     const title = "서비스 소개 | 2026 연봉·세금 계산기";
-    const description = "연봉 실수령액, 건보료 역산, 이직 비교, 퇴사 시뮬레이션을 제공하는 무료 계산기. 2026 최신 세율 반영.";
+    const description = "연봉 실수령액, 건보료 계산, 이직 비교, 퇴사 시뮬레이션을 제공하는 무료 계산기. 2026 최신 세율 반영.";
     const canonical = `${SITE_URL}/about`;
     return {
       title,
@@ -155,8 +155,8 @@ function buildMeta(route) {
 
   const withholdingAmount = readWithholdingAmount(route);
   if (withholdingAmount !== null) {
-    const title = `월 소득세 ${formatWon(withholdingAmount)} → 연봉 역산 계산기 | 2026`;
-    const description = `월 소득세 ${formatWon(withholdingAmount)} 기준 추정 연봉과 실수령액을 역산합니다. 4대보험 포함 공제 상세 확인.`;
+    const title = `월 소득세 ${formatWon(withholdingAmount)} → 연봉 계산기 | 2026`;
+    const description = `월 소득세 ${formatWon(withholdingAmount)} 기준 추정 연봉과 실수령액을 계산합니다. 4대보험 포함 공제 상세 확인.`;
     const canonical = `${SITE_URL}/withholding/${withholdingAmount}`;
 
     return {
@@ -172,7 +172,7 @@ function buildMeta(route) {
             name: `소득세 ${formatWon(withholdingAmount)}이면 연봉이 얼마인가요?`,
             acceptedAnswer: {
               "@type": "Answer",
-              text: `2026년 기준 이진탐색 역산으로 추정 연봉을 즉시 계산할 수 있습니다.`,
+              text: `2026년 기준 이진탐색 계산으로 추정 연봉을 즉시 계산할 수 있습니다.`,
             },
           },
           {
@@ -187,7 +187,7 @@ function buildMeta(route) {
       },
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
-        { name: "원천세 역산", url: `${SITE_URL}/withholding` },
+        { name: "원천세 계산", url: `${SITE_URL}/withholding` },
         { name: `소득세 ${formatWon(withholdingAmount)}` },
       ]),
     };
@@ -240,7 +240,7 @@ function buildMeta(route) {
       },
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
-        { name: "건보료 역산", url: `${SITE_URL}/insurance` },
+        { name: "건보료 계산", url: `${SITE_URL}/insurance` },
         { name: `건보료 ${feeManWon}만원` },
       ]),
     };
@@ -428,10 +428,10 @@ function buildMeta(route) {
   if (route === "/insurance" || route === "/") {
     const isHome = route === "/";
     const title = isHome
-      ? "2026 연봉 실수령액 계산기 | 건보료 역산·4대보험·종합소득세"
-      : "2026 건강보험료로 연봉 역산 계산기 | 4대보험";
+      ? "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세"
+      : "2026 건강보험료로 연봉 계산기 | 4대보험";
     const description = isHome
-      ? "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 역산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요."
+      ? "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요."
       : "건강보험료를 입력하면 추정 연봉과 월 실수령액을 계산합니다. 2026 최신 요율 반영.";
     const canonical = isHome ? `${SITE_URL}/` : `${SITE_URL}/insurance`;
 
@@ -445,7 +445,7 @@ function buildMeta(route) {
           "@type": "WebSite",
           name: "finance.shakilabs.com",
           url: SITE_URL,
-          description: "건보료 역산, 연봉 실수령액 계산, 이직 비교, 퇴사 시뮬레이션",
+          description: "건보료 계산, 연봉 실수령액 계산, 이직 비교, 퇴사 시뮬레이션",
           inLanguage: "ko",
           potentialAction: {
             "@type": "SearchAction",
@@ -456,7 +456,7 @@ function buildMeta(route) {
         {
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          name: isHome ? "2026 연봉 실수령액 계산기" : "2026 건강보험료 연봉 역산 계산기",
+          name: isHome ? "2026 연봉 실수령액 계산기" : "2026 건강보험료 연봉 계산기",
           url: canonical,
           applicationCategory: "FinanceApplication",
           operatingSystem: "Any",
@@ -467,7 +467,7 @@ function buildMeta(route) {
       ],
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
-        { name: isHome ? "연봉 실수령액 계산기" : "건보료 역산" },
+        { name: isHome ? "연봉 실수령액 계산기" : "건보료 계산" },
       ]),
     };
   }
@@ -545,8 +545,8 @@ function buildMeta(route) {
   }
 
   if (route === "/withholding") {
-    const title = "원천세 역산 계산기 | 소득세로 연봉 추정 2026";
-    const description = "급여명세서 소득세를 입력하면 추정 연봉과 월 실수령액을 역산합니다. 2026 최신 세율 반영.";
+    const title = "원천세 계산기 | 소득세로 연봉 추정 2026";
+    const description = "급여명세서 소득세를 입력하면 추정 연봉과 월 실수령액을 계산합니다. 2026 최신 세율 반영.";
     const canonical = `${SITE_URL}/withholding`;
     return {
       title,
@@ -555,7 +555,7 @@ function buildMeta(route) {
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        name: "원천세 역산 계산기",
+        name: "원천세 계산기",
         url: canonical,
         applicationCategory: "FinanceApplication",
         inLanguage: "ko",
@@ -563,7 +563,7 @@ function buildMeta(route) {
       },
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
-        { name: "원천세 역산" },
+        { name: "원천세 계산" },
       ]),
     };
   }
@@ -593,8 +593,8 @@ function buildMeta(route) {
   }
 
   // fallback
-  const title = "2026 연봉 실수령액 계산기 | 건보료 역산·4대보험·종합소득세";
-  const description = "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 역산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
+  const title = "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세";
+  const description = "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
   const canonical = `${SITE_URL}${route}`;
 
   return {
@@ -626,7 +626,7 @@ function buildPrerenderSection(route, meta) {
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">건보료 ${Math.round(insuranceFee / 10000)}만원이면 연봉 얼마?</h1>
       <p style="margin:0 0 10px;">월 건강보험료 ${formatWon(insuranceFee)} 기준 추정 연봉은 약 ${formatWon(estimatedAnnual)}입니다.</p>
-      <p style="margin:0;"><a href="/insurance">건보료 역산 계산기 열기</a></p>
+      <p style="margin:0;"><a href="/insurance">건보료 계산기 열기</a></p>
     </section>`;
   }
 
@@ -675,8 +675,8 @@ function buildPrerenderSection(route, meta) {
     return `
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">소득세 ${formatWon(withholdingAmt)}이면 연봉 얼마?</h1>
-      <p style="margin:0 0 10px;">월 소득세 ${formatWon(withholdingAmt)} 기준 추정 연봉과 월 실수령액을 역산합니다.</p>
-      <p style="margin:0;"><a href="/withholding">원천세 역산 계산기 열기</a></p>
+      <p style="margin:0 0 10px;">월 소득세 ${formatWon(withholdingAmt)} 기준 추정 연봉과 월 실수령액을 계산합니다.</p>
+      <p style="margin:0;"><a href="/withholding">원천세 계산기 열기</a></p>
     </section>`;
   }
 
@@ -685,7 +685,7 @@ function buildPrerenderSection(route, meta) {
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${meta.title}</h1>
       <p style="margin:0 0 10px;">${meta.description}</p>
       <ul style="margin:0;padding-left:20px;">
-        <li><a href="/insurance">건보료 역산 계산기</a></li>
+        <li><a href="/insurance">건보료 계산기</a></li>
         <li><a href="/salary">연봉 실수령액 계산기</a></li>
         <li><a href="/comprehensive-tax">종합소득세 계산기</a></li>
         <li><a href="/compare">이직 연봉 비교 계산기</a></li>

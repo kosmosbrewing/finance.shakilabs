@@ -4,6 +4,7 @@
   "outputDirectory": "client/dist",
   "framework": null,
   "redirects": [
+    { "source": "/favicon.ico", "destination": "/favicon.png", "permanent": true },
     { "source": "/freelance/:amount(\\d+)", "destination": "/comprehensive-tax?biz=:amount", "permanent": true },
     { "source": "/freelance", "destination": "/comprehensive-tax", "permanent": true }
   ],

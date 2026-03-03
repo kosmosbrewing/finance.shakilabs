@@ -8,6 +8,8 @@
     "prebuild": "node scripts/generate-sitemap.mjs",
     "build": "vite build && node scripts/prerender.mjs",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test": "npm run typecheck",
+    "check": "npm run typecheck && npm run build",
     "preview": "vite preview"
   },
   "dependencies": {

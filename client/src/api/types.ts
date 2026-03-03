@@ -4,4 +4,5 @@ export type Comment = {
   nickname: string;
   content: string;
   createdAt: string;
+  likes: number;
 };

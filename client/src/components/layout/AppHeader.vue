@@ -8,6 +8,8 @@ import {
   salaryTickerMessages,
   compareTickerMessages,
   quitTickerMessages,
+  withholdingTickerMessages,
+  comprehensiveTaxTickerMessages,
 } from "@/data/tickerMessages";
 
 const THEME_STORAGE_KEY = "salary-calc:theme:v1";
@@ -21,6 +23,8 @@ const tickerMessages = computed(() => {
   if (route.path.startsWith("/salary")) return salaryTickerMessages;
   if (route.path.startsWith("/compare")) return compareTickerMessages;
   if (route.path.startsWith("/quit")) return quitTickerMessages;
+  if (route.path.startsWith("/withholding")) return withholdingTickerMessages;
+  if (route.path.startsWith("/comprehensive-tax")) return comprehensiveTaxTickerMessages;
   return salaryTickerMessages;
 });
 
@@ -42,7 +46,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <header class="border-b border-border bg-background">
+  <header class="border-b border-border bg-primary/8">
     <div class="container pt-2.5 pb-2.5">
       <div class="overflow-hidden">
         <div class="retro-titlebar h-11 border-b-0 px-2 bg-transparent">

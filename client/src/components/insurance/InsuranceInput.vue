@@ -9,15 +9,16 @@ const props = defineProps<{
   dependents: number;
   childrenUnder20: number;
   nonTaxableMonthly: number;
+  retirementIncluded?: boolean;
 }>();
 
 const emit = defineEmits<{
-  "update:mode": [value: "reverse" | "forward"];
   "update:healthInsuranceFee": [value: number];
   "update:annualGross": [value: number];
   "update:dependents": [value: number];
   "update:childrenUnder20": [value: number];
   "update:nonTaxableMonthly": [value: number];
+  "update:retirementIncluded": [value: boolean];
 }>();
 
 // 천단위 콤마 포맷 (건보료, 원 단위)
@@ -33,35 +34,34 @@ function onHealthFeeInput(event: Event): void {
   }
 }
 
-// 연봉 입력값 만원 단위로 변환 (SalaryInputPanel 동일 패턴)
-const annualGrossManWon = computed({
-  get: () => Math.round(props.annualGross / 10_000),
-  set: (value: number) => {
-    const safe = Math.max(1_000, Math.min(300_000, Math.floor(value || 0)));
-    emit("update:annualGross", safe * 10_000);
-  },
-});
-
-const formattedGrossManWon = computed(() =>
-  formatNumber(annualGrossManWon.value)
-);
+// 연봉 천단위 콤마 포맷 (원 단위)
+const formattedGross = computed(() => formatNumber(props.annualGross));
 
 function onGrossInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    annualGrossManWon.value = value;
+    emit("update:annualGross", Math.max(10_000_000, Math.min(3_000_000_000, value)));
   }
 }
 
-// 비과세
-const nonTaxableManWon = computed({
-  get: () => Math.floor(props.nonTaxableMonthly / 10_000),
-  set: (value: number) => {
-    const safe = Math.max(0, Math.min(500, Math.floor(value || 0)));
-    emit("update:nonTaxableMonthly", safe * 10_000);
-  },
-});
+function onGrossRangeInput(event: Event): void {
+  const value = parseInt((event.target as HTMLInputElement).value, 10);
+  if (Number.isFinite(value)) {
+    emit("update:annualGross", value);
+  }
+}
+
+// 비과세 천단위 콤마 포맷 (원 단위)
+const formattedNonTaxable = computed(() => formatNumber(props.nonTaxableMonthly));
+
+function onNonTaxableInput(event: Event): void {
+  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
+  const value = parseInt(raw, 10);
+  if (Number.isFinite(value)) {
+    emit("update:nonTaxableMonthly", Math.max(0, Math.min(5_000_000, value)));
+  }
+}
 
 function updateDependents(value: number): void {
   const safe = Math.max(1, Math.min(20, Math.floor(value || 1)));
@@ -96,34 +96,19 @@ function onHealthFeeRangeInput(event: Event): void {
   }
 }
 
+function updateRetirementIncluded(value: boolean): void {
+  emit("update:retirementIncluded", value);
+}
+
 </script>
 
 <template>
   <section class="retro-panel">
     <div class="retro-titlebar">
-      <h2 class="retro-title">건보료/연봉 입력</h2>
+      <h2 class="retro-title">{{ mode === "reverse" ? "건강보험료 입력" : "연봉 입력" }}</h2>
     </div>
 
     <div class="retro-panel-content space-y-4">
-      <div class="flex gap-2.5 border-b border-border/40 pb-4">
-        <button
-          type="button"
-          class="touch-target min-w-0 flex-1 rounded-xl border px-2 py-1.5 text-caption font-semibold transition-colors"
-          :class="mode === 'reverse' ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
-          @click="emit('update:mode', 'reverse')"
-        >
-          건보료 → 연봉
-        </button>
-        <button
-          type="button"
-          class="touch-target min-w-0 flex-1 rounded-xl border px-2 py-1.5 text-caption font-semibold transition-colors"
-          :class="mode === 'forward' ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
-          @click="emit('update:mode', 'forward')"
-        >
-          연봉 → 건보료
-        </button>
-      </div>
-
       <Transition name="slide-fade" mode="out-in">
         <!-- 건보료 → 연봉 추정 모드 -->
         <div v-if="mode === 'reverse'" key="reverse" class="space-y-3">
@@ -177,7 +162,7 @@ function onHealthFeeRangeInput(event: Event): void {
         <!-- 연봉 → 건보료 계산 모드 -->
         <div v-else key="forward" class="space-y-3">
         <label :for="inputIds.forwardAnnualGross" class="mb-0.5 block text-caption font-semibold text-foreground">
-          연봉 (만원)
+          연봉 (원)
         </label>
         <div class="space-y-2">
           <div class="flex items-center gap-2">
@@ -185,13 +170,13 @@ function onHealthFeeRangeInput(event: Event): void {
               type="button"
               class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               aria-label="100만원 감소"
-              @click="annualGrossManWon = Math.max(1000, annualGrossManWon - 100)"
+              @click="emit('update:annualGross', Math.max(10_000_000, annualGross - 1_000_000))"
             >
               −
             </button>
             <input
               :id="inputIds.forwardAnnualGross"
-              :value="formattedGrossManWon"
+              :value="formattedGross"
               type="text"
               inputmode="numeric"
               class="retro-input min-w-0 flex-1 text-center text-heading font-bold tabular-nums"
@@ -201,21 +186,44 @@ function onHealthFeeRangeInput(event: Event): void {
               type="button"
               class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               aria-label="100만원 증가"
-              @click="annualGrossManWon = Math.min(20000, annualGrossManWon + 100)"
+              @click="emit('update:annualGross', Math.min(200_000_000, annualGross + 1_000_000))"
             >
               +
             </button>
           </div>
           <input
             :id="inputIds.forwardAnnualGrossRange"
-            v-model.number="annualGrossManWon"
+            :value="annualGross"
             type="range"
-            min="1000"
-            max="20000"
-            step="100"
+            min="10000000"
+            max="200000000"
+            step="1000000"
             class="retro-range"
             aria-label="연봉 슬라이더"
+            @input="onGrossRangeInput"
           />
+        </div>
+
+        <div>
+          <span class="mb-0.5 block text-caption font-semibold text-foreground">퇴직금 포함 여부</span>
+          <div class="flex gap-2.5">
+            <button
+              type="button"
+              class="touch-target rounded-xl border px-3 py-1.5 text-caption font-semibold transition-colors"
+              :class="!props.retirementIncluded ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
+              @click="updateRetirementIncluded(false)"
+            >
+              퇴직금 별도
+            </button>
+            <button
+              type="button"
+              class="touch-target rounded-xl border px-3 py-1.5 text-caption font-semibold transition-colors"
+              :class="props.retirementIncluded ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
+              @click="updateRetirementIncluded(true)"
+            >
+              퇴직금 포함
+            </button>
+          </div>
         </div>
         </div>
       </Transition>
@@ -253,15 +261,14 @@ function onHealthFeeRangeInput(event: Event): void {
             />
           </label>
           <label class="space-y-1" :for="inputIds.nonTaxableMonthly">
-            <span class="text-caption text-muted-foreground">비과세(만원/월)</span>
+            <span class="text-caption text-muted-foreground">비과세(원/월)</span>
             <input
               :id="inputIds.nonTaxableMonthly"
-              v-model.number="nonTaxableManWon"
-              type="number"
+              :value="formattedNonTaxable"
+              type="text"
               inputmode="numeric"
-              min="0"
-              max="500"
               class="retro-input"
+              @input="onNonTaxableInput"
             />
           </label>
         </div>

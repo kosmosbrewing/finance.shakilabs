@@ -4,7 +4,7 @@ import {
   FREELANCE_INDUSTRIES,
   type IndustryKey,
 } from "@/data/freelanceTaxRates";
-import { getSliderWindow } from "@/lib/utils";
+import { formatNumber, getSliderWindow } from "@/lib/utils";
 
 const props = withDefaults(
   defineProps<{
@@ -86,6 +86,17 @@ const inputIds = computed(() => {
   };
 });
 
+// 원 단위로 표시 (내부 데이터는 만원)
+const formattedRevenue = computed(() => formatNumber(props.revenue * 10_000));
+
+function onRevenueInput(event: Event): void {
+  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
+  const value = parseInt(raw, 10);
+  if (Number.isFinite(value)) {
+    updateRevenue(Math.round(value / 10_000));
+  }
+}
+
 function updateRevenue(value: number): void {
   const config = rangeConfig.value;
   const safe = Math.max(config.min, Math.min(config.max, Math.floor(value || 0)));
@@ -136,32 +147,30 @@ const separateHint = computed(() => {
 
     <div v-show="enabled" class="retro-panel-content space-y-4">
       <label :for="inputIds.revenue" class="mb-0.5 block text-caption font-semibold text-foreground">
-        연 수입 (만원)
+        연 수입 (원)
       </label>
       <div class="space-y-2">
         <div class="flex items-center gap-2">
           <button
             type="button"
             class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-            :aria-label="`${rangeConfig.step}만원 감소`"
+            :aria-label="`${rangeConfig.step * 10_000}원 감소`"
             @click="updateRevenue(revenue - rangeConfig.step)"
           >
             −
           </button>
           <input
             :id="inputIds.revenue"
-            :value="revenue"
-            type="number"
+            :value="formattedRevenue"
+            type="text"
             inputmode="numeric"
             class="retro-input min-w-0 flex-1 text-center text-heading font-bold tabular-nums"
-            :min="rangeConfig.min"
-            :max="rangeConfig.max"
-            @input="updateRevenue(parseInt(($event.target as HTMLInputElement).value, 10))"
+            @input="onRevenueInput"
           />
           <button
             type="button"
             class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-            :aria-label="`${rangeConfig.step}만원 증가`"
+            :aria-label="`${rangeConfig.step * 10_000}원 증가`"
             @click="updateRevenue(revenue + rangeConfig.step)"
           >
             +
@@ -196,6 +205,9 @@ const separateHint = computed(() => {
             {{ item.label }} ({{ Math.round(item.baseRate * 1000) / 10 }}% / {{ Math.round(item.excessRate * 1000) / 10 }}%)
           </option>
         </select>
+        <p class="text-tiny text-muted-foreground">
+          인적용역(프리랜서) 기준 단순경비율입니다. 음식업·도소매 등 일반 자영업은 별도 계산이 필요합니다.
+        </p>
       </div>
 
       <div v-if="sourceType === 'rental'" class="space-y-2 rounded-xl border border-border/60 bg-muted/20 p-3">

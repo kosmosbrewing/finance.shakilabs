@@ -47,10 +47,10 @@ function diffClass(delta: number): string {
         <table class="w-full text-caption border-collapse">
           <thead>
             <tr class="border-b-2 border-primary/20 bg-muted/40">
-              <th class="px-3 py-2.5 text-left font-semibold">항목</th>
-              <th class="px-3 py-2.5 text-right font-semibold">현재 회사</th>
-              <th class="px-3 py-2.5 text-right font-semibold">이직 회사</th>
-              <th class="px-3 py-2.5 text-right font-semibold">차이</th>
+              <th class="px-2 py-2 text-left font-semibold md:px-3 md:py-2.5">항목</th>
+              <th class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">현재 회사</th>
+              <th class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">이직 회사</th>
+              <th class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">차이</th>
             </tr>
           </thead>
           <tbody>
@@ -59,16 +59,40 @@ function diffClass(delta: number): string {
               :key="row.label"
               class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors"
             >
-              <td class="px-3 py-2.5 whitespace-nowrap">{{ row.label }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(row.a) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap">{{ formatWon(row.b) }}</td>
-              <td class="px-3 py-2.5 text-right tabular-nums whitespace-nowrap font-semibold" :class="diffClass(row.delta)">
+              <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">{{ row.label }}</td>
+              <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatWon(row.a) }}</td>
+              <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatWon(row.b) }}</td>
+              <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap font-semibold md:px-3 md:py-2.5" :class="diffClass(row.delta)">
                 {{ formatWon(row.delta) }}
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <details class="retro-details md:hidden">
+        <summary class="retro-details-summary">
+          <span>회사별 값 보기</span>
+          <span class="retro-details-chevron" aria-hidden="true">▾</span>
+        </summary>
+        <ul class="space-y-2 p-2">
+          <li
+            v-for="row in rows"
+            :key="`${row.label}-mobile-values`"
+            class="rounded-lg border border-border/60 bg-muted/10 p-2"
+          >
+            <p class="text-caption font-semibold text-foreground">{{ row.label }}</p>
+            <div class="mt-1 flex items-center justify-between text-tiny text-muted-foreground">
+              <span>현재 회사</span>
+              <span class="tabular-nums">{{ formatWon(row.a) }}</span>
+            </div>
+            <div class="mt-0.5 flex items-center justify-between text-tiny text-muted-foreground">
+              <span>이직 회사</span>
+              <span class="tabular-nums">{{ formatWon(row.b) }}</span>
+            </div>
+          </li>
+        </ul>
+      </details>
     </div>
   </component>
 </template>

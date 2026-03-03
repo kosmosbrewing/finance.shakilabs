@@ -17,7 +17,7 @@ export type InsuranceReverseResult = {
   calc: SalaryCalcResult;
 };
 
-// 건보료(근로자 부담분) 입력값으로 연봉을 역산
+// 건보료(근로자 부담분) 입력값으로 연봉을 계산
 export function useInsuranceReverse(input: InsuranceReverseInput): InsuranceReverseResult {
   const normalizedHealthInsuranceFee = computed(() =>
     Math.max(0, Math.floor(input.healthInsuranceFee.value || 0))
@@ -43,7 +43,7 @@ export function useInsuranceReverse(input: InsuranceReverseInput): InsuranceReve
     initialRetirementIncluded: false,
   });
 
-  // 역산값 변경 시 정방향 계산기에 동기화
+  // 계산값 변경 시 정방향 계산기에 동기화
   watch(
     [estimatedAnnualGross, () => input.dependents.value, () => input.childrenUnder20.value, () => input.nonTaxableMonthly.value],
     ([annualGross, dependents, childrenUnder20, nonTaxableMonthly]) => {

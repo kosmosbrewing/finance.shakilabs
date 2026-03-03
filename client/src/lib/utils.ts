@@ -11,10 +11,15 @@ export function formatNumber(num: number | null | undefined): string {
   return num.toLocaleString("ko-KR");
 }
 
-// 원화 포맷: 2345678 → "2,345,678원"
+// 원화 원단위 포맷: 2345678 → "2,345,678원"
+function formatWonExact(amount: number): string {
+  return `${Math.round(amount).toLocaleString("ko-KR")}원`;
+}
+
+// 기본 원화 포맷: 2345678 → "2,345,678원"
 export function formatWon(amount: number | null | undefined): string {
   if (amount == null) return "-";
-  return `${Math.round(amount).toLocaleString("ko-KR")}원`;
+  return formatWonExact(amount);
 }
 
 function formatCompactManWon(roundedManWon: number): string {
@@ -53,14 +58,10 @@ export function formatManWon(amount: number | null | undefined): string {
 }
 
 // 자동 KRW 포맷 규칙:
-// - 절대값 100만원 미만: "1,000원"
-// - 절대값 100만원 이상: "100만원" / "1억원"
+// - 전역 정책: 축약 없이 "천단위 콤마 + 원"
 export function formatKrwAuto(amount: number | null | undefined): string {
   if (amount == null) return "-";
-  if (Math.abs(amount) < 1_000_000) {
-    return formatWon(amount);
-  }
-  return formatKrwCompact(amount);
+  return formatWonExact(amount);
 }
 
 // 퍼센트 포맷: 0.1234 → "12.34%"

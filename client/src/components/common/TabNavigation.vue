@@ -5,15 +5,24 @@ import { useRoute, RouterLink } from "vue-router";
 const route = useRoute();
 
 const tabs = [
-  { label: "건보료 역산", to: "/insurance", startsWith: "/insurance" },
-  { label: "실수령액", to: "/salary", startsWith: "/salary" },
-  { label: "종합소득세", to: "/comprehensive-tax", startsWith: "/comprehensive-tax" },
-  { label: "이직 비교", to: "/compare", startsWith: "/compare" },
-  { label: "퇴사 계산", to: "/quit", startsWith: "/quit" },
-  { label: "원천세 역산", to: "/withholding", startsWith: "/withholding" },
+  { key: "insurance", label: "건보료 계산", to: "/insurance" },
+  { key: "salary", label: "연봉 계산", to: "/salary" },
+  { key: "compare", label: "이직 비교", to: "/compare" },
+  { key: "quit", label: "퇴사 계산", to: "/quit" },
+  { key: "withholding", label: "원천세 계산", to: "/withholding" },
+  { key: "comprehensive-tax", label: "종합소득세 계산", to: "/comprehensive-tax" },
 ] as const;
 
 const activePath = computed(() => route.path);
+
+function isActiveTab(key: (typeof tabs)[number]["key"]): boolean {
+  if (key === "insurance") return activePath.value.startsWith("/insurance");
+  if (key === "salary") return activePath.value.startsWith("/salary");
+  if (key === "compare") return activePath.value.startsWith("/compare");
+  if (key === "quit") return activePath.value.startsWith("/quit");
+  if (key === "withholding") return activePath.value.startsWith("/withholding");
+  return activePath.value.startsWith("/comprehensive-tax");
+}
 </script>
 
 <template>
@@ -22,11 +31,11 @@ const activePath = computed(() => route.path);
       <div class="flex h-12 items-center gap-2 overflow-x-auto" style="scrollbar-width: none">
         <RouterLink
           v-for="tab in tabs"
-          :key="tab.to"
+          :key="tab.key"
           :to="tab.to"
           :class="[
             'touch-target inline-flex h-11 shrink-0 items-center rounded-lg px-3 text-body font-semibold transition-all duration-200',
-            activePath.startsWith(tab.startsWith)
+            isActiveTab(tab.key)
               ? 'bg-white/20 text-primary-foreground shadow-sm'
               : 'text-primary-foreground/90 hover:bg-white/15 hover:text-primary-foreground',
           ]"

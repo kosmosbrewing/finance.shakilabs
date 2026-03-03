@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
 import IncomeSourceInput from "@/components/comprehensive-tax/IncomeSourceInput.vue";
 import ComprehensiveTaxResult from "@/components/comprehensive-tax/ComprehensiveTaxResult.vue";
@@ -19,17 +19,26 @@ import {
 import { addEntry } from "@/composables/useRecentCalcs";
 import { useComprehensiveTaxCalc } from "@/composables/useComprehensiveTaxCalc";
 import { showAlert } from "@/composables/useAlert";
-import { copyUsingExecCommand, formatManWonValue, formatWon } from "@/lib/utils";
+import { formatManWonValue, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
+import {
+  buildAbsoluteUrl,
+  copyToClipboard,
+  isSameQuery,
+  parseQueryFloat,
+  parseQueryInt,
+  queryFirst,
+} from "@/lib/routeState";
 
 const props = defineProps<{
   initialBusinessAmountManWon?: number;
 }>();
 
 const route = useRoute();
-const router = useRouter();
 
 const initialized = ref(false);
+// router.replace() 대신 history.replaceState()로 URL을 갱신하기 위한 내부 추적
+const lastQuery = ref<Record<string, string>>({});
 
 const business = ref({
   enabled: true,
@@ -65,24 +74,16 @@ function clampRate(value: number): number {
 }
 
 function parsePositiveInt(value: unknown): number | null {
-  const parsed = Number.parseInt(String(value), 10);
-  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  const parsed = parseQueryInt(value);
+  if (parsed === null || parsed <= 0) return null;
   return parsed;
 }
 
 function parseRate(value: unknown): number | null {
   if (value == null) return null;
-  const parsed = Number.parseFloat(String(value));
-  if (!Number.isFinite(parsed)) return null;
+  const parsed = parseQueryFloat(value);
+  if (parsed === null) return null;
   return clampRate(parsed);
-}
-
-function queryFirst(value: unknown): string | null {
-  if (Array.isArray(value)) {
-    const first = value[0];
-    return typeof first === "string" ? first : null;
-  }
-  return typeof value === "string" ? value : null;
 }
 
 onMounted(() => {
@@ -166,6 +167,7 @@ onMounted(() => {
   }
 
   initialized.value = true;
+  lastQuery.value = buildComprehensiveQuery();
 });
 
 const calcInput = computed(() => ({
@@ -230,7 +232,7 @@ const breadcrumbJsonLd = computed(() => ({
   ],
 }));
 
-function buildQuery(): Record<string, string> {
+function buildComprehensiveQuery(): Record<string, string> {
   const query: Record<string, string> = {};
 
   if (business.value.enabled && business.value.revenue > 0) {
@@ -271,24 +273,25 @@ watch(
   [business, rental, other, dependents, includePension],
   () => {
     if (!initialized.value) return;
-    router.replace({ path: "/comprehensive-tax", query: buildQuery() });
+    const nextQuery = buildComprehensiveQuery();
+    if (isSameQuery(lastQuery.value, nextQuery)) return;
+    lastQuery.value = nextQuery;
+    // Vue Router navigation을 거치지 않고 URL만 갱신 → page-fade Transition 미발동
+    const qs = new URLSearchParams(nextQuery).toString();
+    history.replaceState(history.state, "", qs ? `/comprehensive-tax?${qs}` : "/comprehensive-tax");
   },
   { deep: true, flush: "post" }
 );
 
 function getShareUrl(): string {
-  const params = new URLSearchParams(buildQuery());
-  const query = params.toString();
-  const base = `${window.location.origin}/comprehensive-tax`;
-  return query ? `${base}?${query}` : base;
+  return buildAbsoluteUrl("/comprehensive-tax", buildComprehensiveQuery());
 }
 
 async function copyShareLink(): Promise<void> {
   try {
     const shareUrl = getShareUrl();
-    if (window.isSecureContext && navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(shareUrl);
-    } else if (!copyUsingExecCommand(shareUrl)) {
+    const copied = await copyToClipboard(shareUrl);
+    if (!copied) {
       throw new Error("clipboard unavailable");
     }
     showAlert("공유 링크를 복사했습니다");
@@ -320,7 +323,7 @@ watch(
   () => {
     if (recentCalcTimer) clearTimeout(recentCalcTimer);
     recentCalcTimer = setTimeout(() => {
-      const query = new URLSearchParams(buildQuery()).toString();
+      const query = new URLSearchParams(buildComprehensiveQuery()).toString();
       addEntry({
         type: "comprehensive-tax",
         label: `종합소득 ${formatManWonValue(Math.floor(result.value.totalRevenue / 10_000))}`,
@@ -421,11 +424,6 @@ watch(
           :rental-compare="result.rentalCompare"
           :other-compare="result.otherCompare"
         />
-
-        <div class="flex flex-wrap gap-2">
-          <button type="button" class="retro-button" @click="shareComprehensiveTax">공유</button>
-          <button type="button" class="retro-button-subtle" @click="copyShareLink">링크 복사</button>
-        </div>
 
         <CalcSourceBox />
 

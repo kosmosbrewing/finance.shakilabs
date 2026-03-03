@@ -24,35 +24,33 @@ const inputIds = {
   nonTaxableMonthly: "salary-nontaxable-monthly",
 } as const;
 
-// 연봉 입력값 만원 단위로 변환
-const grossInManWon = computed({
-  get: () => Math.round(props.annualGross / 10_000),
-  set: (value: number) => {
-    const safe = Math.max(1_000, Math.min(300_000, Math.floor(value || 0)));
-    emit("update:annualGross", safe * 10_000);
-  },
-});
-
-// 천단위 콤마 포맷
-const formattedGrossManWon = computed(() =>
-  formatNumber(grossInManWon.value)
-);
+// 천단위 콤마 포맷 (원 단위)
+const formattedGross = computed(() => formatNumber(props.annualGross));
 
 function onGrossInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    grossInManWon.value = value;
+    emit("update:annualGross", Math.max(10_000_000, Math.min(3_000_000_000, value)));
   }
 }
 
-const nonTaxableManWon = computed({
-  get: () => Math.round(props.nonTaxableMonthly / 10_000),
-  set: (value: number) => {
-    const safe = Math.max(0, Math.min(500, Math.floor(value || 0)));
-    emit("update:nonTaxableMonthly", safe * 10_000);
-  },
-});
+function onGrossRangeInput(event: Event): void {
+  const value = parseInt((event.target as HTMLInputElement).value, 10);
+  if (Number.isFinite(value)) {
+    emit("update:annualGross", value);
+  }
+}
+
+const formattedNonTaxable = computed(() => formatNumber(props.nonTaxableMonthly));
+
+function onNonTaxableInput(event: Event): void {
+  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
+  const value = parseInt(raw, 10);
+  if (Number.isFinite(value)) {
+    emit("update:nonTaxableMonthly", Math.max(0, Math.min(5_000_000, value)));
+  }
+}
 
 function adjustDependents(delta: number): void {
   const next = Math.max(1, Math.min(20, props.dependents + delta));
@@ -84,7 +82,7 @@ function updateRetirementIncluded(value: boolean): void {
     <div class="retro-panel-content space-y-4">
       <div>
         <label :for="inputIds.annualGross" class="mb-0.5 block text-caption font-semibold text-foreground">
-          연봉 (만원)
+          연봉 (원)
         </label>
         <div class="space-y-2">
           <div class="flex items-center gap-2">
@@ -92,16 +90,16 @@ function updateRetirementIncluded(value: boolean): void {
               type="button"
               class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               aria-label="100만원 감소"
-              @click="grossInManWon = Math.max(1000, grossInManWon - 100)"
+              @click="emit('update:annualGross', Math.max(10_000_000, annualGross - 1_000_000))"
             >
               −
             </button>
             <input
               :id="inputIds.annualGross"
-              :value="formattedGrossManWon"
+              :value="formattedGross"
               type="text"
               class="retro-input min-w-0 flex-1 text-center text-heading font-bold tabular-nums"
-              placeholder="3,000"
+              placeholder="30,000,000"
               inputmode="numeric"
               @input="onGrossInput"
             />
@@ -109,20 +107,21 @@ function updateRetirementIncluded(value: boolean): void {
               type="button"
               class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               aria-label="100만원 증가"
-              @click="grossInManWon = Math.min(20000, grossInManWon + 100)"
+              @click="emit('update:annualGross', Math.min(200_000_000, annualGross + 1_000_000))"
             >
               +
             </button>
           </div>
           <input
             :id="inputIds.annualGrossRange"
-            v-model.number="grossInManWon"
+            :value="annualGross"
             type="range"
-            min="1000"
-            max="20000"
-            step="100"
+            min="10000000"
+            max="200000000"
+            step="1000000"
             class="retro-range"
             aria-label="연봉 슬라이더"
+            @input="onGrossRangeInput"
           />
         </div>
       </div>
@@ -209,17 +208,16 @@ function updateRetirementIncluded(value: boolean): void {
 
             <div>
               <label :for="inputIds.nonTaxableMonthly" class="mb-0.5 block text-caption font-semibold text-foreground">
-                비과세 금액 (만원/월)
+                비과세 금액 (원/월)
               </label>
               <input
                 :id="inputIds.nonTaxableMonthly"
-                v-model.number="nonTaxableManWon"
-                type="number"
+                :value="formattedNonTaxable"
+                type="text"
                 class="retro-input tabular-nums"
-                placeholder="20"
-                min="0"
-                max="500"
+                placeholder="200,000"
                 inputmode="numeric"
+                @input="onNonTaxableInput"
               />
             </div>
           </div>

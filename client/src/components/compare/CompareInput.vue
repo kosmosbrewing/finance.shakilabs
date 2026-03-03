@@ -44,42 +44,25 @@ function updateCompany(
   });
 }
 
-const annualAManWon = computed({
-  get: () => Math.floor(props.companyA.annualGross / 10_000),
-  set: (value: number) =>
-    updateCompany("companyA", { annualGross: clampInt(value, 1_000, 300_000) * 10_000 }),
-});
+// 천단위 콤마 포맷 (원 단위)
+const formattedAnnualA = computed(() => formatNumber(props.companyA.annualGross));
+const formattedAnnualB = computed(() => formatNumber(props.companyB.annualGross));
+const formattedNonTaxA = computed(() => formatNumber(props.companyA.nonTaxableMonthly));
+const formattedNonTaxB = computed(() => formatNumber(props.companyB.nonTaxableMonthly));
 
-const annualBManWon = computed({
-  get: () => Math.floor(props.companyB.annualGross / 10_000),
-  set: (value: number) =>
-    updateCompany("companyB", { annualGross: clampInt(value, 1_000, 300_000) * 10_000 }),
-});
-
-const nonTaxAManWon = computed({
-  get: () => Math.floor(props.companyA.nonTaxableMonthly / 10_000),
-  set: (value: number) =>
-    updateCompany("companyA", {
-      nonTaxableMonthly: clampInt(value, 0, 500) * 10_000,
-    }),
-});
-
-const nonTaxBManWon = computed({
-  get: () => Math.floor(props.companyB.nonTaxableMonthly / 10_000),
-  set: (value: number) =>
-    updateCompany("companyB", {
-      nonTaxableMonthly: clampInt(value, 0, 500) * 10_000,
-    }),
-});
-
-// 천단위 콤마 포맷 (연봉)
-const formattedAnnualA = computed(() => formatNumber(annualAManWon.value));
-const formattedAnnualB = computed(() => formatNumber(annualBManWon.value));
 function onAnnualInput(key: "companyA" | "companyB", event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    updateCompany(key, { annualGross: clampInt(value, 1_000, 300_000) * 10_000 });
+    updateCompany(key, { annualGross: clampInt(value, 10_000_000, 3_000_000_000) });
+  }
+}
+
+function onNonTaxInput(key: "companyA" | "companyB", event: Event): void {
+  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
+  const value = parseInt(raw, 10);
+  if (Number.isFinite(value)) {
+    updateCompany(key, { nonTaxableMonthly: clampInt(value, 0, 5_000_000) });
   }
 }
 
@@ -123,7 +106,7 @@ const inputIds = {
             </div>
           </div>
           <label class="block space-y-1" :for="inputIds.annualA">
-            <span class="text-caption text-muted-foreground">연봉 (만원)</span>
+            <span class="text-caption text-muted-foreground">연봉 (원)</span>
             <input
               :id="inputIds.annualA"
               :value="formattedAnnualA"
@@ -134,8 +117,8 @@ const inputIds = {
             />
           </label>
           <label class="block space-y-1" :for="inputIds.nonTaxA">
-            <span class="text-caption text-muted-foreground">비과세 (만원/월)</span>
-            <input :id="inputIds.nonTaxA" v-model.number="nonTaxAManWon" type="number" min="0" max="500" class="retro-input" inputmode="numeric" />
+            <span class="text-caption text-muted-foreground">비과세 (원/월)</span>
+            <input :id="inputIds.nonTaxA" :value="formattedNonTaxA" type="text" class="retro-input" inputmode="numeric" @input="onNonTaxInput('companyA', $event)" />
           </label>
           <details class="retro-details border-status-info/30 bg-background/60">
             <summary class="retro-details-summary text-status-info">
@@ -173,7 +156,7 @@ const inputIds = {
             </div>
           </div>
           <label class="block space-y-1" :for="inputIds.annualB">
-            <span class="text-caption text-muted-foreground">연봉 (만원)</span>
+            <span class="text-caption text-muted-foreground">연봉 (원)</span>
             <input
               :id="inputIds.annualB"
               :value="formattedAnnualB"
@@ -184,8 +167,8 @@ const inputIds = {
             />
           </label>
           <label class="block space-y-1" :for="inputIds.nonTaxB">
-            <span class="text-caption text-muted-foreground">비과세 (만원/월)</span>
-            <input :id="inputIds.nonTaxB" v-model.number="nonTaxBManWon" type="number" min="0" max="500" class="retro-input" inputmode="numeric" />
+            <span class="text-caption text-muted-foreground">비과세 (원/월)</span>
+            <input :id="inputIds.nonTaxB" :value="formattedNonTaxB" type="text" class="retro-input" inputmode="numeric" @input="onNonTaxInput('companyB', $event)" />
           </label>
           <details class="retro-details border-status-success/30 bg-background/60">
             <summary class="retro-details-summary text-status-success">
