@@ -18,39 +18,20 @@ const annualNetDiff = computed(
 );
 
 const monthlyGapAbs = computed(() => Math.abs(monthlyNetDiff.value));
-const annualGapAbs = computed(() => Math.abs(annualNetDiff.value));
-
-const leadLabel = computed(() => {
-  if (monthlyNetDiff.value > 0) return "이직 회사가 월 실수령 우위";
-  if (monthlyNetDiff.value < 0) return "현재 회사가 월 실수령 우위";
-  return "월 실수령 차이 없음";
-});
-
-const leadDescription = computed(() => {
-  if (monthlyNetDiff.value === 0) return "월 실수령이 동일합니다";
-  return `연간 차이 ${formatKrwAuto(annualGapAbs.value)}`;
-});
 
 const diffClass = computed(() => {
   if (monthlyNetDiff.value > 0) return "text-status-success";
   if (monthlyNetDiff.value < 0) return "text-status-danger";
   return "text-muted-foreground";
+
 });
 
-const barMax = computed(() =>
-  Math.max(
-    Math.abs(props.calcA.monthlyNet.value),
-    Math.abs(props.calcB.monthlyNet.value),
-    1
-  )
-);
+const diffSign = computed(() => {
+  if (monthlyNetDiff.value > 0) return "+";
+  if (monthlyNetDiff.value < 0) return "-";
+  return "";
+});
 
-const monthlyBarA = computed(
-  () => `${(Math.abs(props.calcA.monthlyNet.value) / barMax.value) * 100}%`
-);
-const monthlyBarB = computed(
-  () => `${(Math.abs(props.calcB.monthlyNet.value) / barMax.value) * 100}%`
-);
 </script>
 
 <template>
@@ -64,119 +45,57 @@ const monthlyBarB = computed(
         <h3 class="text-caption font-semibold text-foreground">비교 결과</h3>
       </div>
 
-      <div class="text-center py-3">
-        <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1" :class="diffClass">{{ leadLabel }}</p>
+      <!-- 히어로: 차이 금액 -->
+      <div class="text-center py-3 space-y-0.5">
+        <p class="text-caption text-muted-foreground">월 실수령 차이</p>
         <p class="text-display font-bold font-title tabular-nums" :class="diffClass">
-          {{ formatWon(monthlyGapAbs) }}
+          {{ diffSign }}{{ formatWon(monthlyGapAbs) }}
         </p>
-        <p class="text-body text-muted-foreground mt-1.5">{{ leadDescription }}</p>
       </div>
 
-      <div class="rounded-xl border border-border/70 bg-background p-2.5">
-        <p class="text-caption font-semibold text-foreground">핵심 비교</p>
-        <div class="mt-1.5 space-y-2 text-caption">
-          <div>
-            <div class="mb-1 flex items-center justify-between">
-              <span class="text-muted-foreground">월 실수령</span>
-              <span class="tabular-nums">Δ {{ formatWon(monthlyNetDiff) }}</span>
-            </div>
-            <div class="mb-1 flex items-center justify-between text-tiny text-muted-foreground">
-              <span>현재 {{ formatWon(calcA.monthlyNet.value) }}</span>
-              <span>이직 {{ formatWon(calcB.monthlyNet.value) }}</span>
-            </div>
-            <div class="space-y-1">
-              <div class="h-2 rounded-full bg-muted/70">
-                <div class="h-full rounded-full bg-status-info/80" :style="{ width: monthlyBarA }" />
-              </div>
-              <div class="h-2 rounded-full bg-muted/70">
-                <div class="h-full rounded-full bg-primary/80" :style="{ width: monthlyBarB }" />
-              </div>
-            </div>
+      <!-- 현재 vs 이직 카드 -->
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] md:items-stretch">
+        <div class="rounded-xl border-2 border-status-info/35 bg-status-info/10 p-2.5 space-y-2">
+          <div class="rounded-lg border border-status-info/35 bg-background/60 px-2.5 py-1.5">
+            <p class="text-caption font-semibold text-status-info">현재 회사</p>
+          </div>
+          <div class="rounded-lg border border-status-info/25 bg-background/60 px-2.5 py-2.5 text-center">
+            <p class="text-h2 font-bold tabular-nums">{{ formatWon(calcA.monthlyNet.value) }}</p>
+          </div>
+        </div>
+
+        <div class="flex md:hidden items-center justify-center -my-1">
+          <div class="h-px flex-1 bg-border/60" />
+          <span class="retro-kbd mx-3 px-3 py-1 font-extrabold">결과</span>
+          <div class="h-px flex-1 bg-border/60" />
+        </div>
+        <div class="hidden md:flex items-center justify-center">
+          <span class="retro-kbd px-3 py-1 font-extrabold">결과</span>
+        </div>
+
+        <div class="rounded-xl border-2 border-status-success/35 bg-status-success/10 p-2.5 space-y-2">
+          <div class="rounded-lg border border-status-success/35 bg-background/60 px-2.5 py-1.5">
+            <p class="text-caption font-semibold text-status-success">이직 회사</p>
+          </div>
+          <div class="rounded-lg border border-status-success/25 bg-background/60 px-2.5 py-2.5 text-center">
+            <p class="text-h2 font-bold tabular-nums">{{ formatWon(calcB.monthlyNet.value) }}</p>
           </div>
         </div>
       </div>
 
-      <details class="retro-details">
-        <summary class="retro-details-summary">
-          <span>상세 결과 보기 (연 실수령 차이 {{ formatKrwAuto(annualNetDiff) }})</span>
-          <span class="retro-details-chevron" aria-hidden="true">▾</span>
-        </summary>
-        <div class="overflow-x-auto">
-          <table class="w-full text-caption border-collapse">
-            <thead>
-              <tr class="border-b-2 border-primary/20 bg-muted/40">
-                <th class="px-2 py-2 text-left font-semibold md:px-3 md:py-2.5">항목</th>
-                <th class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">현재 회사</th>
-                <th class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">이직 회사</th>
-                <th class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">차이</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
-                <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">월 실수령</td>
-                <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatWon(calcA.monthlyNet.value) }}</td>
-                <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatWon(calcB.monthlyNet.value) }}</td>
-                <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5" :class="diffClass">{{ formatWon(monthlyNetDiff) }}</td>
-              </tr>
-              <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
-                <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">연 실수령</td>
-                <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatKrwAuto(calcA.annualNet.value) }}</td>
-                <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatKrwAuto(calcB.annualNet.value) }}</td>
-                <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5" :class="diffClass">{{ formatKrwAuto(annualNetDiff) }}</td>
-              </tr>
-              <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
-                <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">총 공제(월)</td>
-                <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatWon(calcA.totalDeduction.value) }}</td>
-                <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatWon(calcB.totalDeduction.value) }}</td>
-                <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5">{{ formatWon(calcB.totalDeduction.value - calcA.totalDeduction.value) }}</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- 요약 행: 연 실수령 + 총 공제 -->
+      <div class="retro-board-list text-caption">
+        <div class="retro-board-item">
+          <span>연 실수령 차이</span>
+          <strong class="tabular-nums" :class="diffClass">{{ formatKrwAuto(annualNetDiff) }}</strong>
         </div>
+        <div class="retro-board-item">
+          <span>총 공제 차이 (월)</span>
+          <strong class="tabular-nums">{{ formatWon(calcB.totalDeduction.value - calcA.totalDeduction.value) }}</strong>
+        </div>
+      </div>
 
-        <details class="retro-details md:hidden mt-2">
-          <summary class="retro-details-summary">
-            <span>회사별 값 보기</span>
-            <span class="retro-details-chevron" aria-hidden="true">▾</span>
-          </summary>
-          <ul class="space-y-2 p-2">
-            <li class="rounded-lg border border-border/60 bg-muted/10 p-2">
-              <p class="text-caption font-semibold text-foreground">월 실수령</p>
-              <div class="mt-1 flex items-center justify-between text-tiny text-muted-foreground">
-                <span>현재 회사</span>
-                <span class="tabular-nums">{{ formatWon(calcA.monthlyNet.value) }}</span>
-              </div>
-              <div class="mt-0.5 flex items-center justify-between text-tiny text-muted-foreground">
-                <span>이직 회사</span>
-                <span class="tabular-nums">{{ formatWon(calcB.monthlyNet.value) }}</span>
-              </div>
-            </li>
-            <li class="rounded-lg border border-border/60 bg-muted/10 p-2">
-              <p class="text-caption font-semibold text-foreground">연 실수령</p>
-              <div class="mt-1 flex items-center justify-between text-tiny text-muted-foreground">
-                <span>현재 회사</span>
-                <span class="tabular-nums">{{ formatKrwAuto(calcA.annualNet.value) }}</span>
-              </div>
-              <div class="mt-0.5 flex items-center justify-between text-tiny text-muted-foreground">
-                <span>이직 회사</span>
-                <span class="tabular-nums">{{ formatKrwAuto(calcB.annualNet.value) }}</span>
-              </div>
-            </li>
-            <li class="rounded-lg border border-border/60 bg-muted/10 p-2">
-              <p class="text-caption font-semibold text-foreground">총 공제(월)</p>
-              <div class="mt-1 flex items-center justify-between text-tiny text-muted-foreground">
-                <span>현재 회사</span>
-                <span class="tabular-nums">{{ formatWon(calcA.totalDeduction.value) }}</span>
-              </div>
-              <div class="mt-0.5 flex items-center justify-between text-tiny text-muted-foreground">
-                <span>이직 회사</span>
-                <span class="tabular-nums">{{ formatWon(calcB.totalDeduction.value) }}</span>
-              </div>
-            </li>
-          </ul>
-        </details>
-      </details>
-
+      <!-- 공제 상세 -->
       <details class="retro-details">
         <summary class="retro-details-summary">
           <span>공제 항목 상세 보기</span>

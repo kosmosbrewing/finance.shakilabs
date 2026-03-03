@@ -12,6 +12,19 @@ const props = defineProps<{
   calc: SalaryCalcResult;
 }>();
 
+// 역산 모드: 건강보험 표시값은 사용자 입력값 그대로 사용 (재계산 오차 1원 제거)
+const displayedHealthInsurance = computed(() =>
+  props.mode === "reverse" ? props.healthInsuranceFee : props.calc.healthInsurance.value
+);
+
+// 4대보험 소계도 displayedHealthInsurance 기준으로 재계산 (헤더 ↔ 행 합계 일치)
+const displayedTotalInsurance = computed(() =>
+  props.calc.nationalPension.value +
+  displayedHealthInsurance.value +
+  props.calc.longTermCare.value +
+  props.calc.employmentInsurance.value
+);
+
 const title = computed(() => {
   if (props.mode === "reverse") {
     return `건보료 ${formatWon(props.healthInsuranceFee)} 기준`;
@@ -128,7 +141,7 @@ onUnmounted(() => {
             />
             <div
               class="bg-chart-health retro-chart-segment"
-              :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.healthInsurance.value / calc.totalDeduction.value) * 100}%` : '0%' }"
+              :style="{ width: calc.totalDeduction.value > 0 ? `${(displayedHealthInsurance / calc.totalDeduction.value) * 100}%` : '0%' }"
               title="건강보험"
             />
             <div
@@ -157,7 +170,7 @@ onUnmounted(() => {
         <!-- 4대보험 그룹 -->
         <div class="retro-board-item bg-muted/30 font-semibold">
           <span>4대보험</span>
-          <strong class="tabular-nums">{{ formatWon(calc.totalInsurance.value) }}</strong>
+          <strong class="tabular-nums">{{ formatWon(displayedTotalInsurance) }}</strong>
         </div>
         <div class="retro-board-item">
           <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-pension" />국민연금</span>
@@ -165,7 +178,7 @@ onUnmounted(() => {
         </div>
         <div class="retro-board-item">
           <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-health" />건강보험</span>
-          <strong class="tabular-nums">{{ formatWon(calc.healthInsurance.value) }}</strong>
+          <strong class="tabular-nums">{{ formatWon(displayedHealthInsurance) }}</strong>
         </div>
         <div class="retro-board-item">
           <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-care" />장기요양</span>

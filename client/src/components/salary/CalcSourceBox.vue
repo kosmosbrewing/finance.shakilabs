@@ -45,7 +45,4 @@ import { TAX_YEAR } from "@/lib/tax-constants";
       </div>
     </div>
   </details>
-  <p class="text-caption text-muted-foreground mt-1">
-    본 계산기는 참고용 추정값이며 법적 효력이 없습니다.
-  </p>
 </template>

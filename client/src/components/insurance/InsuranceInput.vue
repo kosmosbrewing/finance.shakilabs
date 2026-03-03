@@ -30,7 +30,7 @@ function onHealthFeeInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    emit("update:healthInsuranceFee", Math.max(0, Math.min(5_000_000, value)));
+    emit("update:healthInsuranceFee", Math.max(0, Math.min(500_000, value)));
   }
 }
 
@@ -41,7 +41,7 @@ function onGrossInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    emit("update:annualGross", Math.max(10_000_000, Math.min(3_000_000_000, value)));
+    emit("update:annualGross", Math.max(10_000_000, Math.min(200_000_000, value)));
   }
 }
 
@@ -140,7 +140,7 @@ function updateRetirementIncluded(value: boolean): void {
               type="button"
               class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
               aria-label="1만원 증가"
-              @click="emit('update:healthInsuranceFee', Math.min(5_000_000, healthInsuranceFee + 10_000))"
+              @click="emit('update:healthInsuranceFee', Math.min(500_000, healthInsuranceFee + 10_000))"
             >
               +
             </button>

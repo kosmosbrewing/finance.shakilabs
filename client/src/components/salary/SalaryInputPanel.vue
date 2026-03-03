@@ -31,7 +31,7 @@ function onGrossInput(event: Event): void {
   const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
-    emit("update:annualGross", Math.max(10_000_000, Math.min(3_000_000_000, value)));
+    emit("update:annualGross", Math.max(10_000_000, Math.min(200_000_000, value)));
   }
 }
 

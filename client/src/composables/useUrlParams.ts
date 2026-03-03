@@ -23,7 +23,7 @@ export function useUrlParams(calc: SalaryCalcResult): void {
       applyingRoute.value = true;
 
       const gross = parseQueryInt(query.gross);
-      if (gross !== null && gross > 0 && gross <= 10_000_000_000) {
+      if (gross !== null && gross > 0 && gross <= 200_000_000) {
         calc.annualGross.value = gross;
       }
 

@@ -23,11 +23,16 @@ export function useInsuranceReverse(input: InsuranceReverseInput): InsuranceReve
     Math.max(0, Math.floor(input.healthInsuranceFee.value || 0))
   );
 
-  const estimatedTaxableMonthly = computed(() =>
-    Math.floor(
-      normalizedHealthInsuranceFee.value / RATES_2026.healthInsurance.employee
-    )
-  );
+  const estimatedTaxableMonthly = computed(() => {
+    const fee = normalizedHealthInsuranceFee.value;
+    const rate = RATES_2026.healthInsurance.employee;
+    const base = Math.floor(fee / rate);
+    // Math.floor 역산 시 1원 오차 보정: base+1이 동일 건보료를 생성하면 채택
+    if (Math.floor((base + 1) * rate) === fee) {
+      return base + 1;
+    }
+    return base;
+  });
 
   const estimatedMonthlyGross = computed(
     () => estimatedTaxableMonthly.value + Math.max(0, input.nonTaxableMonthly.value || 0)

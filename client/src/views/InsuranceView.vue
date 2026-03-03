@@ -70,7 +70,7 @@ watch(
 watch(
   () => props.initialHealthInsuranceFee,
   (next) => {
-    if (typeof next === "number" && Number.isFinite(next) && next > 0) {
+    if (typeof next === "number" && Number.isFinite(next) && next >= 0) {
       healthInsuranceFee.value = Math.floor(next);
     }
   },
@@ -139,7 +139,7 @@ watch(
     if (grossFromQuery !== null && grossFromQuery > 0) {
       forwardCalc.annualGross.value = Math.max(
         0,
-        Math.min(10_000_000_000, grossFromQuery)
+        Math.min(200_000_000, grossFromQuery)
       );
     }
 
@@ -177,7 +177,7 @@ function buildInsuranceRouteState(): {
 } {
   if (mode.value === "reverse") {
     return {
-      path: `/insurance/${Math.max(1, Math.floor(healthInsuranceFee.value))}`,
+      path: `/insurance/${Math.max(0, Math.floor(healthInsuranceFee.value))}`,
       query: buildQuery({
         dep: dependents.value !== 1 ? dependents.value : null,
         child: childrenUnder20.value !== 0 ? childrenUnder20.value : null,
@@ -376,7 +376,7 @@ watch(
           />
         </div>
 
-        <HealthInsuranceRank v-if="isForwardMode" :calc="forwardCalc" />
+        <HealthInsuranceRank :calc="activeCalc" :mode="isForwardMode ? 'salary' : 'insurance'" />
 
         <AdSlot slot="110001" label="광고 · top" />
 

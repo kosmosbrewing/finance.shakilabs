@@ -25,6 +25,7 @@ import { addEntry } from "@/composables/useRecentCalcs";
 
 import { formatManWonValue, formatPercent, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
+import { parseQueryBoolean, parseQueryInt } from "@/lib/routeState";
 
 const route = useRoute();
 const calc = useSalaryCalc();
@@ -40,6 +41,28 @@ watch(
   amountManWon,
   (next) => {
     calc.annualGross.value = next * 10_000;
+  },
+  { immediate: true }
+);
+
+// 공유 URL 쿼리 파라미터 복원 (dep, nontax, retire)
+// gross는 경로 파라미터(/salary/:amount)를 primary로 유지
+watch(
+  () => route.query,
+  (query) => {
+    const dep = parseQueryInt(query.dep);
+    if (dep !== null) calc.dependents.value = Math.max(1, Math.min(20, dep));
+
+    const child = parseQueryInt(query.child);
+    if (child !== null) {
+      const maxChildren = Math.max(0, calc.dependents.value - 1);
+      calc.childrenUnder20.value = Math.max(0, Math.min(maxChildren, child));
+    }
+
+    const nontax = parseQueryInt(query.nontax);
+    if (nontax !== null) calc.nonTaxableMonthly.value = Math.max(0, Math.min(5_000_000, nontax));
+
+    calc.retirementIncluded.value = parseQueryBoolean(query.retire, false);
   },
   { immediate: true }
 );

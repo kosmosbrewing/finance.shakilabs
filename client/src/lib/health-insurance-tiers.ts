@@ -1,6 +1,7 @@
-// 직장가입자 건강보험료 기준 소득 백분위 (2024 건강보험 통계연보 기반)
-// 건보료 = 보수월액 × 3.595% (근로자 부담분)
-// 실제 수치는 건강보험 통계연보에서 확인 후 조정 필요 — 아래는 공개 분포 기반 추정값
+// 직장가입자 건강보험료 기준 소득 백분위
+// - 소득 분위 기준(연봉 구간): 2024 건강보험 통계연보 기반 추정 (2026 통계연보 미발행)
+// - 건보료(monthlyPremium): 2026년 확정 요율 3.595% (근로자 부담분) 적용
+//   계산식: Math.floor(annualSalary / 12 * 0.03595)
 export const HEALTH_INSURANCE_TIERS = [
   { percentile: 1, annualSalary: 200_000_000, monthlyPremium: 599_166 },
   { percentile: 5, annualSalary: 100_000_000, monthlyPremium: 299_583 },
