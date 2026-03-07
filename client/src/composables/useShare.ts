@@ -18,24 +18,40 @@ declare global {
 
 let kakaoSdkPromise: Promise<void> | null = null;
 
-export function useShare(calc: SalaryCalcResult) {
+type UseShareOptions = {
+  getCalc?: () => SalaryCalcResult;
+  getShareUrl?: (calc: SalaryCalcResult) => string;
+  getShareText?: (calc: SalaryCalcResult) => string;
+  getShareSummary?: (calc: SalaryCalcResult) => string;
+  getDescription?: (calc: SalaryCalcResult) => string;
+  getImageUrl?: (calc: SalaryCalcResult) => string;
+  getButtonTitle?: (calc: SalaryCalcResult) => string;
+};
+
+export function useShare(calc: SalaryCalcResult, options: UseShareOptions = {}) {
   const showShareModal = ref(false);
   const kakaoBusy = ref(false);
+  const resolveCalc = (): SalaryCalcResult => options.getCalc?.() ?? calc;
   const shareSummary = computed(() => {
+    const currentCalc = resolveCalc();
+    if (options.getShareSummary) {
+      return options.getShareSummary(currentCalc);
+    }
+
     const parts = [
-      `연봉 ${formatManWon(calc.annualGross.value)}`,
-      `부양가족 ${calc.dependents.value}명`,
-      `자녀 ${calc.childrenUnder20.value}명`,
+      `연봉 ${formatManWon(currentCalc.annualGross.value)}`,
+      `부양가족 ${currentCalc.dependents.value}명`,
+      `자녀 ${currentCalc.childrenUnder20.value}명`,
     ];
 
-    if (calc.nonTaxableMonthly.value > 0) {
-      parts.push(`비과세 월 ${formatWon(calc.nonTaxableMonthly.value)}`);
+    if (currentCalc.nonTaxableMonthly.value > 0) {
+      parts.push(`비과세 월 ${formatWon(currentCalc.nonTaxableMonthly.value)}`);
     }
-    if (calc.retirementIncluded.value) {
+    if (currentCalc.retirementIncluded.value) {
       parts.push("퇴직금 포함");
     }
 
-    parts.push(`월 실수령 ${formatWon(calc.monthlyNet.value)}`);
+    parts.push(`월 실수령 ${formatWon(currentCalc.monthlyNet.value)}`);
     return parts.join(" · ");
   });
 
@@ -48,22 +64,47 @@ export function useShare(calc: SalaryCalcResult) {
   }
 
   function getShareUrl(): string {
+    const currentCalc = resolveCalc();
+    if (options.getShareUrl) {
+      return options.getShareUrl(currentCalc);
+    }
+
     const path = window.location.pathname || "/";
     return buildAbsoluteUrl(path, {
-      gross: calc.annualGross.value,
-      dep: calc.dependents.value !== 1 ? calc.dependents.value : null,
-      child: calc.childrenUnder20.value !== 0 ? calc.childrenUnder20.value : null,
+      gross: currentCalc.annualGross.value,
+      dep: currentCalc.dependents.value !== 1 ? currentCalc.dependents.value : null,
+      child: currentCalc.childrenUnder20.value !== 0 ? currentCalc.childrenUnder20.value : null,
       nontax:
-        calc.nonTaxableMonthly.value !== 200_000
-          ? calc.nonTaxableMonthly.value
+        currentCalc.nonTaxableMonthly.value !== 200_000
+          ? currentCalc.nonTaxableMonthly.value
           : null,
-      retire: calc.retirementIncluded.value ? 1 : null,
+      retire: currentCalc.retirementIncluded.value ? 1 : null,
     });
   }
 
   function getShareText(): string {
-    const retireLabel = calc.retirementIncluded.value ? "· 퇴직금 포함" : "";
-    return `연봉 ${formatManWon(calc.annualGross.value)} 실수령액: 월 ${formatWon(calc.monthlyNet.value)} ${retireLabel} (2026년 기준)`;
+    const currentCalc = resolveCalc();
+    if (options.getShareText) {
+      return options.getShareText(currentCalc);
+    }
+
+    const retireLabel = currentCalc.retirementIncluded.value ? "· 퇴직금 포함" : "";
+    return `연봉 ${formatManWon(currentCalc.annualGross.value)} 실수령액: 월 ${formatWon(currentCalc.monthlyNet.value)} ${retireLabel} (2026년 기준)`;
+  }
+
+  function getShareDescription(): string {
+    const currentCalc = resolveCalc();
+    return options.getDescription?.(currentCalc) ?? "2026년 최신 세율 기준 연봉 실수령액 계산기";
+  }
+
+  function getShareImageUrl(): string {
+    const currentCalc = resolveCalc();
+    return options.getImageUrl?.(currentCalc) ?? `${window.location.origin}/favicon.png`;
+  }
+
+  function getShareButtonTitle(): string {
+    const currentCalc = resolveCalc();
+    return options.getButtonTitle?.(currentCalc) ?? "내 연봉 계산하기";
   }
 
   async function copyLink(): Promise<void> {
@@ -140,8 +181,8 @@ export function useShare(calc: SalaryCalcResult) {
         objectType: "feed",
         content: {
           title: getShareText(),
-          description: "2026년 최신 세율 기준 연봉 실수령액 계산기",
-          imageUrl: `${window.location.origin}/favicon.png`,
+          description: getShareDescription(),
+          imageUrl: getShareImageUrl(),
           link: {
             mobileWebUrl: getShareUrl(),
             webUrl: getShareUrl(),
@@ -149,7 +190,7 @@ export function useShare(calc: SalaryCalcResult) {
         },
         buttons: [
           {
-            title: "내 연봉 계산하기",
+            title: getShareButtonTitle(),
             link: {
               mobileWebUrl: getShareUrl(),
               webUrl: getShareUrl(),

@@ -25,12 +25,10 @@ import { DEFAULT_INSURANCE_PRESET } from "@/data/insurancePresets";
 
 import { formatManWon, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
-import { showAlert } from "@/composables/useAlert";
 import { addEntry } from "@/composables/useRecentCalcs";
 import {
   buildAbsoluteUrl,
   buildQuery,
-  copyToClipboard,
   isSameQuery,
   parseQueryBoolean,
   parseQueryInt,
@@ -99,7 +97,57 @@ const {
   closeShare,
   shareKakao,
   copyLink,
-} = useShare(forwardCalc);
+} = useShare(forwardCalc, {
+  getCalc: () => activeCalc.value,
+  getShareUrl: () => getShareUrl(),
+  getShareText: (calc) => {
+    if (isForwardMode.value) {
+      const retireLabel = calc.retirementIncluded.value ? "· 퇴직금 포함" : "";
+      return `연봉 ${formatManWon(calc.annualGross.value)} 실수령액: 월 ${formatWon(calc.monthlyNet.value)} ${retireLabel} (2026년 기준)`;
+    }
+
+    return `건보료 ${formatWon(healthInsuranceFee.value)} 기준 추정 연봉: ${formatManWon(reverse.estimatedAnnualGross.value)} · 월 실수령 ${formatWon(reverse.calc.monthlyNet.value)} (2026년 기준)`;
+  },
+  getShareSummary: (calc) => {
+    if (isForwardMode.value) {
+      const parts = [
+        `연봉 ${formatManWon(calc.annualGross.value)}`,
+        `부양가족 ${calc.dependents.value}명`,
+        `자녀 ${calc.childrenUnder20.value}명`,
+      ];
+
+      if (calc.nonTaxableMonthly.value > 0) {
+        parts.push(`비과세 월 ${formatWon(calc.nonTaxableMonthly.value)}`);
+      }
+      if (calc.retirementIncluded.value) {
+        parts.push("퇴직금 포함");
+      }
+
+      parts.push(`월 실수령 ${formatWon(calc.monthlyNet.value)}`);
+      return parts.join(" · ");
+    }
+
+    const parts = [
+      `건보료 ${formatWon(healthInsuranceFee.value)}`,
+      `추정 연봉 ${formatManWon(reverse.estimatedAnnualGross.value)}`,
+      `부양가족 ${dependents.value}명`,
+      `자녀 ${childrenUnder20.value}명`,
+    ];
+
+    if (nonTaxableMonthly.value > 0) {
+      parts.push(`비과세 월 ${formatWon(nonTaxableMonthly.value)}`);
+    }
+
+    parts.push(`월 실수령 ${formatWon(reverse.calc.monthlyNet.value)}`);
+    return parts.join(" · ");
+  },
+  getDescription: () =>
+    isForwardMode.value
+      ? "2026년 최신 세율 기준 연봉 실수령액 계산기"
+      : "2026년 최신 요율 기준 건강보험료로 추정 연봉과 월 실수령액을 계산합니다",
+  getButtonTitle: () =>
+    isForwardMode.value ? "내 연봉 계산하기" : "내 건보료로 계산하기",
+});
 
 watch(
   [dependents, childrenUnder20, nonTaxableMonthly],
@@ -278,41 +326,8 @@ function getShareUrl(): string {
   return buildAbsoluteUrl(nextRoute.path, nextRoute.query);
 }
 
-async function copyInsuranceLink(): Promise<void> {
-  try {
-    const link = getShareUrl();
-    const copied = await copyToClipboard(link);
-    if (!copied) {
-      throw new Error("clipboard unavailable");
-    }
-    showAlert("링크를 복사했습니다");
-  } catch {
-    showAlert("링크 복사에 실패했습니다", { type: "error" });
-  }
-}
-
-async function shareInsurance(): Promise<void> {
-  if (typeof navigator.share === "function") {
-    try {
-      await navigator.share({
-        title: seoTitle.value,
-        text: seoDescription.value,
-        url: getShareUrl(),
-      });
-      return;
-    } catch {
-      // 사용자가 공유를 취소한 경우
-    }
-  }
-  await copyInsuranceLink();
-}
-
 function handleSidebarShare(): void {
-  if (isForwardMode.value) {
-    openShare();
-    return;
-  }
-  void shareInsurance();
+  openShare();
 }
 
 // 최근 계산 자동 저장 (2초 디바운스)
