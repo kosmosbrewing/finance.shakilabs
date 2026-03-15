@@ -187,9 +187,13 @@ onUnmounted(() => {
         </div>
         <Transition name="fade">
           <p v-if="showDiffWarning" class="text-status-warning text-caption">
-            비과세 조건, 8~20세 자녀 세액공제, 학자금대출 공제로 인해 차이가 있을 수 있습니다.
+            비과세 조건, 8~20세 자녀 세액공제, 학자금대출 공제로 인해 차이가 커질 수 있습니다.
           </p>
         </Transition>
+        <p class="text-caption text-muted-foreground">
+          이 결과는 급여명세서의 월 소득세만으로 역산한 추정치입니다. 상여, 중도입사·퇴사,
+          추가 세액공제 반영 여부에 따라 실제 연봉과 달라질 수 있습니다.
+        </p>
       </div>
     </div>
   </section>

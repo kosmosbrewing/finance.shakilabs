@@ -83,6 +83,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: "2026 종합소득세 계산 결과 | 프리랜서 세금 계산기" },
   },
   {
+    path: "/freelance-rate",
+    name: "FreelanceRate",
+    component: () => import("@/views/FreelanceRateView.vue"),
+    meta: { title: "프리랜서 세후 단가 역산 계산기 | 2026 finance.shakilabs" },
+  },
+  {
     path: "/freelance/:amount(\\d+)",
     redirect: (to) => ({
       path: "/comprehensive-tax",
@@ -104,6 +110,24 @@ const routes: RouteRecordRaw[] = [
     name: "Compare",
     component: () => import("@/views/CompareView.vue"),
     meta: { title: "2026 이직 연봉 비교 계산기 | 실수령액 차이 비교" },
+  },
+  {
+    path: "/raise",
+    name: "Raise",
+    component: () => import("@/views/RaiseView.vue"),
+    meta: { title: "연봉 협상 인상률 실수령 계산기 | 2026 finance.shakilabs" },
+  },
+  {
+    path: "/bonus",
+    name: "Bonus",
+    component: () => import("@/views/BonusView.vue"),
+    meta: { title: "성과급 실수령 계산기 | 2026 finance.shakilabs" },
+  },
+  {
+    path: "/overtime",
+    name: "Overtime",
+    component: () => import("@/views/OvertimeView.vue"),
+    meta: { title: "연장·야간·휴일수당 계산기 | 2026 finance.shakilabs" },
   },
   {
     path: "/compare/:a(\\d+)-vs-:b(\\d+)",
@@ -179,7 +203,7 @@ router.beforeEach((to, _from, next) => {
   const title =
     typeof to.meta.title === "string"
       ? to.meta.title
-      : "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세";
+      : "2026 finance.shakilabs | 연봉·세금·수당 계산기";
   document.title = title;
   next();
 });

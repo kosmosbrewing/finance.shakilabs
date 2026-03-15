@@ -1,7 +1,17 @@
 import { ref, readonly, type DeepReadonly, type Ref } from "vue";
 
 export type RecentCalcEntry = {
-  type: "salary" | "insurance" | "comprehensive-tax" | "compare" | "quit" | "withholding";
+  type:
+    | "salary"
+    | "insurance"
+    | "comprehensive-tax"
+    | "compare"
+    | "quit"
+    | "withholding"
+    | "freelance-rate"
+    | "raise"
+    | "bonus"
+    | "overtime";
   timestamp: number;
   label: string;
   path: string;

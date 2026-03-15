@@ -5,6 +5,9 @@ import tailwind from "tailwindcss";
 import autoprefixer from "autoprefixer";
 
 export default defineConfig({
+  test: {
+    include: ["src/**/*.test.ts"],
+  },
   base: "/",
   css: {
     postcss: {

@@ -12,6 +12,24 @@ export const salaryTickerMessages = [
   "비과세 식대 20만원 설정 여부를 꼭 확인하세요.",
 ] as const;
 
+export const raiseTickerMessages = [
+  "연봉 10% 인상이어도 실수령 증가는 그보다 작을 수 있어요.",
+  "협상안은 세전보다 월 실수령 증가액으로 비교해보세요.",
+  "부양가족 수와 비과세 금액이 체감 인상폭을 바꿉니다.",
+] as const;
+
+export const bonusTickerMessages = [
+  "성과급은 세전 금액보다 실제 입금액 차이가 큽니다.",
+  "보너스는 연봉 총액에 합산해 보면 세후 체감이 더 정확해요.",
+  "성과급 수령률은 연봉 구간에 따라 달라집니다.",
+] as const;
+
+export const overtimeTickerMessages = [
+  "추가 수당은 통상시급 기준으로 계산해야 정확합니다.",
+  "야간 가산과 휴일 수당을 분리해서 보면 누락이 줄어듭니다.",
+  "추가 수당도 결국 4대보험과 세금 영향을 함께 받습니다.",
+] as const;
+
 export const compareTickerMessages = [
   "연봉 500 올려도 실수령 증가는 예상보다 작을 수 있어요.",
   "이직 비교는 세전보다 실수령 기준으로 보는 게 정확합니다.",
@@ -38,4 +56,10 @@ export const comprehensiveTaxTickerMessages = [
   "소득공제 항목을 잘 챙기면 세금이 크게 줄어요.",
   "프리랜서·사업자라면 필요경비 공제가 핵심입니다.",
   "분리과세와 종합과세 중 유리한 방식을 비교해보세요.",
+] as const;
+
+export const freelanceRateTickerMessages = [
+  "목표 실수령을 먼저 정하면 프리랜서 단가가 더 선명해집니다.",
+  "3.3% 원천징수와 실제 종합소득세는 최종 금액이 다를 수 있어요.",
+  "일 단가와 시간당 단가를 같이 보면 견적 방어가 쉬워집니다.",
 ] as const;

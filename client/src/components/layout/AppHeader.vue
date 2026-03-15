@@ -6,10 +6,14 @@ import TickerBar from "@/components/common/TickerBar.vue";
 import {
   insuranceTickerMessages,
   salaryTickerMessages,
+  raiseTickerMessages,
+  bonusTickerMessages,
+  overtimeTickerMessages,
   compareTickerMessages,
   quitTickerMessages,
   withholdingTickerMessages,
   comprehensiveTaxTickerMessages,
+  freelanceRateTickerMessages,
 } from "@/data/tickerMessages";
 
 const THEME_STORAGE_KEY = "salary-calc:theme:v1";
@@ -21,9 +25,13 @@ const theme = ref<ThemeMode>("light");
 const tickerMessages = computed(() => {
   if (route.path.startsWith("/insurance")) return insuranceTickerMessages;
   if (route.path.startsWith("/salary")) return salaryTickerMessages;
+  if (route.path.startsWith("/raise")) return raiseTickerMessages;
+  if (route.path.startsWith("/bonus")) return bonusTickerMessages;
+  if (route.path.startsWith("/overtime")) return overtimeTickerMessages;
   if (route.path.startsWith("/compare")) return compareTickerMessages;
   if (route.path.startsWith("/quit")) return quitTickerMessages;
   if (route.path.startsWith("/withholding")) return withholdingTickerMessages;
+  if (route.path.startsWith("/freelance-rate")) return freelanceRateTickerMessages;
   if (route.path.startsWith("/comprehensive-tax")) return comprehensiveTaxTickerMessages;
   return salaryTickerMessages;
 });

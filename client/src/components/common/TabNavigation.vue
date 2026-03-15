@@ -7,10 +7,14 @@ const route = useRoute();
 const tabs = [
   { key: "insurance", label: "건보료 계산", to: "/insurance" },
   { key: "salary", label: "연봉 계산", to: "/salary" },
+  { key: "raise", label: "연봉 인상률", to: "/raise" },
+  { key: "bonus", label: "성과급", to: "/bonus" },
+  { key: "overtime", label: "추가 수당", to: "/overtime" },
   { key: "compare", label: "이직 비교", to: "/compare" },
   { key: "quit", label: "퇴사 계산", to: "/quit" },
   { key: "withholding", label: "원천세 계산", to: "/withholding" },
   { key: "comprehensive-tax", label: "종합소득세 계산", to: "/comprehensive-tax" },
+  { key: "freelance-rate", label: "프리랜서 단가", to: "/freelance-rate" },
 ] as const;
 
 const activePath = computed(() => route.path);
@@ -18,9 +22,13 @@ const activePath = computed(() => route.path);
 function isActiveTab(key: (typeof tabs)[number]["key"]): boolean {
   if (key === "insurance") return activePath.value.startsWith("/insurance");
   if (key === "salary") return activePath.value.startsWith("/salary");
+  if (key === "raise") return activePath.value.startsWith("/raise");
+  if (key === "bonus") return activePath.value.startsWith("/bonus");
+  if (key === "overtime") return activePath.value.startsWith("/overtime");
   if (key === "compare") return activePath.value.startsWith("/compare");
   if (key === "quit") return activePath.value.startsWith("/quit");
   if (key === "withholding") return activePath.value.startsWith("/withholding");
+  if (key === "freelance-rate") return activePath.value.startsWith("/freelance-rate");
   return activePath.value.startsWith("/comprehensive-tax");
 }
 </script>
