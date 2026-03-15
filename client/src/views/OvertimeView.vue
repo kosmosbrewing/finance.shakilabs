@@ -177,8 +177,8 @@ watch(
                   </div>
                 </div>
                 <p class="text-caption leading-6 text-muted-foreground">
-                  기본 월 실수령 {{ formatWon(result.before.monthlyNet) }}에서
-                  <span class="font-semibold text-foreground">{{ formatWon(result.after.monthlyNet) }}</span>
+                  기본 월 실수령 <span class="tabular-nums">{{ formatWon(result.before.monthlyNet) }}</span>에서
+                  <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.after.monthlyNet) }}</span>
                   으로 올라갑니다.
                 </p>
                 <Button class="w-full" @click="openShare">결과 공유</Button>

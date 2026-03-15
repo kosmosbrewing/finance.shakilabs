@@ -150,8 +150,8 @@ watch(
               <div class="retro-panel-muted retro-panel-content space-y-3">
                 <p class="text-body font-semibold text-foreground">핵심 해석</p>
                 <p class="text-caption leading-6 text-muted-foreground">
-                  세전으로는 {{ formatWon(result.raiseAmount) }} 인상이지만, 월 실수령 증가는
-                  <span class="font-semibold text-foreground">{{ formatWon(result.monthlyNetDiff) }}</span>
+                  세전으로는 <span class="tabular-nums">{{ formatWon(result.raiseAmount) }}</span> 인상이지만, 월 실수령 증가는
+                  <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.monthlyNetDiff) }}</span>
                   입니다.
                 </p>
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">

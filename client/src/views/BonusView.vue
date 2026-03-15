@@ -149,8 +149,8 @@ watch(
               <div class="retro-panel-muted retro-panel-content space-y-3">
                 <p class="text-body font-semibold text-foreground">핵심 해석</p>
                 <p class="text-caption leading-6 text-muted-foreground">
-                  보너스 {{ formatWon(input.bonusAmount) }} 중 실제 손에 남는 금액은
-                  <span class="font-semibold text-foreground">{{ formatWon(result.netBonus) }}</span>
+                  보너스 <span class="tabular-nums">{{ formatWon(input.bonusAmount) }}</span> 중 실제 손에 남는 금액은
+                  <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.netBonus) }}</span>
                   입니다.
                 </p>
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">

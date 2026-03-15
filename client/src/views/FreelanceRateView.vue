@@ -180,8 +180,8 @@ const incomeTypeOptions = [
                   </div>
                 </div>
                 <p class="text-caption leading-6 text-muted-foreground">
-                  목표 세후 {{ formatWon(input.targetMonthlyNet) }}를 위해 연간 청구액은
-                  <span class="font-semibold text-foreground">{{ formatWon(result.annualGross) }}</span> 수준이 필요합니다.
+                  목표 세후 <span class="tabular-nums">{{ formatWon(input.targetMonthlyNet) }}</span>를 위해 연간 청구액은
+                  <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.annualGross) }}</span> 수준이 필요합니다.
                 </p>
                 <Button class="w-full" @click="openShare">결과 공유</Button>
               </div>
