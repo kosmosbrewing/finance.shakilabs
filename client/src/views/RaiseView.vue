@@ -154,7 +154,7 @@ watch(
                   <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.monthlyNetDiff) }}</span>
                   입니다.
                 </p>
-                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">추가 보험료</p>
                     <p class="mt-1 text-body font-semibold tabular-nums">+{{ formatWon(result.insuranceDelta) }}/월</p>

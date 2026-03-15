@@ -107,7 +107,7 @@
   }
 
   .retro-panel-muted {
-    @apply rounded-2xl border border-border bg-muted/30 shadow-sm;
+    @apply rounded-2xl border border-border bg-muted/30 shadow-sm overflow-hidden;
   }
 
   .retro-titlebar {

@@ -162,7 +162,7 @@ watch(
               </div>
 
               <div class="retro-panel-muted retro-panel-content space-y-3">
-                <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">연장</p>
                     <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.overtimePay) }}</p>

@@ -169,7 +169,7 @@ const incomeTypeOptions = [
               </div>
 
               <div class="retro-panel-muted retro-panel-content space-y-3">
-                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">원천징수 후 현금흐름</p>
                     <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.cashAfterWithholdingMonthly) }}/월</p>
