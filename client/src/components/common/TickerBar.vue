@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -15,7 +15,6 @@ const currentIndex = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
 let mediaQuery: MediaQueryList | null = null;
 const prefersReducedMotion = ref(false);
-let motionChangeHandler: ((event: MediaQueryListEvent) => void) | null = null;
 
 const safeMessages = computed(() =>
   props.messages.length > 0
@@ -52,36 +51,56 @@ function handleVisibilityChange(): void {
   startTimer();
 }
 
+function handleMotionPreferenceChange(event: MediaQueryListEvent): void {
+  prefersReducedMotion.value = event.matches;
+  if (event.matches) {
+    stopTimer();
+    return;
+  }
+  startTimer();
+}
+
+function addMotionListener(): void {
+  if (!mediaQuery) return;
+  if (typeof mediaQuery.addEventListener === "function") {
+    mediaQuery.addEventListener("change", handleMotionPreferenceChange);
+    return;
+  }
+  mediaQuery.addListener(handleMotionPreferenceChange);
+}
+
+function removeMotionListener(): void {
+  if (!mediaQuery) return;
+  if (typeof mediaQuery.removeEventListener === "function") {
+    mediaQuery.removeEventListener("change", handleMotionPreferenceChange);
+    return;
+  }
+  mediaQuery.removeListener(handleMotionPreferenceChange);
+}
+
+watch(
+  () => [props.intervalMs, safeMessages.value.length] as const,
+  () => {
+    currentIndex.value = currentIndex.value % safeMessages.value.length;
+    stopTimer();
+    startTimer();
+  }
+);
+
 onMounted(() => {
+  if (typeof window === "undefined") return;
   mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   prefersReducedMotion.value = mediaQuery.matches;
-  motionChangeHandler = (event: MediaQueryListEvent) => {
-    prefersReducedMotion.value = event.matches;
-    if (event.matches) {
-      stopTimer();
-      return;
-    }
-    startTimer();
-  };
-  if (typeof mediaQuery.addEventListener === "function") {
-    mediaQuery.addEventListener("change", motionChangeHandler);
-  } else {
-    mediaQuery.addListener(motionChangeHandler);
-  }
+  addMotionListener();
   document.addEventListener("visibilitychange", handleVisibilityChange);
   startTimer();
 });
 
 onUnmounted(() => {
   stopTimer();
-  if (mediaQuery && motionChangeHandler) {
-    if (typeof mediaQuery.removeEventListener === "function") {
-      mediaQuery.removeEventListener("change", motionChangeHandler);
-    } else {
-      mediaQuery.removeListener(motionChangeHandler);
-    }
-  }
+  removeMotionListener();
   document.removeEventListener("visibilitychange", handleVisibilityChange);
+  mediaQuery = null;
 });
 </script>
 

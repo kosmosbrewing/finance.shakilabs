@@ -33,9 +33,9 @@ export function getCanonicalHost(): string {
 }
 
 export function getKakaoAllowedHosts(): string[] {
-  const configured = (import.meta.env.VITE_KAKAO_ALLOWED_HOSTS || "")
+  const configured = ((import.meta.env.VITE_KAKAO_ALLOWED_HOSTS as string | undefined) || "")
     .split(",")
-    .map((value) => value.trim().toLowerCase())
+    .map((value: string) => value.trim().toLowerCase())
     .filter(Boolean);
 
   return Array.from(new Set(configured.length ? configured : [getCanonicalHost()]));

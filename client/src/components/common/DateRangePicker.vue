@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
 
 type ActiveField = "start" | "end";
 
@@ -270,9 +270,17 @@ function onKeydown(event: KeyboardEvent): void {
   }
 }
 
-onMounted(() => {
-  window.addEventListener("keydown", onKeydown);
-});
+watch(
+  () => isPanelOpen.value || isCalendarOpen.value,
+  (isOpen, wasOpen) => {
+    if (typeof window === "undefined" || isOpen === wasOpen) return;
+    if (isOpen) {
+      window.addEventListener("keydown", onKeydown);
+      return;
+    }
+    window.removeEventListener("keydown", onKeydown);
+  }
+);
 
 onUnmounted(() => {
   window.removeEventListener("keydown", onKeydown);

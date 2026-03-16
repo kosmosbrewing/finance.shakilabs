@@ -68,7 +68,6 @@ export const WITHHOLDING_AMOUNTS = [
 ];
 
 export const SEO_ROUTES = [
-  "/",
   "/insurance",
   "/salary",
   "/raise",
