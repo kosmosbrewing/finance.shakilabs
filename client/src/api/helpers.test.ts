@@ -32,7 +32,7 @@ describe("api helpers", () => {
     } satisfies Partial<ApiRequestError>);
   });
 
-  it("서버 에러는 응답 메시지를 우선 사용한다", async () => {
+  it("4xx 에러는 client 종류와 응답 메시지를 사용한다", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ error: "입력값이 올바르지 않아요." }), {
         status: 400,
@@ -41,13 +41,13 @@ describe("api helpers", () => {
     ) as typeof fetch;
 
     await expect(apiFetch("/salary")).rejects.toMatchObject({
-      kind: "server",
+      kind: "client",
       status: 400,
       message: "입력값이 올바르지 않아요.",
     } satisfies Partial<ApiRequestError>);
   });
 
-  it("서버 메시지가 없으면 상태 코드별 기본 문구를 사용한다", async () => {
+  it("5xx 에러는 server 종류와 상태별 기본 문구를 사용한다", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(
       new Response("upstream failed", { status: 503 })
     ) as typeof fetch;
@@ -56,6 +56,18 @@ describe("api helpers", () => {
       kind: "server",
       status: 503,
       message: "서버 응답이 불안정해요. 잠시 후 다시 시도해 주세요.",
+    } satisfies Partial<ApiRequestError>);
+  });
+
+  it("429 에러는 재시도 안내 문구를 반환한다", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response("rate limited", { status: 429 })
+    ) as typeof fetch;
+
+    await expect(apiFetch("/salary")).rejects.toMatchObject({
+      kind: "client",
+      status: 429,
+      message: "요청이 많아요. 잠시 후 다시 시도해 주세요.",
     } satisfies Partial<ApiRequestError>);
   });
 });

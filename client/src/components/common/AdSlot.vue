@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-const props = defineProps<{
+defineProps<{
   slot: string;
   label?: string;
 }>();

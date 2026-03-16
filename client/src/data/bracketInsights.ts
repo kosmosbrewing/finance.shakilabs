@@ -14,7 +14,7 @@ function findBracketIndex(taxableBase: number): number {
 }
 
 export function getBracketInsights(
-  annualGross: number,
+  _annualGross: number,
   calc: SalaryCalcResult
 ): BracketInsight[] {
   const insights: BracketInsight[] = [];

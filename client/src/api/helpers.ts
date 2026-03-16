@@ -5,7 +5,7 @@ const API_BASE = (
   "/api/salary-calc"
 ).replace(/\/+$/, "");
 
-type ApiErrorKind = "network" | "server";
+type ApiErrorKind = "network" | "client" | "server";
 
 interface ApiErrorOptions {
   kind: ApiErrorKind;
@@ -62,6 +62,10 @@ function getServerErrorMessage(status: number, fallback: string | null): string 
   return "요청을 처리하지 못했어요. 입력값을 다시 확인해 주세요.";
 }
 
+function getErrorKind(status: number): ApiErrorKind {
+  return status >= 500 ? "server" : "client";
+}
+
 export async function apiFetch<T>(
   path: string,
   init?: RequestInit
@@ -87,7 +91,7 @@ export async function apiFetch<T>(
 
   if (!response.ok) {
     throw new ApiRequestError({
-      kind: "server",
+      kind: getErrorKind(response.status),
       status: response.status,
       message: getServerErrorMessage(response.status, await readErrorMessage(response)),
     });
