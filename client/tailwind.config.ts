@@ -23,6 +23,7 @@ const config: Config = {
           ...fontFamily.sans,
         ],
         title: [
+          "GmarketSans",
           "Pretendard",
           "Apple SD Gothic Neo",
           "Malgun Gothic",

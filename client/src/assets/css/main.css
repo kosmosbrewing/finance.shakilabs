@@ -338,7 +338,7 @@
   }
 
   .retro-stat-label {
-    @apply truncate text-caption uppercase tracking-wide text-muted-foreground;
+    @apply whitespace-nowrap truncate text-caption uppercase tracking-wide text-muted-foreground;
   }
 
   .retro-stat-value {
