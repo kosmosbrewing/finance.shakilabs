@@ -2,7 +2,7 @@
 
 const API_BASE = (
   (import.meta.env.VITE_API_BASE as string | undefined)?.trim() ||
-  "/api/salary-calc"
+  "/api/finance"
 ).replace(/\/+$/, "");
 
 type ApiErrorKind = "network" | "client" | "server";

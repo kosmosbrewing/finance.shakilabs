@@ -26,7 +26,7 @@ export default defineConfig({
   server: {
     port: 6202,
     proxy: {
-      "/api/salary-calc": {
+      "/api/finance": {
         target: "http://localhost:6002",
         changeOrigin: true,
       },

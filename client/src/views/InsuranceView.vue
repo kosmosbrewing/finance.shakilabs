@@ -17,6 +17,7 @@ import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import RelatedServices from "@/components/common/RelatedServices.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import { useInsuranceReverse } from "@/composables/useInsuranceReverse";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
@@ -411,6 +412,7 @@ watch(
 
         <CalcSourceBox />
         <InternalLink :current="internalLinkCurrent" />
+        <RelatedServices />
 
         <AdSlot slot="110003" label="광고 · bottom" />
       </div>

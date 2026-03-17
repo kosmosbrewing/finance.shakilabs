@@ -4,11 +4,16 @@ import { Moon, Sun } from "lucide-vue-next";
 import { RouterLink, useRoute } from "vue-router";
 import TickerBar from "@/components/common/TickerBar.vue";
 import {
+  annualLeaveTickerMessages,
   insuranceTickerMessages,
   salaryTickerMessages,
   raiseTickerMessages,
   bonusTickerMessages,
   overtimeTickerMessages,
+  pensionTickerMessages,
+  monthlyRentTickerMessages,
+  irpTickerMessages,
+  employerInsuranceTickerMessages,
   compareTickerMessages,
   quitTickerMessages,
   withholdingTickerMessages,
@@ -27,7 +32,12 @@ const tickerMessages = computed(() => {
   if (route.path.startsWith("/salary")) return salaryTickerMessages;
   if (route.path.startsWith("/raise")) return raiseTickerMessages;
   if (route.path.startsWith("/bonus")) return bonusTickerMessages;
+  if (route.path.startsWith("/annual-leave")) return annualLeaveTickerMessages;
   if (route.path.startsWith("/overtime")) return overtimeTickerMessages;
+  if (route.path.startsWith("/pension")) return pensionTickerMessages;
+  if (route.path.startsWith("/monthly-rent-deduction")) return monthlyRentTickerMessages;
+  if (route.path.startsWith("/irp")) return irpTickerMessages;
+  if (route.path.startsWith("/4-insurance-employer")) return employerInsuranceTickerMessages;
   if (route.path.startsWith("/compare")) return compareTickerMessages;
   if (route.path.startsWith("/quit")) return quitTickerMessages;
   if (route.path.startsWith("/withholding")) return withholdingTickerMessages;

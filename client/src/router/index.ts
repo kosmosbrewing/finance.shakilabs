@@ -124,10 +124,40 @@ const routes: RouteRecordRaw[] = [
     meta: { title: "성과급 실수령 계산기 | 2026 finance.shakilabs" },
   },
   {
+    path: "/annual-leave",
+    name: "AnnualLeave",
+    component: () => import("@/views/AnnualLeaveView.vue"),
+    meta: { title: "연차 수당 계산기 | 2026 finance.shakilabs" },
+  },
+  {
     path: "/overtime",
     name: "Overtime",
     component: () => import("@/views/OvertimeView.vue"),
     meta: { title: "연장·야간·휴일수당 계산기 | 2026 finance.shakilabs" },
+  },
+  {
+    path: "/pension",
+    name: "Pension",
+    component: () => import("@/views/PensionView.vue"),
+    meta: { title: "국민연금 예상 수령액 계산기 | 2026 finance.shakilabs" },
+  },
+  {
+    path: "/monthly-rent-deduction",
+    name: "MonthlyRentDeduction",
+    component: () => import("@/views/MonthlyRentDeductionView.vue"),
+    meta: { title: "월세 세액공제 계산기 | 2026 finance.shakilabs" },
+  },
+  {
+    path: "/irp",
+    name: "Irp",
+    component: () => import("@/views/IrpView.vue"),
+    meta: { title: "IRP 세액공제 계산기 | 2026 finance.shakilabs" },
+  },
+  {
+    path: "/4-insurance-employer",
+    name: "InsuranceEmployer",
+    component: () => import("@/views/InsuranceEmployerView.vue"),
+    meta: { title: "사업주 4대보험 부담금 계산기 | 2026 finance.shakilabs" },
   },
   {
     path: "/compare/:a(\\d+)-vs-:b(\\d+)",

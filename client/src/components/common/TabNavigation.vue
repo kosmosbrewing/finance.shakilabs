@@ -9,7 +9,12 @@ const tabs = [
   { key: "salary", label: "연봉 계산", to: "/salary" },
   { key: "raise", label: "연봉 인상률", to: "/raise" },
   { key: "bonus", label: "성과급", to: "/bonus" },
+  { key: "annual-leave", label: "연차수당", to: "/annual-leave" },
   { key: "overtime", label: "추가 수당", to: "/overtime" },
+  { key: "pension", label: "국민연금", to: "/pension" },
+  { key: "monthly-rent-deduction", label: "월세공제", to: "/monthly-rent-deduction" },
+  { key: "irp", label: "IRP 절세", to: "/irp" },
+  { key: "4-insurance-employer", label: "사업주4보험", to: "/4-insurance-employer" },
   { key: "compare", label: "이직 비교", to: "/compare" },
   { key: "quit", label: "퇴사 계산", to: "/quit" },
   { key: "withholding", label: "원천세 계산", to: "/withholding" },
@@ -24,7 +29,12 @@ function isActiveTab(key: (typeof tabs)[number]["key"]): boolean {
   if (key === "salary") return activePath.value.startsWith("/salary");
   if (key === "raise") return activePath.value.startsWith("/raise");
   if (key === "bonus") return activePath.value.startsWith("/bonus");
+  if (key === "annual-leave") return activePath.value.startsWith("/annual-leave");
   if (key === "overtime") return activePath.value.startsWith("/overtime");
+  if (key === "pension") return activePath.value.startsWith("/pension");
+  if (key === "monthly-rent-deduction") return activePath.value.startsWith("/monthly-rent-deduction");
+  if (key === "irp") return activePath.value.startsWith("/irp");
+  if (key === "4-insurance-employer") return activePath.value.startsWith("/4-insurance-employer");
   if (key === "compare") return activePath.value.startsWith("/compare");
   if (key === "quit") return activePath.value.startsWith("/quit");
   if (key === "withholding") return activePath.value.startsWith("/withholding");
@@ -36,7 +46,7 @@ function isActiveTab(key: (typeof tabs)[number]["key"]): boolean {
 <template>
   <nav class="sticky top-0 z-50 border-b border-primary/20 bg-primary shadow-sm" aria-label="주요 메뉴">
     <div class="container">
-      <div class="grid grid-cols-3 gap-x-1 sm:flex sm:h-12 sm:items-center sm:gap-2 sm:overflow-x-auto" style="scrollbar-width: none">
+      <div class="grid grid-cols-4 gap-x-1 sm:flex sm:h-12 sm:items-center sm:gap-2 sm:overflow-x-auto" style="scrollbar-width: none">
         <RouterLink
           v-for="tab in tabs"
           :key="tab.key"
