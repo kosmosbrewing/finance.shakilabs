@@ -21,6 +21,8 @@ const activePath = computed(() => route.path);
 
 function isActiveTab(key: (typeof tabs)[number]["key"]): boolean {
   if (key === "all") return activePath.value === "/all";
+  // /freelancer는 종합소득세 탭에 포함
+  if (key === "comprehensive-tax" && activePath.value.startsWith("/freelancer")) return true;
   return activePath.value.startsWith(`/${key}`);
 }
 

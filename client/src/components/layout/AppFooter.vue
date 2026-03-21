@@ -62,11 +62,11 @@ const footerNav = [
       <nav aria-label="전체 계산기" class="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
         <div v-for="group in footerNav" :key="group.title">
           <p class="text-tiny font-bold text-foreground mb-1.5">{{ group.title }}</p>
-          <ul class="space-y-0.5">
+          <ul class="space-y-0">
             <li v-for="link in group.links" :key="link.to">
               <RouterLink
                 :to="link.to"
-                class="text-tiny text-muted-foreground hover:text-foreground transition-colors"
+                class="inline-block w-full py-1.5 text-tiny text-muted-foreground hover:text-foreground transition-colors"
               >
                 {{ link.label }}
               </RouterLink>

@@ -49,6 +49,7 @@ const tickerMessages = computed(() => {
   if (route.path.startsWith("/quit")) return quitTickerMessages;
   if (route.path.startsWith("/withholding")) return withholdingTickerMessages;
   if (route.path.startsWith("/freelance-rate")) return freelanceRateTickerMessages;
+  if (route.path.startsWith("/freelancer")) return comprehensiveTaxTickerMessages;
   if (route.path.startsWith("/comprehensive-tax")) return comprehensiveTaxTickerMessages;
   if (route.path.startsWith("/year-end-settlement")) return yearEndSettlementTickerMessages;
   if (route.path.startsWith("/severance-pay")) return severancePayTickerMessages;
