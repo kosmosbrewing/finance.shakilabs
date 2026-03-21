@@ -61,12 +61,12 @@ const footerNav = [
       <!-- 카테고리별 계산기 링크 -->
       <nav aria-label="전체 계산기" class="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
         <div v-for="group in footerNav" :key="group.title">
-          <p class="text-tiny font-bold text-foreground mb-1.5">{{ group.title }}</p>
+          <p class="text-caption font-bold text-foreground mb-1.5">{{ group.title }}</p>
           <ul class="space-y-0">
             <li v-for="link in group.links" :key="link.to">
               <RouterLink
                 :to="link.to"
-                class="inline-block w-full py-1.5 text-tiny text-muted-foreground hover:text-foreground transition-colors"
+                class="inline-block w-full py-1.5 text-[0.75rem] text-muted-foreground hover:text-foreground transition-colors"
               >
                 {{ link.label }}
               </RouterLink>
@@ -78,7 +78,7 @@ const footerNav = [
       <!-- 기존 하단 -->
       <div class="mt-4 border-t border-border/40 pt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p class="text-caption font-bold text-foreground">shakilabs.com/finance</p>
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-tiny">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.75rem]">
           <RouterLink to="/all" class="text-muted-foreground hover:text-foreground transition-colors">
             전체 계산기
           </RouterLink>
