@@ -48,7 +48,7 @@ const seoDescription = computed(
           </div>
           <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
             <div class="space-y-4">
-              <ScenarioField v-model="averageMonthlyIncome" label="평균 기준소득월액" unit="원" :min="400_000" :max="6_370_000" :step="10_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '320만원', value: 3_200_000 }, { label: '500만원', value: 5_000_000 }]" />
+              <ScenarioField v-model="averageMonthlyIncome" label="평균 기준소득월액" unit="원" :min="410_000" :max="6_590_000" :step="10_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '320만원', value: 3_200_000 }, { label: '500만원', value: 5_000_000 }]" />
               <ScenarioField v-model="insuredYears" label="가입 기간" unit="년" :min="1" :max="40" :presets="[{ label: '10년', value: 10 }, { label: '20년', value: 20 }, { label: '30년', value: 30 }]" />
               <ScenarioField v-model="claimAge" label="청구 나이" unit="세" :min="60" :max="70" :presets="[{ label: '63세', value: 63 }, { label: '65세', value: 65 }, { label: '68세', value: 68 }]" />
             </div>

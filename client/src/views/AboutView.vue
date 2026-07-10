@@ -71,7 +71,7 @@ const CALCULATOR_GROUPS = [
 ];
 
 const RATE_REFERENCES = [
-  { item: "국민연금", rate: "근로자 4.75% (상·하한 637만/40만)", source: "국민연금공단 고시" },
+  { item: "국민연금", rate: "근로자 4.75% (2026.7.1부터 상·하한 659만/41만)", source: "국민연금공단 고시" },
   { item: "건강보험", rate: "근로자 3.595%", source: "국민건강보험공단 고시" },
   { item: "장기요양보험", rate: "건보료의 13.14%", source: "국민건강보험공단 고시" },
   { item: "고용보험", rate: "근로자 0.9%", source: "고용노동부 고시" },

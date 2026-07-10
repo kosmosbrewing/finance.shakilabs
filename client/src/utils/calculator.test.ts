@@ -14,6 +14,7 @@ import {
   calculateYearEndSettlement,
 } from "@/utils/yearEndSettlementCalculator";
 import { calculateParentalLeave } from "@/utils/parentalLeaveCalculator";
+import { estimateAnnualRemuneration } from "@/lib/health-insurance-tiers";
 
 describe("calculator core", () => {
   it("clampNumber는 최소값 아래 입력을 보정한다", () => {
@@ -68,13 +69,28 @@ describe("calculator core", () => {
 
   it("보험 공제는 국민연금 상한을 적용한다", () => {
     const result = calcInsuranceDeduction(10_000_000);
-    expect(result.nationalPension).toBe(302_575);
+    expect(result.nationalPension).toBe(313_025);
     expect(result.totalInsurance).toBe(
       result.nationalPension +
         result.healthInsurance +
         result.longTermCare +
         result.employmentInsurance
     );
+  });
+
+  it("국민연금은 2026년 7월 하한 41만원을 적용한다", () => {
+    expect(calcInsuranceDeduction(1).nationalPension).toBe(19_475);
+    expect(calcInsuranceDeduction(410_000).nationalPension).toBe(19_475);
+  });
+
+  it("국민연금은 2026년 7월 상한 659만원을 적용한다", () => {
+    expect(calcInsuranceDeduction(6_590_000).nationalPension).toBe(313_025);
+    expect(calcInsuranceDeduction(6_590_001).nationalPension).toBe(313_025);
+  });
+
+  it("건강보험료 환산은 소득 순위가 아닌 연간 보수 추정값을 반환한다", () => {
+    expect(estimateAnnualRemuneration(107_850)).toBe(36_000_000);
+    expect(estimateAnnualRemuneration(0)).toBe(0);
   });
 
   it("소득세 번들은 부양가족과 자녀 수를 허용 범위로 보정한다", () => {
