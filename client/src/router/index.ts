@@ -1,7 +1,9 @@
+import { nextTick } from "vue";
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 import { trackPageView } from "@/lib/analytics";
 import { queryFirst } from "@/lib/routeState";
 import { clearRuntimeError } from "@/lib/runtimeError";
+import { buildPublicPagePath, shouldTrackPageView } from "@/utils/pageTracking";
 
 function mapLegacyFreelanceQuery(
   query: Record<string, unknown>,
@@ -373,11 +375,15 @@ router.beforeEach((to, _from, next) => {
   next();
 });
 
-router.afterEach((to, _from, failure) => {
+router.afterEach((to, from, failure) => {
   if (failure) return;
   clearRuntimeError();
+  if (!shouldTrackPageView(to.path, from.path, from.matched.length > 0)) return;
+
   const title = typeof to.meta.title === "string" ? to.meta.title : document.title;
-  trackPageView(to.fullPath, title);
+  void nextTick(() => {
+    trackPageView(buildPublicPagePath("/finance", to.path), title);
+  });
 });
 
 export default router;
