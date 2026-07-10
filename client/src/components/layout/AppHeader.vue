@@ -83,12 +83,12 @@ onMounted(() => {
   <header class="border-b border-border bg-primary/8">
     <div class="container pt-2.5 pb-2.5">
       <div class="overflow-hidden">
-        <div class="retro-titlebar h-11 border-b-0 px-2 bg-transparent">
+        <div class="retro-titlebar h-[44px] border-b-0 px-2 bg-transparent">
           <div class="flex h-full w-full items-center gap-2 sm:gap-4">
             <RouterLink
               to="/"
               aria-label="ShakiLabs 홈"
-              class="inline-flex h-8 w-8 shrink-0 items-center justify-center gap-1 px-0.5 text-muted-foreground transition-colors hover:text-foreground sm:w-auto sm:justify-start sm:gap-1.5"
+              class="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center gap-1 px-0.5 text-muted-foreground transition-colors hover:text-foreground sm:h-8 sm:w-auto sm:justify-start sm:gap-1.5"
             >
               <span
                 class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-muted/60 ring-1 ring-border/60"
@@ -105,7 +105,7 @@ onMounted(() => {
             </div>
             <button
               type="button"
-              class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded border border-border/70 bg-transparent text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded border border-border/70 bg-transparent text-muted-foreground transition-colors hover:border-primary hover:text-primary sm:h-8 sm:w-8"
               :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
               @click="toggleTheme"
             >

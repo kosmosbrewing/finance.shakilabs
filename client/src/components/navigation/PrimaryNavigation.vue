@@ -99,7 +99,7 @@ function trackNavigation(item: NavigationItem): void {
           :to="item.to"
           :aria-current="isActive(item) ? 'page' : undefined"
           :class="[
-            'flex min-h-8 items-center justify-center rounded-lg px-1 py-1.5 text-center text-[0.7rem] font-medium leading-tight transition-colors',
+            'flex min-h-[44px] items-center justify-center rounded-lg px-1 py-1.5 text-center text-[0.7rem] font-medium leading-tight transition-colors',
             isActive(item)
               ? 'bg-white/20 font-semibold text-white'
               : 'text-primary-foreground/75 active:bg-white/10',

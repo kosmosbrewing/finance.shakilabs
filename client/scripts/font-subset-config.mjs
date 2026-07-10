@@ -5,15 +5,36 @@ import { fileURLToPath } from "node:url";
 const scriptRoot = dirname(fileURLToPath(import.meta.url));
 export const clientRoot = resolve(scriptRoot, "..");
 
-export const fontJob = {
-  source: resolve(clientRoot, "public/fonts/GmarketSansBold.woff"),
-  output: resolve(clientRoot, "public/fonts/GmarketSansBold-subset-v3.woff2"),
-  publicName: "GmarketSansBold-subset-v3.woff2",
-  maxBytes: 96 * 1024,
-};
+export const fontJobs = [
+  {
+    source: resolve(clientRoot, "public/fonts/Pretendard-Regular.woff"),
+    output: resolve(clientRoot, "public/fonts/Pretendard-Regular-subset.woff2"),
+    publicName: "Pretendard-Regular-subset.woff2",
+    maxBytes: 160 * 1024,
+    preload: true,
+  },
+  {
+    source: resolve(clientRoot, "public/fonts/Pretendard-Bold.woff"),
+    output: resolve(clientRoot, "public/fonts/Pretendard-Bold-subset.woff2"),
+    publicName: "Pretendard-Bold-subset.woff2",
+    maxBytes: 160 * 1024,
+    preload: true,
+  },
+  {
+    source: resolve(clientRoot, "public/fonts/GmarketSansBold.woff"),
+    output: resolve(clientRoot, "public/fonts/GmarketSansBold-subset-v3.woff2"),
+    publicName: "GmarketSansBold-subset-v3.woff2",
+    maxBytes: 128 * 1024,
+    preload: true,
+  },
+];
 
-const textExtensions = new Set([".css", ".html", ".json", ".ts", ".vue"]);
-const contentRoots = [resolve(clientRoot, "src"), resolve(clientRoot, "index.html")];
+const textExtensions = new Set([".css", ".html", ".json", ".mjs", ".ts", ".vue"]);
+const contentRoots = [
+  resolve(clientRoot, "src"),
+  resolve(clientRoot, "scripts"),
+  resolve(clientRoot, "index.html"),
+];
 
 function listTextFiles(path) {
   if (!statSync(path).isDirectory()) return [path];
