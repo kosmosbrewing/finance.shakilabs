@@ -181,8 +181,8 @@ function buildSalaryContent(manWon) {
       </table>
 
       <div style="${CALLOUT_STYLE}">
-        <strong>국민연금 상한 주의</strong> — 국민연금은 월 기준소득 637만원(2026년 고시) 초과분에 대해서는
-        추가 부담하지 않습니다. 월 기준소득 637만원 이상인 경우 국민연금은 302,575원으로 고정됩니다.
+        <strong>국민연금 상한 주의</strong> — 국민연금은 월 기준소득 659만원(2026년 7월 시행) 초과분에 대해서는
+        추가 부담하지 않습니다. 월 기준소득 659만원 이상인 경우 근로자 부담액은 313,025원으로 고정됩니다.
       </div>
 
       <h2 style="${H2_STYLE}">3. 소득세·지방소득세 계산 근거</h2>
@@ -1844,9 +1844,9 @@ function buildWageConverterContent(hourly) {
 // =========================
 function buildRegionalHealthContent(manWon) {
   const monthlyIncome = manWon * 10_000;
-  // 소득 기준 부과점수 근사: 2026년 점수당 금액·소득점수표 기반 대략 7.09%
+  // 지역가입자 실제 산식과 다르므로 건강보험 총 요율로 소득분만 단순 추정
   // 재산·자동차 점수는 개인별로 편차가 커서 프리렌더에서는 제외
-  const estimatedRegionalIncomeOnly = Math.max(20_000, Math.floor(monthlyIncome * 0.0709));
+  const estimatedRegionalIncomeOnly = Math.max(20_000, Math.floor(monthlyIncome * 0.0719));
   const formerEmployed = Math.floor(monthlyIncome * 0.03595);
   const maxContinued = formerEmployed; // 임의계속가입: 직전 부담분 유지
 
@@ -2035,7 +2035,7 @@ function buildAboutContent() {
         <tbody>
           <tr>
             <td style="${TD_STYLE}">국민연금</td>
-            <td style="${TD_STYLE}">근로자 4.75% (상·하한 637만/40만)</td>
+            <td style="${TD_STYLE}">근로자 4.75% (2026.7.1부터 상·하한 659만/41만)</td>
             <td style="${TD_STYLE}">국민연금공단 고시</td>
           </tr>
           <tr>
@@ -2153,7 +2153,7 @@ const LANDING_CONTENT = {
       },
       {
         h2: "4대보험 공제 항목 (2026년 요율)",
-        body: "국민연금 근로자 부담 4.75% (상·하한 637만/40만), 건강보험 3.595%, 장기요양보험(건보료의 13.14%), 고용보험 0.9%. 사업주도 동일 요율을 부담하므로 총 부담액은 약 2배입니다. 국민연금은 월 기준소득 637만원(2026년 고시) 초과분에 대해서는 추가 부담하지 않습니다.",
+        body: "국민연금 근로자 부담 4.75% (2026년 7월 1일부터 상·하한 659만/41만), 건강보험 3.595%, 장기요양보험(건보료의 13.14%), 고용보험 0.9%를 적용합니다. 국민연금은 월 기준소득 659만원 초과분에 대해서는 추가 부담하지 않습니다.",
       },
       {
         h2: "소득세 계산 원리",

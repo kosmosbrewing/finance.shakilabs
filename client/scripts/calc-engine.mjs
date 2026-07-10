@@ -6,8 +6,8 @@ export const RATES_2026 = {
   nationalPension: {
     employee: 0.0475,
     employer: 0.0475,
-    minMonthlyIncome: 400_000,
-    maxMonthlyIncome: 6_370_000,
+    minMonthlyIncome: 410_000,
+    maxMonthlyIncome: 6_590_000,
   },
   healthInsurance: { employee: 0.03595, employer: 0.03595 },
   longTermCare: { rateOfHealth: 0.1314 },

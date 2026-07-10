@@ -1,13 +1,32 @@
 // 2026년 4대보험 요율 상수
 export const TAX_YEAR = 2026;
 
+export const INSURANCE_RATE_BASIS = {
+  verifiedAt: "2026-07-10",
+  nationalPension: {
+    effectiveFrom: "2026-07-01",
+    effectiveTo: "2027-06-30",
+    sourceUrl:
+      "https://www.nps.or.kr/pnsgdnc/newgdnc/getOHAE0001M1.do?pstId=ZZ202600000000000147",
+  },
+  healthInsurance: {
+    effectiveFrom: "2026-01-01",
+    sourceUrl:
+      "https://edi.nhis.or.kr/portal/images/popup/20251204_pop01longdesc.html",
+  },
+  employmentInsurance: {
+    sourceUrl:
+      "https://edrm.ei.go.kr/ei/eim/eg/ei/eiEminsr/retrieveEi0301Info.do",
+  },
+} as const;
+
 export const RATES_2026 = {
   nationalPension: {
     total: 0.095,
     employee: 0.0475,
     employer: 0.0475,
-    minMonthlyIncome: 400_000,
-    maxMonthlyIncome: 6_370_000,
+    minMonthlyIncome: 410_000,
+    maxMonthlyIncome: 6_590_000,
   },
   healthInsurance: {
     total: 0.0719,
