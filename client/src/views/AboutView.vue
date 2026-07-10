@@ -141,7 +141,7 @@ const RATE_REFERENCES = [
       <div class="retro-panel-content space-y-2">
         <p class="text-caption text-muted-foreground leading-relaxed">
           본 서비스는 아래 공식 고시와 법령에 기반해 계산 엔진을 구성합니다. 세법·요율 개정이 있을 때마다
-          신속히 반영하며, 최근 업데이트는 2026년 1월 전면 개정입니다.
+          신속히 반영하며, 주요 정책값은 2026년 7월 공식 자료와 다시 대조했습니다.
         </p>
         <div class="retro-board-list text-caption">
           <div
@@ -252,6 +252,10 @@ const RATE_REFERENCES = [
       </div>
       <div class="retro-panel-content">
         <ul class="space-y-2 text-caption text-muted-foreground">
+          <li class="flex gap-2">
+            <span class="text-primary shrink-0 font-mono">2026.07</span>
+            <span>연말정산 신용카드 소득공제 한도와 공식 출처 재검증</span>
+          </li>
           <li class="flex gap-2">
             <span class="text-primary shrink-0 font-mono">2026.03</span>
             <span>사이트 구조 개편 — 9탭 네비게이션, 전체 계산기 허브 페이지 추가</span>

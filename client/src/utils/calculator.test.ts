@@ -185,6 +185,11 @@ describe("yearEndSettlementCalculator", () => {
       const result = calcCardDeduction(52_000_000, 30_000_000, 20_000_000);
       expect(result).toBe(3_000_000);
     });
+
+    it("총급여 7천만원 초과 구간은 250만원 한도를 적용한다", () => {
+      const result = calcCardDeduction(150_000_000, 80_000_000, 20_000_000);
+      expect(result).toBe(2_500_000);
+    });
   });
 
   describe("calculateYearEndSettlement", () => {
