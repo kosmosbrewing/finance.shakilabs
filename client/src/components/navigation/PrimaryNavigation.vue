@@ -101,7 +101,7 @@ function trackNavigation(item: NavigationItem): void {
           :class="[
             'flex min-h-[44px] items-center justify-center rounded-lg px-1 py-1.5 text-center text-[0.7rem] font-medium leading-tight transition-colors',
             isActive(item)
-              ? 'bg-white/20 font-semibold text-white'
+              ? 'bg-white/10 font-semibold text-white'
               : 'text-primary-foreground/75 active:bg-white/10',
           ]"
           @click="trackNavigation(item)"
