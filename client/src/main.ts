@@ -6,6 +6,7 @@ import "./assets/css/main.css";
 import { initAnalytics } from "./lib/analytics";
 import { captureSentryException, initSentry } from "./lib/sentry";
 import { reportRuntimeError } from "./lib/runtimeError";
+import { removePrerenderFallback } from "./utils/prerenderFallback";
 
 function registerRuntimeHandlers(): void {
   router.onError((error) => {
@@ -26,7 +27,7 @@ function registerRuntimeHandlers(): void {
   });
 }
 
-function bootstrap(): void {
+async function bootstrap(): Promise<void> {
   const app = createApp(App);
   const head = createHead();
 
@@ -39,7 +40,9 @@ function bootstrap(): void {
   app.use(head);
   initSentry(app);
   registerRuntimeHandlers();
+  await router.isReady();
   app.mount("#app");
+  removePrerenderFallback();
 
   // GA 초기화를 LCP 이후로 미룸
   if (typeof requestIdleCallback === "function") {
@@ -49,9 +52,7 @@ function bootstrap(): void {
   }
 }
 
-try {
-  bootstrap();
-} catch (error) {
+void bootstrap().catch((error) => {
   captureSentryException(error, "bootstrap");
   console.error("[bootstrap] failed", error);
-}
+});
