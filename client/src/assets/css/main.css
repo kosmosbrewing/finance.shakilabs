@@ -21,10 +21,11 @@
 
 @font-face {
   font-family: "GmarketSans";
-  src: url("/fonts/GmarketSansBold.woff") format("woff");
+  src: url("/fonts/GmarketSansBold-subset-v2.woff2") format("woff2"),
+       url("/fonts/GmarketSansBold.woff") format("woff");
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @tailwind base;

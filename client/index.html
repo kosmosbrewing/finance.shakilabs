@@ -17,6 +17,7 @@
     <!-- 로컬 폰트 preload -->
     <link rel="preload" href="/finance/fonts/Pretendard-Regular-subset.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/finance/fonts/Pretendard-Bold-subset.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/finance/fonts/GmarketSansBold-subset-v2.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- OG 태그 -->
     <meta property="og:title" content="2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세" />
@@ -142,7 +143,7 @@
         font-size: 16px;
       }
 
-      #app:not(:empty) + [data-seo-prerender] {
+      #app:not(:empty) ~ [data-seo-prerender] {
         display: none;
       }
 
