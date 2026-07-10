@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "characterCount": 621,
-  "characterSha256": "614546ce3761dcee0672c7810997815602395255b8d9c577060c2328c32ed74f",
+  "characterCount": 623,
+  "characterSha256": "7c851162c3b66d8396d833b88233d6c49bd618f2428140742612276691ead418",
   "font": {
     "publicName": "GmarketSansBold-subset-v3.woff2",
-    "bytes": 79708,
-    "sha256": "66cf5263694f601d50036db9f8bbd40fabad68cedfcf38032d9484d9220b7d2e"
+    "bytes": 79968,
+    "sha256": "55e8f27af8183f307f305ee5a100c7fb57e19c1daafff5af98eea3983fce3888"
   }
 }
