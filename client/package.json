@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "fonts:subset": "node scripts/subset-fonts.mjs",
     "prebuild": "node scripts/generate-sitemap.mjs",
-    "build": "vite build && node scripts/prerender.mjs",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/verify-fonts.mjs",
     "lint": "eslint \"src/**/*.{ts,vue}\"",
     "lint:fix": "npm run lint -- --fix",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
