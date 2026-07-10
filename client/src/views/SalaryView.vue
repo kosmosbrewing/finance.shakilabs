@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShText } from "@shakilabs/ui";
 import SEOHead from "@/components/common/SEOHead.vue";
 
 
@@ -81,7 +82,7 @@ watch(
       :json-ld="breadcrumbJsonLd"
     />
 
-    <h1 class="text-h1 font-brand">2026 연봉 실수령액 계산기</h1>
+    <ShText as="h1" variant="title">2026 연봉 실수령액 계산기</ShText>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
