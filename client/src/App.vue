@@ -3,6 +3,7 @@ import { computed } from "vue";
 import AppLayout from "@/components/layout/AppLayout.vue";
 import AlertHost from "@/components/ui/alert/AlertHost.vue";
 import { clearRuntimeError, useRuntimeError } from "@/lib/runtimeError";
+import { getPageGroup } from "@/utils/pageTracking";
 
 const { runtimeError } = useRuntimeError();
 const showBlockingRuntimeError = computed(
@@ -82,7 +83,7 @@ function reloadPage(): void {
     </section>
     <RouterView v-else v-slot="{ Component, route }">
       <Transition name="page-fade" mode="out-in">
-        <component :is="Component" :key="route.path" />
+        <component :is="Component" :key="getPageGroup(route.path)" />
       </Transition>
     </RouterView>
     <AlertHost />
