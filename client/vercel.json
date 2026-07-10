@@ -40,8 +40,5 @@
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
     }
-  ],
-  "rewrites": [
-    { "source": "/((?!assets/|fonts/|favicon|og-image|sitemap|robots|ads\\.txt|llms\\.txt|logo|images/).*)", "destination": "/index.html" }
   ]
 }
