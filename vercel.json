@@ -3,13 +3,12 @@
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
   "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
     { "source": "/favicon.ico", "destination": "/favicon.png", "permanent": true },
     { "source": "/freelance/:amount(\\d+)", "destination": "/comprehensive-tax?biz=:amount", "permanent": true },
     { "source": "/freelance", "destination": "/comprehensive-tax", "permanent": true }
-  ],
-  "rewrites": [
-    { "source": "/((?!assets|fonts|favicon|og-image|sitemap|robots).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

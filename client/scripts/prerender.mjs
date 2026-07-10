@@ -1450,4 +1450,22 @@ for (const route of SEO_ROUTES) {
   console.log(`[prerender] ${route} -> ${filePath}`);
 }
 
+const notFoundMeta = {
+  title: "페이지를 찾을 수 없습니다 | ShakiLabs 금융 계산기",
+  description: "요청한 금융 계산기 페이지를 찾을 수 없습니다.",
+  canonical: `${SITE_URL}/404`,
+  jsonLd: null,
+  breadcrumb: null,
+};
+const notFoundHtml = applyMeta(template, "/404", notFoundMeta)
+  .replace(
+    "</head>",
+    '    <meta name="robots" content="noindex,nofollow" />\n  </head>'
+  )
+  .replace(
+    /<noscript>[\s\S]*?<\/noscript>/i,
+    '<noscript><main><h1>페이지를 찾을 수 없습니다</h1><a href="/finance">금융 계산기로 이동</a></main></noscript>'
+  );
+writeFileSync(resolve(DIST_DIR, "404.html"), notFoundHtml, "utf-8");
+
 console.log(`[prerender] Done. ${SEO_ROUTES.length} routes processed.`);
