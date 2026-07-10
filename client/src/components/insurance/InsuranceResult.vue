@@ -95,7 +95,7 @@ onUnmounted(() => {
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="retro-title-brand">{{ title }}</h2>
-      <SectionShareButton @click="emit('shareRequest')" />
+      <SectionShareButton class="min-h-[44px]" @click="emit('shareRequest')" />
     </div>
 
     <div class="retro-panel-content space-y-3">
