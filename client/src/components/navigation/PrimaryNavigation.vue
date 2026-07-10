@@ -48,7 +48,7 @@ const navigationItems: readonly NavigationItem[] = [
     to: "/wage-converter",
     matchPaths: ["/wage-converter"],
   },
-  { key: "all", label: "전체 보기", to: "/all", matchPaths: ["/all"] },
+  { key: "all", label: "전체 계산기", to: "/all", matchPaths: ["/all"] },
 ];
 
 const mobileDefaultKeys = [
