@@ -34,11 +34,11 @@
 
 @layer base {
   :root {
-    --status-success: 148 61% 36%;
-    --status-warning: 43 88% 43%;
-    --status-caution: 28 82% 48%;
-    --status-danger: 0 70% 52%;
-    --status-info: 212 83% 45%;
+    --status-success: 142 64% 24%;
+    --status-warning: 24 83% 31%;
+    --status-caution: 17 79% 34%;
+    --status-danger: 0 74% 42%;
+    --status-info: 212 83% 35%;
     --chart-net: 172 74% 36%;
     --chart-pension: 212 83% 45%;
     --chart-health: 142 71% 45%;
@@ -410,4 +410,17 @@
 .slide-fade-leave-to {
   opacity: 0;
   transform: translateY(6px);
+}
+
+/* 탭 텍스트가 모바일과 데스크톱 모두 WCAG AA 대비를 유지하도록 보정 */
+nav[aria-label="주요 메뉴"].bg-primary {
+  background-color: #17634d !important;
+}
+
+nav[aria-label="주요 메뉴"] .tab-scroll > a {
+  color: #fff !important;
+}
+
+nav[aria-label="주요 메뉴"] .tab-scroll > a[aria-current="page"] {
+  background-color: rgb(255 255 255 / 12%) !important;
 }
