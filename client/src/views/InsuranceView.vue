@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -376,15 +377,20 @@ watch(
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
         <div class="space-y-4">
-          <InsuranceInput
-            :mode="mode"
-            v-model:health-insurance-fee="healthInsuranceFee"
-            v-model:annual-gross="forwardCalc.annualGross.value"
-            v-model:retirement-included="forwardCalc.retirementIncluded.value"
-            v-model:dependents="dependents"
-            v-model:children-under20="childrenUnder20"
-            v-model:non-taxable-monthly="nonTaxableMonthly"
-          />
+          <CalculatorInteractionTracker
+            :calculator-id="isForwardMode ? 'salary_net' : 'health_insurance_reverse'"
+            :page-path="isForwardMode ? '/finance/salary' : '/finance/insurance'"
+          >
+            <InsuranceInput
+              :mode="mode"
+              v-model:health-insurance-fee="healthInsuranceFee"
+              v-model:annual-gross="forwardCalc.annualGross.value"
+              v-model:retirement-included="forwardCalc.retirementIncluded.value"
+              v-model:dependents="dependents"
+              v-model:children-under20="childrenUnder20"
+              v-model:non-taxable-monthly="nonTaxableMonthly"
+            />
+          </CalculatorInteractionTracker>
 
           <InsuranceResult
             :mode="mode"
