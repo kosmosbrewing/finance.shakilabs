@@ -4,6 +4,11 @@ import { resolve, dirname } from "path";
 import { SEO_ROUTES } from "./seo-routes.mjs";
 import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
 import { buildRichContent } from "./prerender-content.mjs";
+import {
+  buildPrerenderGuide,
+  getPrerenderGuide,
+  PRERENDER_GUIDE_ROUTES,
+} from "./prerender-guides.mjs";
 
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
 const INDEX_HTML = resolve(DIST_DIR, "index.html");
@@ -1144,6 +1149,30 @@ function buildMeta(route) {
     };
   }
 
+  const guide = getPrerenderGuide(route);
+  if (guide) {
+    const canonical = `${SITE_URL}${route}`;
+    return {
+      title: guide.title,
+      description: guide.description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: guide.heading,
+        description: guide.description,
+        url: canonical,
+        applicationCategory: "FinanceApplication",
+        inLanguage: "ko",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: guide.heading },
+      ]),
+    };
+  }
+
   // fallback
   const title = "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세";
   const description = "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
@@ -1421,7 +1450,7 @@ function applyMeta(html, route, meta) {
 
   // 리치 콘텐츠 우선 시도 → 없으면 기본 스텁
   const rich = buildRichContent(route, meta);
-  const mainContent = rich || buildPrerenderSection(route, meta);
+  const mainContent = rich || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
   const headerHtml = buildPrerenderHeader();
   const footerHtml = buildPrerenderFooter();
 
@@ -1449,6 +1478,28 @@ for (const route of SEO_ROUTES) {
   writeFileSync(filePath, html, "utf-8");
   console.log(`[prerender] ${route} -> ${filePath}`);
 }
+
+const guideBodies = new Set();
+for (const route of PRERENDER_GUIDE_ROUTES) {
+  const guide = getPrerenderGuide(route);
+  const filePath = resolve(DIST_DIR, route.slice(1), "index.html");
+  const html = readFileSync(filePath, "utf8");
+  const body = html.match(/<article data-seo-prerender[\s\S]*?<\/article>/i)?.[0];
+  if (!guide || !html.includes(`<title>${guide.title}</title>`)) {
+    throw new Error(`Missing guide title for ${route}`);
+  }
+  if (!html.includes(`<link rel="canonical" href="${SITE_URL}${route}"`)) {
+    throw new Error(`Missing guide canonical for ${route}`);
+  }
+  if (!body || body.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().length < 300) {
+    throw new Error(`Guide body is too short for ${route}`);
+  }
+  guideBodies.add(body);
+}
+if (guideBodies.size !== PRERENDER_GUIDE_ROUTES.length) {
+  throw new Error("Prerender guide bodies must be unique");
+}
+console.log(`Validated ${guideBodies.size} route-specific prerender guides.`);
 
 const notFoundMeta = {
   title: "페이지를 찾을 수 없습니다 | ShakiLabs 금융 계산기",
