@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from "vue";
 import { Moon, Sun } from "lucide-vue-next";
+import { ShButton } from "@shakilabs/ui";
 import { RouterLink, useRoute } from "vue-router";
 import TickerBar from "@/components/common/TickerBar.vue";
 import {
@@ -103,15 +104,17 @@ onMounted(() => {
             <div class="flex min-w-0 flex-1 items-center justify-center overflow-hidden px-1 text-center font-brand text-caption tracking-[-0.01em] sm:h-full sm:px-0 sm:text-body sm:tracking-[0.01em]">
               <TickerBar :key="route.path" :messages="tickerMessages" />
             </div>
-            <button
+            <ShButton
               type="button"
-              class="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded border border-border/70 bg-transparent text-muted-foreground transition-colors hover:border-primary hover:text-primary sm:h-8 sm:w-8"
+              variant="secondary"
+              size="sm"
+              class="design-system-theme-toggle shrink-0 text-muted-foreground"
               :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
               @click="toggleTheme"
             >
               <Moon v-if="theme === 'dark'" class="h-4 w-4" />
               <Sun v-else class="h-4 w-4" />
-            </button>
+            </ShButton>
           </div>
         </div>
       </div>

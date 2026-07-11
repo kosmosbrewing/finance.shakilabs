@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
+import { ShText } from "@shakilabs/ui";
 
 const year = new Date().getFullYear();
 
@@ -77,7 +78,7 @@ const footerNav = [
 
       <!-- 기존 하단 -->
       <div class="mt-4 border-t border-border/40 pt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <p class="text-caption font-bold text-foreground">shakilabs.com/finance</p>
+        <ShText as="p" variant="label">shakilabs.com/finance</ShText>
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.75rem]">
           <RouterLink to="/all" class="text-muted-foreground hover:text-foreground transition-colors">
             전체 계산기
@@ -101,12 +102,12 @@ const footerNav = [
       </div>
 
       <div class="mt-3 border-t border-border/40 pt-3 space-y-1">
-        <p class="text-tiny text-muted-foreground">
+        <ShText as="p" variant="label" tone="muted">
           본 계산 결과는 참고용 추정치이며, 실제 납부액·환급액은 다를 수 있습니다.
-        </p>
-        <p class="text-tiny text-muted-foreground">
+        </ShText>
+        <ShText as="p" variant="label" tone="muted">
           Copyright © {{ year }} shakilabs.com
-        </p>
+        </ShText>
       </div>
     </div>
   </footer>

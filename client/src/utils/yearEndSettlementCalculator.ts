@@ -88,7 +88,7 @@ export function calcCardDeduction(
   const limitEntry = CARD_DEDUCTION.limits.find(
     (l) => annualSalary <= l.salaryLimit
   );
-  const limit = limitEntry?.deductionLimit ?? 2_000_000;
+  const limit = limitEntry?.deductionLimit ?? 2_500_000;
 
   return Math.min(deduction, limit);
 }

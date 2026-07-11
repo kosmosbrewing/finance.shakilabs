@@ -1,11 +1,17 @@
 <script setup lang="ts">
+import { ShSurface } from "@shakilabs/ui";
 import AppHeader from "@/components/layout/AppHeader.vue";
 import AppFooter from "@/components/layout/AppFooter.vue";
 import PrimaryNavigation from "@/components/navigation/PrimaryNavigation.vue";
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-background bg-[radial-gradient(1200px_500px_at_50%_-120px,hsl(var(--primary)/0.12),transparent_70%)]">
+  <ShSurface
+    as="div"
+    variant="plain"
+    padding="none"
+    class="design-system-shell min-h-screen flex flex-col bg-background"
+  >
     <a
       href="#main-content"
       class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[100] focus:rounded focus:bg-background focus:px-3 focus:py-2 focus:text-caption focus:font-semibold"
@@ -18,5 +24,5 @@ import PrimaryNavigation from "@/components/navigation/PrimaryNavigation.vue";
       <slot />
     </main>
     <AppFooter />
-  </div>
+  </ShSurface>
 </template>

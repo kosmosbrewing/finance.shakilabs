@@ -12,8 +12,7 @@ export const CARD_DEDUCTION = {
   /** 공제한도 (총급여 구간별) */
   limits: [
     { salaryLimit: 70_000_000, deductionLimit: 3_000_000 },
-    { salaryLimit: 120_000_000, deductionLimit: 2_500_000 },
-    { salaryLimit: Number.POSITIVE_INFINITY, deductionLimit: 2_000_000 },
+    { salaryLimit: Number.POSITIVE_INFINITY, deductionLimit: 2_500_000 },
   ],
 } as const;
 
@@ -44,7 +43,7 @@ export const YEAR_END_SALARY_PRESETS = [
 
 export const YEAR_END_AMOUNTS = [3000, 4500, 5200, 6000, 7500, 10000];
 
-export const YEAR_END_UPDATED = "2026.01";
+export const YEAR_END_UPDATED = "2026.07";
 
 export const YEAR_END_FAQS = [
   {
@@ -53,7 +52,7 @@ export const YEAR_END_FAQS = [
   },
   {
     question: "신용카드 소득공제는 어떻게 계산되나요?",
-    answer: "총급여의 25%를 초과 사용한 금액에 대해 신용카드 15%, 체크카드·현금영수증 30% 공제율을 적용합니다. 공제한도는 총급여 7천만원 이하 300만원, 7천만~1.2억 250만원, 1.2억 초과 200만원입니다.",
+    answer: "총급여의 25%를 초과 사용한 금액에 대해 신용카드 15%, 체크카드·현금영수증 30% 공제율을 적용합니다. 기본 공제한도는 총급여 7천만원 이하 300만원, 7천만원 초과 250만원입니다.",
   },
   {
     question: "연금저축과 IRP 세액공제는 중복 적용되나요?",
@@ -69,7 +68,7 @@ export const YEAR_END_SOURCES = [
   {
     name: "국세청",
     basis: "연말정산 안내 (2025년 귀속)",
-    url: "https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?mi=2304&cntntsId=238938",
+    url: "https://g.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=7794&mi=2469",
   },
   {
     name: "소득세법",
