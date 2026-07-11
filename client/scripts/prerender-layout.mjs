@@ -46,7 +46,7 @@ export function buildPrerenderHeader() {
   return `
     <header data-seo-prerender="header" style="max-width:1120px;margin:0 auto;padding:14px 16px;border-bottom:1px solid #e2e8f0;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <a href="/finance/" style="font-weight:700;font-size:18px;color:#065f46;text-decoration:none;">ShakiLabs 연봉계산기</a>
+        <a href="/finance/salary" style="font-weight:700;font-size:18px;color:#065f46;text-decoration:none;">ShakiLabs 연봉계산기</a>
         <nav aria-label="주요 계산기" style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
           <a href="/finance/salary" style="color:#334155;text-decoration:none;">연봉 실수령</a>
           <a href="/finance/insurance" style="color:#334155;text-decoration:none;">건강보험료</a>

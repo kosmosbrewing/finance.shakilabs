@@ -8,7 +8,7 @@ useSEO({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "홈", item: "https://shakilabs.com/finance/" },
+      { "@type": "ListItem", position: 1, name: "홈", item: "https://shakilabs.com/finance/salary" },
       {
         "@type": "ListItem",
         position: 2,

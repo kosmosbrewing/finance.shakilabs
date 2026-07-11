@@ -114,7 +114,7 @@ onUnmounted(() => {
       </div>
 
       <!-- 요약 stat-grid (3열) -->
-      <div class="grid grid-cols-3 gap-1.5">
+      <div class="result-stat-grid grid grid-cols-3 gap-1.5">
         <div class="retro-stat flex min-h-[74px] flex-col justify-center p-2 text-center sm:min-h-0 sm:p-2.5">
           <p class="retro-stat-label">월 급여</p>
           <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">
