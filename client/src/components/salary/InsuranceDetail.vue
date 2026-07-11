@@ -16,14 +16,14 @@ defineProps<{
 
     <div class="retro-panel-content space-y-3">
       <div class="overflow-x-auto">
-        <table class="w-full text-caption border-collapse">
+        <table aria-label="4대보험 항목별 상세" class="w-full text-caption border-collapse">
           <thead>
             <tr class="border-b-2 border-primary/20 bg-muted/40">
-              <th class="px-2 py-2 text-left font-semibold md:px-3 md:py-2.5">항목</th>
-              <th class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">근로자 요율</th>
-              <th class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">근로자(월)</th>
-              <th class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">사업주 요율</th>
-              <th class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">사업주(월)</th>
+              <th scope="col" class="px-2 py-2 text-left font-semibold md:px-3 md:py-2.5">항목</th>
+              <th scope="col" class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">근로자 요율</th>
+              <th scope="col" class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">근로자(월)</th>
+              <th scope="col" class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">사업주 요율</th>
+              <th scope="col" class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">사업주(월)</th>
             </tr>
           </thead>
           <tbody>

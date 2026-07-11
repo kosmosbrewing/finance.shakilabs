@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, useId } from "vue";
 import { formatNumber } from "@/lib/utils";
 
 type ScenarioPreset = {
@@ -31,6 +31,8 @@ const props = withDefaults(
 const emit = defineEmits<{
   "update:modelValue": [value: number];
 }>();
+
+const fieldId = useId();
 
 const displayValue = computed(() => {
   if (props.format === "decimal") {
@@ -78,7 +80,7 @@ function onRangeInput(event: Event): void {
   <div class="space-y-3">
     <div class="flex items-center justify-between gap-3">
       <div>
-        <label class="text-body font-semibold text-foreground">{{ label }}</label>
+        <label :for="fieldId" class="text-body font-semibold text-foreground">{{ label }}</label>
         <p v-if="description" class="mt-1 text-caption text-muted-foreground">
           {{ description }}
         </p>
@@ -90,6 +92,7 @@ function onRangeInput(event: Event): void {
 
     <div class="flex items-center gap-2">
       <input
+        :id="fieldId"
         :value="displayValue"
         :inputmode="format === 'decimal' ? 'decimal' : 'numeric'"
         type="text"
@@ -100,6 +103,8 @@ function onRangeInput(event: Event): void {
     </div>
 
     <input
+      :id="`${fieldId}-range`"
+      :aria-label="`${label} 범위`"
       :value="modelValue"
       :min="min"
       :max="max"

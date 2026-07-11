@@ -37,7 +37,7 @@ const rows = computed(() =>
     </div>
 
     <div class="px-2 pb-1 pt-2 md:px-0 md:pb-0 md:pt-0">
-      <table class="w-full table-fixed border-separate border-spacing-0 text-[10px] sm:text-[11px] md:text-caption">
+      <table aria-label="2026 연봉별 공제와 실수령액 비교" class="w-full table-fixed border-separate border-spacing-0 text-[10px] sm:text-[11px] md:text-caption">
         <colgroup>
           <col class="w-[29%] md:w-auto" />
           <col class="w-[24%] md:w-auto" />
@@ -46,18 +46,18 @@ const rows = computed(() =>
         </colgroup>
         <thead>
           <tr class="bg-muted/45">
-            <th class="sticky left-0 z-20 border-b-2 border-primary/20 bg-muted/60 pl-2.5 pr-1.5 py-2 text-left font-semibold sm:px-3 md:px-3 md:py-2.5">
+            <th scope="col" class="sticky left-0 z-20 border-b-2 border-primary/20 bg-muted/60 pl-2.5 pr-1.5 py-2 text-left font-semibold sm:px-3 md:px-3 md:py-2.5">
               연봉
             </th>
-            <th class="border-b-2 border-primary/20 px-1.5 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
+            <th scope="col" class="border-b-2 border-primary/20 px-1.5 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
               <span class="md:hidden">공제</span>
               <span class="hidden md:inline">월 공제 합계</span>
             </th>
-            <th class="border-b-2 border-primary/20 px-1.5 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
+            <th scope="col" class="border-b-2 border-primary/20 px-1.5 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
               <span class="md:hidden">실수령</span>
               <span class="hidden md:inline">월 실수령</span>
             </th>
-            <th class="border-b-2 border-primary/20 pl-1 pr-3 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
+            <th scope="col" class="border-b-2 border-primary/20 pl-1 pr-3 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
               <span class="md:hidden">비율</span>
               <span class="hidden md:inline">공제 비율</span>
             </th>

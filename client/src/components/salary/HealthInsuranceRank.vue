@@ -63,11 +63,11 @@ const nearestAnnualRemuneration = computed(() => {
           <span>연간 보수별 보험료 예시</span>
           <span class="retro-details-chevron" aria-hidden="true">▾</span>
         </summary>
-        <table class="w-full text-caption tabular-nums">
+        <table aria-label="연간 보수별 건강보험료 예시" class="w-full text-caption tabular-nums">
           <thead>
             <tr class="text-muted-foreground border-b border-border/50">
-              <th class="py-1.5 pl-3 text-left font-medium">연간 보수</th>
-              <th class="py-1.5 pr-3 text-right font-medium">건보료</th>
+              <th scope="col" class="py-1.5 pl-3 text-left font-medium">연간 보수</th>
+              <th scope="col" class="py-1.5 pr-3 text-right font-medium">건보료</th>
             </tr>
           </thead>
           <tbody>

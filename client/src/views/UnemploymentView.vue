@@ -1,5 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import {
+  ShButton,
+  ShTable,
+  ShTableBody,
+  ShTableCell,
+  ShTableHead,
+  ShTableHeader,
+  ShTableRow,
+} from "@shakilabs/ui";
 import SEOHead from "@/components/common/SEOHead.vue";
 import FreshBadge from "@/components/common/FreshBadge.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
@@ -74,7 +83,7 @@ const quitReasonOptions = [
             <FreshBadge message="2026년 상한액 68,100원 반영" />
           </div>
           <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div class="space-y-4">
+            <div class="min-w-0 space-y-4">
               <ScenarioField
                 v-model="monthlySalary"
                 label="퇴직 전 월급 (세전)"
@@ -107,23 +116,21 @@ const quitReasonOptions = [
               <div class="space-y-1.5">
                 <label class="text-caption font-semibold text-foreground">퇴사 사유</label>
                 <div class="flex flex-wrap gap-2">
-                  <button
+                  <ShButton
                     v-for="opt in quitReasonOptions"
                     :key="opt.value"
-                    class="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-caption font-medium text-muted-foreground transition-colors"
-                    :class="{
-                      '!bg-primary/15 !text-primary !border-primary/30': quitReason === opt.value,
-                      'hover:bg-primary/5': quitReason !== opt.value,
-                    }"
+                    :variant="quitReason === opt.value ? 'primary' : 'secondary'"
+                    size="sm"
+                    type="button"
                     @click="quitReason = opt.value"
                   >
                     {{ opt.label }}
-                  </button>
+                  </ShButton>
                 </div>
               </div>
             </div>
 
-            <div class="space-y-4">
+            <div class="min-w-0 space-y-4">
               <BenefitStatGrid
                 :items="[
                   { label: '일 수급액', value: formatWon(result.dailyBenefit), tone: result.isEligible ? 'success' : undefined },
@@ -142,28 +149,30 @@ const quitReasonOptions = [
               </div>
 
               <!-- 수급기간 참고표 -->
-              <div class="retro-panel-muted p-3">
+              <div class="retro-panel-muted min-w-0 p-3">
                 <p class="text-caption font-semibold text-foreground mb-2">수급기간 참고표 (일)</p>
-                <div class="overflow-x-auto">
-                  <table class="w-full text-[11px] text-muted-foreground">
-                    <thead>
-                      <tr class="border-b border-border/40">
-                        <th class="py-1 text-left">가입기간</th>
-                        <th class="py-1 text-right">50세 미만</th>
-                        <th class="py-1 text-right">50세 이상</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(_, bucket) in UNEMPLOYMENT_2026.durationTable.under50" :key="bucket" class="border-b border-border/20">
-                        <td class="py-1">
+                <ShTable
+                  aria-label="고용보험 가입기간별 실업급여 수급기간"
+                  density="compact"
+                  min-width="13rem"
+                >
+                  <ShTableHeader>
+                    <ShTableRow>
+                      <ShTableHead>가입기간</ShTableHead>
+                      <ShTableHead numeric>50세 미만</ShTableHead>
+                      <ShTableHead numeric>50세 이상</ShTableHead>
+                    </ShTableRow>
+                  </ShTableHeader>
+                  <ShTableBody>
+                    <ShTableRow v-for="(_, bucket) in UNEMPLOYMENT_2026.durationTable.under50" :key="bucket">
+                      <ShTableCell>
                           {{ bucket === 0 ? '1년 미만' : bucket === 1 ? '1~3년' : bucket === 3 ? '3~5년' : bucket === 5 ? '5~10년' : '10년 이상' }}
-                        </td>
-                        <td class="py-1 text-right tabular-nums">{{ UNEMPLOYMENT_2026.durationTable.under50[bucket] }}일</td>
-                        <td class="py-1 text-right tabular-nums">{{ UNEMPLOYMENT_2026.durationTable.over50[bucket] }}일</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                      </ShTableCell>
+                      <ShTableCell numeric>{{ UNEMPLOYMENT_2026.durationTable.under50[bucket] }}일</ShTableCell>
+                      <ShTableCell numeric>{{ UNEMPLOYMENT_2026.durationTable.over50[bucket] }}일</ShTableCell>
+                    </ShTableRow>
+                  </ShTableBody>
+                </ShTable>
               </div>
             </div>
           </div>
