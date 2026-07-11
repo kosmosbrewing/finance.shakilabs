@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
+import FinanceNextActions from "@/components/finance/FinanceNextActions.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import { useRoute, useRouter } from "vue-router";
-
 import InsuranceInput from "@/components/insurance/InsuranceInput.vue";
 import InsuranceResult from "@/components/insurance/InsuranceResult.vue";
 import InsuranceTable from "@/components/insurance/InsuranceTable.vue";
@@ -13,7 +13,6 @@ import DeductionChart from "@/components/salary/DeductionChart.vue";
 import SalaryCompareTable from "@/components/salary/SalaryCompareTable.vue";
 import HealthInsuranceRank from "@/components/salary/HealthInsuranceRank.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
-
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
@@ -25,7 +24,6 @@ import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { useShare } from "@/composables/useShare";
 import { DEFAULT_INSURANCE_PRESET } from "@/data/insurancePresets";
-
 import { formatManWon, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -400,6 +398,8 @@ watch(
             :calc="activeCalc"
             @share-request="handleSidebarShare"
           />
+
+          <FinanceNextActions :mode="isForwardMode ? 'salary' : 'insurance'" />
         </div>
 
         <HealthInsuranceRank :calc="activeCalc" :mode="isForwardMode ? 'salary' : 'insurance'" />
