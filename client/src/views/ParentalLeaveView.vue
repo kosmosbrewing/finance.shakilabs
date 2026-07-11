@@ -94,13 +94,13 @@ const summaryItems = computed(() => [
             <div class="space-y-2">
               <h2 class="text-body font-semibold">월별 급여 상세</h2>
               <div class="overflow-x-auto rounded-xl border">
-                <table class="w-full text-caption">
+                <table aria-label="육아휴직 월별 급여 상세" class="w-full text-caption">
                   <thead>
                     <tr class="border-b bg-muted/50">
-                      <th class="px-3 py-2 text-left font-medium">월</th>
-                      <th class="px-3 py-2 text-right font-medium">지급률</th>
-                      <th class="px-3 py-2 text-right font-medium">상한</th>
-                      <th class="px-3 py-2 text-right font-medium">수령액</th>
+                      <th scope="col" class="px-3 py-2 text-left font-medium">월</th>
+                      <th scope="col" class="px-3 py-2 text-right font-medium">지급률</th>
+                      <th scope="col" class="px-3 py-2 text-right font-medium">상한</th>
+                      <th scope="col" class="px-3 py-2 text-right font-medium">수령액</th>
                     </tr>
                   </thead>
                   <tbody>

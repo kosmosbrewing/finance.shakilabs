@@ -44,13 +44,13 @@ function diffClass(delta: number): string {
 
     <div :class="props.embedded ? '' : 'retro-panel-content'">
       <div class="overflow-x-auto">
-        <table class="w-full text-caption border-collapse">
+        <table aria-label="이직 전후 공제액 비교" class="w-full text-caption border-collapse">
           <thead>
             <tr class="border-b-2 border-primary/20 bg-muted/40">
-              <th class="px-2 py-2 text-left font-semibold md:px-3 md:py-2.5">항목</th>
-              <th class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">현재 회사</th>
-              <th class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">이직 회사</th>
-              <th class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">차이</th>
+              <th scope="col" class="px-2 py-2 text-left font-semibold md:px-3 md:py-2.5">항목</th>
+              <th scope="col" class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">현재 회사</th>
+              <th scope="col" class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">이직 회사</th>
+              <th scope="col" class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">차이</th>
             </tr>
           </thead>
           <tbody>

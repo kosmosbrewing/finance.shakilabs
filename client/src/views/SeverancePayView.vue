@@ -145,11 +145,11 @@ watch(
               <div v-if="result.isEligible" class="retro-panel-muted p-3">
                 <p class="text-caption font-semibold text-foreground mb-2">근속연수별 퇴직금 비교</p>
                 <div class="overflow-x-auto">
-                  <table class="w-full text-[11px] text-muted-foreground">
+                  <table aria-label="근속연수별 퇴직금 비교" class="w-full text-[11px] text-muted-foreground">
                     <thead>
                       <tr class="border-b border-border/40">
-                        <th class="py-1 text-left">근속연수</th>
-                        <th class="py-1 text-right">퇴직금</th>
+                        <th scope="col" class="py-1 text-left">근속연수</th>
+                        <th scope="col" class="py-1 text-right">퇴직금</th>
                       </tr>
                     </thead>
                     <tbody>
