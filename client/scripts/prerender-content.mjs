@@ -82,7 +82,7 @@ function buildSalaryContent(manWon) {
   return `
     <article data-seo-prerender="salary" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a>
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
         <a href="/finance/salary" style="color:#64748b;text-decoration:none;">연봉 실수령액 계산기</a>
         &nbsp;›&nbsp;
@@ -313,7 +313,7 @@ function buildInsuranceContent(fee) {
   return `
     <article data-seo-prerender="insurance" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a>
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
         <a href="/finance/insurance" style="color:#64748b;text-decoration:none;">건강보험료 계산기</a>
         &nbsp;›&nbsp;
@@ -532,7 +532,7 @@ function buildComprehensiveTaxContent(manWon) {
   return `
     <article data-seo-prerender="comprehensive-tax" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a>
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
         <a href="/finance/comprehensive-tax" style="color:#64748b;text-decoration:none;">종합소득세 계산기</a>
         &nbsp;›&nbsp;
@@ -706,7 +706,7 @@ function buildCompareContent(aManWon, bManWon) {
   return `
     <article data-seo-prerender="compare" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a>
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
         <a href="/finance/compare" style="color:#64748b;text-decoration:none;">이직 연봉 비교</a>
         &nbsp;›&nbsp;
@@ -860,7 +860,7 @@ function buildQuitContent(years) {
   return `
     <article data-seo-prerender="quit" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a>
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
         <a href="/finance/quit" style="color:#64748b;text-decoration:none;">퇴사 계산기</a>
         &nbsp;›&nbsp;
@@ -1025,7 +1025,7 @@ function buildUnemploymentContent(manWon) {
   return `
     <article data-seo-prerender="unemployment" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a>
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
         <a href="/finance/unemployment" style="color:#64748b;text-decoration:none;">실업급여 계산기</a>
         &nbsp;›&nbsp;
@@ -1175,7 +1175,7 @@ function buildSeverancePayContent(years) {
   return `
     <article data-seo-prerender="severance" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a>
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
         <a href="/finance/severance-pay" style="color:#64748b;text-decoration:none;">퇴직금 계산기</a>
         &nbsp;›&nbsp;
@@ -1324,7 +1324,7 @@ function buildYearEndContent(manWon) {
   return `
     <article data-seo-prerender="year-end" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a> ›
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
         <a href="/finance/year-end-settlement" style="color:#64748b;text-decoration:none;">연말정산 계산기</a> ›
         연봉 ${label}
       </nav>
@@ -1446,7 +1446,7 @@ function buildParentalLeaveContent(manWon) {
   return `
     <article data-seo-prerender="parental-leave" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a> ›
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
         <a href="/finance/parental-leave" style="color:#64748b;text-decoration:none;">육아휴직 급여</a> ›
         월급 ${formatManWonValue(manWon)}
       </nav>
@@ -1556,7 +1556,7 @@ function buildWithholdingContent(amount) {
   return `
     <article data-seo-prerender="withholding" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a> ›
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
         <a href="/finance/withholding" style="color:#64748b;text-decoration:none;">원천세 계산기</a> ›
         월 소득세 ${formatWon(amount)}
       </nav>
@@ -1605,7 +1605,7 @@ function buildWithholdingContent(amount) {
       </p>
       <h3 style="${H3_STYLE}">Q2. 월 소득세 ${formatWon(amount)}인데 실수령은 얼마?</h3>
       <p style="${P_STYLE}">
-        추정 연봉 ${formatManWonValue(estimatedManWon)}원 기준으로 <a href="/finance/salary/${estimatedManWon}">해당 연봉의 실수령액 페이지</a>에서 정확한 월 실수령을 확인할 수 있습니다.
+        추정 연봉 ${formatManWonValue(estimatedManWon)}원 기준으로 <a href="/finance/salary?gross=${estimatedAnnual}">연봉 실수령액 계산기</a>에서 정확한 월 실수령을 확인할 수 있습니다.
       </p>
       <h3 style="${H3_STYLE}">Q3. 원천징수액을 조정할 수 있나요?</h3>
       <p style="${P_STYLE}">
@@ -1639,7 +1639,7 @@ function buildWeeklyHolidayPayContent(hourly) {
   return `
     <article data-seo-prerender="weekly-holiday-pay" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a> ›
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
         <a href="/finance/weekly-holiday-pay" style="color:#64748b;text-decoration:none;">주휴수당 계산기</a> ›
         시급 ${hourly.toLocaleString("ko-KR")}원
       </nav>
@@ -1743,7 +1743,7 @@ function buildWageConverterContent(hourly) {
   return `
     <article data-seo-prerender="wage-converter" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a> ›
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
         <a href="/finance/wage-converter" style="color:#64748b;text-decoration:none;">시급 환산기</a> ›
         시급 ${hourly.toLocaleString("ko-KR")}원
       </nav>
@@ -1853,7 +1853,7 @@ function buildRegionalHealthContent(manWon) {
   return `
     <article data-seo-prerender="regional-health" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a> ›
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
         <a href="/finance/regional-health" style="color:#64748b;text-decoration:none;">지역가입자 건보료</a> ›
         월급 ${formatManWonValue(manWon)}
       </nav>
@@ -1963,7 +1963,7 @@ function buildAboutContent() {
   return `
     <article data-seo-prerender="about" style="${ARTICLE_STYLE}">
       <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/" style="color:#64748b;text-decoration:none;">홈</a> › 서비스 소개
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> › 서비스 소개
       </nav>
 
       <h1 style="${H1_STYLE}">서비스 소개 — ShakiLabs 연봉·세금 계산기</h1>
