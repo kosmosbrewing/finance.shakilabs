@@ -136,7 +136,7 @@ function updateRetirementIncluded(value: boolean): void {
           급여명세서의 <strong>건강보험(근로자 부담분)</strong>만 입력하세요.
         </p>
         <div class="space-y-2">
-          <div class="flex items-center gap-2">
+          <div class="amount-stepper flex items-center gap-2">
             <button
               type="button"
               class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
@@ -195,7 +195,7 @@ function updateRetirementIncluded(value: boolean): void {
           연봉 (원)
         </label>
         <div class="space-y-2">
-          <div class="flex items-center gap-2">
+          <div class="amount-stepper flex items-center gap-2">
             <button
               type="button"
               class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
@@ -249,7 +249,7 @@ function updateRetirementIncluded(value: boolean): void {
 
         <div>
           <span class="mb-0.5 block text-caption font-semibold text-foreground">퇴직금 포함 여부</span>
-          <div class="flex gap-2.5">
+          <div class="flex flex-wrap gap-2.5">
             <button
               type="button"
               class="touch-target rounded-xl border px-3 py-1.5 text-caption font-semibold transition-colors"

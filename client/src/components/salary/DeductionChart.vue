@@ -80,7 +80,7 @@ const chartDescription = computed(() =>
         <!-- 도넛 차트 -->
         <svg
           :viewBox="`0 0 ${SIZE} ${SIZE}`"
-          class="w-48 h-48 shrink-0"
+          class="h-auto w-[192px] max-w-full shrink-0"
           role="img"
           aria-labelledby="deduction-chart-title deduction-chart-desc"
         >

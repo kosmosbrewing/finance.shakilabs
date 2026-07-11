@@ -369,7 +369,7 @@ watch(
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="text-resize-layout container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
     <h1 class="text-h1 font-brand">{{ pageTitle }}</h1>

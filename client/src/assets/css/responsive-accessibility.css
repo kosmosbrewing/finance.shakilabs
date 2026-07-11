@@ -1,0 +1,109 @@
+@media (max-width: 400px) {
+  .text-caption,
+  .text-tiny,
+  .text-xs,
+  [class*="text-[0.6"],
+  [class*="text-[0.7"],
+  [class*="text-[10px]"],
+  [class*="text-[11px]"],
+  [class~="!text-xs"] {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .retro-details-chevron {
+    font-size: 12px !important;
+  }
+
+  main button,
+  main a[target="_blank"],
+  main a.underline,
+  main summary,
+  footer a {
+    min-height: 24px;
+  }
+
+  main a[target="_blank"],
+  main a.underline,
+  main summary,
+  footer a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  main a.whitespace-nowrap {
+    display: inline-flex;
+    min-height: 24px;
+    min-width: 24px;
+    align-items: center;
+  }
+
+  main button,
+  footer a {
+    min-width: 24px;
+  }
+
+  .text-resize-layout.container {
+    padding-inline: 12px;
+  }
+
+  .text-resize-layout .retro-panel-content,
+  .text-resize-layout .retro-titlebar {
+    padding-inline: 12px;
+  }
+
+  .text-resize-layout :is(h1, h2, h3, p, a, button, span, strong, label) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .text-resize-layout .amount-stepper {
+    gap: 8px;
+  }
+
+  .text-resize-layout .amount-stepper > button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+
+  .text-resize-layout .result-stat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .text-resize-layout .retro-stat-label,
+  .text-resize-layout .retro-stat-value {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .text-resize-layout .retro-board-item {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .text-resize-layout .retro-board-item > :last-child {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .text-resize-layout .salary-table-scroll {
+    padding-inline: 0;
+  }
+
+  .text-resize-layout section > .retro-panel-content > .grid > a {
+    padding: 12px;
+  }
+
+  .text-resize-layout section > .retro-panel-content > .grid > a > div {
+    gap: 8px;
+  }
+
+  .text-resize-layout section > .retro-panel-content > .grid > a > div > span {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+}

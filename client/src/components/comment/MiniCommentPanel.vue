@@ -24,6 +24,7 @@ const activeTab = ref<Tab>("recent");
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const error = ref("");
+const commentsEnabled = import.meta.env.PROD || import.meta.env.VITE_ENABLE_COMMENTS === "true";
 
 // 좋아요한 댓글 ID 세트 (중복 방지)
 const likedIds = ref<Set<string>>(new Set());
@@ -66,6 +67,8 @@ function saveLikedId(id: string): void {
 }
 
 async function fetchRecent(force = false): Promise<void> {
+  if (!commentsEnabled) return;
+
   const now = Date.now();
   if (!force && recentFetchedAt && now - recentFetchedAt < 30_000) return;
 
@@ -83,6 +86,8 @@ async function fetchRecent(force = false): Promise<void> {
 }
 
 async function fetchPopular(force = false): Promise<void> {
+  if (!commentsEnabled) return;
+
   const now = Date.now();
   if (!force && popularFetchedAt && now - popularFetchedAt < 30_000) return;
 
@@ -101,6 +106,7 @@ async function fetchPopular(force = false): Promise<void> {
 
 function switchTab(tab: Tab): void {
   activeTab.value = tab;
+  if (!commentsEnabled) return;
   if (tab === "recent") fetchRecent();
   else fetchPopular();
 }
@@ -215,8 +221,15 @@ onMounted(() => {
     </div>
 
     <div class="retro-panel-content space-y-2.5">
+      <p
+        v-if="!commentsEnabled"
+        class="rounded-lg border border-border bg-muted/30 px-3 py-3 text-caption leading-relaxed text-muted-foreground"
+      >
+        로컬 단독 실행에서는 댓글을 불러오지 않습니다. 백엔드 연결 시 <code>VITE_ENABLE_COMMENTS=true</code>로 활성화하세요.
+      </p>
+
       <!-- 글쓰기 영역 -->
-      <form @submit.prevent="addComment">
+      <form v-else @submit.prevent="addComment">
         <label class="mb-1 block text-tiny text-muted-foreground">익명 글쓰기</label>
         <div class="rounded-xl border border-input bg-card dark:bg-background">
           <textarea
@@ -292,7 +305,7 @@ onMounted(() => {
       </ul>
 
       <!-- 빈 상태 -->
-      <p v-else class="text-center text-caption text-muted-foreground py-4">
+      <p v-else-if="commentsEnabled" class="text-center text-caption text-muted-foreground py-4">
         첫 댓글을 남겨보세요
       </p>
     </div>

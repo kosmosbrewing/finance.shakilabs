@@ -38,8 +38,13 @@ const rows = computed(() =>
       <h2 class="retro-title">2026 연봉별 월 공제 합계·실수령·공제비율 표</h2>
     </div>
 
-    <div class="px-2 pb-1 pt-2 md:px-0 md:pb-0 md:pt-0">
-      <table aria-label="2026 연봉별 공제와 실수령액 비교" class="w-full table-fixed border-separate border-spacing-0 text-[10px] sm:text-[11px] md:text-caption">
+    <div
+      class="salary-table-scroll overflow-x-auto px-2 pb-1 pt-2 md:px-0 md:pb-0 md:pt-0"
+      role="region"
+      aria-label="건강보험료별 연봉 환산 표"
+      tabindex="0"
+    >
+      <table aria-label="건강보험료별 연봉 환산 표" class="min-w-[560px] table-fixed border-separate border-spacing-0 text-xs md:text-caption">
         <colgroup>
           <col class="w-[29%] md:w-auto" />
           <col class="w-[24%] md:w-auto" />
@@ -90,7 +95,7 @@ const rows = computed(() =>
             </td>
             <td class="border-t border-border/40 pl-1 pr-3 py-2 text-right tabular-nums sm:px-3 md:px-3 md:py-2.5">
               <span
-                class="inline-flex min-w-[52px] items-center justify-center rounded-full border px-1 py-0.5 text-[9.5px] font-semibold sm:min-w-[60px] sm:px-2 sm:text-[10.5px] md:min-w-[72px] md:text-[11px]"
+                class="inline-flex min-w-[52px] items-center justify-center rounded-full border px-1 py-0.5 text-xs font-semibold sm:min-w-[60px] sm:px-2 md:min-w-[72px]"
                 :class="deductionToneClass(row.deductionRate)"
               >
                 {{ formatPercent(row.deductionRate, 1) }}
