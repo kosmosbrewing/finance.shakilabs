@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { ShSlider } from "@shakilabs/ui";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -125,19 +125,12 @@ function updateRetirementIncluded(value: boolean): void {
             aria-label="연봉 슬라이더"
             @update:model-value="emit('update:annualGross', $event)"
           />
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="preset in salaryPresets"
-              :key="preset.value"
-              type="button"
-              class="retro-chip"
-              :class="annualGross === preset.value ? 'border-primary text-primary' : ''"
-              :aria-label="`연봉 ${preset.label}원으로 설정`"
-              @click="emit('update:annualGross', preset.value)"
-            >
-              {{ preset.label }}
-            </button>
-          </div>
+          <ShPresetGroup
+            :model-value="annualGross"
+            :options="salaryPresets"
+            label="연봉 빠른 선택"
+            @update:model-value="emit('update:annualGross', $event)"
+          />
         </div>
       </div>
 

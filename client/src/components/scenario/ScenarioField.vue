@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from "vue";
-import { ShSlider } from "@shakilabs/ui";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 type ScenarioPreset = {
@@ -109,16 +109,12 @@ function onTextInput(event: Event): void {
       @update:model-value="updateValue"
     />
 
-    <div v-if="presets.length" class="flex flex-wrap gap-2">
-      <button
-        v-for="preset in presets"
-        :key="`${label}-${preset.label}`"
-        type="button"
-        class="retro-chip whitespace-nowrap"
-        @click="updateValue(preset.value)"
-      >
-        {{ preset.label }}
-      </button>
-    </div>
+    <ShPresetGroup
+      v-if="presets.length"
+      :model-value="modelValue"
+      :options="presets"
+      :label="`${label} 빠른 선택`"
+      @update:model-value="updateValue"
+    />
   </div>
 </template>

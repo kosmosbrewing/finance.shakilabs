@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { QuitReason } from "@/data/unemploymentTable";
 import { computed, ref } from "vue";
-import { ShSlider } from "@shakilabs/ui";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -338,19 +338,12 @@ const inputIds = {
             aria-label="월급 슬라이더"
             @update:model-value="emit('update:monthlySalary', $event)"
           />
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="preset in salaryPresets"
-              :key="preset.value"
-              type="button"
-              class="retro-chip"
-              :class="monthlySalary === preset.value ? 'border-primary text-primary' : ''"
-              :aria-label="`월급 ${preset.label}원으로 설정`"
-              @click="emit('update:monthlySalary', preset.value)"
-            >
-              {{ preset.label }}
-            </button>
-          </div>
+          <ShPresetGroup
+            :model-value="monthlySalary"
+            :options="salaryPresets"
+            label="월급 빠른 선택"
+            @update:model-value="emit('update:monthlySalary', $event)"
+          />
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { ShSlider } from "@shakilabs/ui";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -124,19 +124,12 @@ const inputIds = {
             aria-label="소득세 슬라이더"
             @update:model-value="emit('update:monthlyIncomeTax', $event)"
           />
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="preset in taxPresets"
-              :key="preset.value"
-              type="button"
-              class="retro-chip"
-              :class="monthlyIncomeTax === preset.value ? 'border-primary text-primary' : ''"
-              :aria-label="`소득세 ${preset.label}원으로 설정`"
-              @click="emit('update:monthlyIncomeTax', preset.value)"
-            >
-              {{ preset.label }}
-            </button>
-          </div>
+          <ShPresetGroup
+            :model-value="monthlyIncomeTax"
+            :options="taxPresets"
+            label="월 소득세 빠른 선택"
+            @update:model-value="emit('update:monthlyIncomeTax', $event)"
+          />
         </div>
 
       </div>
