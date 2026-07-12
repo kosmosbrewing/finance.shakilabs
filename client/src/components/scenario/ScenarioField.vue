@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from "vue";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 type ScenarioPreset = {
@@ -69,11 +70,6 @@ function onTextInput(event: Event): void {
   updateValue(parseRawValue(target.value));
 }
 
-function onRangeInput(event: Event): void {
-  const target = event.target as HTMLInputElement;
-  const parsed = Number.parseFloat(target.value);
-  updateValue(Number.isFinite(parsed) ? parsed : props.min);
-}
 </script>
 
 <template>
@@ -102,28 +98,23 @@ function onRangeInput(event: Event): void {
       <span v-if="unit" class="inline-flex shrink-0 whitespace-nowrap text-caption font-semibold text-muted-foreground">{{ unit }}</span>
     </div>
 
-    <input
+    <ShSlider
       :id="`${fieldId}-range`"
       :aria-label="`${label} 범위`"
-      :value="modelValue"
+      :model-value="modelValue"
       :min="min"
       :max="max"
       :step="step"
-      type="range"
-      class="retro-range"
-      @input="onRangeInput"
+      :value-text="`${label} ${displayValue}${unit}`"
+      @update:model-value="updateValue"
     />
 
-    <div v-if="presets.length" class="flex flex-wrap gap-2">
-      <button
-        v-for="preset in presets"
-        :key="`${label}-${preset.label}`"
-        type="button"
-        class="retro-chip whitespace-nowrap"
-        @click="updateValue(preset.value)"
-      >
-        {{ preset.label }}
-      </button>
-    </div>
+    <ShPresetGroup
+      v-if="presets.length"
+      :model-value="modelValue"
+      :options="presets"
+      :label="`${label} 빠른 선택`"
+      @update:model-value="updateValue"
+    />
   </div>
 </template>

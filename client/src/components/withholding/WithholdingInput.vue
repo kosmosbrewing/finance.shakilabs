@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -52,13 +53,6 @@ function updateDependents(value: number): void {
 function updateChildren(value: number): void {
   const maxChildren = Math.max(0, props.dependents - 1);
   emit("update:childrenUnder20", Math.max(0, Math.min(maxChildren, Math.floor(value || 0))));
-}
-
-function onTaxRangeInput(event: Event): void {
-  const value = parseInt((event.target as HTMLInputElement).value, 10);
-  if (Number.isFinite(value)) {
-    emit("update:monthlyIncomeTax", Math.max(0, Math.min(MAX_TAX, value)));
-  }
 }
 
 const taxPresets = [
@@ -120,30 +114,22 @@ const inputIds = {
               +
             </button>
           </div>
-          <input
+          <ShSlider
             :id="inputIds.monthlyIncomeTaxRange"
-            :value="monthlyIncomeTax"
-            type="range"
-            min="0"
-            max="10000000"
-            step="5000"
-            class="retro-range"
+            :model-value="monthlyIncomeTax"
+            :min="0"
+            :max="MAX_TAX"
+            :step="5_000"
+            :value-text="`월 소득세 ${formattedTax}원`"
             aria-label="소득세 슬라이더"
-            @input="onTaxRangeInput"
+            @update:model-value="emit('update:monthlyIncomeTax', $event)"
           />
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="preset in taxPresets"
-              :key="preset.value"
-              type="button"
-              class="retro-chip"
-              :class="monthlyIncomeTax === preset.value ? 'border-primary text-primary' : ''"
-              :aria-label="`소득세 ${preset.label}원으로 설정`"
-              @click="emit('update:monthlyIncomeTax', preset.value)"
-            >
-              {{ preset.label }}
-            </button>
-          </div>
+          <ShPresetGroup
+            :model-value="monthlyIncomeTax"
+            :options="taxPresets"
+            label="월 소득세 빠른 선택"
+            @update:model-value="emit('update:monthlyIncomeTax', $event)"
+          />
         </div>
 
       </div>

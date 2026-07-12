@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { QuitReason } from "@/data/unemploymentTable";
 import { computed, ref } from "vue";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -242,13 +243,6 @@ function updateChildren(value: number): void {
   emit("update:childrenUnder20", clampInt(value, 0, maxChildren));
 }
 
-function onSalaryRangeInput(event: Event): void {
-  const value = parseInt((event.target as HTMLInputElement).value, 10);
-  if (Number.isFinite(value)) {
-    emit("update:monthlySalary", value);
-  }
-}
-
 const inputIds = {
   monthlySalary: "quit-monthly-salary",
   monthlySalaryRange: "quit-monthly-salary-range",
@@ -334,30 +328,22 @@ const inputIds = {
               +
             </button>
           </div>
-          <input
+          <ShSlider
             :id="inputIds.monthlySalaryRange"
-            :value="monthlySalary"
-            type="range"
-            min="1000000"
-            max="20000000"
-            step="100000"
-            class="retro-range"
+            :model-value="monthlySalary"
+            :min="1_000_000"
+            :max="20_000_000"
+            :step="100_000"
+            :value-text="`월급 ${formattedSalary}원`"
             aria-label="월급 슬라이더"
-            @input="onSalaryRangeInput"
+            @update:model-value="emit('update:monthlySalary', $event)"
           />
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="preset in salaryPresets"
-              :key="preset.value"
-              type="button"
-              class="retro-chip"
-              :class="monthlySalary === preset.value ? 'border-primary text-primary' : ''"
-              :aria-label="`월급 ${preset.label}원으로 설정`"
-              @click="emit('update:monthlySalary', preset.value)"
-            >
-              {{ preset.label }}
-            </button>
-          </div>
+          <ShPresetGroup
+            :model-value="monthlySalary"
+            :options="salaryPresets"
+            label="월급 빠른 선택"
+            @update:model-value="emit('update:monthlySalary', $event)"
+          />
         </div>
       </div>
 
