@@ -9,8 +9,8 @@ import {
   ShTableHeader,
   ShTableRow,
 } from "@shakilabs/ui";
+import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
@@ -72,18 +72,15 @@ const quitReasonOptions = [
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(unemploymentFaqs)" />
 
+    <CalculatorPageHeader title="2026 실업급여 계산기" />
+
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">
-        <div class="retro-panel overflow-hidden">
+        <section class="retro-panel overflow-hidden" aria-labelledby="unemployment-input-title">
           <div class="retro-titlebar rounded-t-2xl">
-            <div class="space-y-1">
-              <h1 class="retro-title">실업급여 계산기</h1>
-              <p class="text-caption text-muted-foreground">월급과 고용보험 가입기간을 입력하면 구직급여 수급액과 수급기간을 계산합니다.</p>
-            </div>
-            <FreshBadge message="2026년 상한액 68,100원 반영" />
+            <h2 id="unemployment-input-title" class="retro-title">수급 조건 입력</h2>
           </div>
-          <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div class="min-w-0 space-y-4">
+          <div class="retro-panel-content min-w-0 space-y-5">
               <ScenarioField
                 v-model="monthlySalary"
                 label="퇴직 전 월급 (세전)"
@@ -128,55 +125,55 @@ const quitReasonOptions = [
                   </ShButton>
                 </div>
               </div>
+          </div>
+        </section>
+
+        <section class="retro-panel overflow-hidden" aria-labelledby="unemployment-result-title">
+          <div class="retro-titlebar rounded-t-2xl">
+            <h2 id="unemployment-result-title" class="retro-title">실업급여 예상 결과</h2>
+          </div>
+          <div class="retro-panel-content min-w-0 space-y-4">
+            <BenefitStatGrid
+              class="min-[360px]:!grid-cols-2"
+              :items="[
+                { label: '일 수급액', value: formatWon(result.dailyBenefit), tone: result.isEligible ? 'success' : undefined },
+                { label: '수급 기간', value: result.isEligible ? `${result.durationDays}일` : '-' },
+                { label: '총 예상 수급액', value: formatWon(result.totalBenefit), tone: result.isEligible ? 'success' : undefined },
+                { label: '수급 종료일', value: result.endDateLabel },
+              ]"
+            />
+
+            <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
+              <p v-if="!result.isEligible" class="font-semibold text-status-danger">
+                자발적 퇴사는 원칙적으로 실업급여 수급 대상이 아닙니다. 정당한 사유가 있으면 고용센터에 문의하세요.
+              </p>
+              <p>2026년 구직급여 일 상한액 {{ formatWon(UNEMPLOYMENT_2026.dailyMax) }}, 하한액 {{ formatWon(UNEMPLOYMENT_2026.dailyMin) }}이 적용됩니다.</p>
+              <p>실제 수급액은 이직확인서 기준 평균임금과 고용센터 심사에 따라 달라질 수 있습니다.</p>
             </div>
 
-            <div class="min-w-0 space-y-4">
-              <BenefitStatGrid
-                :items="[
-                  { label: '일 수급액', value: formatWon(result.dailyBenefit), tone: result.isEligible ? 'success' : undefined },
-                  { label: '수급 기간', value: result.isEligible ? `${result.durationDays}일` : '-' },
-                  { label: '총 예상 수급액', value: formatWon(result.totalBenefit), tone: result.isEligible ? 'success' : undefined },
-                  { label: '수급 종료일', value: result.endDateLabel },
-                ]"
-              />
-
-              <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
-                <p v-if="!result.isEligible" class="font-semibold text-status-danger">
-                  자발적 퇴사는 원칙적으로 실업급여 수급 대상이 아닙니다. 정당한 사유가 있으면 고용센터에 문의하세요.
-                </p>
-                <p>2026년 구직급여 일 상한액 {{ formatWon(UNEMPLOYMENT_2026.dailyMax) }}, 하한액 {{ formatWon(UNEMPLOYMENT_2026.dailyMin) }}이 적용됩니다.</p>
-                <p>실제 수급액은 이직확인서 기준 평균임금과 고용센터 심사에 따라 달라질 수 있습니다.</p>
-              </div>
-
-              <!-- 수급기간 참고표 -->
-              <div class="retro-panel-muted min-w-0 p-3">
-                <p class="text-caption font-semibold text-foreground mb-2">수급기간 참고표 (일)</p>
-                <ShTable
-                  aria-label="고용보험 가입기간별 실업급여 수급기간"
-                  density="compact"
-                  min-width="13rem"
-                >
-                  <ShTableHeader>
-                    <ShTableRow>
-                      <ShTableHead>가입기간</ShTableHead>
-                      <ShTableHead numeric>50세 미만</ShTableHead>
-                      <ShTableHead numeric>50세 이상</ShTableHead>
-                    </ShTableRow>
-                  </ShTableHeader>
-                  <ShTableBody>
-                    <ShTableRow v-for="(_, bucket) in UNEMPLOYMENT_2026.durationTable.under50" :key="bucket">
-                      <ShTableCell>
-                          {{ bucket === 0 ? '1년 미만' : bucket === 1 ? '1~3년' : bucket === 3 ? '3~5년' : bucket === 5 ? '5~10년' : '10년 이상' }}
-                      </ShTableCell>
-                      <ShTableCell numeric>{{ UNEMPLOYMENT_2026.durationTable.under50[bucket] }}일</ShTableCell>
-                      <ShTableCell numeric>{{ UNEMPLOYMENT_2026.durationTable.over50[bucket] }}일</ShTableCell>
-                    </ShTableRow>
-                  </ShTableBody>
-                </ShTable>
-              </div>
+            <div class="retro-panel-muted min-w-0 p-3">
+              <p class="mb-2 text-caption font-semibold text-foreground">수급기간 참고표 (일)</p>
+              <ShTable aria-label="고용보험 가입기간별 실업급여 수급기간" density="compact" min-width="13rem">
+                <ShTableHeader>
+                  <ShTableRow>
+                    <ShTableHead>가입기간</ShTableHead>
+                    <ShTableHead numeric>50세 미만</ShTableHead>
+                    <ShTableHead numeric>50세 이상</ShTableHead>
+                  </ShTableRow>
+                </ShTableHeader>
+                <ShTableBody>
+                  <ShTableRow v-for="(_, bucket) in UNEMPLOYMENT_2026.durationTable.under50" :key="bucket">
+                    <ShTableCell>
+                      {{ bucket === 0 ? '1년 미만' : bucket === 1 ? '1~3년' : bucket === 3 ? '3~5년' : bucket === 5 ? '5~10년' : '10년 이상' }}
+                    </ShTableCell>
+                    <ShTableCell numeric>{{ UNEMPLOYMENT_2026.durationTable.under50[bucket] }}일</ShTableCell>
+                    <ShTableCell numeric>{{ UNEMPLOYMENT_2026.durationTable.over50[bucket] }}일</ShTableCell>
+                  </ShTableRow>
+                </ShTableBody>
+              </ShTable>
             </div>
           </div>
-        </div>
+        </section>
 
         <BenefitFaqPanel :items="unemploymentFaqs" />
         <InternalLink current="unemployment" />

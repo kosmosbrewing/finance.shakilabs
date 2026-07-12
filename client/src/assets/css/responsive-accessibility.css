@@ -1,3 +1,8 @@
+.tabular-nums {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
 @media (max-width: 400px) {
   .text-caption,
   .text-tiny,
@@ -43,7 +48,8 @@
     min-width: 24px;
   }
 
-  .text-resize-layout.container {
+  .text-resize-layout.container,
+  .text-resize-layout .container {
     padding-inline: 12px;
   }
 
@@ -52,9 +58,28 @@
     padding-inline: 12px;
   }
 
-  .text-resize-layout :is(h1, h2, h3, p, a, button, span, strong, label) {
+  .text-resize-layout .retro-titlebar,
+  .text-resize-layout .retro-titlebar > div {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .text-resize-layout .insurance-result-title {
+    overflow-wrap: normal;
+    word-break: keep-all;
+  }
+
+  .text-resize-layout :is(h1, h2, h3, h4) {
+    min-width: 0;
+    overflow-wrap: break-word;
+    text-wrap-style: balance;
+    word-break: keep-all;
+  }
+
+  .text-resize-layout :is(p, li, dt, dd) {
     min-width: 0;
     overflow-wrap: anywhere;
+    text-wrap-style: pretty;
   }
 
   .text-resize-layout .amount-stepper {
@@ -71,11 +96,61 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .text-resize-layout .retro-stat-label,
-  .text-resize-layout .retro-stat-value {
+  .text-resize-layout .retro-stat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .text-resize-layout .sh-text--label {
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  footer .sh-text--label {
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  .text-resize-layout p.text-display.font-bold {
+    font-size: clamp(1rem, 9vw, 2.5rem);
+    line-height: 1.15;
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+
+  .text-resize-layout .text-h2.tabular-nums {
+    font-size: clamp(0.9375rem, 7vw, 1.5rem);
+    line-height: 1.2;
+  }
+
+  .text-resize-layout .retro-panel-content > .flex:has(> button.flex-1) {
+    flex-wrap: wrap;
+  }
+
+  .text-resize-layout button.flex-1 {
+    flex-basis: 100%;
+  }
+
+  .text-resize-layout button.inline-flex,
+  .text-resize-layout button.retro-button {
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+
+  .text-resize-layout .retro-stat-label {
     overflow: visible;
     text-overflow: clip;
     white-space: normal;
+  }
+
+  .text-resize-layout .retro-stat-value {
+    overflow: visible;
+    overflow-wrap: normal;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .retro-link[href^="mailto:"] {
+    overflow-wrap: anywhere;
   }
 
   .text-resize-layout .retro-board-item {

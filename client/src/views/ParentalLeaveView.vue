@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
@@ -13,7 +13,6 @@ import {
   PARENTAL_LEAVE_FAQS,
   PARENTAL_LEAVE_SALARY_PRESETS,
   PARENTAL_LEAVE_TYPE_LABELS,
-  PARENTAL_LEAVE_UPDATED,
   type ParentalLeaveType,
 } from "@/data/parentalLeave";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
@@ -51,24 +50,15 @@ const summaryItems = computed(() => [
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDesc" :json-ld="buildFaqJsonLd(PARENTAL_LEAVE_FAQS)" />
 
+    <CalculatorPageHeader title="2026 육아휴직 급여 계산기" />
+
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">
-        <div class="retro-panel overflow-hidden">
+        <section class="retro-panel overflow-hidden" aria-labelledby="parental-leave-input-title">
           <div class="retro-titlebar rounded-t-2xl">
-            <div class="space-y-1">
-              <h1 class="retro-title">육아휴직 급여 계산기</h1>
-              <p class="text-caption text-muted-foreground">
-                통상임금과 휴직 기간을 입력하면 월별 급여와 총 수령액을 계산합니다.
-              </p>
-            </div>
-            <FreshBadge :message="`${PARENTAL_LEAVE_UPDATED} 기준`" />
+            <h2 id="parental-leave-input-title" class="retro-title">육아휴직 조건 입력</h2>
           </div>
-
-          <div class="retro-panel-content space-y-6">
-            <!-- 결과 요약 -->
-            <BenefitStatGrid :items="summaryItems" />
-
-            <!-- 입력 -->
+          <div class="retro-panel-content space-y-5">
             <div class="grid gap-4 sm:grid-cols-2">
               <ScenarioField v-model="calc.monthlyWage.value" label="통상임금 (월)" unit="원" :min="700_000" :max="10_000_000" :step="100_000" format="currency" :presets="PARENTAL_LEAVE_SALARY_PRESETS" />
               <ScenarioField v-model="calc.months.value" label="휴직 기간" unit="개월" :min="1" :max="12" :step="1" />
@@ -83,18 +73,27 @@ const summaryItems = computed(() => [
                   type="button"
                   class="rounded-full border px-3 py-1.5 text-caption transition-colors"
                   :class="calc.leaveType.value === opt.value ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border text-muted-foreground hover:border-primary/50'"
+                  :aria-pressed="calc.leaveType.value === opt.value"
                   @click="calc.leaveType.value = opt.value"
                 >
                   {{ opt.label }}
                 </button>
               </div>
             </div>
+          </div>
+        </section>
 
-            <!-- 월별 상세 -->
+        <section class="retro-panel overflow-hidden" aria-labelledby="parental-leave-result-title">
+          <div class="retro-titlebar rounded-t-2xl">
+            <h2 id="parental-leave-result-title" class="retro-title">육아휴직 예상 결과</h2>
+          </div>
+          <div class="retro-panel-content space-y-5">
+            <BenefitStatGrid :items="summaryItems" class="min-[360px]:!grid-cols-2" />
+
             <div class="space-y-2">
               <h2 class="text-body font-semibold">월별 급여 상세</h2>
               <div class="overflow-x-auto rounded-xl border">
-                <table aria-label="육아휴직 월별 급여 상세" class="w-full text-caption">
+                <table aria-label="육아휴직 월별 급여 상세" class="w-max min-w-full whitespace-nowrap text-caption">
                   <thead>
                     <tr class="border-b bg-muted/50">
                       <th scope="col" class="px-3 py-2 text-left font-medium">월</th>
@@ -130,7 +129,7 @@ const summaryItems = computed(() => [
               <p>실제 급여는 고용보험 가입기간, 지급 심사 결과에 따라 달라질 수 있습니다.</p>
             </div>
           </div>
-        </div>
+        </section>
 
         <BenefitFaqPanel :items="PARENTAL_LEAVE_FAQS" />
         <InternalLink current="parental-leave" />

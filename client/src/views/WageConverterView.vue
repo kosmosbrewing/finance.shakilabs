@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
@@ -19,27 +19,18 @@ import { formatWon } from "@/lib/utils";
 import { calculateWageConversion, type WageConverterInput } from "@/utils/laborCalculator";
 
 const props = defineProps<{ initialHourlyWage?: number }>();
-
 const base = ref<WageConverterInput["base"]>("hourly");
 const amount = ref(props.initialHourlyWage ?? 10_320);
 const weeklyWorkHours = ref(40);
 const includeWeeklyHoliday = ref(true);
-
 const result = computed(() =>
   calculateWageConversion({
-    base: base.value,
-    amount: amount.value,
+    base: base.value, amount: amount.value,
     weeklyWorkHours: weeklyWorkHours.value,
     includeWeeklyHoliday: includeWeeklyHoliday.value,
   }),
 );
-
-const baseOptions = [
-  { label: "시급", value: "hourly" as const },
-  { label: "월급", value: "monthly" as const },
-  { label: "연봉", value: "annual" as const },
-];
-
+const baseOptions = [{ label: "시급", value: "hourly" as const }, { label: "월급", value: "monthly" as const }, { label: "연봉", value: "annual" as const }];
 function onBaseChange(newBase: WageConverterInput["base"]) {
   base.value = newBase;
   if (newBase === "hourly") amount.value = 10_320;
@@ -93,107 +84,102 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(wageConverterFaqs)" />
 
+    <CalculatorPageHeader title="2026 시급·월급·연봉 환산기" />
+
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">
-        <div class="retro-panel overflow-hidden">
+        <section class="retro-panel overflow-hidden" aria-labelledby="wage-converter-input-title">
           <div class="retro-titlebar rounded-t-2xl">
-            <div class="space-y-1">
-              <h1 class="retro-title">시급 ↔ 월급 ↔ 연봉 환산기</h1>
-              <p class="text-caption text-muted-foreground">시급·월급·연봉 중 하나를 입력하면 나머지를 자동 환산합니다.</p>
-            </div>
-            <FreshBadge message="2026 최저시급 반영" />
+            <h2 id="wage-converter-input-title" class="retro-title">환산 조건 입력</h2>
           </div>
-          <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div class="space-y-4">
-              <div class="space-y-1.5">
-                <label class="text-caption font-semibold text-foreground">입력 기준</label>
-                <div class="flex flex-wrap gap-2">
-                  <button
-                    v-for="opt in baseOptions"
-                    :key="opt.value"
-                    class="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-caption font-medium text-muted-foreground transition-colors"
-                    :class="{
-                      '!bg-primary/15 !text-primary !border-primary/30': base === opt.value,
-                      'hover:bg-primary/5': base !== opt.value,
-                    }"
-                    @click="onBaseChange(opt.value)"
-                  >
-                    {{ opt.label }}
-                  </button>
-                </div>
-              </div>
-
-              <ScenarioField
-                v-model="amount"
-                :label="base === 'hourly' ? '시급' : base === 'monthly' ? '월급' : '연봉'"
-                unit="원"
-                :min="base === 'hourly' ? 1_000 : base === 'monthly' ? 500_000 : 10_000_000"
-                :max="base === 'hourly' ? 200_000 : base === 'monthly' ? 50_000_000 : 600_000_000"
-                :step="base === 'hourly' ? 100 : base === 'monthly' ? 100_000 : 1_000_000"
-                format="currency"
-                :presets="
-                  base === 'hourly'
-                    ? [{ label: '최저 10,320', value: 10_320 }, { label: '15,000', value: 15_000 }, { label: '20,000', value: 20_000 }]
-                    : base === 'monthly'
-                      ? [{ label: '250만', value: 2_500_000 }, { label: '300만', value: 3_000_000 }, { label: '400만', value: 4_000_000 }]
-                      : [{ label: '3000만', value: 30_000_000 }, { label: '3600만', value: 36_000_000 }, { label: '5000만', value: 50_000_000 }]
-                "
-              />
-
-              <ScenarioField
-                v-model="weeklyWorkHours"
-                label="주 근무시간"
-                unit="시간"
-                :min="15"
-                :max="52"
-                :presets="[
-                  { label: '20시간', value: 20 },
-                  { label: '35시간', value: 35 },
-                  { label: '40시간', value: 40 },
-                ]"
-              />
-
-              <div class="space-y-1.5">
-                <label class="text-caption font-semibold text-foreground">주휴수당 포함</label>
-                <div class="flex flex-wrap gap-2">
-                  <button
-                    v-for="opt in [{ label: '포함', value: true }, { label: '미포함', value: false }]"
-                    :key="String(opt.value)"
-                    class="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-caption font-medium text-muted-foreground transition-colors"
-                    :class="{
-                      '!bg-primary/15 !text-primary !border-primary/30': includeWeeklyHoliday === opt.value,
-                      'hover:bg-primary/5': includeWeeklyHoliday !== opt.value,
-                    }"
-                    @click="includeWeeklyHoliday = opt.value"
-                  >
-                    {{ opt.label }}
-                  </button>
-                </div>
+          <div class="retro-panel-content space-y-5">
+            <div class="space-y-1.5">
+              <label class="text-caption font-semibold text-foreground">입력 기준</label>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="opt in baseOptions"
+                  :key="opt.value"
+                  type="button"
+                  class="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-caption font-medium text-muted-foreground transition-colors"
+                  :class="{
+                    '!bg-primary/15 !text-primary !border-primary/30': base === opt.value,
+                    'hover:bg-primary/5': base !== opt.value,
+                  }"
+                  :aria-pressed="base === opt.value"
+                  @click="onBaseChange(opt.value)"
+                >
+                  {{ opt.label }}
+                </button>
               </div>
             </div>
 
-            <div class="space-y-4">
-              <BenefitStatGrid
-                :items="[
-                  { label: '시급', value: formatWon(result.hourly), tone: base === 'hourly' ? undefined : 'success' },
-                  { label: '일급 (8시간)', value: formatWon(result.daily) },
-                  { label: '월급', value: formatWon(result.monthly), tone: base === 'monthly' ? undefined : 'success' },
-                  { label: '연봉', value: formatWon(result.annual), tone: base === 'annual' ? undefined : 'success' },
-                ]"
-              />
+            <ScenarioField
+              v-model="amount"
+              :label="base === 'hourly' ? '시급' : base === 'monthly' ? '월급' : '연봉'"
+              unit="원"
+              :min="base === 'hourly' ? 1_000 : base === 'monthly' ? 500_000 : 10_000_000"
+              :max="base === 'hourly' ? 200_000 : base === 'monthly' ? 50_000_000 : 600_000_000"
+              :step="base === 'hourly' ? 100 : base === 'monthly' ? 100_000 : 1_000_000"
+              format="currency"
+              :presets="
+                base === 'hourly'
+                  ? [{ label: '최저 10,320', value: 10_320 }, { label: '15,000', value: 15_000 }, { label: '20,000', value: 20_000 }]
+                  : base === 'monthly'
+                    ? [{ label: '250만', value: 2_500_000 }, { label: '300만', value: 3_000_000 }, { label: '400만', value: 4_000_000 }]
+                    : [{ label: '3000만', value: 30_000_000 }, { label: '3600만', value: 36_000_000 }, { label: '5000만', value: 50_000_000 }]
+              "
+            />
 
-              <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
-                <p>
-                  유효 주 시간: <span class="font-semibold text-foreground">{{ result.effectiveWeeklyHours }}시간</span>
-                  <span v-if="includeWeeklyHoliday"> (근무 {{ weeklyWorkHours }} + 주휴 8)</span>
-                </p>
-                <p>월 환산 시간: <span class="font-semibold text-foreground">{{ result.monthlyHours }}시간</span></p>
-                <p>* 1개월 = 4.345주 (365 ÷ 12 ÷ 7) 기준 간이 계산입니다.</p>
-                <Button class="w-full" @click="openShare">결과 공유</Button>
+            <ScenarioField v-model="weeklyWorkHours" label="주 근무시간" unit="시간" :min="15" :max="52" :presets="[{ label: '20시간', value: 20 }, { label: '35시간', value: 35 }, { label: '40시간', value: 40 }]" />
+
+            <div class="space-y-1.5">
+              <label class="text-caption font-semibold text-foreground">주휴수당 포함</label>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="opt in [{ label: '포함', value: true }, { label: '미포함', value: false }]"
+                  :key="String(opt.value)"
+                  type="button"
+                  class="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-caption font-medium text-muted-foreground transition-colors"
+                  :class="{
+                    '!bg-primary/15 !text-primary !border-primary/30': includeWeeklyHoliday === opt.value,
+                    'hover:bg-primary/5': includeWeeklyHoliday !== opt.value,
+                  }"
+                  :aria-pressed="includeWeeklyHoliday === opt.value"
+                  @click="includeWeeklyHoliday = opt.value"
+                >
+                  {{ opt.label }}
+                </button>
               </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        <section class="retro-panel overflow-hidden" aria-labelledby="wage-converter-result-title">
+          <div class="retro-titlebar rounded-t-2xl">
+            <h2 id="wage-converter-result-title" class="retro-title">임금 환산 결과</h2>
+          </div>
+          <div class="retro-panel-content space-y-4">
+            <BenefitStatGrid
+              class="min-[360px]:!grid-cols-2"
+              :items="[
+                { label: '시급', value: formatWon(result.hourly), tone: base === 'hourly' ? undefined : 'success' },
+                { label: '일급 (8시간)', value: formatWon(result.daily) },
+                { label: '월급', value: formatWon(result.monthly), tone: base === 'monthly' ? undefined : 'success' },
+                { label: '연봉', value: formatWon(result.annual), tone: base === 'annual' ? undefined : 'success' },
+              ]"
+            />
+
+            <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
+              <p>
+                유효 주 시간: <span class="font-semibold text-foreground">{{ result.effectiveWeeklyHours }}시간</span>
+                <span v-if="includeWeeklyHoliday"> (근무 {{ weeklyWorkHours }} + 주휴 8)</span>
+              </p>
+              <p>월 환산 시간: <span class="font-semibold text-foreground">{{ result.monthlyHours }}시간</span></p>
+              <p>* 1개월 = 4.345주 (365 ÷ 12 ÷ 7) 기준 간이 계산입니다.</p>
+              <Button class="w-full" @click="openShare">결과 공유</Button>
+            </div>
+          </div>
+        </section>
 
         <BenefitFaqPanel :items="wageConverterFaqs" />
         <InternalLink current="wage-converter" />

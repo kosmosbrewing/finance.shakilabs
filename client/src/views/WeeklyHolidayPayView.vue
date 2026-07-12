@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
@@ -76,18 +76,15 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(weeklyHolidayPayFaqs)" />
 
+    <CalculatorPageHeader title="2026 주휴수당 계산기" />
+
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">
-        <div class="retro-panel overflow-hidden">
+        <section class="retro-panel overflow-hidden" aria-labelledby="weekly-pay-input-title">
           <div class="retro-titlebar rounded-t-2xl">
-            <div class="space-y-1">
-              <h1 class="retro-title">주휴수당 계산기</h1>
-              <p class="text-caption text-muted-foreground">시급과 주 근무 조건을 입력하면 주휴수당, 실질 시급, 예상 월급을 계산합니다.</p>
-            </div>
-            <FreshBadge message="2026 최저시급 반영" />
+            <h2 id="weekly-pay-input-title" class="retro-title">근무 조건 입력</h2>
           </div>
-          <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div class="space-y-4">
+          <div class="retro-panel-content space-y-5">
               <ScenarioField
                 v-model="hourlyWage"
                 label="시급"
@@ -128,38 +125,43 @@ watch(
                   { label: '8시간', value: 8 },
                 ]"
               />
-            </div>
+          </div>
+        </section>
 
-            <div class="space-y-4">
-              <BenefitStatGrid
-                :items="[
-                  { label: '주휴수당', value: formatWon(result.weeklyHolidayPay), tone: result.isEligible ? 'success' : undefined },
-                  { label: '실질 시급', value: formatWon(result.effectiveHourlyWage), tone: result.isEligible ? 'success' : undefined },
-                  { label: '예상 월급', value: formatWon(result.estimatedMonthlyPay) },
-                  { label: '주 근무시간', value: `${result.weeklyHours}시간` },
-                ]"
-              />
+        <section class="retro-panel overflow-hidden" aria-labelledby="weekly-pay-result-title">
+          <div class="retro-titlebar rounded-t-2xl">
+            <h2 id="weekly-pay-result-title" class="retro-title">주휴수당 예상 결과</h2>
+          </div>
+          <div class="retro-panel-content space-y-4">
+            <BenefitStatGrid
+              class="min-[360px]:!grid-cols-2"
+              :items="[
+                { label: '주휴수당', value: formatWon(result.weeklyHolidayPay), tone: result.isEligible ? 'success' : undefined },
+                { label: '실질 시급', value: formatWon(result.effectiveHourlyWage), tone: result.isEligible ? 'success' : undefined },
+                { label: '예상 월급', value: formatWon(result.estimatedMonthlyPay) },
+                { label: '주 근무시간', value: `${result.weeklyHours}시간` },
+              ]"
+            />
 
-              <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
-                <p v-if="!result.isEligible" class="font-semibold text-status-danger">
-                  주 {{ result.weeklyHours }}시간 근무로 15시간 미만이므로 주휴수당이 발생하지 않습니다.
+            <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
+              <p v-if="!result.isEligible" class="font-semibold text-status-danger">
+                주 {{ result.weeklyHours }}시간 근무로 15시간 미만이므로 주휴수당이 발생하지 않습니다.
+              </p>
+              <template v-else>
+                <p>
+                  주휴수당 포함 시 월급은
+                  <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.estimatedMonthlyPay) }}</span>이며,
+                  미포함 대비 매월
+                  <span class="font-semibold text-status-success tabular-nums">+{{ formatWon(result.monthlyDifference) }}</span>
+                  차이가 납니다.
                 </p>
-                <template v-else>
-                  <p>
-                    주휴수당 포함 시 월급은
-                    <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.estimatedMonthlyPay) }}</span>이며,
-                    미포함 대비 매월
-                    <span class="font-semibold text-status-success tabular-nums">+{{ formatWon(result.monthlyDifference) }}</span>
-                    차이가 납니다.
-                  </p>
-                  <p>주급(주휴수당 미포함): {{ formatWon(result.weeklyWage) }}</p>
-                </template>
-                <p>* 월급 = (주급 + 주휴수당) × 4.345주 기준 간이 계산입니다.</p>
-                <Button class="w-full" @click="openShare">결과 공유</Button>
-              </div>
+                <p>주급(주휴수당 미포함): {{ formatWon(result.weeklyWage) }}</p>
+              </template>
+              <p>* 월급 = (주급 + 주휴수당) × 4.345주 기준 간이 계산입니다.</p>
+              <Button class="w-full" @click="openShare">결과 공유</Button>
             </div>
           </div>
-        </div>
+        </section>
 
         <BenefitFaqPanel :items="weeklyHolidayPayFaqs" />
         <InternalLink current="weekly-holiday-pay" />

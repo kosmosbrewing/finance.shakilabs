@@ -150,7 +150,7 @@ const incomeTypeOptions = [
               <ScenarioChipGroup v-if="incomeType === 'business'" v-model="industryKey" label="업종 경비율" :options="industryOptions" />
             </div>
             <div class="space-y-4">
-              <div class="retro-stat-grid sm:grid-cols-2">
+              <div class="retro-stat-grid">
                 <div class="retro-stat">
                   <p class="retro-stat-label">월 청구액</p>
                   <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.monthlyInvoice) }}</p>

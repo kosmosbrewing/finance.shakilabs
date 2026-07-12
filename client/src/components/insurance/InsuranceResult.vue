@@ -94,7 +94,7 @@ onUnmounted(() => {
 <template>
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
-      <h2 class="retro-title-brand">{{ title }}</h2>
+      <h2 class="insurance-result-title retro-title-brand">{{ title }}</h2>
       <SectionShareButton class="min-h-[44px]" @click="emit('shareRequest')" />
     </div>
 

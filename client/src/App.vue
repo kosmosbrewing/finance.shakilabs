@@ -83,7 +83,9 @@ function reloadPage(): void {
     </section>
     <RouterView v-else v-slot="{ Component, route }">
       <Transition name="page-fade" mode="out-in">
-        <component :is="Component" :key="getPageGroup(route.path)" />
+        <div :key="getPageGroup(route.path)" class="text-resize-layout">
+          <component :is="Component" />
+        </div>
       </Transition>
     </RouterView>
     <AlertHost />
