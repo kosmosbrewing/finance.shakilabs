@@ -9,6 +9,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import { Button } from "@/components/ui/button";
 import InternalLink from "@/components/common/InternalLink.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
+import ComparisonBars from "@/components/result-visualization/ComparisonBars.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
 import { normalizeRaiseInput } from "@/lib/validators";
@@ -50,6 +51,11 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateRaiseImpact(input.value));
+const comparisonMetrics = computed(() => [
+  { key: "gross", label: "월 급여", before: result.value.current.monthlyGross, after: result.value.next.monthlyGross },
+  { key: "net", label: "월 실수령", before: result.value.current.monthlyNet, after: result.value.next.monthlyNet },
+  { key: "deduction", label: "월 공제", before: result.value.current.totalDeduction, after: result.value.next.totalDeduction },
+]);
 const seoTitle = computed(() => "2026 연봉 인상률 계산기 | 연봉 협상 실수령액 비교");
 const seoDescription = computed(
   () =>
@@ -147,6 +153,13 @@ watch(
                   <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">+{{ formatWon(result.annualNetDiff) }}</p>
                 </div>
               </div>
+
+              <ComparisonBars
+                :metrics="comparisonMetrics"
+                before-label="현재"
+                after-label="협상 후"
+                :format-value="formatWon"
+              />
 
               <div class="retro-panel-muted retro-panel-content space-y-3">
                 <p class="text-body font-semibold text-foreground">핵심 해석</p>

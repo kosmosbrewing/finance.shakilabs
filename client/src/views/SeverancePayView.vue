@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import BreakdownStackedBar from "@/components/result-visualization/BreakdownStackedBar.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -19,7 +20,6 @@ import { formatWon } from "@/lib/utils";
 import { calculateSeverancePay } from "@/utils/laborCalculator";
 
 const props = defineProps<{ initialYears?: number }>();
-
 const averageMonthlySalary = ref(3_500_000);
 const yearsOfService = ref(props.initialYears ?? 3);
 
@@ -29,6 +29,10 @@ const result = computed(() =>
     averageMonthlySalary: averageMonthlySalary.value,
   }),
 );
+const severanceSegments = computed(() => [
+  { key: "net", label: "실수령", value: result.value.netSeverancePay, color: "hsl(var(--chart-net))" },
+  { key: "tax", label: "퇴직소득세", value: result.value.severanceTax, color: "hsl(var(--chart-tax))" },
+]);
 
 const seoTitle = computed(() =>
   props.initialYears
@@ -129,6 +133,16 @@ watch(
                 { label: '1일 평균임금', value: formatWon(result.dailyAvgWage) },
               ]"
             />
+
+            <div v-if="result.isEligible" class="retro-chart">
+              <p class="text-caption font-semibold text-foreground">퇴직금 구성</p>
+              <BreakdownStackedBar
+                :segments="severanceSegments"
+                label="퇴직금 실수령과 세금 구성"
+                show-legend
+                :format-value="formatWon"
+              />
+            </div>
 
             <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
               <p v-if="!result.isEligible" class="font-semibold text-status-danger">
