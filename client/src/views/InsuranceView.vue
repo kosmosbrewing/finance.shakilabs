@@ -285,8 +285,8 @@ const activeCalc = computed(() =>
 const isForwardMode = computed(() => mode.value === "forward");
 const pageTitle = computed(() =>
   isForwardMode.value
-    ? "2026 연봉 실수령액 계산기"
-    : "2026 건강보험료 연봉 계산기"
+    ? "연봉 실수령액 계산기"
+    : "건강보험료 연봉 계산기"
 );
 
 const seoTitle = computed(() => {
