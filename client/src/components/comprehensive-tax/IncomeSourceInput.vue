@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ShSlider } from "@shakilabs/ui";
 import {
   FREELANCE_INDUSTRIES,
   type IndustryKey,
@@ -200,16 +201,15 @@ const separateHint = computed(() => {
             +
           </button>
         </div>
-        <input
+        <ShSlider
           :id="inputIds.revenueRange"
-          :value="revenue"
-          type="range"
-          class="retro-range"
+          :model-value="revenue"
           :min="revenueSliderBounds.min"
           :max="revenueSliderBounds.max"
           :step="rangeConfig.step"
           :aria-label="`${title} 연수입 슬라이더`"
-          @input="updateRevenue(parseInt(($event.target as HTMLInputElement).value, 10))"
+          :value-text="`${title} 연수입 ${formattedRevenue}원`"
+          @update:model-value="updateRevenue"
         />
         <div class="flex flex-wrap gap-1.5">
           <button

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -42,13 +43,6 @@ function onGrossInput(event: Event): void {
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
     emit("update:annualGross", Math.max(10_000_000, Math.min(300_000_000, value)));
-  }
-}
-
-function onGrossRangeInput(event: Event): void {
-  const value = parseInt((event.target as HTMLInputElement).value, 10);
-  if (Number.isFinite(value)) {
-    emit("update:annualGross", value);
   }
 }
 
@@ -106,13 +100,6 @@ const inputIds = {
   nonTaxableMonthly: "insurance-nontaxable-monthly",
 } as const;
 
-function onHealthFeeRangeInput(event: Event): void {
-  const value = parseInt((event.target as HTMLInputElement).value, 10);
-  if (Number.isFinite(value)) {
-    emit("update:healthInsuranceFee", Math.max(0, Math.min(1_000_000, value)));
-  }
-}
-
 function updateRetirementIncluded(value: boolean): void {
   emit("update:retirementIncluded", value);
 }
@@ -162,16 +149,15 @@ function updateRetirementIncluded(value: boolean): void {
               +
             </button>
           </div>
-          <input
+          <ShSlider
             :id="inputIds.reverseHealthInsuranceRange"
-            :value="healthInsuranceFee"
-            type="range"
-            min="0"
-            max="1000000"
-            step="1000"
-            class="retro-range"
+            :model-value="healthInsuranceFee"
+            :min="0"
+            :max="1_000_000"
+            :step="1_000"
+            :value-text="`건강보험료 ${formattedHealthFee}원`"
             aria-label="건보료 슬라이더"
-            @input="onHealthFeeRangeInput"
+            @update:model-value="emit('update:healthInsuranceFee', $event)"
           />
           <div class="flex flex-wrap gap-1.5">
             <button
@@ -221,16 +207,15 @@ function updateRetirementIncluded(value: boolean): void {
               +
             </button>
           </div>
-          <input
+          <ShSlider
             :id="inputIds.forwardAnnualGrossRange"
-            :value="annualGross"
-            type="range"
-            min="10000000"
-            max="300000000"
-            step="1000000"
-            class="retro-range"
+            :model-value="annualGross"
+            :min="10_000_000"
+            :max="300_000_000"
+            :step="1_000_000"
+            :value-text="`연봉 ${formattedGross}원`"
             aria-label="연봉 슬라이더"
-            @input="onGrossRangeInput"
+            @update:model-value="emit('update:annualGross', $event)"
           />
           <div class="flex flex-wrap gap-1.5">
             <button
