@@ -13,7 +13,6 @@ import {
   PARENTAL_LEAVE_FAQS,
   PARENTAL_LEAVE_SALARY_PRESETS,
   PARENTAL_LEAVE_TYPE_LABELS,
-  PARENTAL_LEAVE_UPDATED,
   type ParentalLeaveType,
 } from "@/data/parentalLeave";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
@@ -51,11 +50,7 @@ const summaryItems = computed(() => [
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDesc" :json-ld="buildFaqJsonLd(PARENTAL_LEAVE_FAQS)" />
 
-    <CalculatorPageHeader
-      title="2026 육아휴직 급여 계산기"
-      description="통상임금과 휴직 기간을 입력하면 월별 급여와 총 수령액을 계산합니다."
-      :freshness="`${PARENTAL_LEAVE_UPDATED} 기준`"
-    />
+    <CalculatorPageHeader title="2026 육아휴직 급여 계산기" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">

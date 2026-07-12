@@ -74,11 +74,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(severancePayFaqs)" />
 
-    <CalculatorPageHeader
-      title="2026 퇴직금 계산기"
-      description="최근 3개월 평균 월급과 근속연수를 입력하면 퇴직금, 퇴직소득세, 실수령액을 계산합니다."
-      freshness="2026 퇴직소득세 반영"
-    />
+    <CalculatorPageHeader title="2026 퇴직금 계산기" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">

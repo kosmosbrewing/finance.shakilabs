@@ -76,11 +76,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(weeklyHolidayPayFaqs)" />
 
-    <CalculatorPageHeader
-      title="2026 주휴수당 계산기"
-      description="시급과 주 근무 조건을 입력하면 주휴수당, 실질 시급, 예상 월급을 계산합니다."
-      freshness="2026 최저시급 반영"
-    />
+    <CalculatorPageHeader title="2026 주휴수당 계산기" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">

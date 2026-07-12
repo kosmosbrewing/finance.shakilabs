@@ -72,11 +72,7 @@ const quitReasonOptions = [
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(unemploymentFaqs)" />
 
-    <CalculatorPageHeader
-      title="2026 실업급여 계산기"
-      description="월급과 고용보험 가입기간을 입력하면 구직급여 수급액과 수급기간을 계산합니다."
-      freshness="2026년 상한액 68,100원 반영"
-    />
+    <CalculatorPageHeader title="2026 실업급여 계산기" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">

@@ -84,7 +84,7 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(wageConverterFaqs)" />
 
-    <CalculatorPageHeader title="2026 시급·월급·연봉 환산기" description="시급·월급·연봉 중 하나를 입력하면 나머지를 자동 환산합니다." freshness="2026 최저시급 반영" />
+    <CalculatorPageHeader title="2026 시급·월급·연봉 환산기" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">

@@ -12,7 +12,6 @@ import { useYearEndSettlement } from "@/composables/useYearEndSettlement";
 import {
   YEAR_END_FAQS,
   YEAR_END_SALARY_PRESETS,
-  YEAR_END_UPDATED,
 } from "@/data/yearEndSettlement";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
 import { formatWon } from "@/lib/utils";
@@ -56,11 +55,7 @@ const deductionItems = computed(() => [
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDesc" :json-ld="buildFaqJsonLd(YEAR_END_FAQS)" />
 
-    <CalculatorPageHeader
-      title="2026 연말정산 환급액 계산기"
-      description="연봉과 공제 항목을 입력하면 예상 환급액 또는 추가 납부액을 계산합니다."
-      :freshness="`${YEAR_END_UPDATED} 기준`"
-    />
+    <CalculatorPageHeader title="2026 연말정산 환급액 계산기" />
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">
