@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import {
   FREELANCE_INDUSTRIES,
   type IndustryKey,
@@ -200,30 +201,22 @@ const separateHint = computed(() => {
             +
           </button>
         </div>
-        <input
+        <ShSlider
           :id="inputIds.revenueRange"
-          :value="revenue"
-          type="range"
-          class="retro-range"
+          :model-value="revenue"
           :min="revenueSliderBounds.min"
           :max="revenueSliderBounds.max"
           :step="rangeConfig.step"
           :aria-label="`${title} 연수입 슬라이더`"
-          @input="updateRevenue(parseInt(($event.target as HTMLInputElement).value, 10))"
+          :value-text="`${title} 연수입 ${formattedRevenue}원`"
+          @update:model-value="updateRevenue"
         />
-        <div class="flex flex-wrap gap-1.5">
-          <button
-            v-for="preset in revenuePresets"
-            :key="preset.value"
-            type="button"
-            class="retro-chip"
-            :class="revenue === preset.value ? 'border-primary text-primary' : ''"
-            :aria-label="`${title} ${preset.label}원으로 설정`"
-            @click="updateRevenue(preset.value)"
-          >
-            {{ preset.label }}
-          </button>
-        </div>
+        <ShPresetGroup
+          :model-value="revenue"
+          :options="revenuePresets"
+          :label="`${title} 연수입 빠른 선택`"
+          @update:model-value="updateRevenue"
+        />
       </div>
 
       <div v-if="sourceType === 'business'" class="space-y-1">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -41,13 +42,6 @@ function onGrossInput(event: Event): void {
   const value = parseInt(raw, 10);
   if (Number.isFinite(value)) {
     emit("update:annualGross", Math.max(10_000_000, Math.min(300_000_000, value)));
-  }
-}
-
-function onGrossRangeInput(event: Event): void {
-  const value = parseInt((event.target as HTMLInputElement).value, 10);
-  if (Number.isFinite(value)) {
-    emit("update:annualGross", value);
   }
 }
 
@@ -121,30 +115,22 @@ function updateRetirementIncluded(value: boolean): void {
               +
             </button>
           </div>
-          <input
+          <ShSlider
             :id="inputIds.annualGrossRange"
-            :value="annualGross"
-            type="range"
-            min="10000000"
-            max="300000000"
-            step="1000000"
-            class="retro-range"
+            :model-value="annualGross"
+            :min="10_000_000"
+            :max="300_000_000"
+            :step="1_000_000"
+            :value-text="`연봉 ${formattedGross}원`"
             aria-label="연봉 슬라이더"
-            @input="onGrossRangeInput"
+            @update:model-value="emit('update:annualGross', $event)"
           />
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="preset in salaryPresets"
-              :key="preset.value"
-              type="button"
-              class="retro-chip"
-              :class="annualGross === preset.value ? 'border-primary text-primary' : ''"
-              :aria-label="`연봉 ${preset.label}원으로 설정`"
-              @click="emit('update:annualGross', preset.value)"
-            >
-              {{ preset.label }}
-            </button>
-          </div>
+          <ShPresetGroup
+            :model-value="annualGross"
+            :options="salaryPresets"
+            label="연봉 빠른 선택"
+            @update:model-value="emit('update:annualGross', $event)"
+          />
         </div>
       </div>
 
