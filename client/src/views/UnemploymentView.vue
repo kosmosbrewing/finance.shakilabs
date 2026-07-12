@@ -134,7 +134,6 @@ const quitReasonOptions = [
           </div>
           <div class="retro-panel-content min-w-0 space-y-4">
             <BenefitStatGrid
-              class="min-[360px]:!grid-cols-2"
               :items="[
                 { label: '일 수급액', value: formatWon(result.dailyBenefit), tone: result.isEligible ? 'success' : undefined },
                 { label: '수급 기간', value: result.isEligible ? `${result.durationDays}일` : '-' },

@@ -349,18 +349,70 @@
   .retro-stat-grid {
     @apply grid gap-2;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    align-items: stretch;
+  }
+
+  .retro-stat-grid > * {
+    min-width: 0;
   }
 
   .retro-stat {
-    @apply retro-panel-muted overflow-hidden p-3.5;
+    @apply retro-panel-muted flex min-w-0 flex-col p-3.5;
   }
 
   .retro-stat-label {
-    @apply whitespace-nowrap truncate text-caption uppercase tracking-wide text-muted-foreground;
+    @apply min-w-0 text-caption uppercase tracking-wide text-muted-foreground;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+    word-break: keep-all;
   }
 
   .retro-stat-value {
     @apply mt-1 text-heading font-bold tabular-nums;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+
+  .retro-stat-grid .retro-stat-value {
+    margin-top: auto;
+    padding-top: 0.25rem;
+  }
+
+  .result-stat-grid {
+    @apply grid grid-cols-3 gap-1.5;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .result-stat-card {
+    @apply min-h-[74px] justify-center p-2 text-center sm:min-h-0 sm:p-2.5;
+  }
+
+  .benefit-stat-layout {
+    container: benefit-stats / inline-size;
+  }
+
+  .benefit-stat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @container benefit-stats (min-width: 22rem) {
+    .benefit-stat-grid--2,
+    .benefit-stat-grid--4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container benefit-stats (min-width: 34rem) {
+    .benefit-stat-grid--3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @container benefit-stats (min-width: 44rem) {
+    .benefit-stat-grid--4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   .retro-board-list {

@@ -15,12 +15,21 @@ function valueClass(tone?: "default" | "success" | "danger"): string {
 </script>
 
 <template>
-  <div class="retro-stat-grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))]">
-    <div v-for="item in props.items" :key="item.label" class="retro-stat">
-      <p class="retro-stat-label">{{ item.label }}</p>
-      <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading" :class="valueClass(item.tone)">
-        {{ item.value }}
-      </p>
+  <div class="benefit-stat-layout">
+    <div
+      class="benefit-stat-grid retro-stat-grid"
+      :class="{
+        'benefit-stat-grid--2': props.items.length === 2,
+        'benefit-stat-grid--3': props.items.length === 3,
+        'benefit-stat-grid--4': props.items.length >= 4,
+      }"
+    >
+      <div v-for="item in props.items" :key="item.label" class="retro-stat">
+        <p class="retro-stat-label">{{ item.label }}</p>
+        <p class="retro-stat-value text-[0.95rem] sm:text-heading" :class="valueClass(item.tone)">
+          {{ item.value }}
+        </p>
+      </div>
     </div>
   </div>
 </template>

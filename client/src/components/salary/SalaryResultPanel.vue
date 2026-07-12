@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watchEffect } from "vue";
-import { formatKrwAuto, formatKrwCompact, formatWon, formatPercent, deductionTextClass } from "@/lib/utils";
+import { formatKrwAuto, formatWon } from "@/lib/utils";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
+import SalarySummaryStatGrid from "@/components/salary/SalarySummaryStatGrid.vue";
 
 const props = defineProps<{
   calc: SalaryCalcResult;
@@ -84,27 +85,11 @@ onUnmounted(() => {
         </p>
       </div>
 
-      <!-- 요약 stat-grid (3열) -->
-      <div class="grid grid-cols-3 gap-1.5">
-        <div class="retro-stat flex min-h-[74px] flex-col justify-center p-2 text-center sm:min-h-0 sm:p-2.5">
-          <p class="retro-stat-label">월 급여</p>
-          <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">
-            <span class="sm:hidden">{{ formatKrwCompact(props.calc.monthlyGross.value) }}</span>
-            <span class="hidden sm:inline">{{ formatWon(props.calc.monthlyGross.value) }}</span>
-          </p>
-        </div>
-        <div class="retro-stat flex min-h-[74px] flex-col justify-center p-2 text-center sm:min-h-0 sm:p-2.5">
-          <p class="retro-stat-label">공제 합계</p>
-          <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading" :class="deductionTextClass(props.calc.effectiveTaxRate.value)">
-            <span class="sm:hidden">{{ formatKrwCompact(props.calc.totalDeduction.value) }}</span>
-            <span class="hidden sm:inline">{{ formatWon(props.calc.totalDeduction.value) }}</span>
-          </p>
-        </div>
-        <div class="retro-stat flex min-h-[74px] flex-col justify-center p-2 text-center sm:min-h-0 sm:p-2.5">
-          <p class="retro-stat-label">공제 비율</p>
-          <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading" :class="deductionTextClass(props.calc.effectiveTaxRate.value)">{{ formatPercent(props.calc.effectiveTaxRate.value, 1) }}</p>
-        </div>
-      </div>
+      <SalarySummaryStatGrid
+        :monthly-gross="props.calc.monthlyGross.value"
+        :total-deduction="props.calc.totalDeduction.value"
+        :effective-tax-rate="props.calc.effectiveTaxRate.value"
+      />
 
       <!-- 공제 내역 통합 섹션 -->
       <div class="retro-board-list text-caption">

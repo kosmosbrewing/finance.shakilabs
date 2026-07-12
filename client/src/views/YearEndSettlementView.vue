@@ -121,11 +121,11 @@ const deductionItems = computed(() => [
               </p>
             </div>
 
-            <BenefitStatGrid :items="summaryItems" class="min-[360px]:!grid-cols-2" />
+            <BenefitStatGrid :items="summaryItems" />
 
             <div class="space-y-2">
               <h2 class="text-body font-semibold">주요 공제 내역</h2>
-              <BenefitStatGrid :items="deductionItems" class="min-[360px]:!grid-cols-2" />
+              <BenefitStatGrid :items="deductionItems" />
 
               <div class="retro-panel-muted retro-panel-content space-y-2 text-caption leading-6 text-muted-foreground">
                 <p>기납부세액은 매월 원천징수(기본 소득공제만 적용) 기준으로 추정한 값입니다. 실제 원천징수 내역과 다를 수 있습니다.</p>

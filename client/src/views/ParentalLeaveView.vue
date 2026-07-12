@@ -88,7 +88,7 @@ const summaryItems = computed(() => [
             <h2 id="parental-leave-result-title" class="retro-title">육아휴직 예상 결과</h2>
           </div>
           <div class="retro-panel-content space-y-5">
-            <BenefitStatGrid :items="summaryItems" class="min-[360px]:!grid-cols-2" />
+            <BenefitStatGrid :items="summaryItems" />
 
             <div class="space-y-2">
               <h2 class="text-body font-semibold">월별 급여 상세</h2>

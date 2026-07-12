@@ -121,7 +121,6 @@ watch(
           </div>
           <div class="retro-panel-content space-y-4">
             <BenefitStatGrid
-              class="min-[360px]:!grid-cols-2"
               :items="[
                 { label: '퇴직금', value: formatWon(result.severancePay), tone: result.isEligible ? 'success' : undefined },
                 { label: '퇴직소득세', value: formatWon(result.severanceTax), tone: result.severanceTax > 0 ? 'danger' : undefined },

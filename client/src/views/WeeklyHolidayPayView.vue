@@ -134,7 +134,6 @@ watch(
           </div>
           <div class="retro-panel-content space-y-4">
             <BenefitStatGrid
-              class="min-[360px]:!grid-cols-2"
               :items="[
                 { label: '주휴수당', value: formatWon(result.weeklyHolidayPay), tone: result.isEligible ? 'success' : undefined },
                 { label: '실질 시급', value: formatWon(result.effectiveHourlyWage), tone: result.isEligible ? 'success' : undefined },
