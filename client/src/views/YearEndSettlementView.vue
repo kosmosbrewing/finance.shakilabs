@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
 import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
@@ -56,35 +56,23 @@ const deductionItems = computed(() => [
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDesc" :json-ld="buildFaqJsonLd(YEAR_END_FAQS)" />
 
+    <CalculatorPageHeader
+      title="2026 연말정산 환급액 계산기"
+      description="연봉과 공제 항목을 입력하면 예상 환급액 또는 추가 납부액을 계산합니다."
+      :freshness="`${YEAR_END_UPDATED} 기준`"
+    />
+
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4">
-        <!-- 헤더 -->
-        <div class="retro-panel overflow-hidden">
+        <section class="retro-panel overflow-hidden" aria-labelledby="year-end-input-title">
           <div class="retro-titlebar rounded-t-2xl">
-            <div class="space-y-1">
-              <h1 class="retro-title">연말정산 환급액 계산기</h1>
-              <p class="text-caption text-muted-foreground">
-                연봉과 공제 항목을 입력하면 예상 환급액 또는 추가 납부액을 계산합니다.
-              </p>
-            </div>
-            <FreshBadge :message="`${YEAR_END_UPDATED} 기준`" />
+            <h2 id="year-end-input-title" class="retro-title">연말정산 조건 입력</h2>
           </div>
 
           <div class="retro-panel-content space-y-6">
-            <!-- 결과 요약 -->
-            <div class="rounded-xl border-2 p-4 text-center" :class="r.isRefund ? 'border-status-success/30 bg-status-success/5' : 'border-status-danger/30 bg-status-danger/5'">
-              <p class="text-caption text-muted-foreground">{{ r.isRefund ? '예상 환급액' : '추가 납부 예상' }}</p>
-              <p class="text-display font-bold tabular-nums" :class="r.isRefund ? 'text-status-success' : 'text-status-danger'">
-                {{ formatWon(Math.abs(r.settlementAmount)) }}
-              </p>
-            </div>
-
-            <BenefitStatGrid :items="summaryItems" />
-
-            <!-- 기본 정보 -->
             <div class="space-y-1">
               <h2 class="text-body font-semibold">기본 정보</h2>
-              <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div class="grid gap-4 sm:grid-cols-2">
                 <ScenarioField v-model="calc.annualSalary.value" label="총급여(연봉)" unit="원" :min="12_000_000" :max="300_000_000" :step="1_000_000" format="currency" :presets="YEAR_END_SALARY_PRESETS" />
                 <ScenarioField v-model="calc.dependents.value" label="부양가족 수 (본인 포함)" unit="명" :min="1" :max="10" :step="1" />
                 <ScenarioField v-model="calc.children.value" label="8세 이상 자녀 수" unit="명" :min="0" :max="5" :step="1" />
@@ -122,10 +110,27 @@ const deductionItems = computed(() => [
               </div>
             </div>
 
-            <!-- 공제 항목 상세 -->
+          </div>
+        </section>
+
+        <section class="retro-panel overflow-hidden" aria-labelledby="year-end-result-title">
+          <div class="retro-titlebar rounded-t-2xl">
+            <h2 id="year-end-result-title" class="retro-title">연말정산 예상 결과</h2>
+          </div>
+
+          <div class="retro-panel-content space-y-5">
+            <div class="rounded-xl border-2 p-4 text-center" :class="r.isRefund ? 'border-status-success/30 bg-status-success/5' : 'border-status-danger/30 bg-status-danger/5'">
+              <p class="text-caption text-muted-foreground">{{ r.isRefund ? '예상 환급액' : '추가 납부 예상' }}</p>
+              <p class="text-display font-bold tabular-nums" :class="r.isRefund ? 'text-status-success' : 'text-status-danger'">
+                {{ formatWon(Math.abs(r.settlementAmount)) }}
+              </p>
+            </div>
+
+            <BenefitStatGrid :items="summaryItems" class="min-[360px]:!grid-cols-2" />
+
             <div class="space-y-2">
               <h2 class="text-body font-semibold">주요 공제 내역</h2>
-              <BenefitStatGrid :items="deductionItems" />
+              <BenefitStatGrid :items="deductionItems" class="min-[360px]:!grid-cols-2" />
 
               <div class="retro-panel-muted retro-panel-content space-y-2 text-caption leading-6 text-muted-foreground">
                 <p>기납부세액은 매월 원천징수(기본 소득공제만 적용) 기준으로 추정한 값입니다. 실제 원천징수 내역과 다를 수 있습니다.</p>
@@ -133,7 +138,7 @@ const deductionItems = computed(() => [
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         <BenefitFaqPanel :items="YEAR_END_FAQS" />
         <InternalLink current="year-end-settlement" />
