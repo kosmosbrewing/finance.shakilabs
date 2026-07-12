@@ -9,6 +9,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import { Button } from "@/components/ui/button";
 import InternalLink from "@/components/common/InternalLink.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
+import BreakdownStackedBar from "@/components/result-visualization/BreakdownStackedBar.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
 import { normalizeBonusInput } from "@/lib/validators";
@@ -50,6 +51,10 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateBonusImpact(input.value));
+const bonusSegments = computed(() => [
+  { key: "net", label: "실수령", value: result.value.netBonus, color: "hsl(var(--chart-net))" },
+  { key: "deduction", label: "추가 공제", value: result.value.bonusTax, color: "hsl(var(--chart-tax))" },
+]);
 const seoTitle = computed(() => "2026 성과급 실수령 계산기 | 상여금 세금·4대보험 공제");
 const seoDescription = computed(
   () =>
@@ -148,6 +153,15 @@ watch(
               </div>
 
               <div class="retro-panel-muted retro-panel-content space-y-3">
+                <div class="space-y-2">
+                  <p class="text-body font-semibold text-foreground">성과급 구성</p>
+                  <BreakdownStackedBar
+                    :segments="bonusSegments"
+                    label="성과급 실수령과 추가 공제 구성"
+                    show-legend
+                    :format-value="formatWon"
+                  />
+                </div>
                 <p class="text-body font-semibold text-foreground">핵심 해석</p>
                 <p class="text-caption leading-6 text-muted-foreground">
                   보너스 <span class="tabular-nums">{{ formatWon(input.bonusAmount) }}</span> 중 실제 손에 남는 금액은

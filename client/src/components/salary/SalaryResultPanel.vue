@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref, watchEffect } from "vue";
 import { formatKrwAuto, formatKrwCompact, formatWon, formatPercent, deductionTextClass } from "@/lib/utils";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
+import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 
 const props = defineProps<{
   calc: SalaryCalcResult;
@@ -113,14 +114,7 @@ onUnmounted(() => {
           <strong class="tabular-nums text-primary">{{ formatWon(props.calc.totalDeduction.value) }}</strong>
         </div>
         <div class="px-3 py-1.5">
-          <div class="retro-chart-bar">
-            <div class="bg-chart-pension retro-chart-segment" :style="{ width: props.calc.totalDeduction.value > 0 ? `${(props.calc.nationalPension.value / props.calc.totalDeduction.value) * 100}%` : '0%' }" title="국민연금" />
-            <div class="bg-chart-health retro-chart-segment" :style="{ width: props.calc.totalDeduction.value > 0 ? `${(props.calc.healthInsurance.value / props.calc.totalDeduction.value) * 100}%` : '0%' }" title="건강보험" />
-            <div class="bg-chart-care retro-chart-segment" :style="{ width: props.calc.totalDeduction.value > 0 ? `${(props.calc.longTermCare.value / props.calc.totalDeduction.value) * 100}%` : '0%' }" title="장기요양" />
-            <div class="bg-chart-employment retro-chart-segment" :style="{ width: props.calc.totalDeduction.value > 0 ? `${(props.calc.employmentInsurance.value / props.calc.totalDeduction.value) * 100}%` : '0%' }" title="고용보험" />
-            <div class="bg-chart-tax retro-chart-segment" :style="{ width: props.calc.totalDeduction.value > 0 ? `${(props.calc.monthlyIncomeTax.value / props.calc.totalDeduction.value) * 100}%` : '0%' }" title="소득세" />
-            <div class="bg-chart-localTax retro-chart-segment" :style="{ width: props.calc.totalDeduction.value > 0 ? `${(props.calc.monthlyLocalTax.value / props.calc.totalDeduction.value) * 100}%` : '0%' }" title="지방소득세" />
-          </div>
+          <SalaryDeductionBar :calc="props.calc" />
         </div>
         <div class="retro-board-item bg-muted/30 font-semibold">
           <span>4대보험</span>
