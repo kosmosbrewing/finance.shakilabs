@@ -9,13 +9,13 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
+import OvertimeBreakdown from "@/components/overtime/OvertimeBreakdown.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
 import { normalizeOvertimeInput } from "@/lib/validators";
 import { buildAbsoluteUrl, buildQuery, parseQueryInt } from "@/lib/routeState";
 import { formatWon } from "@/lib/utils";
 import { calculateOvertimeImpact } from "@/utils/scenarioCalculator";
-
 const route = useRoute();
 const monthlySalary = ref(3_200_000);
 const overtimeHours = ref(12);
@@ -25,7 +25,6 @@ const monthlyBaseHours = ref(209);
 const dependents = ref(1);
 const children = ref(0);
 const nonTaxableMonthly = ref(200_000);
-
 watch(
   () => route.query,
   (query) => {
@@ -118,7 +117,6 @@ watch(
   { immediate: true }
 );
 </script>
-
 <template>
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" />
@@ -163,6 +161,7 @@ watch(
               </div>
 
               <div class="retro-panel-muted retro-panel-content space-y-3">
+                <OvertimeBreakdown :result="result" />
                 <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                   <div>
                     <p class="text-tiny uppercase tracking-wide text-muted-foreground">연장</p>

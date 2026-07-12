@@ -4,6 +4,7 @@ import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { formatKrwAuto, formatKrwCompact, formatWon, formatPercent, deductionTextClass } from "@/lib/utils";
 import { RATES_2026 } from "@/data/taxRates2026";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
+import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 
 const props = defineProps<{
   mode: "reverse" | "forward";
@@ -17,17 +18,18 @@ const emit = defineEmits<{
   shareRequest: [];
 }>();
 
-// 역산 모드: 건강보험 표시값은 사용자 입력값 그대로 사용 (재계산 오차 1원 제거)
 const displayedHealthInsurance = computed(() =>
   props.mode === "reverse" ? props.healthInsuranceFee : props.calc.healthInsurance.value
 );
 
-// 4대보험 소계도 displayedHealthInsurance 기준으로 재계산 (헤더 ↔ 행 합계 일치)
 const displayedTotalInsurance = computed(() =>
   props.calc.nationalPension.value +
   displayedHealthInsurance.value +
   props.calc.longTermCare.value +
   props.calc.employmentInsurance.value
+);
+const displayedTotalDeduction = computed(
+  () => displayedTotalInsurance.value + props.calc.totalTax.value
 );
 
 const title = computed(() => {
@@ -37,7 +39,6 @@ const title = computed(() => {
   return `연봉 ${formatKrwAuto(props.calc.annualGross.value)} 기준`;
 });
 
-// 애니메이션 카운트업 (SalaryResultPanel 동일 패턴)
 const displayedMonthlyNet = ref(0);
 const hasAnimatedInitial = ref(false);
 let rafId: number | null = null;
@@ -99,7 +100,6 @@ onUnmounted(() => {
     </div>
 
     <div class="retro-panel-content space-y-3">
-      <!-- 메인 결과: 애니메이션 카운트업 -->
       <div class="text-center py-3">
         <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1">
           {{ mode === 'reverse' ? '추정 월 실수령액' : '월 실수령액' }}
@@ -113,7 +113,6 @@ onUnmounted(() => {
         </p>
       </div>
 
-      <!-- 요약 stat-grid (3열) -->
       <div class="result-stat-grid grid grid-cols-3 gap-1.5">
         <div class="retro-stat flex min-h-[74px] flex-col justify-center p-2 text-center sm:min-h-0 sm:p-2.5">
           <p class="retro-stat-label">월 급여</p>
@@ -140,43 +139,11 @@ onUnmounted(() => {
         <!-- 총공제 헤더 -->
         <div class="retro-board-item bg-primary/5 text-body font-bold text-foreground">
           <span>공제 내역</span>
-          <strong class="tabular-nums text-primary">{{ formatWon(calc.totalDeduction.value) }}</strong>
+          <strong class="tabular-nums text-primary">{{ formatWon(displayedTotalDeduction) }}</strong>
         </div>
 
-        <!-- 통합 차트 바: 6개 세그먼트, 분모 = totalDeduction -->
         <div class="px-3 py-1.5">
-          <div class="retro-chart-bar">
-            <div
-              class="bg-chart-pension retro-chart-segment"
-              :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.nationalPension.value / calc.totalDeduction.value) * 100}%` : '0%' }"
-              title="국민연금"
-            />
-            <div
-              class="bg-chart-health retro-chart-segment"
-              :style="{ width: calc.totalDeduction.value > 0 ? `${(displayedHealthInsurance / calc.totalDeduction.value) * 100}%` : '0%' }"
-              title="건강보험"
-            />
-            <div
-              class="bg-chart-care retro-chart-segment"
-              :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.longTermCare.value / calc.totalDeduction.value) * 100}%` : '0%' }"
-              title="장기요양"
-            />
-            <div
-              class="bg-chart-employment retro-chart-segment"
-              :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.employmentInsurance.value / calc.totalDeduction.value) * 100}%` : '0%' }"
-              title="고용보험"
-            />
-            <div
-              class="bg-chart-tax retro-chart-segment"
-              :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.monthlyIncomeTax.value / calc.totalDeduction.value) * 100}%` : '0%' }"
-              title="소득세"
-            />
-            <div
-              class="bg-chart-localTax retro-chart-segment"
-              :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.monthlyLocalTax.value / calc.totalDeduction.value) * 100}%` : '0%' }"
-              title="지방소득세"
-            />
-          </div>
+          <SalaryDeductionBar :calc="calc" :health-insurance="displayedHealthInsurance" />
         </div>
 
         <!-- 4대보험 그룹 -->

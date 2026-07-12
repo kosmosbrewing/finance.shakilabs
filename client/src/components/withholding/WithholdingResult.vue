@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { formatKrwAuto, formatKrwCompact, formatWon, formatPercent, deductionTextClass } from "@/lib/utils";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
+import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 
 const props = defineProps<{
   monthlyIncomeTax: number;       // 사용자 입력 소득세
@@ -120,14 +121,7 @@ onUnmounted(() => {
           <strong class="tabular-nums text-primary">{{ formatWon(calc.totalDeduction.value) }}</strong>
         </div>
         <div class="px-3 py-1.5">
-          <div class="retro-chart-bar">
-            <div class="bg-chart-pension retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.nationalPension.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="국민연금" />
-            <div class="bg-chart-health retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.healthInsurance.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="건강보험" />
-            <div class="bg-chart-care retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.longTermCare.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="장기요양" />
-            <div class="bg-chart-employment retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.employmentInsurance.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="고용보험" />
-            <div class="bg-chart-tax retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.monthlyIncomeTax.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="소득세" />
-            <div class="bg-chart-localTax retro-chart-segment" :style="{ width: calc.totalDeduction.value > 0 ? `${(calc.monthlyLocalTax.value / calc.totalDeduction.value) * 100}%` : '0%' }" title="지방소득세" />
-          </div>
+          <SalaryDeductionBar :calc="calc" />
         </div>
         <div class="retro-board-item bg-muted/30 font-semibold">
           <span>4대보험</span>

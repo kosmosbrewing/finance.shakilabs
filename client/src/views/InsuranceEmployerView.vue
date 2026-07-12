@@ -7,6 +7,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import BreakdownDonut from "@/components/result-visualization/BreakdownDonut.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { employerInsuranceFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
@@ -26,6 +27,13 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateEmployerInsuranceBurden(input.value));
+const burdenSegments = computed(() => [
+  { key: "pension", label: "국민연금", value: result.value.nationalPension, color: "hsl(var(--chart-pension))" },
+  { key: "health", label: "건강보험", value: result.value.healthInsurance, color: "hsl(var(--chart-health))" },
+  { key: "care", label: "장기요양", value: result.value.longTermCare, color: "hsl(var(--chart-care))" },
+  { key: "employment", label: "고용보험", value: result.value.employmentInsurance, color: "hsl(var(--chart-employment))" },
+  { key: "accident", label: "산재보험", value: result.value.industrialAccident, color: "hsl(var(--chart-tax))" },
+]);
 const seoTitle = computed(() => "2026 사업주 4대보험 계산기 | 고용주 부담금·인건비 계산");
 const seoDescription = computed(
   () => `월급 ${formatWon(input.value.monthlySalary)} 기준 사업주 월 부담금은 ${formatWon(result.value.totalMonthlyBurden)}입니다.`
@@ -60,6 +68,17 @@ const seoDescription = computed(
                 { label: '사업주 부담률', value: formatPercent(result.employerRate, 1) },
                 { label: '산재보험', value: formatWon(result.industrialAccident), tone: 'danger' },
               ]" />
+
+              <div class="retro-panel-muted retro-panel-content space-y-3">
+                <h2 class="text-body font-semibold text-foreground">월 부담금 구성</h2>
+                <BreakdownDonut
+                  :segments="burdenSegments"
+                  label="사업주 월 보험료 구성"
+                  center-label="월 합계"
+                  :center-value="formatWon(result.totalMonthlyBurden)"
+                  :format-value="formatWon"
+                />
+              </div>
 
               <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
                 <p>국민연금, 건강보험, 장기요양보험은 2026 상수를 적용했습니다.</p>

@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { formatKrwAuto, formatWon } from "@/lib/utils";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
+import BreakdownDonut from "@/components/result-visualization/BreakdownDonut.vue";
 
 import type { QuitReason } from "@/data/unemploymentTable";
 
-defineProps<{
+const props = defineProps<{
   servicePeriodLabel: string;
   retirementGross: number;
   retirementTax: number;
@@ -19,6 +21,13 @@ defineProps<{
   unemploymentEndDateLabel: string;
   quitReason: QuitReason;
 }>();
+
+const receivableSegments = computed(() => [
+  { key: "retirement", label: "퇴직금", value: props.retirementNet, color: "hsl(var(--chart-net))" },
+  { key: "unemployment", label: "실업급여", value: props.unemploymentTotal, color: "hsl(var(--chart-pension))" },
+  { key: "leave", label: "연차수당", value: props.unpaidLeaveAllowance, color: "hsl(var(--chart-employment))" },
+  { key: "salary", label: "마지막 급여", value: props.finalMonthlyNet, color: "hsl(var(--chart-health))" },
+]);
 
 const emit = defineEmits<{
   shareRequest: [];
@@ -52,6 +61,16 @@ const eligibleLabel: Record<string, string> = {
         <p class="text-body text-muted-foreground mt-1.5">
           퇴직금 + 실업급여 + 연차수당 + 마지막 급여
         </p>
+      </div>
+
+      <div class="retro-chart">
+        <p class="text-caption font-semibold text-foreground">총 수령액 구성</p>
+        <BreakdownDonut
+          :segments="receivableSegments"
+          label="퇴사 시 총 수령액 구성"
+          center-label="총 수령액"
+          :format-value="formatWon"
+        />
       </div>
 
       <!-- 항목 상세 -->
