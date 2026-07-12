@@ -37,3 +37,4 @@ Thumbs.db
 /artifacts/text-layout-audit/*
 !/artifacts/text-layout-audit/report.md
 !/artifacts/text-layout-audit/issues.json
+client-result-visualizations/
