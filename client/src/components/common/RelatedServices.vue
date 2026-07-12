@@ -48,8 +48,8 @@ const items: RelatedServiceItem[] = [
           class="group flex flex-col rounded-[1.6rem] border border-border/70 bg-card p-4 text-left transition-[background-color,border-color,transform,box-shadow] duration-200 hover:-translate-y-[1px] hover:border-primary/25 hover:bg-muted/15"
         >
           <div class="flex items-start justify-between gap-3">
-            <div>
-              <p class="text-body font-bold text-foreground">{{ item.title }}</p>
+            <div class="min-w-0">
+              <p class="[text-wrap-style:balance] text-body font-bold text-foreground">{{ item.title }}</p>
               <p class="mt-1.5 text-caption text-muted-foreground">{{ item.description }}</p>
             </div>
             <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">

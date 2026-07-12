@@ -85,7 +85,7 @@ function onRangeInput(event: Event): void {
           {{ description }}
         </p>
       </div>
-      <span class="rounded-full border border-border/60 bg-muted/25 px-3 py-1 text-caption font-semibold tabular-nums">
+      <span class="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-border/60 bg-muted/25 px-3 py-1 text-caption font-semibold tabular-nums">
         {{ displayValue }}{{ unit }}
       </span>
     </div>
@@ -96,10 +96,10 @@ function onRangeInput(event: Event): void {
         :value="displayValue"
         :inputmode="format === 'decimal' ? 'decimal' : 'numeric'"
         type="text"
-        class="retro-input tabular-nums"
+        class="retro-input min-w-0 tabular-nums"
         @input="onTextInput"
       />
-      <span v-if="unit" class="text-caption font-semibold text-muted-foreground">{{ unit }}</span>
+      <span v-if="unit" class="inline-flex shrink-0 whitespace-nowrap text-caption font-semibold text-muted-foreground">{{ unit }}</span>
     </div>
 
     <input
@@ -119,7 +119,7 @@ function onRangeInput(event: Event): void {
         v-for="preset in presets"
         :key="`${label}-${preset.label}`"
         type="button"
-        class="retro-chip"
+        class="retro-chip whitespace-nowrap"
         @click="updateValue(preset.value)"
       >
         {{ preset.label }}

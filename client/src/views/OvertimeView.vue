@@ -143,7 +143,7 @@ watch(
             </div>
 
             <div class="space-y-4">
-              <div class="retro-stat-grid sm:grid-cols-2">
+              <div class="retro-stat-grid">
                 <div class="retro-stat">
                   <p class="retro-stat-label">추가 세전 수당</p>
                   <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.totalExtraGross) }}</p>

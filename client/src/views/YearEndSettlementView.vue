@@ -74,7 +74,7 @@ const deductionItems = computed(() => [
             <!-- 결과 요약 -->
             <div class="rounded-xl border-2 p-4 text-center" :class="r.isRefund ? 'border-status-success/30 bg-status-success/5' : 'border-status-danger/30 bg-status-danger/5'">
               <p class="text-caption text-muted-foreground">{{ r.isRefund ? '예상 환급액' : '추가 납부 예상' }}</p>
-              <p class="text-display font-bold" :class="r.isRefund ? 'text-status-success' : 'text-status-danger'">
+              <p class="text-display font-bold tabular-nums" :class="r.isRefund ? 'text-status-success' : 'text-status-danger'">
                 {{ formatWon(Math.abs(r.settlementAmount)) }}
               </p>
             </div>
