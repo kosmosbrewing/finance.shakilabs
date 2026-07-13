@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
@@ -36,6 +37,14 @@ function onBaseChange(newBase: WageConverterInput["base"]) {
   if (newBase === "hourly") amount.value = 10_320;
   else if (newBase === "monthly") amount.value = 3_000_000;
   else amount.value = 36_000_000;
+}
+
+function updateBasePreset(value: PresetValue): void {
+  if (value === "hourly" || value === "monthly" || value === "annual") onBaseChange(value);
+}
+
+function updateWeeklyHolidayPreset(value: PresetValue): void {
+  if (typeof value === "boolean") includeWeeklyHoliday.value = value;
 }
 
 const seoTitle = computed(() =>
@@ -95,22 +104,12 @@ watch(
           <div class="retro-panel-content space-y-5">
             <div class="space-y-1.5">
               <label class="text-caption font-semibold text-foreground">입력 기준</label>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="opt in baseOptions"
-                  :key="opt.value"
-                  type="button"
-                  class="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-caption font-medium text-muted-foreground transition-colors"
-                  :class="{
-                    '!bg-primary/15 !text-primary !border-primary/30': base === opt.value,
-                    'hover:bg-primary/5': base !== opt.value,
-                  }"
-                  :aria-pressed="base === opt.value"
-                  @click="onBaseChange(opt.value)"
-                >
-                  {{ opt.label }}
-                </button>
-              </div>
+              <ShPresetGroup
+                :model-value="base"
+                :options="baseOptions"
+                label="입력 기준 선택"
+                @update:model-value="updateBasePreset"
+              />
             </div>
 
             <ScenarioField
@@ -134,22 +133,12 @@ watch(
 
             <div class="space-y-1.5">
               <label class="text-caption font-semibold text-foreground">주휴수당 포함</label>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="opt in [{ label: '포함', value: true }, { label: '미포함', value: false }]"
-                  :key="String(opt.value)"
-                  type="button"
-                  class="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-caption font-medium text-muted-foreground transition-colors"
-                  :class="{
-                    '!bg-primary/15 !text-primary !border-primary/30': includeWeeklyHoliday === opt.value,
-                    'hover:bg-primary/5': includeWeeklyHoliday !== opt.value,
-                  }"
-                  :aria-pressed="includeWeeklyHoliday === opt.value"
-                  @click="includeWeeklyHoliday = opt.value"
-                >
-                  {{ opt.label }}
-                </button>
-              </div>
+              <ShPresetGroup
+                :model-value="includeWeeklyHoliday"
+                :options="[{ label: '포함', value: true }, { label: '미포함', value: false }]"
+                label="주휴수당 포함 여부"
+                @update:model-value="updateWeeklyHolidayPreset"
+              />
             </div>
           </div>
         </section>

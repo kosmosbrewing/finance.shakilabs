@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 type CompanyInput = {
@@ -92,6 +93,10 @@ const salaryPresets = [
   { label: "1억", value: 100_000_000 },
 ];
 
+function updateSalaryPreset(key: "companyA" | "companyB", value: PresetValue): void {
+  if (typeof value === "number") updateCompany(key, { annualGross: value });
+}
+
 const inputIds = {
   annualA: "compare-annual-a",
   nonTaxA: "compare-nontax-a",
@@ -128,19 +133,12 @@ const inputIds = {
               @input="onAnnualInput('companyA', $event)"
             />
           </label>
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="preset in salaryPresets"
-              :key="`a-${preset.value}`"
-              type="button"
-              class="retro-chip"
-              :class="companyA.annualGross === preset.value ? 'border-primary text-primary' : ''"
-              :aria-label="`현재 회사 연봉 ${preset.label}원으로 설정`"
-              @click="updateCompany('companyA', { annualGross: preset.value })"
-            >
-              {{ preset.label }}
-            </button>
-          </div>
+          <ShPresetGroup
+            :model-value="companyA.annualGross"
+            :options="salaryPresets"
+            label="현재 회사 연봉 빠른 선택"
+            @update:model-value="updateSalaryPreset('companyA', $event)"
+          />
           <label class="block space-y-1" :for="inputIds.nonTaxA">
             <span class="text-caption text-muted-foreground">비과세 (원/월)</span>
             <input :id="inputIds.nonTaxA" :value="formattedNonTaxA" type="text" class="retro-input" inputmode="numeric" @input="onNonTaxInput('companyA', $event)" />
@@ -191,19 +189,12 @@ const inputIds = {
               @input="onAnnualInput('companyB', $event)"
             />
           </label>
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="preset in salaryPresets"
-              :key="`b-${preset.value}`"
-              type="button"
-              class="retro-chip"
-              :class="companyB.annualGross === preset.value ? 'border-primary text-primary' : ''"
-              :aria-label="`이직 회사 연봉 ${preset.label}원으로 설정`"
-              @click="updateCompany('companyB', { annualGross: preset.value })"
-            >
-              {{ preset.label }}
-            </button>
-          </div>
+          <ShPresetGroup
+            :model-value="companyB.annualGross"
+            :options="salaryPresets"
+            label="이직 회사 연봉 빠른 선택"
+            @update:model-value="updateSalaryPreset('companyB', $event)"
+          />
           <label class="block space-y-1" :for="inputIds.nonTaxB">
             <span class="text-caption text-muted-foreground">비과세 (원/월)</span>
             <input :id="inputIds.nonTaxB" :value="formattedNonTaxB" type="text" class="retro-input" inputmode="numeric" @input="onNonTaxInput('companyB', $event)" />
