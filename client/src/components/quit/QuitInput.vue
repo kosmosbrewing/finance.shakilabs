@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { QuitReason } from "@/data/unemploymentTable";
 import { computed, ref } from "vue";
-import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
+import { ShPresetGroup, ShSlider, type PresetValue } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -66,7 +66,14 @@ function setServiceYears(years: number): void {
   emit("range-apply", { startDate: newStart, endDate: props.endDate });
 }
 
-const quickYears = [1, 3, 5, 7, 10, 15, 20];
+const quickYears = [1, 3, 5, 7, 10, 15, 20].map((value) => ({
+  label: `${value}년`,
+  value,
+}));
+
+function updateServiceYears(value: PresetValue): void {
+  if (typeof value === "number") setServiceYears(value);
+}
 
 const salaryPresets = [
   { label: "250만", value: 2_500_000 },
@@ -74,6 +81,12 @@ const salaryPresets = [
   { label: "500만", value: 5_000_000 },
   { label: "700만", value: 7_000_000 },
 ];
+const quitReasonOptions = [
+  { value: "layoff", label: "권고사직" },
+  { value: "dismissal", label: "해고" },
+  { value: "contract_end", label: "계약만료" },
+  { value: "voluntary", label: "자발적 퇴사" },
+] as const;
 
 // ── 캘린더 모달 ──
 type ActiveField = "start" | "end";
@@ -283,18 +296,12 @@ const inputIds = {
             <p class="text-caption font-semibold tabular-nums">{{ formatDotDate(endDate) }}</p>
           </button>
         </div>
-        <div class="flex flex-wrap gap-1.5">
-          <button
-            v-for="y in quickYears"
-            :key="y"
-            type="button"
-            class="touch-target rounded-lg border border-border/60 bg-muted/20 px-2.5 py-1 text-caption font-semibold text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
-            :class="serviceYears === y ? 'border-primary bg-primary/10 text-primary' : ''"
-            @click="setServiceYears(y)"
-          >
-            {{ y }}년
-          </button>
-        </div>
+        <ShPresetGroup
+          :model-value="serviceYears"
+          :options="quickYears"
+          label="근속 기간 빠른 선택"
+          @update:model-value="updateServiceYears"
+        />
       </div>
 
       <div>
@@ -349,23 +356,12 @@ const inputIds = {
 
       <div>
         <span class="mb-1.5 block text-caption font-semibold text-foreground">퇴사 사유</span>
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="option in ([
-              { value: 'layoff', label: '권고사직' },
-              { value: 'dismissal', label: '해고' },
-              { value: 'contract_end', label: '계약만료' },
-              { value: 'voluntary', label: '자발적 퇴사' },
-            ] as const)"
-            :key="option.value"
-            type="button"
-            class="touch-target rounded-xl border px-3 py-1.5 text-caption font-semibold transition-colors"
-            :class="quitReason === option.value ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
-            @click="emit('update:quitReason', option.value)"
-          >
-            {{ option.label }}
-          </button>
-        </div>
+        <ShPresetGroup
+          :model-value="quitReason"
+          :options="quitReasonOptions"
+          label="퇴사 사유 선택"
+          @update:model-value="emit('update:quitReason', $event)"
+        />
       </div>
 
       <details class="retro-details">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
@@ -28,6 +29,12 @@ const typeOptions: { value: ParentalLeaveType; label: string }[] = [
   { value: "parent66", label: PARENTAL_LEAVE_TYPE_LABELS.parent66 },
   { value: "singleParent", label: PARENTAL_LEAVE_TYPE_LABELS.singleParent },
 ];
+
+function updateLeaveType(value: PresetValue): void {
+  if (value === "general" || value === "parent66" || value === "singleParent") {
+    calc.leaveType.value = value;
+  }
+}
 
 const seoTitle = computed(() =>
   props.initialWage
@@ -66,19 +73,12 @@ const summaryItems = computed(() => [
 
             <div class="space-y-1">
               <p class="text-caption font-medium text-muted-foreground">적용 제도</p>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="opt in typeOptions"
-                  :key="opt.value"
-                  type="button"
-                  class="rounded-full border px-3 py-1.5 text-caption transition-colors"
-                  :class="calc.leaveType.value === opt.value ? 'border-primary bg-primary/10 text-primary font-semibold' : 'border-border text-muted-foreground hover:border-primary/50'"
-                  :aria-pressed="calc.leaveType.value === opt.value"
-                  @click="calc.leaveType.value = opt.value"
-                >
-                  {{ opt.label }}
-                </button>
-              </div>
+              <ShPresetGroup
+                :model-value="calc.leaveType.value"
+                :options="typeOptions"
+                label="육아휴직 적용 제도"
+                @update:model-value="updateLeaveType"
+              />
             </div>
           </div>
         </section>
