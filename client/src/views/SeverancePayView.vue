@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { ShBreakdownBar } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
@@ -9,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
-import BreakdownStackedBar from "@/components/result-visualization/BreakdownStackedBar.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -135,11 +135,9 @@ watch(
             />
 
             <div v-if="result.isEligible" class="retro-chart">
-              <p class="text-caption font-semibold text-foreground">퇴직금 구성</p>
-              <BreakdownStackedBar
+              <ShBreakdownBar
                 :segments="severanceSegments"
                 label="퇴직금 실수령과 세금 구성"
-                show-legend
                 :format-value="formatWon"
               />
             </div>

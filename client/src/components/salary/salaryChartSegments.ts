@@ -1,4 +1,6 @@
-import type { ChartSegment } from "@/components/result-visualization/chartMath";
+import type { BreakdownSegment } from "@shakilabs/ui";
+
+export type SalaryChartSegment = BreakdownSegment & { color: string };
 
 export type SalaryDeductionValues = {
   nationalPension: number;
@@ -11,7 +13,7 @@ export type SalaryDeductionValues = {
 
 export function buildSalaryDeductionSegments(
   values: SalaryDeductionValues,
-): ChartSegment[] {
+): SalaryChartSegment[] {
   return [
     { key: "pension", label: "국민연금", value: values.nationalPension, color: "hsl(var(--chart-pension))" },
     { key: "health", label: "건강보험", value: values.healthInsurance, color: "hsl(var(--chart-health))" },

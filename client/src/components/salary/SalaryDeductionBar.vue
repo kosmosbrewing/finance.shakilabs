@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ShBreakdownBar } from "@shakilabs/ui";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
-import BreakdownStackedBar from "@/components/result-visualization/BreakdownStackedBar.vue";
 import { buildSalaryDeductionSegments } from "@/components/salary/salaryChartSegments";
 
 const props = defineProps<{
@@ -22,5 +22,5 @@ const segments = computed(() =>
 </script>
 
 <template>
-  <BreakdownStackedBar label="월 공제 구성" :segments="segments" />
+  <ShBreakdownBar label="월 공제 구성" :segments="segments" />
 </template>
