@@ -149,7 +149,6 @@ watch(
           </div>
           <div class="retro-panel-content space-y-4">
             <BenefitStatGrid
-              class="min-[360px]:!grid-cols-2"
               :items="[
                 { label: '시급', value: formatWon(result.hourly), tone: base === 'hourly' ? undefined : 'success' },
                 { label: '일급 (8시간)', value: formatWon(result.daily) },
