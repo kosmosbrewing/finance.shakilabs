@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
+import RecentCalcStorageNote from "@/components/finance/RecentCalcStorageNote.vue";
 
 const seoTitle = "2026 세금·연봉·수당 계산기 모음 | 23개 계산기";
 const seoDescription = "연봉 실수령액, 종합소득세, 프리랜서 세금, 연말정산, 퇴직금, 실업급여, 주휴수당 등 23개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
@@ -72,6 +73,8 @@ const categories = [
 <template>
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="jsonLd" />
+
+    <RecentCalcStorageNote />
 
     <div class="retro-panel overflow-hidden">
       <div class="retro-titlebar rounded-t-2xl">
