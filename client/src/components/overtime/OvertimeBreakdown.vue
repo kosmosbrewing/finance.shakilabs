@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import BreakdownStackedBar from "@/components/result-visualization/BreakdownStackedBar.vue";
+import { ShBreakdownBar } from "@shakilabs/ui";
 import { formatWon } from "@/lib/utils";
 import type { OvertimeResult } from "@/utils/scenarioCalculator";
 
@@ -17,11 +17,9 @@ const segments = computed(() => [
 
 <template>
   <div class="space-y-2">
-    <p class="text-body font-semibold text-foreground">추가 수당 구성</p>
-    <BreakdownStackedBar
+    <ShBreakdownBar
       :segments="segments"
       label="연장 야간 휴일수당 구성"
-      show-legend
       :format-value="formatWon"
     />
   </div>

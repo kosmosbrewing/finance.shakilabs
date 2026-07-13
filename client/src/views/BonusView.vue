@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { ShBreakdownBar } from "@shakilabs/ui";
 import SEOHead from "@/components/common/SEOHead.vue";
 import FreshBadge from "@/components/common/FreshBadge.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
@@ -9,7 +10,6 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import { Button } from "@/components/ui/button";
 import InternalLink from "@/components/common/InternalLink.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
-import BreakdownStackedBar from "@/components/result-visualization/BreakdownStackedBar.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
 import { normalizeBonusInput } from "@/lib/validators";
@@ -153,15 +153,11 @@ watch(
               </div>
 
               <div class="retro-panel-muted retro-panel-content space-y-3">
-                <div class="space-y-2">
-                  <p class="text-body font-semibold text-foreground">성과급 구성</p>
-                  <BreakdownStackedBar
-                    :segments="bonusSegments"
-                    label="성과급 실수령과 추가 공제 구성"
-                    show-legend
-                    :format-value="formatWon"
-                  />
-                </div>
+                <ShBreakdownBar
+                  :segments="bonusSegments"
+                  label="성과급 실수령과 추가 공제 구성"
+                  :format-value="formatWon"
+                />
                 <p class="text-body font-semibold text-foreground">핵심 해석</p>
                 <p class="text-caption leading-6 text-muted-foreground">
                   보너스 <span class="tabular-nums">{{ formatWon(input.bonusAmount) }}</span> 중 실제 손에 남는 금액은
