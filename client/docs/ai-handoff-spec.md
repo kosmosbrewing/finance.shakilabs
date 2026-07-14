@@ -1,201 +1,91 @@
-# Salary Calculator AI Handoff Spec (Current Codebase Reference)
+# Finance AI Handoff Spec
 
-## 0. Read First
+- 상태: Current codebase reference
+- 마지막 코드 대조: 2026-07-14
+- 공개 canonical: `https://shakilabs.com/finance`
+- sitemap: 124 indexable URLs
 
-이 문서는 **신규 프로젝트 생성 가이드가 아니라, 기존 프로젝트 참조 스펙**이다.  
-작업 시작 시 반드시 현재 코드베이스를 먼저 파악하고, **이미 구현된 기능은 재구현하지 말고 부족한 부분만 수정/추가**한다.
+## 1. 작업 원칙
 
-- 금지: "처음부터 새로 만들기", 기존 라우트/컴포넌트/컴포저블 중복 생성
-- 원칙: 기존 구조 재사용 + 점진적 개선
+이 문서는 신규 scaffold가 아니라 `02.finance/client` 유지보수용 기준이다. 작업 전에 `src/router/index.ts`, 대상 view·composable·test와 `scripts/seo-routes.mjs`를 읽는다.
 
-## 1. Current Baseline (Already Implemented)
+- 기존 route, composable, 계산식, UI를 재구현하지 않는다.
+- 금액·세율·보험료율은 기존 single source와 공식 출처를 사용한다.
+- 공통 primitive는 `@shakilabs/ui` 공개 API를 우선한다.
+- Header, Footer, SEO, 분석, 광고와 도메인 계산은 app-local로 유지한다.
+- 다른 앱이나 root UI package 변경은 별도 작업으로 분리한다.
 
-- 라우트
-  - `/insurance`, `/salary`, `/compare`, `/quit`, `/comprehensive-tax`, `/freelance`, `/withholding` + 상세 SEO 라우트
-  - `/` 는 `/insurance`로 리다이렉트
-- 핵심 composables
-  - `useInsuranceCalc.ts`, `useInsuranceReverse.ts`, `useSalaryCalc.ts`
-  - `useRetirementCalc.ts`, `useUnemploymentCalc.ts`, `useSurvivalCalc.ts`
-  - `useComprehensiveTaxCalc.ts`, `useFreelanceCalc.ts`, `useWithholdingReverse.ts`
-  - `useIncomeTax.ts`, `useHeadlineMessages.ts`, `useRecentCalcs.ts`
-  - `useAlert.ts`, `useModal.ts`, `useSEO.ts`, `useShare.ts`, `useUrlParams.ts`
-- 공통 컴포넌트
-  - `TickerBar`, `TabNavigation`, `FreshBadge`, `ShareModal`, `AdSlot`, `VisitorCounter`, `MiniCommentPanel`
-- SEO/SSG
-  - `scripts/seo-routes.mjs`, `scripts/generate-sitemap.mjs`, `scripts/prerender.mjs`
-- Analytics
-  - GA4 연동 (`src/lib/analytics.ts`)
+## 2. 현재 스택
 
-## 2. Tech Stack (Actual)
+- Vue 3, Vite, Vue Router, TypeScript
+- Tailwind CSS 3 + app-local compatibility utilities
+- `@shakilabs/ui` `0.3.7` exact vendored artifact
+- `@unhead/vue` for title, canonical, OG, JSON-LD
+- Radix Vue, CVA, Lucide for app-local interactive UI
+- Zod for external input and URL query validation
+- Vitest, ESLint, vue-tsc
+- Sentry and GA4 when the corresponding environment variables are configured
 
-- Frontend: Vue 3 + Vite + Vue Router + TypeScript
-- Styling: TailwindCSS + custom retro utility classes
-- Head/SEO: `@vueuse/head`
-- UI primitives: `radix-vue`
-- Icons: `lucide-vue-next`
-- Validation: `zod`
-- Comment API: `VITE_API_BASE`를 통한 **Express backend API**
+`@vueuse/head`는 사용하지 않는다. 차트 기본 구현은 SVG와 `ShBreakdownBar`이며 Chart.js는 Finance의 필수 의존성이 아니다.
 
-> 본 프로젝트는 `.js`가 아닌 `.ts`/`.vue` 기준으로 유지한다.
+## 3. 라우팅과 SEO
 
-## 3. Environment Variables (Actual)
+- `/`는 `/salary`로 이동한다.
+- 주요 계산기에는 `/salary`, `/insurance`, `/comprehensive-tax`, `/freelancer`, `/freelance-rate`, `/withholding`, `/compare`, `/raise`, `/bonus`, `/annual-leave`, `/overtime`, `/pension`, `/monthly-rent-deduction`, `/irp`, `/4-insurance-employer`, `/quit`, `/parental-leave`, `/year-end-settlement`, `/unemployment`, `/regional-health`, `/weekly-holiday-pay`, `/wage-converter`, `/severance-pay`가 있다.
+- `/all`, `/about`, `/privacy`, `/terms`는 탐색·신뢰 페이지다.
+- 숫자 landing route와 legacy redirect는 router와 `seo-routes.mjs`를 함께 확인한다.
+- unknown route는 `NotFoundView`와 noindex를 사용한다.
 
-`client/.env.example` 기준:
+라우트 목록을 문서에 별도로 복제하지 않는다. `src/router/index.ts`가 runtime source, `scripts/seo-routes.mjs`가 indexable inventory source다.
 
-- `VITE_GA_MEASUREMENT_ID`
-- `VITE_GA_DEBUG`
-- `VITE_ADSENSE_PUBLISHER_ID`
-- `VITE_ADSENSE_SLOT_TOP`
-- `VITE_ADSENSE_SLOT_MIDDLE`
-- `VITE_ADSENSE_SLOT_BOTTOM`
-- `VITE_API_BASE`
-- `VITE_KAKAO_JS_KEY`
+## 4. 데이터와 계산
 
-Supabase 키(`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)는 현재 기본 경로가 아니다.
+- 보험료율·시행일: `src/data/taxRates2026.ts`
+- 소득세 구간: `src/data/taxBrackets.ts`
+- 호환 상수: `src/lib/tax-constants.ts`
+- 계산 로직: `src/composables`, `src/utils`
+- 공식 근거와 검증 이력: `docs/tax-source-verification.md`
 
-## 4. API Architecture (Actual)
+숫자를 view나 문서 프롬프트에 다시 하드코딩하지 않는다. 기준 변경 시 source URL, effective date, golden test와 사용자 화면의 기준일을 같이 갱신한다.
 
-- 댓글 API는 프론트에서 `src/api/comments.ts` + `src/api/helpers.ts`를 통해 백엔드 호출
-- 기본 흐름:
-  - `GET {VITE_API_BASE}/comments`
-  - `POST {VITE_API_BASE}/comments`
-- Supabase 직접 호출 모델이 필요하면, 별도 마이그레이션 작업으로 명시한다.
+## 5. API와 환경변수
 
-## 5. Build/Deploy Pipeline (Actual)
+`client/.env.example`이 환경변수 source다. 주요 항목은 다음과 같다.
 
-- 개발: `npm run dev`
-- 타입검사: `npm run typecheck`
-- 빌드: `npm run build`
-  - 내부적으로 `prebuild -> generate-sitemap -> vite build -> prerender`
-- SSG 핵심 스크립트:
-  - `scripts/seo-routes.mjs`
-  - `scripts/generate-sitemap.mjs`
-  - `scripts/prerender.mjs`
+- `VITE_SITE_URL=https://shakilabs.com/finance`
+- `VITE_API_BASE=/api/finance`
+- `VITE_ENABLE_COMMENTS=false` by default
+- `VITE_GA_MEASUREMENT_ID`, `VITE_GA_DEBUG`
+- `VITE_SENTRY_DSN`
+- AdSense publisher/slot IDs
+- Kakao JS key and allowed hosts
 
-## 6. Route Map (Actual)
+댓글 기능은 enabled일 때 Express backend를 사용한다. 브라우저에서 Supabase를 직접 호출하지 않는다.
 
-`src/router/index.ts` 기준:
+## 6. UI 경계
 
-- `/` -> `/insurance` redirect
-- `/insurance`
-- `/insurance/:amount(\\d+)`
-- `/salary`
-- `/salary/:amount`
-- `/comprehensive-tax`
-- `/comprehensive-tax/:amount(\\d+)`
-- `/freelance`  (children: `/comprehensive-tax`)
-- `/freelance/:amount(\\d+)`  (children: `/comprehensive-tax`)
-- `/withholding`
-- `/withholding/:amount(\\d+)`
-- `/compare`
-- `/compare/:a(\\d+)-vs-:b(\\d+)`
-- `/quit`
-- `/quit/:years(\\d+years)`  (예: `/quit/1years`)
-- `/about`
-- `/privacy`
-- `/:pathMatch(.*)*`
+- 공통: `ShButton`, `ShSurface`, `ShText`, primary navigation, preset/slider, table/form primitives, `ShBreakdownBar`, `ShBulletProgress`
+- app-local: 세금·보험 계산 form, 결과 해석, 출처, focus 관리형 alert/accordion, share, SEO, analytics
+- 기존 retro utility는 호환 레이어로 유지하되 신규 공통 계약을 우회하는 별도 디자인 시스템을 만들지 않는다.
+- 모바일 360px, 390px, 430px에서 결과 overflow와 44px control target을 확인한다.
 
-## 7. Source Structure (Actual, TypeScript)
+## 7. Build와 배포
 
-```txt
-client/src/
-  api/
-    comments.ts
-    helpers.ts
-    types.ts
-  composables/
-    useAlert.ts
-    useComprehensiveTaxCalc.ts
-    useFreelanceCalc.ts
-    useHeadlineMessages.ts
-    useIncomeTax.ts
-    useInsuranceCalc.ts
-    useInsuranceReverse.ts
-    useModal.ts
-    useRecentCalcs.ts
-    useRetirementCalc.ts
-    useSalaryCalc.ts
-    useSEO.ts
-    useShare.ts
-    useSurvivalCalc.ts
-    useUnemploymentCalc.ts
-    useUrlParams.ts
-    useWithholdingReverse.ts
-  components/
-    common/
-    insurance/
-    salary/
-      HealthInsuranceRank.vue
-      SalaryInputPanel.vue
-      SalaryResultPanel.vue
-      DeductionChart.vue
-      DeductionTable.vue
-      CalcSourceBox.vue
-    compare/
-    quit/
-    share/
-  data/
-    taxRates2026.ts
-    taxBrackets.ts
-    ...
-  lib/
-    analytics.ts
-    site.ts
-    tax-constants.ts
-    health-insurance-tiers.ts
-    utils.ts
-  utils/
-    calculator.ts
-  views/
-    InsuranceView.vue
-    SalaryView.vue
-    SalaryLandingView.vue
-    CompareView.vue
-    QuitView.vue
-    AboutView.vue
-    PrivacyView.vue
-    NotFoundView.vue
+```bash
+npm run typecheck
+npm test
+npm run build
 ```
 
-## 8. Design System (Actual)
+`build`는 sitemap 생성, Vite build, route prerender, font manifest 검증을 수행한다. 필요 시 `npm run lint`도 실행한다.
 
-프로젝트의 시각 정체성은 커스텀 retro 클래스 기반:
+Vercel은 `client/dist`의 route별 prerender HTML을 직접 제공한다. 모든 route를 `/index.html`로 보내는 catch-all rewrite를 추가하지 않는다.
 
-- `retro-panel`, `retro-panel-content`
-- `retro-titlebar`, `retro-title`, `retro-kbd`
-- `retro-board-list`, `retro-board-item`
-- `retro-stat`, `retro-stat-label`, `retro-stat-value`
+## 8. 완료 조건
 
-신규 UI는 위 클래스를 우선 재사용하고, 일반 Tailwind-only 스타일로 대체하지 않는다.
-
-## 9. Data Single Source Rule
-
-요율/세율은 코드 상수에서 단일 진실 원천을 유지한다.
-
-- 기본 소스: `src/data/taxRates2026.ts`, `src/data/taxBrackets.ts`
-- 호환/집계: `src/lib/tax-constants.ts`
-- 프롬프트 문서 본문에 숫자를 중복 하드코딩하지 않는다.
-
-## 10. Dependency Baseline (Actual)
-
-`package.json` 기준 필수 의존성:
-
-- `@vueuse/head`
-- `radix-vue`
-- `lucide-vue-next`
-- `tailwindcss-animate`
-- `class-variance-authority`
-- `clsx`
-- `tailwind-merge`
-- `zod`
-
-차트는 `chart.js`/`vue-chartjs`가 기본 의존성이 아니다. (`DeductionChart.vue`는 SVG 기반)
-
-## 11. Work Instructions for Future AI Sessions
-
-1. `src/router/index.ts`와 `src/composables`를 먼저 읽고 기존 흐름을 파악한다.
-2. 기존 컴포넌트가 있으면 신규 생성보다 확장/수정한다.
-3. API는 `VITE_API_BASE` 기반 Express 경로를 우선 따른다.
-4. 변경 후 `npm run typecheck && npm run build`를 반드시 통과시킨다.
-5. 문서/프롬프트는 본 스펙과 코드가 불일치하지 않도록 업데이트한다.
-
+1. 계산 경계와 기존 regression test가 통과한다.
+2. 변경 route의 title, description, H1, canonical, source가 일치한다.
+3. `typecheck -> test -> build`가 모두 통과한다.
+4. 데이터 변경이면 공식 source와 시행일을 기록한다.
+5. UI 변경이면 mobile과 desktop을 확인한다.
+6. 문서의 구현 주장이 실제 코드와 다르면 같은 PR에서 갱신한다.
