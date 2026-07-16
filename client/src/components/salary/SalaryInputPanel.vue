@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
+import { ShPresetGroup, ShSlider, ShStepper, ShToggleGroup } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
 
 const props = defineProps<{
@@ -55,8 +55,8 @@ function onNonTaxableInput(event: Event): void {
   }
 }
 
-function adjustDependents(delta: number): void {
-  const next = Math.max(1, Math.min(20, props.dependents + delta));
+// 스텝 UI는 ShStepper 소유, 부양가족↔자녀 결합 규칙(자녀 ≤ 부양가족−1)만 앱이 유지
+function onDependentsChange(next: number): void {
   emit("update:dependents", next);
 
   const maxChildren = Math.max(0, next - 1);
@@ -65,15 +65,12 @@ function adjustDependents(delta: number): void {
   }
 }
 
-function adjustChildren(delta: number): void {
-  const maxChildren = Math.max(0, props.dependents - 1);
-  const next = Math.max(0, Math.min(maxChildren, props.childrenUnder20 + delta));
-  emit("update:childrenUnder20", next);
-}
+const maxChildren = computed(() => Math.max(0, props.dependents - 1));
 
-function updateRetirementIncluded(value: boolean): void {
-  emit("update:retirementIncluded", value);
-}
+const retirementOptions = [
+  { label: "퇴직금 별도", value: false },
+  { label: "퇴직금 포함", value: true },
+];
 </script>
 
 <template>
@@ -88,33 +85,26 @@ function updateRetirementIncluded(value: boolean): void {
           연봉 (원)
         </label>
         <div class="space-y-2">
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-              aria-label="100만원 감소"
-              @click="emit('update:annualGross', Math.max(10_000_000, annualGross - 1_000_000))"
-            >
-              −
-            </button>
+          <ShStepper
+            class="w-full"
+            :model-value="annualGross"
+            :min="10_000_000"
+            :max="300_000_000"
+            :step="1_000_000"
+            label="연봉 100만원 단위"
+            @update:model-value="emit('update:annualGross', $event)"
+          >
+            <!-- 연봉은 직접 입력이 핵심 UX — 값 표시 대신 기존 입력창을 slot으로 유지 -->
             <input
               :id="inputIds.annualGross"
               :value="formattedGross"
               type="text"
-              class="retro-input min-w-0 flex-1 text-center text-heading font-bold tabular-nums"
+              class="retro-input w-full text-center text-heading font-bold tabular-nums"
               placeholder="30,000,000"
               inputmode="numeric"
               @input="onGrossInput"
             />
-            <button
-              type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-              aria-label="100만원 증가"
-              @click="emit('update:annualGross', Math.min(300_000_000, annualGross + 1_000_000))"
-            >
-              +
-            </button>
-          </div>
+          </ShStepper>
           <ShSlider
             :id="inputIds.annualGrossRange"
             :model-value="annualGross"
@@ -143,24 +133,12 @@ function updateRetirementIncluded(value: boolean): void {
         <div class="space-y-3 p-3">
           <div>
             <span class="mb-0.5 block text-caption font-semibold text-foreground">퇴직금 포함 여부</span>
-            <div class="flex gap-2.5">
-              <button
-                type="button"
-                class="touch-target rounded-xl border px-3 py-1.5 text-caption font-semibold transition-colors"
-                :class="!props.retirementIncluded ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
-                @click="updateRetirementIncluded(false)"
-              >
-                퇴직금 별도
-              </button>
-              <button
-                type="button"
-                class="touch-target rounded-xl border px-3 py-1.5 text-caption font-semibold transition-colors"
-                :class="props.retirementIncluded ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:text-foreground'"
-                @click="updateRetirementIncluded(true)"
-              >
-                퇴직금 포함
-              </button>
-            </div>
+            <ShToggleGroup
+              :model-value="props.retirementIncluded ?? false"
+              :options="retirementOptions"
+              label="퇴직금 포함 여부"
+              @update:model-value="emit('update:retirementIncluded', $event)"
+            />
           </div>
 
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -168,50 +146,26 @@ function updateRetirementIncluded(value: boolean): void {
               <p class="mb-0.5 block text-caption font-semibold text-foreground">
                 부양가족 수 (본인 포함)
               </p>
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                  aria-label="부양가족 수 감소"
-                  @click="adjustDependents(-1)"
-                >
-                  −
-                </button>
-                <span class="w-12 text-center text-heading font-bold tabular-nums">{{ props.dependents }}</span>
-                <button
-                  type="button"
-                  class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                  aria-label="부양가족 수 증가"
-                  @click="adjustDependents(1)"
-                >
-                  +
-                </button>
-              </div>
+              <ShStepper
+                :model-value="props.dependents"
+                :min="1"
+                :max="20"
+                label="부양가족 수"
+                @update:model-value="onDependentsChange"
+              />
             </div>
 
             <div>
               <p class="mb-0.5 block text-caption font-semibold text-foreground">
                 8~20세 자녀 수
               </p>
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                  aria-label="8~20세 자녀 수 감소"
-                  @click="adjustChildren(-1)"
-                >
-                  −
-                </button>
-                <span class="w-12 text-center text-heading font-bold tabular-nums">{{ props.childrenUnder20 }}</span>
-                <button
-                  type="button"
-                  class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                  aria-label="8~20세 자녀 수 증가"
-                  @click="adjustChildren(1)"
-                >
-                  +
-                </button>
-              </div>
+              <ShStepper
+                :model-value="props.childrenUnder20"
+                :min="0"
+                :max="maxChildren"
+                label="8~20세 자녀 수"
+                @update:model-value="emit('update:childrenUnder20', $event)"
+              />
             </div>
 
             <div>
