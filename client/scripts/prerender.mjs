@@ -9,6 +9,7 @@ import {
   getPrerenderGuide,
   PRERENDER_GUIDE_ROUTES,
 } from "./prerender-guides.mjs";
+import { FAQ_SOURCE_FILES, ROUTE_FAQS } from "./faq-data.mjs";
 
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
 const INDEX_HTML = resolve(DIST_DIR, "index.html");
@@ -34,6 +35,66 @@ if (!existsSync(INDEX_HTML)) {
 }
 
 const template = readFileSync(INDEX_HTML, "utf-8");
+
+// --- 랜딩 라우트 FAQ (faq-data.mjs 미러) ---
+// 화면(BenefitFaqPanel) 문구와 스키마 문구가 달라지면 안 되므로,
+// 미러 텍스트가 원본 소스에 그대로 존재하는지 빌드 시점에 검증한다.
+function verifyFaqMirror() {
+  const sourceText = FAQ_SOURCE_FILES.map((path) =>
+    readFileSync(resolve(import.meta.dirname, "..", path), "utf-8")
+  ).join("\n");
+
+  for (const [route, items] of Object.entries(ROUTE_FAQS)) {
+    for (const item of items) {
+      if (!sourceText.includes(item.question) || !sourceText.includes(item.answer)) {
+        throw new Error(
+          `[prerender] FAQ mirror drift for ${route}: "${item.question}" — update scripts/faq-data.mjs to match src data.`
+        );
+      }
+    }
+  }
+}
+verifyFaqMirror();
+
+// src/lib/faqSeo.ts buildFaqJsonLd 미러 — 동일한 FAQPage 형식 유지
+function buildFaqJsonLd(items) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+// 스키마와 동일한 Q/A를 정적 본문에도 노출 (prerender-content.mjs FAQ 섹션과 같은 스타일)
+function buildFaqSectionHtml(items) {
+  const qaHtml = items
+    .map(
+      (item) => `
+      <h3 style="font-size:16px;line-height:1.4;margin:18px 0 6px;color:#0f172a;">${item.question}</h3>
+      <p style="margin:0 0 10px;">${item.answer}</p>`
+    )
+    .join("");
+
+  return `
+      <h2 style="font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #10b98133;color:#0f172a;">자주 묻는 질문 (FAQ)</h2>${qaHtml}`;
+}
+
+// 본문 마지막 닫는 태그 앞에 FAQ 섹션 삽입 (guide article·fallback section 공용)
+function appendFaqSection(contentHtml, items) {
+  const faqHtml = buildFaqSectionHtml(items);
+  const closingTag = /<\/(article|section)>\s*$/i;
+  if (!closingTag.test(contentHtml)) {
+    throw new Error("[prerender] Cannot append FAQ section: unexpected content markup.");
+  }
+  return contentHtml.replace(closingTag, (matched) => `${faqHtml}\n    ${matched}`);
+}
 
 function escapeAttr(value) {
   return String(value)
@@ -1437,7 +1498,12 @@ function applyMeta(html, route, meta) {
   );
 
   // JSON-LD: jsonLd + breadcrumb를 배열로 병합
-  const jsonLdArray = [meta.jsonLd, meta.breadcrumb].flat().filter(Boolean);
+  // FAQ 보유 랜딩 라우트는 FAQPage를 추가하되, 이미 있으면 절대 중복 주입하지 않는다 (페이지당 정확히 1개)
+  const routeFaqs = ROUTE_FAQS[route] ?? null;
+  const baseJsonLd = [meta.jsonLd].flat().filter(Boolean);
+  const hasFaqPage = baseJsonLd.some((entry) => entry["@type"] === "FAQPage");
+  const faqJsonLd = routeFaqs && !hasFaqPage ? buildFaqJsonLd(routeFaqs) : null;
+  const jsonLdArray = [...baseJsonLd, faqJsonLd, meta.breadcrumb].flat().filter(Boolean);
   const jsonLdTag = `    <script type="application/ld+json" data-seo-prerender="jsonld">${toSafeJson(jsonLdArray)}</script>`;
   output = output.replace(/\n?\s*<script type="application\/ld\+json" data-seo-prerender="jsonld">[\s\S]*?<\/script>/i, "");
   output = output.replace("</head>", `${jsonLdTag}\n  </head>`);
@@ -1450,7 +1516,11 @@ function applyMeta(html, route, meta) {
 
   // 리치 콘텐츠 우선 시도 → 없으면 기본 스텁
   const rich = buildRichContent(route, meta);
-  const mainContent = rich || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
+  let mainContent = rich || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
+  // 스키마 규칙: FAQPage의 Q/A는 본문에 렌더되는 문구와 동일해야 하므로 같은 데이터로 본문 FAQ도 노출
+  if (routeFaqs && !mainContent.includes("자주 묻는")) {
+    mainContent = appendFaqSection(mainContent, routeFaqs);
+  }
   const headerHtml = buildPrerenderHeader();
   const footerHtml = buildPrerenderFooter();
 
@@ -1475,6 +1545,24 @@ for (const route of SEO_ROUTES) {
 
   const meta = buildMeta(route);
   const html = applyMeta(template, route, meta);
+
+  // 불변 규칙 검증: FAQPage는 페이지당 최대 1개, FAQ 라우트는 정확히 1개 + 본문에 동일 Q 텍스트 존재
+  const faqPageCount = (html.match(/"FAQPage"/g) ?? []).length;
+  if (faqPageCount > 1) {
+    throw new Error(`[prerender] Duplicate FAQPage schema on ${route} (count=${faqPageCount})`);
+  }
+  const routeFaqs = ROUTE_FAQS[route];
+  if (routeFaqs) {
+    if (faqPageCount !== 1) {
+      throw new Error(`[prerender] Missing FAQPage schema on FAQ route ${route}`);
+    }
+    for (const item of routeFaqs) {
+      if (!html.includes(item.question)) {
+        throw new Error(`[prerender] FAQ question missing from body on ${route}: "${item.question}"`);
+      }
+    }
+  }
+
   writeFileSync(filePath, html, "utf-8");
   console.log(`[prerender] ${route} -> ${filePath}`);
 }
