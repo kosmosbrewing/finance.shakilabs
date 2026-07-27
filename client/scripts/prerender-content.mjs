@@ -9,6 +9,7 @@ import {
   formatPercent,
   RATES_2026,
 } from "./calc-engine.mjs";
+import { INSURANCE_AMOUNTS } from "./seo-routes.mjs";
 
 // --- 라우트 파서 ---
 const SALARY_RE = /^\/salary\/(\d+)$/;
@@ -294,6 +295,38 @@ function buildSalaryContent(manWon) {
 // =========================
 // 건강보험료 역산 (/insurance/:fee)
 // =========================
+
+// 인접 건보료 구간의 역산 결과 행 — 페이지별 고유 수치를 만들고 구간 페이지 간 크롤 경로를 잇는다
+function buildInsuranceNeighborRows(fee) {
+  const offsets = [-20_000, -10_000, 0, 10_000, 20_000];
+  return offsets
+    .map((offset) => fee + offset)
+    .filter((neighborFee) => neighborFee >= 10_000)
+    .map((neighborFee) => {
+      const taxable = Math.floor(neighborFee / RATES_2026.healthInsurance.employee);
+      const annual = (taxable + 200_000) * 12;
+      const breakdown = calculateSalaryBreakdown({
+        grossAnnual: annual,
+        nonTaxableMonthly: 200_000,
+        dependents: 1,
+        children: 0,
+        retirementIncluded: false,
+      });
+      const isCurrent = neighborFee === fee;
+      const hasPage = !isCurrent && INSURANCE_AMOUNTS.includes(neighborFee);
+      const feeCell = hasPage
+        ? `<a href="/finance/insurance/${neighborFee}">${formatWon(neighborFee)}</a>`
+        : `${formatWon(neighborFee)}${isCurrent ? " (현재 페이지)" : ""}`;
+      return `
+          <tr${isCurrent ? ' style="background:#ecfdf5;"' : ""}>
+            <td style="${TD_STYLE}">${feeCell}</td>
+            <td style="${TD_STYLE}">${formatManWonValue(Math.round(annual / 10_000))}원</td>
+            <td style="${TD_STYLE}">${formatWon(breakdown.monthlyNet)}</td>
+          </tr>`;
+    })
+    .join("");
+}
+
 function buildInsuranceContent(fee) {
   // 건보료 → 월 과세급여 역산
   const monthlyTaxable = Math.floor(fee / RATES_2026.healthInsurance.employee);
@@ -441,7 +474,25 @@ function buildInsuranceContent(fee) {
         </tbody>
       </table>
 
-      <h2 style="${H2_STYLE}">4. 자주 묻는 질문 (FAQ)</h2>
+      <h2 style="${H2_STYLE}">4. 인접 건보료 구간 비교</h2>
+      <p style="${P_STYLE}">
+        월 건강보험료가 1~2만원 차이 나면 역산 연봉은 얼마나 달라질까요?
+        건보료 ${formatWon(fee)} 전후 구간의 추정 연봉과 월 실수령액을 비교한 표입니다.
+        보수월액 신고 반올림이나 성과급 반영 시점에 따라 실제 급여는 인접 구간에 걸쳐 있을 수 있습니다.
+      </p>
+      <table style="${TABLE_STYLE}">
+        <thead>
+          <tr>
+            <th style="${TH_STYLE}">월 건강보험료</th>
+            <th style="${TH_STYLE}">추정 연봉</th>
+            <th style="${TH_STYLE}">예상 월 실수령액</th>
+          </tr>
+        </thead>
+        <tbody>${buildInsuranceNeighborRows(fee)}
+        </tbody>
+      </table>
+
+      <h2 style="${H2_STYLE}">5. 자주 묻는 질문 (FAQ)</h2>
 
       <h3 style="${H3_STYLE}">Q1. 회사가 신고한 건보료와 실제 급여가 다를 수 있나요?</h3>
       <p style="${P_STYLE}">
@@ -475,7 +526,7 @@ function buildInsuranceContent(fee) {
         최근 추세는 연 2~4% 수준의 인상이며, 2026년 근로자 부담 요율은 3.595%입니다.
       </p>
 
-      <h2 style="${H2_STYLE}">5. 관련 계산기</h2>
+      <h2 style="${H2_STYLE}">6. 관련 계산기</h2>
       <ul style="${UL_STYLE}">
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a> - 연봉으로 실수령 순산</li>
         <li style="${LI_STYLE}"><a href="/finance/regional-health">지역가입자 건보료 계산기</a> - 퇴사 후 건보료</li>
