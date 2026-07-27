@@ -42,6 +42,7 @@ const footerNav = [
       { to: "/unemployment", label: "실업급여" },
       { to: "/parental-leave", label: "육아휴직" },
       { to: "/regional-health", label: "지역가입자 건보" },
+      { to: "/dependent", label: "피부양자 판정" },
     ],
   },
   {

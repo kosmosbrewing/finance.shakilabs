@@ -80,6 +80,15 @@ const GUIDES = {
     limit: "실제 필요경비, 다른 소득, 부양가족, 부가가치세와 사업 형태에 따라 확정 세액은 달라집니다.",
     links: [["/finance/freelancer", "프리랜서 세금 계산"], ["/finance/comprehensive-tax", "종합소득세 계산"]],
   },
+  "/dependent": {
+    title: "2026 건보 피부양자 자격 판정기 | 소득·재산 기준",
+    description: "연 합산소득 2,000만원, 재산세 과세표준 5억4천만·9억원 기준으로 건강보험 피부양자 유지 가능 여부를 판정합니다. 탈락 시 지역가입자 보험료 계산으로 이어집니다.",
+    heading: "건강보험 피부양자 자격 판정기",
+    usage: "연금 수령이나 금융소득 증가로 피부양자 탈락이 걱정될 때 소득·재산·사업소득 요건을 한 번에 점검합니다.",
+    method: "합산소득 2,000만원 초과, 재산과표 9억원 초과, 재산과표 5억4천만원 초과 시 소득 1,000만원 기준, 사업소득 요건을 순서대로 검사합니다.",
+    limit: "부양요건(가족관계)과 형제자매 특례, 건보공단이 보유한 실제 부과 자료는 반영하지 않는 간이 판정입니다.",
+    links: [["/finance/regional-health", "지역가입자 건보료 계산"], ["/finance/insurance", "건보료 역산 계산"]],
+  },
 };
 
 export const PRERENDER_GUIDE_ROUTES = Object.freeze(Object.keys(GUIDES));

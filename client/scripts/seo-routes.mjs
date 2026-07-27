@@ -133,6 +133,7 @@ export const SEO_ROUTES = [
   ...UNEMPLOYMENT_AMOUNTS.map((amount) => `/unemployment/${amount}`),
   "/regional-health",
   ...REGIONAL_HEALTH_AMOUNTS.map((amount) => `/regional-health/${amount}`),
+  "/dependent",
   "/weekly-holiday-pay",
   ...WEEKLY_HOLIDAY_PAY_AMOUNTS.map((amount) => `/weekly-holiday-pay/${amount}`),
   "/wage-converter",
