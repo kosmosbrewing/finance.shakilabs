@@ -29,6 +29,13 @@ const WEEKLY_HOLIDAY_PAY_ROUTE_RE = /^\/weekly-holiday-pay\/(\d+)$/;
 const WAGE_CONVERTER_ROUTE_RE = /^\/wage-converter\/(\d+)$/;
 const SEVERANCE_PAY_ROUTE_RE = /^\/severance-pay\/(\d+)$/;
 const UNPAID_WAGE_ROUTE_RE = /^\/unpaid-wage\/(\d+)$/;
+// 숫자 프리셋 관례와 달리 가구유형 문자열 파라미터를 쓴다
+const EITC_ROUTE_RE = /^\/eitc\/(single|single-income|double-income)$/;
+const EITC_HOUSEHOLD_LABELS = {
+  "single": "단독 가구",
+  "single-income": "홑벌이 가구",
+  "double-income": "맞벌이 가구",
+};
 
 if (!existsSync(INDEX_HTML)) {
   console.warn("[prerender] dist/index.html not found. Skipping prerender.");
@@ -188,6 +195,11 @@ function readUnemploymentManWon(route) {
   if (!matched) return null;
   const parsed = Number.parseInt(matched[1], 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readEitcHousehold(route) {
+  const matched = route.match(EITC_ROUTE_RE);
+  return matched ? matched[1] : null;
 }
 
 function readUnpaidWageManWon(route) {
@@ -366,6 +378,38 @@ function buildMeta(route) {
         { name: "홈", url: SITE_URL },
         { name: "실업급여 계산기", url: `${SITE_URL}/unemployment` },
         { name: `월급 ${formatManWon(unemploymentManWon)}` },
+      ]),
+    };
+  }
+
+  const eitcHousehold = readEitcHousehold(route);
+  if (eitcHousehold !== null) {
+    const householdLabel = EITC_HOUSEHOLD_LABELS[eitcHousehold];
+    const title = `${householdLabel} 근로장려금 계산기 | 2026 지급액 조회`;
+    const description = `${householdLabel} 기준 근로장려금 소득 구간별 지급액을 계산합니다. 재산 요건과 자녀장려금까지 확인하세요.`;
+    const canonical = `${SITE_URL}/eitc/${eitcHousehold}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `${householdLabel}는 근로장려금을 최대 얼마 받나요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "가구 유형별 최대 지급액은 단독 165만원, 홑벌이 285만원, 맞벌이 330만원이며 소득·재산 요건에 따라 달라집니다.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "근로장려금 계산기", url: `${SITE_URL}/eitc` },
+        { name: householdLabel },
       ]),
     };
   }

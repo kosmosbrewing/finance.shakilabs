@@ -301,6 +301,21 @@ const routes: RouteRecordRaw[] = [
     meta: { title: "체불임금 지연이자 계산 결과 | 연 20% 기준" },
   },
   {
+    path: "/eitc",
+    name: "Eitc",
+    component: () => import("@/views/EitcView.vue"),
+    meta: { title: "2026 근로장려금·자녀장려금 계산기 | 가구 유형별 지급액" },
+  },
+  {
+    path: "/eitc/:household(single|single-income|double-income)",
+    name: "EitcHousehold",
+    component: () => import("@/views/EitcView.vue"),
+    props: (route) => ({
+      initialHousehold: String(route.params.household),
+    }),
+    meta: { title: "가구 유형별 근로장려금 계산 | 2026 지급액" },
+  },
+  {
     path: "/weekly-holiday-pay",
     name: "WeeklyHolidayPay",
     component: () => import("@/views/WeeklyHolidayPayView.vue"),

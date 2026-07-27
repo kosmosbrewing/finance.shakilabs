@@ -26,6 +26,7 @@ const WEEKLY_HOLIDAY_PAY_RE = /^\/weekly-holiday-pay\/(\d+)$/;
 const WAGE_CONVERTER_RE = /^\/wage-converter\/(\d+)$/;
 const SEVERANCE_PAY_RE = /^\/severance-pay\/(\d+)$/;
 const UNPAID_WAGE_RE = /^\/unpaid-wage\/(\d+)$/;
+const EITC_RE = /^\/eitc\/(single|single-income|double-income)$/;
 
 function parseInt10(s) {
   const n = Number.parseInt(s, 10);
@@ -289,6 +290,147 @@ function buildSalaryContent(manWon) {
       <p style="font-size:12px;color:#64748b;margin-top:24px;">
         ※ 본 계산 결과는 2026년 국세청 근로소득 간이세액표와 국민건강보험공단·국민연금공단·고용노동부 고시를 기반으로 한
         추정값이며, 법적 효력이 없는 참고용입니다. 실제 급여명세서와 차이가 있을 수 있습니다.
+      </p>
+    </article>`;
+}
+
+// =========================
+// 근로장려금 (/eitc/:household)
+// =========================
+// src/data/eitc.ts · src/utils/eitcCalculator.ts 미러 — 점증·평탄·점감 산식
+const EITC_BRACKETS = {
+  "single": {
+    label: "단독 가구",
+    phaseInEnd: 4_000_000,
+    plateauEnd: 9_000_000,
+    phaseOutEnd: 22_000_000,
+    maxAmount: 1_650_000,
+  },
+  "single-income": {
+    label: "홑벌이 가구",
+    phaseInEnd: 7_000_000,
+    plateauEnd: 14_000_000,
+    phaseOutEnd: 32_000_000,
+    maxAmount: 2_850_000,
+  },
+  "double-income": {
+    label: "맞벌이 가구",
+    phaseInEnd: 8_000_000,
+    plateauEnd: 17_000_000,
+    phaseOutEnd: 44_000_000,
+    maxAmount: 3_300_000,
+  },
+};
+
+function eitcAmountFor(income, bracket) {
+  if (income >= bracket.phaseOutEnd) return 0;
+  if (income < bracket.phaseInEnd) return Math.floor((bracket.maxAmount * income) / bracket.phaseInEnd);
+  if (income <= bracket.plateauEnd) return bracket.maxAmount;
+  return Math.floor(
+    (bracket.maxAmount * (bracket.phaseOutEnd - income)) / (bracket.phaseOutEnd - bracket.plateauEnd),
+  );
+}
+
+function buildEitcContent(householdSlug) {
+  const bracket = EITC_BRACKETS[householdSlug];
+  if (!bracket) return null;
+
+  const incomeRows = [];
+  for (let income = 2_000_000; income < bracket.phaseOutEnd; income += 2_000_000) {
+    incomeRows.push(income);
+  }
+  const tableRows = incomeRows
+    .map((income) => {
+      const amount = eitcAmountFor(income, bracket);
+      const zone = income < bracket.phaseInEnd ? "점증" : income <= bracket.plateauEnd ? "평탄(최대)" : "점감";
+      return `
+          <tr${amount === bracket.maxAmount ? ' style="background:#ecfdf5;"' : ""}>
+            <td style="${TD_STYLE}">${formatWon(income)}</td>
+            <td style="${TD_STYLE}">${zone}</td>
+            <td style="${TD_STYLE}"><strong>${formatWon(amount)}</strong></td>
+          </tr>`;
+    })
+    .join("");
+
+  const otherLinks = Object.entries(EITC_BRACKETS)
+    .filter(([slug]) => slug !== householdSlug)
+    .map(([slug, item]) => `<a href="/finance/eitc/${slug}">${item.label}</a>`)
+    .join(" · ");
+
+  return `
+    <article data-seo-prerender="eitc" style="${ARTICLE_STYLE}">
+      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+        &nbsp;›&nbsp;
+        <a href="/finance/eitc" style="color:#64748b;text-decoration:none;">근로장려금 계산기</a>
+        &nbsp;›&nbsp;
+        ${bracket.label}
+      </nav>
+
+      <h1 style="${H1_STYLE}">${bracket.label} 근로장려금 — 소득별 지급액 (2026)</h1>
+
+      <p style="${P_STYLE}">
+        ${bracket.label}의 근로장려금은 연간 총급여 <strong>${formatWon(bracket.phaseOutEnd)}</strong> 미만일 때 신청할 수 있고,
+        최대 <strong style="color:#047857;">${formatWon(bracket.maxAmount)}</strong>까지 받을 수 있습니다.
+        총급여 ${formatWon(bracket.phaseInEnd)}까지는 소득에 비례해 늘어나는 점증 구간,
+        ${formatWon(bracket.plateauEnd)}까지는 최대액을 유지하는 평탄 구간,
+        그 이후는 상한에서 0원이 되는 점감 구간입니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">1. ${bracket.label} 소득 구간별 예상 지급액</h2>
+      <table style="${TABLE_STYLE}">
+        <thead>
+          <tr>
+            <th style="${TH_STYLE}">연간 총급여</th>
+            <th style="${TH_STYLE}">구간</th>
+            <th style="${TH_STYLE}">예상 근로장려금</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}
+        </tbody>
+      </table>
+      <p style="${P_STYLE}">
+        위 금액은 산식 기준 간이 추정치입니다. 실제 산정표는 총급여 구간 단위와 단수 조정이 있어 소액 차이가 날 수 있으며,
+        가구원 재산 합계가 1억7,000만원 이상이면 50% 감액, 2억4,000만원 이상이면 지급 대상에서 제외됩니다.
+      </p>
+
+      <div style="${CALLOUT_STYLE}">
+        <strong>신청 시기</strong> — 정기 신청 5월, 근로소득자 반기 신청은 상반기분 9월·하반기분 다음 해 3월.
+        기한 후 신청(정기분)은 지급액이 5% 감액됩니다.
+      </div>
+
+      <h2 style="${H2_STYLE}">2. 자녀장려금도 함께 확인</h2>
+      <p style="${P_STYLE}">
+        ${householdSlug === "single"
+          ? "단독 가구는 부양자녀가 없는 가구이므로 자녀장려금 대상이 아닙니다. 결혼·출산으로 가구 유형이 바뀌면 홑벌이·맞벌이 기준을 다시 확인하세요."
+          : `${bracket.label}는 부양자녀(18세 미만) 1인당 최대 100만원의 자녀장려금을 함께 받을 수 있습니다. 총급여 2,100만원까지는 자녀당 100만원, 이후 7,000만원까지 점감해 최소 50만원이 지급됩니다.`}
+      </p>
+
+      <h2 style="${H2_STYLE}">3. 자주 묻는 질문 (FAQ)</h2>
+
+      <h3 style="${H3_STYLE}">Q1. ${bracket.label}의 소득 상한은 얼마인가요?</h3>
+      <p style="${P_STYLE}">
+        연간 총급여 등이 ${formatWon(bracket.phaseOutEnd)} 미만이어야 합니다. 상한에 가까울수록 점감 구간이 적용되어 지급액이 줄어듭니다.
+      </p>
+
+      <h3 style="${H3_STYLE}">Q2. 최대 ${formatWon(bracket.maxAmount)}은 언제 받나요?</h3>
+      <p style="${P_STYLE}">
+        총급여가 ${formatWon(bracket.phaseInEnd)}~${formatWon(bracket.plateauEnd)} 사이(평탄 구간)이고 재산 요건(1억7,000만원 미만)을 충족할 때
+        최대액이 산정됩니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">4. 관련 계산기</h2>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><a href="/finance/eitc">근로장려금 계산기</a> - 조건 직접 입력</li>
+        <li style="${LI_STYLE}"><a href="/finance/year-end-settlement">연말정산 계산기</a> - 예상 환급액</li>
+        <li style="${LI_STYLE}"><a href="/finance/weekly-holiday-pay">주휴수당 계산기</a> - 아르바이트 수당</li>
+        <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
+      </ul>
+      <p style="${P_STYLE}">다른 가구 유형으로 보기: ${otherLinks}</p>
+
+      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+        ※ 본 결과는 조세특례제한법 산식 기준 간이 추정치이며, 국세청 산정표·단수 조정, 국민연금 수급 등 제외 요건에 따라
+        실제 지급액과 차이가 있을 수 있습니다. 확정 금액은 홈택스 모의계산을 이용하세요.
       </p>
     </article>`;
 }
@@ -2445,6 +2587,11 @@ export function buildRichContent(route, _meta) {
   if (unpaidWageMatch) {
     const amount = parseInt10(unpaidWageMatch[1]);
     if (amount !== null && amount > 0) return buildUnpaidWageContent(amount);
+  }
+
+  const eitcMatch = route.match(EITC_RE);
+  if (eitcMatch) {
+    return buildEitcContent(eitcMatch[1]);
   }
 
   const compTaxMatch = route.match(COMPREHENSIVE_TAX_RE);

@@ -53,6 +53,7 @@ const footerNav = [
       { to: "/monthly-rent-deduction", label: "월세 세액공제" },
       { to: "/irp", label: "IRP 세액공제" },
       { to: "/pension", label: "국민연금" },
+      { to: "/eitc", label: "근로장려금" },
     ],
   },
 ];
