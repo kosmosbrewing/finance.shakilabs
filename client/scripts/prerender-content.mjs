@@ -9,7 +9,7 @@ import {
   formatPercent,
   RATES_2026,
 } from "./calc-engine.mjs";
-import { INSURANCE_AMOUNTS } from "./seo-routes.mjs";
+import { INSURANCE_AMOUNTS, UNPAID_WAGE_AMOUNTS } from "./seo-routes.mjs";
 
 // --- 라우트 파서 ---
 const SALARY_RE = /^\/salary\/(\d+)$/;
@@ -25,6 +25,7 @@ const REGIONAL_HEALTH_RE = /^\/regional-health\/(\d+)$/;
 const WEEKLY_HOLIDAY_PAY_RE = /^\/weekly-holiday-pay\/(\d+)$/;
 const WAGE_CONVERTER_RE = /^\/wage-converter\/(\d+)$/;
 const SEVERANCE_PAY_RE = /^\/severance-pay\/(\d+)$/;
+const UNPAID_WAGE_RE = /^\/unpaid-wage\/(\d+)$/;
 
 function parseInt10(s) {
   const n = Number.parseInt(s, 10);
@@ -288,6 +289,124 @@ function buildSalaryContent(manWon) {
       <p style="font-size:12px;color:#64748b;margin-top:24px;">
         ※ 본 계산 결과는 2026년 국세청 근로소득 간이세액표와 국민건강보험공단·국민연금공단·고용노동부 고시를 기반으로 한
         추정값이며, 법적 효력이 없는 참고용입니다. 실제 급여명세서와 차이가 있을 수 있습니다.
+      </p>
+    </article>`;
+}
+
+// =========================
+// 임금체불 지연이자 (/unpaid-wage/:amount)
+// =========================
+// src/utils/unpaidWageCalculator.ts 미러 — 체불액 × 연이율 × 일수 ÷ 365
+const UNPAID_WAGE_RATES = [
+  { label: "민법 연 5% (재직·일반)", rate: 0.05 },
+  { label: "상법 연 6% (재직·상사)", rate: 0.06 },
+  { label: "소촉법 연 12% (소장 송달 후)", rate: 0.12 },
+  { label: "근로기준법 연 20% (퇴직 후)", rate: 0.2 },
+];
+const UNPAID_WAGE_PERIODS = [30, 90, 180, 365];
+
+function buildUnpaidWageContent(manWon) {
+  const amount = manWon * 10_000;
+  const label = formatManWonValue(manWon);
+  const dailyRetired = Math.floor((amount * 0.2) / 365);
+  const monthlyRetired = Math.floor((amount * 0.2) / 12);
+
+  const tableRows = UNPAID_WAGE_PERIODS.map((days) => {
+    const cells = UNPAID_WAGE_RATES.map(
+      (item) => `<td style="${TD_STYLE}">${formatWon(Math.floor((amount * item.rate * days) / 365))}</td>`,
+    ).join("");
+    return `
+          <tr>
+            <td style="${TD_STYLE}"><strong>${days}일</strong></td>${cells}
+          </tr>`;
+  }).join("");
+
+  const otherAmountLinks = UNPAID_WAGE_AMOUNTS.filter((value) => value !== manWon)
+    .map((value) => `<a href="/finance/unpaid-wage/${value}">${formatManWonValue(value)}원</a>`)
+    .join(" · ");
+
+  return `
+    <article data-seo-prerender="unpaid-wage" style="${ARTICLE_STYLE}">
+      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+        &nbsp;›&nbsp;
+        <a href="/finance/unpaid-wage" style="color:#64748b;text-decoration:none;">임금체불 지연이자 계산기</a>
+        &nbsp;›&nbsp;
+        체불액 ${label}원
+      </nav>
+
+      <h1 style="${H1_STYLE}">체불임금 ${label}원 지연이자 — 퇴직 후 연 20% 기준 (2026)</h1>
+
+      <p style="${P_STYLE}">
+        밀린 임금·퇴직금 <strong>${formatWon(amount)}</strong>은 퇴직일부터 14일(금품청산 기한)이 지난
+        다음 날부터 근로기준법 제37조에 따라 <strong style="color:#047857;">연 20%</strong>의 지연이자가 붙습니다.
+        하루 약 ${formatWon(dailyRetired)}, 한 달 기준 약 ${formatWon(monthlyRetired)}씩 늘어나는 셈입니다.
+        재직 중 체불이나 소송 단계에서는 민법 5%·상법 6%·소송촉진법 12%가 적용됩니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">1. 체불액 ${label}원의 기간·이율별 지연이자</h2>
+      <table style="${TABLE_STYLE}">
+        <thead>
+          <tr>
+            <th style="${TH_STYLE}">이자 발생일수</th>
+            ${UNPAID_WAGE_RATES.map((item) => `<th style="${TH_STYLE}">${item.label}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>${tableRows}
+        </tbody>
+      </table>
+      <p style="${P_STYLE}">
+        퇴직 단계(연 20%)의 이자 발생일수는 퇴직일부터 경과한 날에서 금품청산 기한 14일을 제외하고 계산해야 합니다.
+        예를 들어 퇴직 후 104일이 지났다면 이자 발생일수는 90일입니다.
+      </p>
+
+      <div style="${CALLOUT_STYLE}">
+        <strong>계산식</strong> — 지연이자 = 체불액 × 연이율 × 이자 발생일수 ÷ 365
+        <br>예) ${formatWon(amount)} × 20% × 90일 ÷ 365 = ${formatWon(Math.floor((amount * 0.2 * 90) / 365))}
+      </div>
+
+      <h2 style="${H2_STYLE}">2. 어떤 이율이 적용되나</h2>
+      <p style="${P_STYLE}">
+        연 20%는 <strong>퇴직·사망 근로자의 임금과 퇴직금</strong>에 적용되는 특칙입니다(근로기준법 제37조, 시행령 제17조).
+        재직 중 밀린 임금은 민법상 연 5%, 회사(상인)를 상대로 상사채권 이율을 적용하면 연 6%가 일반적이며,
+        소송에서는 소장이 송달된 다음 날부터 소송촉진법상 연 12%를 검토합니다.
+        회사가 도산·회생 절차 중이면 시행령 제18조에 따라 연 20% 적용이 제외될 수 있습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">3. 못 받은 ${label}원, 실무 대응 순서</h2>
+      <p style="${P_STYLE}">
+        먼저 급여명세서·근로계약서·통장 내역으로 체불 사실을 정리한 뒤 회사에 지급을 요구하고,
+        응하지 않으면 고용노동부 노동포털에서 임금체불 진정을 제기합니다.
+        회사가 지급 능력이 없다면 간이대지급금 제도로 국가가 일정 한도까지 먼저 지급받을 수 있습니다.
+        진정·소송 단계에서는 위 표의 지연이자를 함께 청구하는 것이 원칙입니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">4. 자주 묻는 질문 (FAQ)</h2>
+
+      <h3 style="${H3_STYLE}">Q1. 체불임금 ${label}원을 6개월(이자 발생 180일) 못 받으면 이자가 얼마인가요?</h3>
+      <p style="${P_STYLE}">
+        퇴직 후 연 20% 기준 약 ${formatWon(Math.floor((amount * 0.2 * 180) / 365))}입니다.
+        재직 중 민법 5% 기준이라면 약 ${formatWon(Math.floor((amount * 0.05 * 180) / 365))}로 차이가 큽니다.
+      </p>
+
+      <h3 style="${H3_STYLE}">Q2. 지연이자도 소멸시효가 있나요?</h3>
+      <p style="${P_STYLE}">
+        임금채권의 소멸시효는 3년입니다. 체불이 오래될수록 청구 가능 범위가 줄어들 수 있으므로
+        체불액 ${label}원의 지급 요구와 진정 절차를 미루지 않는 것이 안전합니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">5. 관련 계산기</h2>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><a href="/finance/unpaid-wage">임금체불 지연이자 계산기</a> - 조건 직접 입력</li>
+        <li style="${LI_STYLE}"><a href="/finance/severance-pay">퇴직금 계산기</a> - 퇴직금 예상액</li>
+        <li style="${LI_STYLE}"><a href="/finance/unemployment">실업급여 계산기</a> - 구직급여 수급액</li>
+        <li style="${LI_STYLE}"><a href="/finance/quit">퇴사 계산기</a> - 퇴사 전 종합 점검</li>
+      </ul>
+      <p style="${P_STYLE}">다른 체불액으로 보기: ${otherAmountLinks}</p>
+
+      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+        ※ 본 결과는 근로기준법·민법·상법·소송촉진법의 법정이율을 단순 적용한 참고용 추정치입니다.
+        일부 변제, 지연이자 적용 제외 사유, 판결 주문에 따라 실제 금액은 달라질 수 있습니다.
       </p>
     </article>`;
 }
@@ -2320,6 +2439,12 @@ export function buildRichContent(route, _meta) {
   if (insuranceMatch) {
     const fee = parseInt10(insuranceMatch[1]);
     if (fee !== null && fee > 0) return buildInsuranceContent(fee);
+  }
+
+  const unpaidWageMatch = route.match(UNPAID_WAGE_RE);
+  if (unpaidWageMatch) {
+    const amount = parseInt10(unpaidWageMatch[1]);
+    if (amount !== null && amount > 0) return buildUnpaidWageContent(amount);
   }
 
   const compTaxMatch = route.match(COMPREHENSIVE_TAX_RE);

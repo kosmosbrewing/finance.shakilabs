@@ -34,6 +34,9 @@ export const INSURANCE_AMOUNTS = [
   500_000,
 ];
 
+// 임금체불 지연이자 프리셋 (만원) — 본문이 금액×기간×이율단계 표로 고유성 확보
+export const UNPAID_WAGE_AMOUNTS = [100, 300, 500, 1000, 2000, 3000];
+
 export const SALARY_AMOUNTS = [
   2000,
   2500,
@@ -134,6 +137,8 @@ export const SEO_ROUTES = [
   "/regional-health",
   ...REGIONAL_HEALTH_AMOUNTS.map((amount) => `/regional-health/${amount}`),
   "/dependent",
+  "/unpaid-wage",
+  ...UNPAID_WAGE_AMOUNTS.map((amount) => `/unpaid-wage/${amount}`),
   "/weekly-holiday-pay",
   ...WEEKLY_HOLIDAY_PAY_AMOUNTS.map((amount) => `/weekly-holiday-pay/${amount}`),
   "/wage-converter",
