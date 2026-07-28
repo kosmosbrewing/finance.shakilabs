@@ -7,7 +7,8 @@ type CalcKey =
   | "comprehensive-tax" | "freelancer" | "withholding" | "freelance-rate" | "4-insurance-employer"
   | "weekly-holiday-pay" | "wage-converter" | "overtime" | "annual-leave"
   | "quit" | "severance-pay" | "unemployment" | "parental-leave" | "regional-health"
-  | "year-end-settlement" | "monthly-rent-deduction" | "irp" | "pension";
+  | "year-end-settlement" | "monthly-rent-deduction" | "irp" | "pension"
+  | "dependent";
 
 const props = defineProps<{ current: CalcKey }>();
 
@@ -17,8 +18,8 @@ const linkMap: Record<CalcKey, Link[]> = {
   // ── 급여·연봉 ──
   "insurance": [
     { to: "/salary", label: "연봉 실수령액 계산기" },
+    { to: "/dependent", label: "피부양자 자격 판정기" },
     { to: "/compare", label: "이직 연봉 비교" },
-    { to: "/withholding", label: "원천세 계산기" },
     { to: "/year-end-settlement", label: "연말정산 계산기" },
   ],
   "salary": [
@@ -131,9 +132,15 @@ const linkMap: Record<CalcKey, Link[]> = {
   ],
   "regional-health": [
     { to: "/insurance", label: "건보료 역산 계산기" },
-    { to: "/quit", label: "퇴사 계산기" },
+    { to: "/dependent", label: "피부양자 자격 판정기" },
     { to: "/unemployment", label: "실업급여 계산기" },
     { to: "/pension", label: "국민연금 수령액 계산기" },
+  ],
+  "dependent": [
+    { to: "/regional-health", label: "지역가입자 건보료 계산기" },
+    { to: "/insurance", label: "건보료 역산 계산기" },
+    { to: "/pension", label: "국민연금 수령액 계산기" },
+    { to: "/quit", label: "퇴사 계산기" },
   ],
 
   // ── 절세·공제 ──

@@ -280,6 +280,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: "2026 지역가입자 건보료 계산 결과 | 퇴사 후 보험료" },
   },
   {
+    path: "/dependent",
+    name: "Dependent",
+    component: () => import("@/views/DependentView.vue"),
+    meta: { title: "2026 건보 피부양자 자격 판정기 | 소득·재산 기준" },
+  },
+  {
     path: "/weekly-holiday-pay",
     name: "WeeklyHolidayPay",
     component: () => import("@/views/WeeklyHolidayPayView.vue"),
