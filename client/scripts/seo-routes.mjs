@@ -37,6 +37,9 @@ export const INSURANCE_AMOUNTS = [
 // 임금체불 지연이자 프리셋 (만원) — 본문이 금액×기간×이율단계 표로 고유성 확보
 export const UNPAID_WAGE_AMOUNTS = [100, 300, 500, 1000, 2000, 3000];
 
+// 근로장려금 가구유형 프리셋 — 유형별 지급표가 완전히 달라 고유성 확보
+export const EITC_HOUSEHOLDS = ["single", "single-income", "double-income"];
+
 export const SALARY_AMOUNTS = [
   2000,
   2500,
@@ -139,6 +142,8 @@ export const SEO_ROUTES = [
   "/dependent",
   "/unpaid-wage",
   ...UNPAID_WAGE_AMOUNTS.map((amount) => `/unpaid-wage/${amount}`),
+  "/eitc",
+  ...EITC_HOUSEHOLDS.map((slug) => `/eitc/${slug}`),
   "/weekly-holiday-pay",
   ...WEEKLY_HOLIDAY_PAY_AMOUNTS.map((amount) => `/weekly-holiday-pay/${amount}`),
   "/wage-converter",

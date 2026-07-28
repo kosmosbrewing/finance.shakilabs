@@ -799,6 +799,30 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://shakilabs.com/finance/eitc</loc>
+    <lastmod>2026-07-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://shakilabs.com/finance/eitc/single</loc>
+    <lastmod>2026-07-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://shakilabs.com/finance/eitc/single-income</loc>
+    <lastmod>2026-07-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://shakilabs.com/finance/eitc/double-income</loc>
+    <lastmod>2026-07-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://shakilabs.com/finance/weekly-holiday-pay</loc>
     <lastmod>2026-07-27</lastmod>
     <changefreq>monthly</changefreq>

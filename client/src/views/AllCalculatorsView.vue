@@ -3,8 +3,8 @@ import { RouterLink } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
 import RecentCalcStorageNote from "@/components/finance/RecentCalcStorageNote.vue";
 
-const seoTitle = "2026 세금·연봉·수당 계산기 모음 | 25개 계산기";
-const seoDescription = "연봉 실수령액, 종합소득세, 프리랜서 세금, 연말정산, 퇴직금, 실업급여, 주휴수당 등 25개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
+const seoTitle = "2026 세금·연봉·수당 계산기 모음 | 26개 계산기";
+const seoDescription = "연봉 실수령액, 종합소득세, 프리랜서 세금, 연말정산, 퇴직금, 실업급여, 근로장려금 등 26개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
@@ -67,6 +67,7 @@ const categories = [
       { to: "/monthly-rent-deduction", label: "월세 세액공제", desc: "월세 공제 환급액" },
       { to: "/irp", label: "IRP 세액공제", desc: "개인형 퇴직연금 절세 효과" },
       { to: "/pension", label: "국민연금 수령액", desc: "예상 월 수령액 계산" },
+      { to: "/eitc", label: "근로장려금 계산기", desc: "가구 유형별 지급액·자녀장려금" },
     ],
   },
 ];
@@ -82,7 +83,7 @@ const categories = [
       <div class="retro-titlebar rounded-t-2xl">
         <div class="space-y-1">
           <h1 class="retro-title">전체 계산기</h1>
-          <p class="text-caption text-muted-foreground">급여·세금·수당·퇴직·절세까지, 23개 계산기를 한곳에서 확인하세요.</p>
+          <p class="text-caption text-muted-foreground">급여·세금·수당·퇴직·절세까지, 26개 계산기를 한곳에서 확인하세요.</p>
         </div>
       </div>
 

@@ -8,7 +8,7 @@ type CalcKey =
   | "weekly-holiday-pay" | "wage-converter" | "overtime" | "annual-leave"
   | "quit" | "severance-pay" | "unemployment" | "parental-leave" | "regional-health"
   | "year-end-settlement" | "monthly-rent-deduction" | "irp" | "pension"
-  | "dependent" | "unpaid-wage";
+  | "dependent" | "unpaid-wage" | "eitc";
 
 const props = defineProps<{ current: CalcKey }>();
 
@@ -153,8 +153,14 @@ const linkMap: Record<CalcKey, Link[]> = {
   "year-end-settlement": [
     { to: "/monthly-rent-deduction", label: "월세 세액공제 계산기" },
     { to: "/irp", label: "IRP 세액공제 계산기" },
+    { to: "/eitc", label: "근로장려금 계산기" },
     { to: "/salary", label: "연봉 실수령액 계산기" },
+  ],
+  "eitc": [
+    { to: "/year-end-settlement", label: "연말정산 계산기" },
+    { to: "/weekly-holiday-pay", label: "주휴수당 계산기" },
     { to: "/comprehensive-tax", label: "종합소득세 계산기" },
+    { to: "/salary", label: "연봉 실수령액 계산기" },
   ],
   "monthly-rent-deduction": [
     { to: "/year-end-settlement", label: "연말정산 계산기" },

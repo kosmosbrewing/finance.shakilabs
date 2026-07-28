@@ -61,6 +61,7 @@ const tickerMessages = computed(() => {
   if (route.path.startsWith("/regional-health")) return insuranceTickerMessages;
   if (route.path.startsWith("/dependent")) return insuranceTickerMessages;
   if (route.path.startsWith("/unpaid-wage")) return severancePayTickerMessages;
+  if (route.path.startsWith("/eitc")) return yearEndSettlementTickerMessages;
   if (route.path === "/all") return allCalculatorsTickerMessages;
   return salaryTickerMessages;
 });
