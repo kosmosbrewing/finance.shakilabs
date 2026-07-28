@@ -28,6 +28,7 @@ const REGIONAL_HEALTH_ROUTE_RE = /^\/regional-health\/(\d+)$/;
 const WEEKLY_HOLIDAY_PAY_ROUTE_RE = /^\/weekly-holiday-pay\/(\d+)$/;
 const WAGE_CONVERTER_ROUTE_RE = /^\/wage-converter\/(\d+)$/;
 const SEVERANCE_PAY_ROUTE_RE = /^\/severance-pay\/(\d+)$/;
+const UNPAID_WAGE_ROUTE_RE = /^\/unpaid-wage\/(\d+)$/;
 
 if (!existsSync(INDEX_HTML)) {
   console.warn("[prerender] dist/index.html not found. Skipping prerender.");
@@ -184,6 +185,13 @@ function readParentalLeaveManWon(route) {
 
 function readUnemploymentManWon(route) {
   const matched = route.match(UNEMPLOYMENT_ROUTE_RE);
+  if (!matched) return null;
+  const parsed = Number.parseInt(matched[1], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readUnpaidWageManWon(route) {
+  const matched = route.match(UNPAID_WAGE_ROUTE_RE);
   if (!matched) return null;
   const parsed = Number.parseInt(matched[1], 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
@@ -358,6 +366,37 @@ function buildMeta(route) {
         { name: "홈", url: SITE_URL },
         { name: "실업급여 계산기", url: `${SITE_URL}/unemployment` },
         { name: `월급 ${formatManWon(unemploymentManWon)}` },
+      ]),
+    };
+  }
+
+  const unpaidWageManWon = readUnpaidWageManWon(route);
+  if (unpaidWageManWon !== null) {
+    const title = `체불임금 ${formatManWon(unpaidWageManWon)} 지연이자 계산기 | 연 20% 기준`;
+    const description = `밀린 임금 ${formatManWon(unpaidWageManWon)}원의 지연이자를 퇴직 후 연 20%, 민법 5%, 상법 6%, 소송촉진법 12% 단계별로 계산합니다.`;
+    const canonical = `${SITE_URL}/unpaid-wage/${unpaidWageManWon}`;
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `체불임금 ${formatManWon(unpaidWageManWon)}원의 지연이자는 얼마인가요?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "퇴직 후 14일이 지나면 근로기준법상 연 20% 지연이자가 적용됩니다. 지연 일수와 적용 단계별 금액은 계산기에서 확인하세요.",
+            },
+          },
+        ],
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: "임금체불 지연이자 계산기", url: `${SITE_URL}/unpaid-wage` },
+        { name: `체불액 ${formatManWon(unpaidWageManWon)}` },
       ]),
     };
   }

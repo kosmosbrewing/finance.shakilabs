@@ -8,7 +8,7 @@ type CalcKey =
   | "weekly-holiday-pay" | "wage-converter" | "overtime" | "annual-leave"
   | "quit" | "severance-pay" | "unemployment" | "parental-leave" | "regional-health"
   | "year-end-settlement" | "monthly-rent-deduction" | "irp" | "pension"
-  | "dependent";
+  | "dependent" | "unpaid-wage";
 
 const props = defineProps<{ current: CalcKey }>();
 
@@ -114,8 +114,14 @@ const linkMap: Record<CalcKey, Link[]> = {
   ],
   "severance-pay": [
     { to: "/quit", label: "퇴사 계산기" },
+    { to: "/unpaid-wage", label: "임금체불 지연이자" },
     { to: "/unemployment", label: "실업급여 계산기" },
     { to: "/weekly-holiday-pay", label: "주휴수당 계산기" },
+  ],
+  "unpaid-wage": [
+    { to: "/severance-pay", label: "퇴직금 계산기" },
+    { to: "/unemployment", label: "실업급여 계산기" },
+    { to: "/quit", label: "퇴사 계산기" },
     { to: "/wage-converter", label: "시급↔월급 환산기" },
   ],
   "unemployment": [

@@ -286,6 +286,21 @@ const routes: RouteRecordRaw[] = [
     meta: { title: "2026 건보 피부양자 자격 판정기 | 소득·재산 기준" },
   },
   {
+    path: "/unpaid-wage",
+    name: "UnpaidWage",
+    component: () => import("@/views/UnpaidWageView.vue"),
+    meta: { title: "임금체불 지연이자 계산기 | 퇴직 후 연 20%·재직 5~6%" },
+  },
+  {
+    path: "/unpaid-wage/:amount(\\d+)",
+    name: "UnpaidWageLanding",
+    component: () => import("@/views/UnpaidWageView.vue"),
+    props: (route) => ({
+      initialAmount: Number.parseInt(String(route.params.amount), 10) * 10_000,
+    }),
+    meta: { title: "체불임금 지연이자 계산 결과 | 연 20% 기준" },
+  },
+  {
     path: "/weekly-holiday-pay",
     name: "WeeklyHolidayPay",
     component: () => import("@/views/WeeklyHolidayPayView.vue"),
