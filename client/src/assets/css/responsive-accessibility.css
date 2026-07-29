@@ -100,14 +100,15 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* overflow-wrap: anywhere만으로도 긴 토큰의 넘침은 막힌다.
+     break-all까지 걸면 한국어가 어절 중간에서 잘려(예: 면책 문구 마지막 줄에 한 글자만 남음)
+     body의 keep-all이 무력화되므로 word-break는 지정하지 않는다. */
   .text-resize-layout .sh-text--label {
     overflow-wrap: anywhere;
-    word-break: break-all;
   }
 
   footer .sh-text--label {
     overflow-wrap: anywhere;
-    word-break: break-all;
   }
 
   .text-resize-layout p.text-display.font-bold {
