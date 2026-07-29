@@ -107,7 +107,9 @@ onUnmounted(() => {
 <template>
   <div role="status" aria-live="polite" aria-atomic="true" class="w-full min-w-0">
     <Transition name="ticker-fade" mode="out-in">
-      <p :key="currentMessage" class="w-full min-w-0 truncate px-0.5 text-center text-[0.72rem] leading-tight text-foreground/75 sm:px-0 sm:text-body">
+      <!-- 모바일 티커 폭이 230px뿐이라 truncate로는 문구 71개 중 67개가 잘려 요점이 사라졌다.
+           2줄까지 허용하되(29px) 헤더 행 44px 안에 들어가므로 높이 비용은 없다. -->
+      <p :key="currentMessage" class="line-clamp-2 w-full min-w-0 px-0.5 text-center text-[0.72rem] leading-tight text-foreground/75 sm:px-0 sm:truncate sm:text-body">
         {{ currentMessage }}
       </p>
     </Transition>
