@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { History, Trash2 } from "lucide-vue-next";
-import { useRecentCalcs } from "@/composables/useRecentCalcs";
+import { useRecentCalcs, type RecentCalcEntry } from "@/composables/useRecentCalcs";
 import { showDestructiveConfirm } from "@/composables/useAlert";
 
 const { entries, hydrated, hydrate, clearAll } = useRecentCalcs();
 
-const TYPE_CONFIG: Record<string, { label: string; class: string }> = {
+// Record<string, …>이면 누락돼도 타입 검사를 통과해 슬러그가 그대로 노출된다.
+// 저장 스키마의 유니온으로 키를 고정해, 계산기를 추가하면 여기서 컴파일 에러가 나게 한다.
+const TYPE_CONFIG: Record<RecentCalcEntry["type"], { label: string; class: string }> = {
   salary: { label: "연봉", class: "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400" },
   insurance: { label: "건보", class: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400" },
   "comprehensive-tax": { label: "종합", class: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400" },
-  freelance: { label: "프리", class: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400" },
+  // ComprehensiveTaxView가 프리랜서 모드에서 기록하는 키. 기존 "freelance"는 저장 스키마에 없는 死키였다.
+  freelancer: { label: "프리", class: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400" },
   "freelance-rate": { label: "단가", class: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300" },
   raise: { label: "인상", class: "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400" },
   bonus: { label: "보너스", class: "bg-pink-50 text-pink-600 dark:bg-pink-950/50 dark:text-pink-400" },
@@ -18,7 +21,13 @@ const TYPE_CONFIG: Record<string, { label: string; class: string }> = {
   compare: { label: "비교", class: "bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-400" },
   quit: { label: "퇴사", class: "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400" },
   withholding: { label: "원천", class: "bg-orange-50 text-orange-600 dark:bg-orange-950/50 dark:text-orange-400" },
+  "severance-pay": { label: "퇴직", class: "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" },
+  "wage-converter": { label: "시급", class: "bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300" },
+  "weekly-holiday-pay": { label: "주휴", class: "bg-teal-50 text-teal-600 dark:bg-teal-950/50 dark:text-teal-400" },
 };
+
+// 매핑이 없을 때 라우트 슬러그(wage-converter 등)가 그대로 노출되던 문제를 막는다.
+const FALLBACK_BADGE = { label: "계산", class: "bg-muted text-muted-foreground" };
 
 function relativeTime(ts: number): string {
   const diff = Date.now() - ts;
@@ -79,9 +88,9 @@ async function handleClear(): Promise<void> {
       >
         <span
           class="shrink-0 rounded-md px-1.5 py-0.5 text-tiny font-semibold"
-          :class="TYPE_CONFIG[entry.type]?.class ?? 'bg-muted text-muted-foreground'"
+          :class="(TYPE_CONFIG[entry.type] ?? FALLBACK_BADGE).class"
         >
-          {{ TYPE_CONFIG[entry.type]?.label ?? entry.type }}
+          {{ (TYPE_CONFIG[entry.type] ?? FALLBACK_BADGE).label }}
         </span>
         <div class="min-w-0 flex-1">
           <p class="text-caption font-semibold text-foreground truncate leading-snug">{{ entry.label }}</p>
