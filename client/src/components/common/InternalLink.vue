@@ -182,7 +182,33 @@ const linkMap: Record<CalcKey, Link[]> = {
   ],
 };
 
-const suggestions = computed(() => linkMap[props.current]);
+// 계산기가 속한 상황별 체인 가이드 — 관련 계산기 뒤에 절차 진입점을 하나 붙인다
+const chainByCalc: Partial<Record<CalcKey, Link>> = {
+  "quit": { to: "/guide/resignation", label: "가이드: 퇴사 전 계산 순서" },
+  "severance-pay": { to: "/guide/resignation", label: "가이드: 퇴사 전 계산 순서" },
+  "unemployment": { to: "/guide/resignation", label: "가이드: 퇴사 전 계산 순서" },
+  "regional-health": { to: "/guide/resignation", label: "가이드: 퇴사 전 계산 순서" },
+  "unpaid-wage": { to: "/guide/resignation", label: "가이드: 퇴사 전 계산 순서" },
+  "compare": { to: "/guide/job-change", label: "가이드: 이직 연봉 계산 순서" },
+  "salary": { to: "/guide/job-change", label: "가이드: 이직 연봉 계산 순서" },
+  "insurance": { to: "/guide/job-change", label: "가이드: 이직 연봉 계산 순서" },
+  "raise": { to: "/guide/job-change", label: "가이드: 이직 연봉 계산 순서" },
+  "bonus": { to: "/guide/job-change", label: "가이드: 이직 연봉 계산 순서" },
+  "year-end-settlement": { to: "/guide/year-end", label: "가이드: 연말정산 준비 순서" },
+  "dependent": { to: "/guide/year-end", label: "가이드: 연말정산 준비 순서" },
+  "monthly-rent-deduction": { to: "/guide/year-end", label: "가이드: 연말정산 준비 순서" },
+  "irp": { to: "/guide/year-end", label: "가이드: 연말정산 준비 순서" },
+  "eitc": { to: "/guide/year-end", label: "가이드: 연말정산 준비 순서" },
+  "wage-converter": { to: "/guide/part-time", label: "가이드: 알바 급여 계산 순서" },
+  "weekly-holiday-pay": { to: "/guide/part-time", label: "가이드: 알바 급여 계산 순서" },
+  "overtime": { to: "/guide/part-time", label: "가이드: 알바 급여 계산 순서" },
+  "annual-leave": { to: "/guide/part-time", label: "가이드: 알바 급여 계산 순서" },
+};
+
+const suggestions = computed(() => {
+  const chain = chainByCalc[props.current];
+  return chain ? [...linkMap[props.current], chain] : linkMap[props.current];
+});
 </script>
 
 <template>

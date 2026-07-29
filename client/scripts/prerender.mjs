@@ -9,6 +9,10 @@ import {
   getPrerenderGuide,
   PRERENDER_GUIDE_ROUTES,
 } from "./prerender-guides.mjs";
+import {
+  buildScenarioChainHtml,
+  getScenarioChain,
+} from "./scenario-chains.mjs";
 import { FAQ_SOURCE_FILES, ROUTE_FAQS } from "./faq-data.mjs";
 
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
@@ -329,8 +333,8 @@ function buildMeta(route) {
   }
 
   if (route === "/all") {
-    const title = "2026 세금·연봉·수당 계산기 모음 | 23개 계산기";
-    const description = "연봉 실수령액, 종합소득세, 연말정산, 퇴직금, 실업급여, 주휴수당 등 23개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
+    const title = "2026 세금·연봉·수당 계산기 모음 | 26개 계산기";
+    const description = "연봉 실수령액, 종합소득세, 연말정산, 퇴직금, 실업급여, 주휴수당 등 26개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
     const canonical = `${SITE_URL}/all`;
     return {
       title,
@@ -1293,6 +1297,38 @@ function buildMeta(route) {
     };
   }
 
+  const chain = getScenarioChain(route);
+  if (chain) {
+    const canonical = `${SITE_URL}${route}`;
+    return {
+      title: chain.seoTitle,
+      description: chain.seoDescription,
+      canonical,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: chain.seoTitle,
+        description: chain.seoDescription,
+        url: canonical,
+        inLanguage: "ko",
+        mainEntity: {
+          "@type": "ItemList",
+          itemListOrder: "https://schema.org/ItemListOrderAscending",
+          itemListElement: chain.steps.map((step, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: step.label,
+            url: `${SITE_URL}${step.to}`,
+          })),
+        },
+      },
+      breadcrumb: buildBreadcrumb([
+        { name: "홈", url: SITE_URL },
+        { name: chain.heading },
+      ]),
+    };
+  }
+
   const guide = getPrerenderGuide(route);
   if (guide) {
     const canonical = `${SITE_URL}${route}`;
@@ -1599,7 +1635,7 @@ function applyMeta(html, route, meta) {
 
   // 리치 콘텐츠 우선 시도 → 없으면 기본 스텁
   const rich = buildRichContent(route, meta);
-  let mainContent = rich || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
+  let mainContent = rich || buildScenarioChainHtml(route) || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
   // 스키마 규칙: FAQPage의 Q/A는 본문에 렌더되는 문구와 동일해야 하므로 같은 데이터로 본문 FAQ도 노출
   if (routeFaqs && !mainContent.includes("자주 묻는")) {
     mainContent = appendFaqSection(mainContent, routeFaqs);

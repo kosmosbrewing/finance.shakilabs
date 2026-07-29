@@ -133,6 +133,30 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://shakilabs.com/finance/guide/resignation</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://shakilabs.com/finance/guide/job-change</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://shakilabs.com/finance/guide/year-end</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://shakilabs.com/finance/guide/part-time</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://shakilabs.com/finance/about</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>monthly</changefreq>

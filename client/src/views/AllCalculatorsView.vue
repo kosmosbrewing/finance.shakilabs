@@ -2,6 +2,7 @@
 import { RouterLink } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
 import RecentCalcStorageNote from "@/components/finance/RecentCalcStorageNote.vue";
+import { SCENARIO_CHAINS as scenarioChains } from "../../scripts/scenario-chains.mjs";
 
 const seoTitle = "2026 세금·연봉·수당 계산기 모음 | 26개 계산기";
 const seoDescription = "연봉 실수령액, 종합소득세, 프리랜서 세금, 연말정산, 퇴직금, 실업급여, 근로장려금 등 26개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
@@ -78,6 +79,26 @@ const categories = [
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="jsonLd" />
 
     <RecentCalcStorageNote />
+
+    <div class="retro-panel overflow-hidden">
+      <div class="retro-titlebar rounded-t-2xl">
+        <div class="space-y-1">
+          <h2 class="retro-title">상황별 계산 순서 가이드</h2>
+          <p class="text-caption text-muted-foreground">하나의 상황을 계산기 여러 개의 순서로 정리했습니다. 어디서 시작할지 모르겠다면 여기서 출발하세요.</p>
+        </div>
+      </div>
+      <div class="retro-panel-content grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <RouterLink
+          v-for="chain in scenarioChains"
+          :key="chain.slug"
+          :to="chain.route"
+          class="group block rounded-lg border border-border/40 bg-background p-3 transition-colors hover:border-primary/40 hover:bg-primary/5"
+        >
+          <p class="text-caption font-semibold text-foreground transition-colors group-hover:text-primary">{{ chain.name }}</p>
+          <p class="text-tiny text-muted-foreground mt-0.5">{{ chain.steps.length }}단계 · {{ chain.steps[0].label }}부터</p>
+        </RouterLink>
+      </div>
+    </div>
 
     <div class="retro-panel overflow-hidden">
       <div class="retro-titlebar rounded-t-2xl">
