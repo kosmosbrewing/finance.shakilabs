@@ -183,3 +183,30 @@
     border-radius: 12px;
   }
 }
+
+/* 모바일 활성 탭은 배경 하이라이트(흰색 16%)로 이미 구분된다.
+   그런데 공용 네비의 indicator가 left/right: 0.25rem으로 타일 전체 폭(111px)을 차지해
+   글자(60px)보다 두 배 가까이 넓어 밑줄이 과해 보였다.
+   → 모바일에서는 글자 폭에 맞춘 밑줄로 대체한다 (데스크톱은 배경이 없어 기존 유지). */
+@media (max-width: 639px) {
+  .sh-primary-navigation__link--mobile .sh-primary-navigation__indicator {
+    display: none;
+  }
+
+  .sh-primary-navigation__link--mobile.sh-primary-navigation__link--active
+    .sh-primary-navigation__label {
+    position: relative;
+  }
+
+  .sh-primary-navigation__link--mobile.sh-primary-navigation__link--active
+    .sh-primary-navigation__label::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -0.25rem;
+    left: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: currentColor;
+  }
+}
