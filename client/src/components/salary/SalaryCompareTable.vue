@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { ChevronDown } from "lucide-vue-next";
 import { RouterLink } from "vue-router";
 import { SALARY_TABLE_PRESETS } from "@/data/insurancePresets";
 import { calculateSalaryBreakdown } from "@/utils/calculator";
@@ -31,10 +32,12 @@ const rows = computed(() =>
 </script>
 
 <template>
-  <section class="retro-panel overflow-hidden">
-    <div class="retro-titlebar">
+  <!-- 내 연봉 결과가 아니라 다른 연봉대 참고표라 기본은 접어 둔다 -->
+  <details class="group retro-panel overflow-hidden">
+    <summary class="retro-titlebar flex cursor-pointer list-none items-center justify-between gap-3">
       <h2 class="retro-title">2026 연봉별 월 공제 합계·실수령·공제비율 표</h2>
-    </div>
+      <ChevronDown aria-hidden="true" class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
+    </summary>
 
     <div
       class="salary-table-scroll overflow-x-auto px-2 pb-1 pt-2 md:px-0 md:pb-0 md:pt-0"
@@ -104,5 +107,5 @@ const rows = computed(() =>
     <div class="border-t border-border/60 px-4 py-3 text-caption text-muted-foreground">
       부양가족 1명, 비과세 20만원, 퇴직금 별도 기준의 참고값입니다.
     </div>
-  </section>
+  </details>
 </template>

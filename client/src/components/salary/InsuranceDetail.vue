@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronDown } from "lucide-vue-next";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { formatPercent, formatWon } from "@/lib/utils";
 import { RATES_2026 } from "@/data/taxRates2026";
@@ -9,10 +10,13 @@ defineProps<{
 </script>
 
 <template>
-  <section class="retro-panel overflow-hidden">
-    <div class="retro-titlebar">
+  <!-- 결과 패널·공제 내역과 같은 금액을 다시 보여주는 보조 표라 기본은 접어 둔다
+       (사업주 부담분이라는 고유 정보가 있어 삭제하지 않고 펼쳐 볼 수 있게 유지) -->
+  <details class="group retro-panel overflow-hidden">
+    <summary class="retro-titlebar flex cursor-pointer list-none items-center justify-between gap-3">
       <h2 class="retro-title">4대보험 상세 (근로자/사업주)</h2>
-    </div>
+      <ChevronDown aria-hidden="true" class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
+    </summary>
 
     <div class="retro-panel-content space-y-3">
       <div class="overflow-x-auto">
@@ -103,5 +107,5 @@ defineProps<{
         국민연금은 기준소득월액 상하한, 장기요양보험은 근로자 건강보험료 기준으로 계산합니다.
       </p>
     </div>
-  </section>
+  </details>
 </template>
