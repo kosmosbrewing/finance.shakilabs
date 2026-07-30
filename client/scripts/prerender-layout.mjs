@@ -36,6 +36,40 @@ const CALCULATORS = {
   ],
 };
 
+import { readFileSync } from "node:fs";
+
+// 공유 카탈로그 단일 출처 — Vue 푸터와 같은 목록을 정적 HTML에도 심는다(JS 없이도 크롤 경로 확보)
+const SERVICE_CATALOG = JSON.parse(
+  readFileSync(
+    new URL("../node_modules/@shakilabs/ui/dist/services.json", import.meta.url),
+    "utf8",
+  ),
+);
+const CURRENT_APP = "finance";
+
+function buildOtherServicesBlock() {
+  const rows = SERVICE_CATALOG.categories
+    .map((category) => {
+      const items = SERVICE_CATALOG.services.filter(
+        (service) => service.categoryId === category.id && service.app !== CURRENT_APP,
+      );
+      if (!items.length) return "";
+      const links = items
+        .map(
+          (service) =>
+            `<a href="${service.href}" style="color:#64748b;text-decoration:none;margin-right:12px;">${service.shortLabel}</a>`,
+        )
+        .join("");
+      return `<p style="margin:0 0 4px;"><span style="display:inline-block;min-width:78px;color:#94a3b8;">${category.label}</span>${links}</p>`;
+    })
+    .filter(Boolean)
+    .join("");
+  return `<nav aria-label="다른 서비스" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e2e8f0;font-size:12px;line-height:2;">
+        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#334155;">다른 서비스</p>
+        ${rows}
+      </nav>`;
+}
+
 /**
  * 모든 프리렌더 페이지 최상단에 삽입되는 정적 header/nav HTML
  * - 로고
@@ -87,6 +121,7 @@ export function buildPrerenderFooter() {
       <nav aria-label="전체 계산기" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px;margin-bottom:20px;">
         ${categoryBlocks}
       </nav>
+      ${buildOtherServicesBlock()}
       <div style="padding-top:16px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;line-height:1.8;">
         <p style="margin:0 0 6px;">운영 <strong>Shakilabs</strong> · 문의 <a href="mailto:skdba1313@gmail.com" style="color:#64748b;">skdba1313@gmail.com</a></p>
         <p style="margin:0 0 6px;">

@@ -29,11 +29,13 @@ export const fontJobs = [
   },
 ];
 
-const textExtensions = new Set([".css", ".html", ".json", ".mjs", ".ts", ".vue"]);
+const textExtensions = new Set([".css", ".html", ".js", ".json", ".mjs", ".ts", ".vue"]);
 const contentRoots = [
   resolve(clientRoot, "src"),
   resolve(clientRoot, "scripts"),
   resolve(clientRoot, "index.html"),
+  // 공유 UI 패키지에도 화면에 찍히는 한글이 있다(푸터 서비스 목록 등) — 빠지면 두부 글자
+  resolve(clientRoot, "node_modules/@shakilabs/ui/dist/index.js"),
 ];
 
 function listTextFiles(path) {
