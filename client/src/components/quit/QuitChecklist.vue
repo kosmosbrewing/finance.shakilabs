@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
+import { ShBulletProgress } from "@shakilabs/ui";
 import { QUIT_CHECKLIST, TOTAL_ITEMS } from "@/data/quitChecklist";
 
 const STORAGE_KEY = "salary-calc:quit-checklist:v1";
@@ -41,9 +42,14 @@ watch(
 
 const completedCount = computed(() => checkedIds.value.size);
 const isAllDone = computed(() => completedCount.value === TOTAL_ITEMS);
-const progressPercent = computed(
-  () => `${(completedCount.value / TOTAL_ITEMS) * 100}%`,
+// ShBulletProgress는 초과분만 danger로 칠하므로 '완료' 신호는 note로 전달한다.
+const progressNote = computed(() =>
+  isAllDone.value ? "모든 항목을 확인했습니다." : "",
 );
+
+function formatItemCount(value: number): string {
+  return `${value}개`;
+}
 
 function toggle(id: string) {
   const next = new Set(checkedIds.value);
@@ -67,16 +73,17 @@ function resetAll() {
       <span class="retro-kbd">{{ completedCount }}/{{ TOTAL_ITEMS }}</span>
     </div>
 
-    <!-- 프로그레스 바 -->
-    <div class="h-1 bg-muted">
-      <div
-        class="h-full transition-all duration-300 ease-out"
-        :class="isAllDone ? 'bg-[hsl(var(--status-success))]' : 'bg-primary'"
-        :style="{ width: progressPercent }"
-      />
-    </div>
-
     <div class="retro-panel-content space-y-4">
+      <!-- 진행률: role/aria 없는 인라인 막대를 패키지 컴포넌트로 교체 -->
+      <ShBulletProgress
+        label="체크 진행률"
+        :value="completedCount"
+        :limit="TOTAL_ITEMS"
+        :format-value="formatItemCount"
+        :note="progressNote"
+        limit-label="전체"
+      />
+
       <div v-for="category in QUIT_CHECKLIST" :key="category.title">
         <h3 class="text-caption font-semibold text-muted-foreground uppercase tracking-wide mb-2">
           {{ category.title }}
