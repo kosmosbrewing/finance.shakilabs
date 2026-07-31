@@ -104,7 +104,7 @@ onMounted(() => {
                 ShakiLabs
               </span>
             </a>
-            <div class="flex min-w-0 flex-1 items-center justify-center overflow-hidden px-1 text-center font-brand text-caption tracking-[-0.01em] sm:h-full sm:px-0 sm:text-body sm:tracking-[0.01em]">
+            <div class="flex min-w-0 flex-1 items-center justify-center px-1 text-center font-brand text-caption tracking-[-0.01em] sm:px-0 sm:text-body sm:tracking-[0.01em]">
               <TickerBar :key="route.path" :messages="tickerMessages" />
             </div>
             <ShButton
