@@ -82,6 +82,12 @@ export function getScenarioChainBySlug(slug) {
   return SCENARIO_CHAINS.find((chain) => chain.slug === slug) ?? null;
 }
 
+/** RouterLink용 base 상대 경로(/quit)를 정적 HTML용 절대 경로(/finance/quit)로 바꾼다.
+ *  런타임 RouterLink는 base가 /finance라 접두어 없이 맞지만, 프리렌더가 뱉는 raw href는
+ *  그대로면 404가 난다(2026-07-31 라이브에서 21개 링크가 404였다). */
+const APP_BASE = "/finance";
+const toHref = (path) => (path.startsWith(APP_BASE) ? path : `${APP_BASE}${path}`);
+
 export function buildScenarioChainHtml(route) {
   const chain = getScenarioChain(route);
   if (!chain) return null;
@@ -89,7 +95,7 @@ export function buildScenarioChainHtml(route) {
   const steps = chain.steps
     .map((step, index) => `
       <li style="margin:0 0 14px;">
-        <h2 style="font-size:18px;margin:0 0 4px;">${index + 1}단계 · <a href="${step.to}">${step.label}</a></h2>
+        <h2 style="font-size:18px;margin:0 0 4px;">${index + 1}단계 · <a href="${toHref(step.to)}">${step.label}</a></h2>
         <p style="margin:0;">${step.why}</p>
       </li>`)
     .join("");
@@ -97,7 +103,7 @@ export function buildScenarioChainHtml(route) {
   const related = chain.related
     .map((slug) => getScenarioChainBySlug(slug))
     .filter(Boolean)
-    .map((linked) => `<li><a href="${linked.route}">${linked.heading}</a></li>`)
+    .map((linked) => `<li><a href="${toHref(linked.route)}">${linked.heading}</a></li>`)
     .join("");
 
   return `
@@ -106,7 +112,7 @@ export function buildScenarioChainHtml(route) {
       <p>${chain.intro}</p>
       <ol style="list-style:none;padding:0;margin:16px 0;">${steps}</ol>
       <h2>다른 상황 가이드</h2>
-      <ul>${related}<li><a href="/all">전체 계산기 모음</a></li></ul>
+      <ul>${related}<li><a href="${toHref("/all")}">전체 계산기 모음</a></li></ul>
       <p>계산 기준: 2026년 세율·요율. 최종 신고·급여 정산 전에는 관계 기관과 회사 기준을 확인하세요.</p>
     </article>`;
 }
