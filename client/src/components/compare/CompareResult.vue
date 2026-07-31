@@ -4,7 +4,7 @@ import CompareDiffTable from "@/components/compare/CompareDiffTable.vue";
 import { formatKrwAuto, formatWon } from "@/lib/utils";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
-import ComparisonBars from "@/components/result-visualization/ComparisonBars.vue";
+import { ShMetricBars, type MetricBarGroup } from "@shakilabs/ui";
 
 const props = defineProps<{
   calcA: SalaryCalcResult;
@@ -22,11 +22,21 @@ const monthlyNetDiff = computed(
 const annualNetDiff = computed(
   () => props.calcB.annualNet.value - props.calcA.annualNet.value
 );
-const comparisonMetrics = computed(() => [
-  { key: "gross", label: "월 급여", before: props.calcA.monthlyGross.value, after: props.calcB.monthlyGross.value },
-  { key: "net", label: "월 실수령", before: props.calcA.monthlyNet.value, after: props.calcB.monthlyNet.value },
-  { key: "deduction", label: "월 공제", before: props.calcA.totalDeduction.value, after: props.calcB.totalDeduction.value },
-]);
+// 이직 회사(after)를 highlight로 둬 비교 기준을 시각적으로 고정한다.
+const comparisonMetrics = computed<MetricBarGroup[]>(() =>
+  [
+    { key: "gross", label: "월 급여", before: props.calcA.monthlyGross.value, after: props.calcB.monthlyGross.value },
+    { key: "net", label: "월 실수령", before: props.calcA.monthlyNet.value, after: props.calcB.monthlyNet.value },
+    { key: "deduction", label: "월 공제", before: props.calcA.totalDeduction.value, after: props.calcB.totalDeduction.value },
+  ].map((metric) => ({
+    key: metric.key,
+    label: metric.label,
+    values: [
+      { key: "before", label: "현재 회사", value: metric.before },
+      { key: "after", label: "이직 회사", value: metric.after, highlight: true },
+    ],
+  })),
+);
 
 const monthlyGapAbs = computed(() => Math.abs(monthlyNetDiff.value));
 
@@ -96,12 +106,7 @@ const diffSign = computed(() => {
         </div>
       </div>
 
-      <ComparisonBars
-        :metrics="comparisonMetrics"
-        before-label="현재 회사"
-        after-label="이직 회사"
-        :format-value="formatWon"
-      />
+      <ShMetricBars :metrics="comparisonMetrics" :format-value="formatWon" />
 
       <!-- 요약 행: 연 실수령 + 총 공제 -->
       <div class="retro-board-list text-caption">

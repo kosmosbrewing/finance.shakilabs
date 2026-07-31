@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, useId } from "vue";
-import {
-  normalizeChartSegments,
-  type ChartSegment,
-} from "@/components/result-visualization/chartMath";
+import { normalizeBreakdownSegments, type BreakdownSegment } from "@shakilabs/ui";
+
+// 도넛은 아직 패키지에 대응 컴포넌트가 없어 로컬로 남기되, 구성비 계산은
+// 패키지 normalizeBreakdownSegments를 쓴다(로컬 중복 구현 제거).
+// 색상은 호출부가 항상 넘기므로 여기서만 필수로 좁힌다.
+type DonutSegment = BreakdownSegment & { color: string };
+type NormalizedDonutSegment = DonutSegment & { offset: number; ratio: number };
 
 const props = withDefaults(
   defineProps<{
-    segments: readonly ChartSegment[];
+    segments: readonly DonutSegment[];
     label: string;
     centerLabel?: string;
     centerValue?: string;
@@ -24,7 +27,11 @@ const props = withDefaults(
 
 const titleId = `breakdown-donut-title-${useId()}`;
 const descriptionId = `breakdown-donut-desc-${useId()}`;
-const normalizedSegments = computed(() => normalizeChartSegments(props.segments));
+// 패키지 유틸은 제네릭이 아니라 color를 optional로 되돌린다. 구현이 입력을
+// 스프레드로 보존하므로 필수 color가 유지됨을 단언한다.
+const normalizedSegments = computed(
+  () => normalizeBreakdownSegments(props.segments) as NormalizedDonutSegment[],
+);
 const description = computed(() =>
   normalizedSegments.value
     .map((segment) => `${segment.label} ${(segment.ratio * 100).toFixed(1)}%`)
