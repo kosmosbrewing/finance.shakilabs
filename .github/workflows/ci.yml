@@ -36,3 +36,17 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Generate production SBOM
+        run: npm run sbom:prod
+
+      # 오프라인·결정적 검증만 한다(SBOM 신원 + 벤더 tgz 해시). SBOM 재생성 diff는
+      # timestamp·documentNamespace·npm 버전 때문에 상시 실패하므로 쓰지 않는다.
+      - name: Verify supply chain metadata
+        run: npm run verify:supply-chain
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-sbom
+          path: client/artifacts/sbom/*.json

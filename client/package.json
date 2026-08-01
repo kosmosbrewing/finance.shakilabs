@@ -10,6 +10,8 @@
     "build": "vite build && node scripts/prerender.mjs && node scripts/verify-fonts.mjs",
     "lint": "eslint \"src/**/*.{ts,vue}\"",
     "lint:fix": "npm run lint -- --fix",
+    "sbom:prod": "node scripts/sbom.mjs",
+    "verify:supply-chain": "node scripts/verify-vendor-artifacts.mjs && node scripts/verify-sbom-identity.mjs",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "check": "npm run typecheck && npm run test && npm run build",
