@@ -443,8 +443,24 @@ router.beforeEach((to, _from, next) => {
   next();
 });
 
+// 라우터 base가 "/finance/"라 홈에 들어오면 주소창에 끝 슬래시가 남는다.
+// vercel.json은 trailingSlash:false라 "/finance/"는 308 대상이므로, 사용자가 복사·공유하는
+// 주소와 canonical이 200을 주는 "/finance"가 되도록 초기 진입 시 한 번 정리한다.
+// history.state는 그대로 넘겨 뒤로가기 동작을 깨뜨리지 않는다.
+function normalizeTrailingSlash(): void {
+  if (typeof window === "undefined") return;
+  const { pathname, search, hash } = window.location;
+  if (pathname.length <= 1 || !pathname.endsWith("/")) return;
+  window.history.replaceState(
+    window.history.state,
+    "",
+    `${pathname.replace(/\/+$/, "")}${search}${hash}`
+  );
+}
+
 router.afterEach((to, from, failure) => {
   if (failure) return;
+  normalizeTrailingSlash();
   clearRuntimeError();
   if (!shouldTrackPageView(to.path, from.path, from.matched.length > 0)) return;
 
