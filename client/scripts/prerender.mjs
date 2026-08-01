@@ -851,7 +851,8 @@ function buildMeta(route) {
   if (comparePair) {
     const aLabel = comparePair.a.toLocaleString("ko-KR");
     const bLabel = comparePair.b.toLocaleString("ko-KR");
-    const title = "연봉 비교 결과 | 이직 실수령 차이 계산 2026";
+    // 프리셋 8개가 같은 title을 쓰면 검색엔진이 중복 페이지로 본다. 금액을 넣어 고유하게 만든다.
+    const title = `연봉 ${aLabel}만원 vs ${bLabel}만원 비교 | 이직 실수령 차이 2026`;
     const description = `연봉 ${aLabel}만원에서 ${bLabel}만원으로 이직하면 월 실수령 차이를 비교할 수 있습니다.`;
     const canonical = `${SITE_URL}/compare/${comparePair.a}-vs-${comparePair.b}`;
 
@@ -1663,7 +1664,12 @@ for (const route of SEO_ROUTES) {
   }
 
   const meta = buildMeta(route);
-  const html = applyMeta(template, route, meta);
+  // 셸의 <noscript>는 JS 없는 크롤러용 fallback이다. 프리렌더된 라우트는 이미 본문이 정적으로
+  // 들어 있으므로 남겨두면 h1이 2개가 되고 헤딩 아웃라인이 오염된다(라이브 157페이지 전부 그랬다).
+  const html = applyMeta(template, route, meta).replace(
+    /\n?\s*<noscript>[\s\S]*?<\/noscript>/i,
+    "",
+  );
 
   // 불변 규칙 검증: FAQPage는 페이지당 최대 1개, FAQ 라우트는 정확히 1개 + 본문에 동일 Q 텍스트 존재
   const faqPageCount = (html.match(/"FAQPage"/g) ?? []).length;
