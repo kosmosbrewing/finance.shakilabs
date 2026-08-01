@@ -14,6 +14,7 @@ import {
   getScenarioChain,
 } from "./scenario-chains.mjs";
 import { FAQ_SOURCE_FILES, ROUTE_FAQS } from "./faq-data.mjs";
+import { HOME_ITEM_LIST } from "./home-content.mjs";
 
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
 const INDEX_HTML = resolve(DIST_DIR, "index.html");
@@ -262,18 +263,8 @@ function buildBreadcrumb(items) {
   };
 }
 
-// Home ItemList entries — the calculators the home page points at, in the same order
-// as the static home body so the schema and the visible hub never drift apart.
-const HOME_ITEM_LIST = [
-  { name: "연봉 실수령액 계산기", path: "/salary" },
-  { name: "건강보험료 역산 계산기", path: "/insurance" },
-  { name: "종합소득세 계산기", path: "/comprehensive-tax" },
-  { name: "연말정산 환급액 계산기", path: "/year-end-settlement" },
-  { name: "퇴직금 계산기", path: "/severance-pay" },
-  { name: "실업급여 계산기", path: "/unemployment" },
-  { name: "이직 연봉 비교", path: "/compare" },
-  { name: "전체 계산기 모아보기", path: "/all" },
-];
+// Home ItemList entries come from the same catalog the hub renders (scripts/home-content.mjs),
+// so the schema, the static body and src/views/HomeView.vue can never drift apart.
 
 function buildMeta(route) {
   if (route === "/terms") {

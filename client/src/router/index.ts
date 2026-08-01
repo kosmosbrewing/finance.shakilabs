@@ -37,8 +37,12 @@ function mapLegacyFreelanceQuery(
 
 const routes: RouteRecordRaw[] = [
   {
+    // 홈은 /salary로 튕기지 않는다. 프리렌더된 정적 HTML은 허브였는데 사용자만 계산기로
+    // 리다이렉트돼 크롤러와 화면이 갈라져 있었다. /salary 라우트는 그대로 유지한다.
     path: "/",
-    redirect: "/salary",
+    name: "Home",
+    component: () => import("@/views/HomeView.vue"),
+    meta: { title: "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세" },
   },
   {
     path: "/insurance",
