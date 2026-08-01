@@ -11,6 +11,23 @@ type SEOOptions = {
   >;
 };
 
+// canonical·og:url용 주소 정규화.
+// vercel.json이 trailingSlash:false라 끝 슬래시 주소는 308 대상이다. 라우터 base가 "/finance/"인
+// 탓에 홈에서 슬래시가 남으면 canonical이 리다이렉트되는 주소를 가리키게 되므로 여기서 잘라낸다.
+export function normalizeCanonicalUrl(href: string): string {
+  try {
+    const url = new URL(href);
+    url.search = "";
+    url.hash = "";
+    if (url.pathname.length > 1) {
+      url.pathname = url.pathname.replace(/\/+$/, "") || "/";
+    }
+    return url.toString();
+  } catch {
+    return href.split("#")[0].split("?")[0];
+  }
+}
+
 export function useSEO({
   title,
   description,
@@ -34,16 +51,7 @@ export function useSEO({
         : [];
     const currentUrl =
       typeof window !== "undefined"
-        ? (() => {
-            try {
-              const url = new URL(window.location.href);
-              url.search = "";
-              url.hash = "";
-              return url.toString();
-            } catch {
-              return window.location.href.split("#")[0].split("?")[0];
-            }
-          })()
+        ? normalizeCanonicalUrl(window.location.href)
         : undefined;
 
     return {
