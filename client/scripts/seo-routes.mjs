@@ -105,6 +105,9 @@ export const WAGE_CONVERTER_AMOUNTS = [10320, 12000, 15000, 20000];
 export const SEVERANCE_PAY_AMOUNTS = [1, 3, 5, 10];
 
 export const SEO_ROUTES = [
+  // The app home. prerender.mjs already routed "/" to dist/index.html, but the route was
+  // never listed here, so the home shipped as an empty shell with no body and no footer links.
+  "/",
   "/insurance",
   "/salary",
   "/raise",
