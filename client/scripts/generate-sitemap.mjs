@@ -25,8 +25,14 @@ function resolveChangeFreq(route) {
   return "monthly";
 }
 
+// vercel.json sets trailingSlash:false, so ".../finance/" 308s to ".../finance".
+// The home must be listed at the 200 URL that its canonical also points at.
+function resolveLoc(route) {
+  return route === "/" ? SITE_URL : `${SITE_URL}${route}`;
+}
+
 const urls = SEO_ROUTES.map((route) => `  <url>
-    <loc>${SITE_URL}${route}</loc>
+    <loc>${resolveLoc(route)}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${resolveChangeFreq(route)}</changefreq>
     <priority>${resolvePriority(route)}</priority>

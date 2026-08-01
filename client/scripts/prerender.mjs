@@ -262,6 +262,19 @@ function buildBreadcrumb(items) {
   };
 }
 
+// Home ItemList entries — the calculators the home page points at, in the same order
+// as the static home body so the schema and the visible hub never drift apart.
+const HOME_ITEM_LIST = [
+  { name: "연봉 실수령액 계산기", path: "/salary" },
+  { name: "건강보험료 역산 계산기", path: "/insurance" },
+  { name: "종합소득세 계산기", path: "/comprehensive-tax" },
+  { name: "연말정산 환급액 계산기", path: "/year-end-settlement" },
+  { name: "퇴직금 계산기", path: "/severance-pay" },
+  { name: "실업급여 계산기", path: "/unemployment" },
+  { name: "이직 연봉 비교", path: "/compare" },
+  { name: "전체 계산기 모아보기", path: "/all" },
+];
+
 function buildMeta(route) {
   if (route === "/terms") {
     const title = "이용약관 | 2026 연봉·건보료 계산기";
@@ -938,16 +951,17 @@ function buildMeta(route) {
     };
   }
 
-  // --- 랜딩 페이지 ---
-  if (route === "/insurance" || route === "/") {
-    const isHome = route === "/";
-    const title = isHome
-      ? "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세"
-      : "2026 건강보험료로 연봉 계산기 | 4대보험";
-    const description = isHome
-      ? "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요."
-      : "건강보험료를 입력하면 추정 연봉과 월 실수령액을 계산합니다. 2026 최신 요율 반영.";
-    const canonical = isHome ? `${SITE_URL}/` : `${SITE_URL}/insurance`;
+  // --- 앱 홈 ---
+  // The home used to share the /insurance branch but was never listed in SEO_ROUTES,
+  // so it shipped as an empty shell. It now owns its meta: the home is the app's
+  // highest-authority entry point and must not reuse another route's title or body.
+  if (route === "/") {
+    const title = "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세";
+    const description =
+      "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
+    // vercel.json sets trailingSlash:false, so /finance/ 308s to /finance.
+    // The canonical must point at the 200 URL, not the redirect.
+    const canonical = SITE_URL;
 
     return {
       title,
@@ -970,7 +984,48 @@ function buildMeta(route) {
         {
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          name: isHome ? "2026 연봉 실수령액 계산기" : "2026 건강보험료 연봉 계산기",
+          name: "2026 연봉 실수령액 계산기",
+          url: canonical,
+          applicationCategory: "FinanceApplication",
+          operatingSystem: "Any",
+          browserRequirements: "Requires JavaScript",
+          inLanguage: "ko",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "2026 급여·세금 계산기 모음",
+          itemListOrder: "https://schema.org/ItemListOrderAscending",
+          numberOfItems: HOME_ITEM_LIST.length,
+          itemListElement: HOME_ITEM_LIST.map((item, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: item.name,
+            url: `${SITE_URL}${item.path}`,
+          })),
+        },
+      ],
+      breadcrumb: buildBreadcrumb([{ name: "홈" }]),
+    };
+  }
+
+  // --- 랜딩 페이지 ---
+  if (route === "/insurance") {
+    const title = "2026 건강보험료로 연봉 계산기 | 4대보험";
+    const description =
+      "건강보험료를 입력하면 추정 연봉과 월 실수령액을 계산합니다. 2026 최신 요율 반영.";
+    const canonical = `${SITE_URL}/insurance`;
+
+    return {
+      title,
+      description,
+      canonical,
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "2026 건강보험료 연봉 계산기",
           url: canonical,
           applicationCategory: "FinanceApplication",
           operatingSystem: "Any",
@@ -981,7 +1036,7 @@ function buildMeta(route) {
       ],
       breadcrumb: buildBreadcrumb([
         { name: "홈", url: SITE_URL },
-        { name: isHome ? "연봉 실수령액 계산기" : "건보료 계산" },
+        { name: "건보료 계산" },
       ]),
     };
   }

@@ -25,6 +25,12 @@ function canonicalFrom(html) {
   return html.match(/<link rel="canonical" href="([^"]+)"\s*\/?>/)?.[1];
 }
 
+// The home route is "/" but vercel.json sets trailingSlash:false, so its public URL is the
+// bare base — naive concatenation would demand ".../finance/", which 308s.
+function urlFor(route) {
+  return route === "/" ? canonicalBase : canonicalBase + route;
+}
+
 function validateVercelConfig() {
   const config = JSON.parse(readFileSync(resolve(repositoryRoot, "vercel.json"), "utf8"));
   assert(config.cleanUrls === true, "vercel.json: cleanUrls must be true");
@@ -48,7 +54,7 @@ function validateRoutes() {
     }
     const html = readFileSync(outputPath, "utf8");
 
-    assert(canonicalFrom(html) === canonicalBase + route, `Invalid canonical for ${route}`);
+    assert(canonicalFrom(html) === urlFor(route), `Invalid canonical for ${route}`);
 
     const title = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
     assert(title.length > 0, `Missing title for ${route}`);
@@ -96,8 +102,15 @@ function validateSitemap() {
     [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url.replace(/\/$/, "")),
   );
   for (const route of SEO_ROUTES) {
-    assert(listed.has(canonicalBase + route), `Sitemap is missing prerendered route ${route}`);
+    assert(listed.has(urlFor(route)), `Sitemap is missing prerendered route ${route}`);
   }
+  // Each loc must appear exactly once — adding "/" to SEO_ROUTES is the kind of change that
+  // can silently list the home twice (once bare, once with a trailing slash).
+  const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
+  assert(
+    locs.length === listed.size,
+    `Sitemap has ${locs.length - listed.size} duplicate <loc> entries`,
+  );
   for (const url of listed) {
     const route = url.replace(canonicalBase, "");
     assert(
