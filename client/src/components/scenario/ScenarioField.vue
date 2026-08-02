@@ -2,6 +2,7 @@
 import { computed, useId } from "vue";
 import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
+import { syncInputDisplay } from "@/utils/numericInput";
 
 type ScenarioPreset = {
   label: string;
@@ -35,13 +36,15 @@ const emit = defineEmits<{
 
 const fieldId = useId();
 
-const displayValue = computed(() => {
+function formatFieldValue(value: number): string {
   if (props.format === "decimal") {
-    return props.modelValue.toFixed(1).replace(/\.0$/, "");
+    return value.toFixed(1).replace(/\.0$/, "");
   }
 
-  return formatNumber(Math.round(props.modelValue));
-});
+  return formatNumber(Math.round(value));
+}
+
+const displayValue = computed(() => formatFieldValue(props.modelValue));
 
 function clamp(value: number): number {
   return Math.min(props.max, Math.max(props.min, value));
@@ -67,7 +70,12 @@ function updateValue(next: number): void {
 
 function onTextInput(event: Event): void {
   const target = event.target as HTMLInputElement;
-  updateValue(parseRawValue(target.value));
+  const isEmpty = target.value.trim() === "";
+  const next = parseRawValue(target.value);
+  updateValue(next);
+  // 범위 밖 값을 연속 입력하면 값이 그대로라 Vue가 DOM을 다시 쓰지 않는다 — 표시를 직접 맞춘다.
+  // 빈 칸은 지우고 다시 칠 수 있어야 하므로 건드리지 않는다.
+  if (!isEmpty) syncInputDisplay(target, formatFieldValue(next));
 }
 
 </script>

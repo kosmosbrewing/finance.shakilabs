@@ -47,19 +47,12 @@
     <meta name="theme-color" content="hsl(160, 56%, 38%)" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="hsl(160, 30%, 12%)" media="(prefers-color-scheme: dark)" />
 
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "2026 연봉 실수령액 계산기",
-        "url": "https://shakilabs.com/finance",
-        "applicationCategory": "FinanceApplication",
-        "operatingSystem": "Web",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" },
-        "inLanguage": "ko"
-      }
-    </script>
-
+    <!--
+      No static JSON-LD here on purpose. This shell is the template for every prerendered page
+      (scripts/prerender.mjs), so a hardcoded WebApplication node was injected into all routes:
+      every page carried two WebApplication entities, and the static one always pointed at the
+      home url. Route-specific schema is emitted by prerender.mjs (crawlers) and useSEO.ts (SPA).
+    -->
     <script>
       (() => {
         try {

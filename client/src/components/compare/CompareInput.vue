@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
+import { readClampedInteger, readClampedNumber } from "@/utils/numericInput";
 
 type CompanyInput = {
   annualGross: number;
@@ -52,23 +53,21 @@ const formattedNonTaxA = computed(() => formatNumber(props.companyA.nonTaxableMo
 const formattedNonTaxB = computed(() => formatNumber(props.companyB.nonTaxableMonthly));
 
 function onAnnualInput(key: "companyA" | "companyB", event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    // URL이 만원 단위(/compare/4000-vs-5000)이므로 만원 단위로 반올림해 round-trip 손실 방지
-    const clamped = clampInt(value, 10_000_000, 300_000_000);
-    updateCompany(key, { annualGross: Math.round(clamped / 10_000) * 10_000 });
-  }
+  // URL이 만원 단위(/compare/4000-vs-5000)이므로 만원 단위로 반올림해 round-trip 손실 방지
+  const value = readClampedNumber(
+    event.target as HTMLInputElement,
+    (input) => Math.round(clampInt(input, 10_000_000, 300_000_000) / 10_000) * 10_000
+  );
+  if (value !== null) updateCompany(key, { annualGross: value });
 }
 
 function onNonTaxInput(key: "companyA" | "companyB", event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    // URL이 만원 단위(?na=20)이므로 만원 단위로 반올림해 round-trip 손실 방지
-    const clamped = clampInt(value, 0, 5_000_000);
-    updateCompany(key, { nonTaxableMonthly: Math.round(clamped / 10_000) * 10_000 });
-  }
+  // URL이 만원 단위(?na=20)이므로 만원 단위로 반올림해 round-trip 손실 방지
+  const value = readClampedNumber(
+    event.target as HTMLInputElement,
+    (input) => Math.round(clampInt(input, 0, 5_000_000) / 10_000) * 10_000
+  );
+  if (value !== null) updateCompany(key, { nonTaxableMonthly: value });
 }
 
 function updateDependents(value: number): void {
@@ -83,6 +82,21 @@ function updateDependents(value: number): void {
 function updateChildren(value: number): void {
   const maxChildren = Math.max(0, props.dependents - 1);
   emit("update:childrenUnder20", clampInt(value, 0, maxChildren));
+}
+
+function onDependentsInput(event: Event): void {
+  const value = readClampedInteger(event.target as HTMLInputElement, (input) =>
+    clampInt(input, 1, 20)
+  );
+  updateDependents(value ?? Number.NaN);
+}
+
+function onChildrenInput(event: Event): void {
+  const maxChildren = Math.max(0, props.dependents - 1);
+  const value = readClampedInteger(event.target as HTMLInputElement, (input) =>
+    clampInt(input, 0, maxChildren)
+  );
+  updateChildren(value ?? Number.NaN);
 }
 
 const salaryPresets = [
@@ -230,7 +244,7 @@ const inputIds = {
             max="20"
             inputmode="numeric"
             class="retro-input"
-            @input="updateDependents(parseInt(($event.target as HTMLInputElement).value, 10))"
+            @input="onDependentsInput"
           />
         </label>
         <label class="space-y-1" :for="inputIds.children">
@@ -243,7 +257,7 @@ const inputIds = {
             max="20"
             inputmode="numeric"
             class="retro-input"
-            @input="updateChildren(parseInt(($event.target as HTMLInputElement).value, 10))"
+            @input="onChildrenInput"
           />
         </label>
       </div>

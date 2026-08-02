@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { ShPresetGroup, ShSlider, ShStepper, ShToggleGroup } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
+import { readClampedNumber } from "@/utils/numericInput";
 
 const props = defineProps<{
   annualGross: number;
@@ -38,21 +39,19 @@ const inputIds = {
 const formattedGross = computed(() => formatNumber(props.annualGross));
 
 function onGrossInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    emit("update:annualGross", Math.max(10_000_000, Math.min(300_000_000, value)));
-  }
+  const value = readClampedNumber(event.target as HTMLInputElement, (input) =>
+    Math.max(10_000_000, Math.min(300_000_000, input))
+  );
+  if (value !== null) emit("update:annualGross", value);
 }
 
 const formattedNonTaxable = computed(() => formatNumber(props.nonTaxableMonthly));
 
 function onNonTaxableInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    emit("update:nonTaxableMonthly", Math.max(0, Math.min(5_000_000, value)));
-  }
+  const value = readClampedNumber(event.target as HTMLInputElement, (input) =>
+    Math.max(0, Math.min(5_000_000, input))
+  );
+  if (value !== null) emit("update:nonTaxableMonthly", value);
 }
 
 // 스텝 UI는 ShStepper 소유, 부양가족↔자녀 결합 규칙(자녀 ≤ 부양가족−1)만 앱이 유지

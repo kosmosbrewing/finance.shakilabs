@@ -6,6 +6,7 @@ import {
   type IndustryKey,
 } from "@/data/freelanceTaxRates";
 import { formatNumber, getSliderWindow } from "@/lib/utils";
+import { readClampedNumber, syncInputDisplay } from "@/utils/numericInput";
 
 const props = withDefaults(
   defineProps<{
@@ -115,11 +116,14 @@ const inputIds = computed(() => {
 const formattedRevenue = computed(() => formatNumber(props.revenue * 10_000));
 
 function onRevenueInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    updateRevenue(Math.round(value / 10_000));
-  }
+  const config = rangeConfig.value;
+  // 입력창은 원, 계산값은 만원 — 범위 보정도 만원 단위로 하고 표시는 다시 원으로 되돌린다.
+  const value = readClampedNumber(
+    event.target as HTMLInputElement,
+    (input) =>
+      Math.max(config.min, Math.min(config.max, Math.round(input / 10_000))) * 10_000
+  );
+  if (value !== null) updateRevenue(value / 10_000);
 }
 
 function updateRevenue(value: number): void {
@@ -128,8 +132,9 @@ function updateRevenue(value: number): void {
   emit("update:revenue", safe);
 }
 
-function updateCustomExpenseRate(value: string): void {
-  const trimmed = value.trim();
+function updateCustomExpenseRate(event: Event): void {
+  const target = event.target as HTMLInputElement;
+  const trimmed = target.value.trim();
   if (trimmed.length === 0) {
     emit("update:customExpenseRate", null);
     return;
@@ -137,7 +142,9 @@ function updateCustomExpenseRate(value: string): void {
 
   const parsed = Number.parseFloat(trimmed);
   if (!Number.isFinite(parsed)) return;
-  emit("update:customExpenseRate", Math.max(0, Math.min(95, parsed)));
+  const safe = Math.max(0, Math.min(95, parsed));
+  emit("update:customExpenseRate", safe);
+  syncInputDisplay(target, String(safe));
 }
 
 const separateHint = computed(() => {
@@ -292,7 +299,7 @@ const separateHint = computed(() => {
             inputmode="decimal"
             class="retro-input"
             placeholder="기본값 사용"
-            @input="updateCustomExpenseRate(($event.target as HTMLInputElement).value)"
+            @input="updateCustomExpenseRate"
           />
         </label>
         <button

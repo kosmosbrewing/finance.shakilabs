@@ -1,5 +1,9 @@
 import { useHead } from "@unhead/vue";
 import { toValue, type MaybeRefOrGetter } from "vue";
+import {
+  filterDuplicateJsonLd,
+  prerenderedJsonLdTypesForCurrentPath,
+} from "@/utils/prerenderedJsonLd";
 
 type SEOOptions = {
   title: MaybeRefOrGetter<string>;
@@ -26,6 +30,21 @@ export function normalizeCanonicalUrl(href: string): string {
   } catch {
     return href.split("#")[0].split("?")[0];
   }
+}
+
+// unhead v2 renders a script body from `textContent`/`innerHTML` only (see
+// TagConfigKeys in unhead/dist/shared/unhead.yem5I2v_.mjs). Any other key — `children`, which
+// this file used to pass — is normalized into `tag.props` and ends up as an HTML attribute, so
+// the browser gets `<script type="application/ld+json" children="{...}">` with an empty body.
+// `textContent` is also the XSS-safe field, and it is what the other apps in this monorepo use.
+export function buildJsonLdScripts(
+  entries: Record<string, unknown>[]
+): { key: string; type: string; textContent: string }[] {
+  return entries.map((entry, index) => ({
+    key: `json-ld-${index}`,
+    type: "application/ld+json",
+    textContent: JSON.stringify(entry),
+  }));
 }
 
 export function useSEO({
@@ -72,11 +91,12 @@ export function useSEO({
             ]
           : []),
       ],
-      script: resolvedJsonLdArray.map((entry, index) => ({
-        key: `json-ld-${index}`,
-        type: "application/ld+json",
-        children: JSON.stringify(entry),
-      })),
+      script: buildJsonLdScripts(
+        filterDuplicateJsonLd(
+          resolvedJsonLdArray,
+          prerenderedJsonLdTypesForCurrentPath()
+        )
+      ),
     };
   });
 }
