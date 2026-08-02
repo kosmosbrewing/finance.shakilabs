@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
+import { readClampedInteger, readClampedNumber } from "@/utils/numericInput";
 
 const props = defineProps<{
   monthlyIncomeTax: number;
@@ -23,22 +24,20 @@ const MAX_TAX = 10_000_000;
 const formattedTax = computed(() => formatNumber(props.monthlyIncomeTax));
 
 function onTaxInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    emit("update:monthlyIncomeTax", Math.max(0, Math.min(MAX_TAX, value)));
-  }
+  const value = readClampedNumber(event.target as HTMLInputElement, (input) =>
+    Math.max(0, Math.min(MAX_TAX, input))
+  );
+  if (value !== null) emit("update:monthlyIncomeTax", value);
 }
 
 // 비과세 천단위 콤마 포맷 (원 단위)
 const formattedNonTaxable = computed(() => formatNumber(props.nonTaxableMonthly));
 
 function onNonTaxableInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    emit("update:nonTaxableMonthly", Math.max(0, Math.min(5_000_000, value)));
-  }
+  const value = readClampedNumber(event.target as HTMLInputElement, (input) =>
+    Math.max(0, Math.min(5_000_000, input))
+  );
+  if (value !== null) emit("update:nonTaxableMonthly", value);
 }
 
 function updateDependents(value: number): void {
@@ -53,6 +52,21 @@ function updateDependents(value: number): void {
 function updateChildren(value: number): void {
   const maxChildren = Math.max(0, props.dependents - 1);
   emit("update:childrenUnder20", Math.max(0, Math.min(maxChildren, Math.floor(value || 0))));
+}
+
+function onDependentsInput(event: Event): void {
+  const value = readClampedInteger(event.target as HTMLInputElement, (input) =>
+    Math.max(1, Math.min(20, Math.floor(input)))
+  );
+  updateDependents(value ?? Number.NaN);
+}
+
+function onChildrenInput(event: Event): void {
+  const maxChildren = Math.max(0, props.dependents - 1);
+  const value = readClampedInteger(event.target as HTMLInputElement, (input) =>
+    Math.max(0, Math.min(maxChildren, Math.floor(input)))
+  );
+  updateChildren(value ?? Number.NaN);
 }
 
 const taxPresets = [
@@ -150,7 +164,7 @@ const inputIds = {
               min="1"
               max="20"
               class="retro-input"
-              @input="updateDependents(parseInt(($event.target as HTMLInputElement).value, 10))"
+              @input="onDependentsInput"
             />
           </label>
           <label class="space-y-1" :for="inputIds.children">
@@ -163,7 +177,7 @@ const inputIds = {
               min="0"
               max="20"
               class="retro-input"
-              @input="updateChildren(parseInt(($event.target as HTMLInputElement).value, 10))"
+              @input="onChildrenInput"
             />
           </label>
           <label class="space-y-1" :for="inputIds.nonTaxable">

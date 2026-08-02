@@ -1670,9 +1670,12 @@ function applyMeta(html, route, meta) {
   const hasFaqPage = baseJsonLd.some((entry) => entry["@type"] === "FAQPage");
   const faqJsonLd = routeFaqs && !hasFaqPage ? buildFaqJsonLd(routeFaqs) : null;
   const jsonLdArray = [...baseJsonLd, faqJsonLd, meta.breadcrumb].flat().filter(Boolean);
-  const jsonLdTag = `    <script type="application/ld+json" data-seo-prerender="jsonld">${toSafeJson(jsonLdArray)}</script>`;
   output = output.replace(/\n?\s*<script type="application\/ld\+json" data-seo-prerender="jsonld">[\s\S]*?<\/script>/i, "");
-  output = output.replace("</head>", `${jsonLdTag}\n  </head>`);
+  // An empty array is not schema — emitting it only adds a meaningless block (404 shell).
+  if (jsonLdArray.length > 0) {
+    const jsonLdTag = `    <script type="application/ld+json" data-seo-prerender="jsonld">${toSafeJson(jsonLdArray)}</script>`;
+    output = output.replace("</head>", `${jsonLdTag}\n  </head>`);
+  }
 
   // 기존 데이터-seo-prerender 요소 제거 (재실행 대비)
   output = output.replace(/\n?\s*<header data-seo-prerender[\s\S]*?<\/header>/i, "");
@@ -1716,6 +1719,36 @@ for (const route of SEO_ROUTES) {
     /\n?\s*<noscript>[\s\S]*?<\/noscript>/i,
     "",
   );
+
+  // Schema invariant: one JSON-LD block per page, it must parse, it must not be empty, and it
+  // must hold at most one WebApplication node. The shell used to carry a second static block,
+  // so every page shipped two WebApplication entities for the same url with no @id to tell
+  // them apart. This gate fails the build if that block (or any other) comes back.
+  const jsonLdBodies = [
+    ...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi),
+  ].map((match) => match[1]);
+  if (jsonLdBodies.length !== 1) {
+    throw new Error(
+      `[prerender] Expected exactly 1 JSON-LD block on ${route} (count=${jsonLdBodies.length})`
+    );
+  }
+  let jsonLdNodes;
+  try {
+    jsonLdNodes = [JSON.parse(jsonLdBodies[0])].flat();
+  } catch (error) {
+    throw new Error(`[prerender] Unparseable JSON-LD on ${route}: ${error.message}`);
+  }
+  if (jsonLdNodes.length === 0) {
+    throw new Error(`[prerender] Empty JSON-LD on ${route}`);
+  }
+  const webApplicationCount = jsonLdNodes.filter(
+    (node) => node && node["@type"] === "WebApplication"
+  ).length;
+  if (webApplicationCount > 1) {
+    throw new Error(
+      `[prerender] Duplicate WebApplication schema on ${route} (count=${webApplicationCount})`
+    );
+  }
 
   // 불변 규칙 검증: FAQPage는 페이지당 최대 1개, FAQ 라우트는 정확히 1개 + 본문에 동일 Q 텍스트 존재
   const faqPageCount = (html.match(/"FAQPage"/g) ?? []).length;

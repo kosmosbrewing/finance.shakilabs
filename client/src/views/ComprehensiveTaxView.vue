@@ -22,6 +22,7 @@ import { useComprehensiveTaxCalc } from "@/composables/useComprehensiveTaxCalc";
 import { useShare } from "@/composables/useShare";
 import { formatManWonValue, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
+import { syncInputDisplay } from "@/utils/numericInput";
 import {
   buildAbsoluteUrl,
   isSameQuery,
@@ -68,6 +69,14 @@ const includePension = ref(true);
 
 function clampInt(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, Math.floor(value || 0)));
+}
+
+function onDependentsInput(event: Event): void {
+  const target = event.target as HTMLInputElement;
+  const safe = clampInt(Number.parseInt(target.value, 10), 1, 20);
+  dependents.value = safe;
+  // 범위 밖 값을 연속 입력하면 값이 그대로라 Vue가 DOM을 다시 쓰지 않는다 — 표시를 직접 맞춘다.
+  if (target.value.trim() !== "") syncInputDisplay(target, String(safe));
 }
 
 function clampRate(value: number): number {
@@ -414,7 +423,7 @@ watch(
                 max="20"
                 inputmode="numeric"
                 class="retro-input"
-                @input="dependents = clampInt(parseInt(($event.target as HTMLInputElement).value, 10), 1, 20)"
+                @input="onDependentsInput"
               />
             </label>
 

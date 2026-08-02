@@ -4,12 +4,14 @@ import { RouterLink } from "vue-router";
 import { ShPresetGroup, ShSlider } from "@shakilabs/ui";
 import { ArrowRight } from "lucide-vue-next";
 import {
+  clampHomeAnnualGross,
   HOME_QUICK_CALC_DEFAULTS,
   HOME_QUICK_CALC_MAX_GROSS,
   HOME_QUICK_CALC_MIN_GROSS,
   HOME_QUICK_CALC_STEP,
   useHomeQuickCalc,
 } from "@/composables/useHomeQuickCalc";
+import { readClampedNumber } from "@/utils/numericInput";
 import { formatKrwCompact, formatNumber, formatPercent, formatWon } from "@/lib/utils";
 
 const props = defineProps<{ heading: string; note: string }>();
@@ -41,9 +43,11 @@ const inputIds = {
 } as const;
 
 function onGrossInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = Number.parseInt(raw, 10);
-  if (Number.isFinite(value)) setAnnualGross(value);
+  const clamped = readClampedNumber(
+    event.target as HTMLInputElement,
+    clampHomeAnnualGross
+  );
+  if (clamped !== null) setAnnualGross(clamped);
 }
 
 // 상세 화면으로 넘길 때 기본값이면 쿼리를 붙이지 않는다(/salary가 곧바로 URL을 정리하며 깜빡임)

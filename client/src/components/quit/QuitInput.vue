@@ -3,6 +3,7 @@ import type { QuitReason } from "@/data/unemploymentTable";
 import { computed, ref } from "vue";
 import { ShPresetGroup, ShSlider, type PresetValue } from "@shakilabs/ui";
 import { formatNumber } from "@/lib/utils";
+import { readClampedInteger, readClampedNumber } from "@/utils/numericInput";
 
 const props = defineProps<{
   startDate: string;
@@ -206,40 +207,36 @@ const formattedBonus = computed(() => formatNumber(props.annualBonus));
 const formattedLivingCost = computed(() => formatNumber(props.monthlyLivingCost));
 
 function onSalaryInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    // URL이 만원 단위(?salary=350)이므로 만원 단위로 반올림해 round-trip 손실 방지
-    const clamped = clampInt(value, 1_000_000, 100_000_000);
-    emit("update:monthlySalary", Math.round(clamped / 10_000) * 10_000);
-  }
+  // URL이 만원 단위(?salary=350)이므로 만원 단위로 반올림해 round-trip 손실 방지
+  const value = readClampedNumber(
+    event.target as HTMLInputElement,
+    (input) => Math.round(clampInt(input, 1_000_000, 100_000_000) / 10_000) * 10_000
+  );
+  if (value !== null) emit("update:monthlySalary", value);
 }
 
 function onNonTaxInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    const clamped = clampInt(value, 0, 5_000_000);
-    emit("update:nonTaxableMonthly", Math.round(clamped / 10_000) * 10_000);
-  }
+  const value = readClampedNumber(
+    event.target as HTMLInputElement,
+    (input) => Math.round(clampInt(input, 0, 5_000_000) / 10_000) * 10_000
+  );
+  if (value !== null) emit("update:nonTaxableMonthly", value);
 }
 
 function onBonusInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    const clamped = clampInt(value, 0, 1_000_000_000);
-    emit("update:annualBonus", Math.round(clamped / 10_000) * 10_000);
-  }
+  const value = readClampedNumber(
+    event.target as HTMLInputElement,
+    (input) => Math.round(clampInt(input, 0, 1_000_000_000) / 10_000) * 10_000
+  );
+  if (value !== null) emit("update:annualBonus", value);
 }
 
 function onLivingCostInput(event: Event): void {
-  const raw = (event.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-  const value = parseInt(raw, 10);
-  if (Number.isFinite(value)) {
-    const clamped = clampInt(value, 1_000_000, 100_000_000);
-    emit("update:monthlyLivingCost", Math.round(clamped / 10_000) * 10_000);
-  }
+  const value = readClampedNumber(
+    event.target as HTMLInputElement,
+    (input) => Math.round(clampInt(input, 1_000_000, 100_000_000) / 10_000) * 10_000
+  );
+  if (value !== null) emit("update:monthlyLivingCost", value);
 }
 
 function updateDependents(value: number): void {
@@ -254,6 +251,22 @@ function updateDependents(value: number): void {
 function updateChildren(value: number): void {
   const maxChildren = Math.max(0, props.dependents - 1);
   emit("update:childrenUnder20", clampInt(value, 0, maxChildren));
+}
+
+// 빈 칸(파싱 불가)은 예전처럼 clampInt의 기본값으로 떨어뜨리고 표시는 건드리지 않는다.
+function onIntegerInput(event: Event, min: number, max: number): number {
+  const value = readClampedInteger(event.target as HTMLInputElement, (input) =>
+    clampInt(input, min, max)
+  );
+  return value ?? clampInt(Number.NaN, min, max);
+}
+
+function onDependentsInput(event: Event): void {
+  updateDependents(onIntegerInput(event, 1, 20));
+}
+
+function onChildrenInput(event: Event): void {
+  updateChildren(onIntegerInput(event, 0, Math.max(0, props.dependents - 1)));
 }
 
 const inputIds = {
@@ -376,19 +389,19 @@ const inputIds = {
           </label>
           <label class="space-y-1" :for="inputIds.age">
             <span class="text-caption text-muted-foreground">나이</span>
-            <input :id="inputIds.age" :value="age" type="number" min="20" max="80" inputmode="numeric" class="retro-input" @input="emit('update:age', clampInt(parseInt(($event.target as HTMLInputElement).value, 10), 20, 80))" />
+            <input :id="inputIds.age" :value="age" type="number" min="20" max="80" inputmode="numeric" class="retro-input" @input="emit('update:age', onIntegerInput($event, 20, 80))" />
           </label>
           <label class="space-y-1" :for="inputIds.dependents">
             <span class="text-caption text-muted-foreground">부양가족 수</span>
-            <input :id="inputIds.dependents" :value="dependents" type="number" min="1" max="20" inputmode="numeric" class="retro-input" @input="updateDependents(parseInt(($event.target as HTMLInputElement).value, 10))" />
+            <input :id="inputIds.dependents" :value="dependents" type="number" min="1" max="20" inputmode="numeric" class="retro-input" @input="onDependentsInput" />
           </label>
           <label class="space-y-1" :for="inputIds.children">
             <span class="text-caption text-muted-foreground">8~20세 자녀 수</span>
-            <input :id="inputIds.children" :value="childrenUnder20" type="number" min="0" max="20" inputmode="numeric" class="retro-input" @input="updateChildren(parseInt(($event.target as HTMLInputElement).value, 10))" />
+            <input :id="inputIds.children" :value="childrenUnder20" type="number" min="0" max="20" inputmode="numeric" class="retro-input" @input="onChildrenInput" />
           </label>
           <label class="space-y-1" :for="inputIds.unusedLeaveDays">
             <span class="text-caption text-muted-foreground">미사용 연차(일)</span>
-            <input :id="inputIds.unusedLeaveDays" :value="unusedLeaveDays" type="number" min="0" max="60" inputmode="numeric" class="retro-input" @input="emit('update:unusedLeaveDays', clampInt(parseInt(($event.target as HTMLInputElement).value, 10), 0, 60))" />
+            <input :id="inputIds.unusedLeaveDays" :value="unusedLeaveDays" type="number" min="0" max="60" inputmode="numeric" class="retro-input" @input="emit('update:unusedLeaveDays', onIntegerInput($event, 0, 60))" />
           </label>
           <label class="space-y-1" :for="inputIds.annualBonus">
             <span class="text-caption text-muted-foreground">연간 상여금(원)</span>
