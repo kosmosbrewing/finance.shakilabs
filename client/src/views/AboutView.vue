@@ -153,6 +153,22 @@ const RATE_REFERENCES = [
             <span class="text-muted-foreground text-tiny">{{ ref.rate }} · {{ ref.source }}</span>
           </div>
         </div>
+        <p class="text-caption text-muted-foreground leading-relaxed">
+          주요 세율·요율의 원문 고시는
+          <a
+            href="https://www.nts.go.kr"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-2"
+          >국세청</a>과
+          <a
+            href="https://www.nhis.or.kr"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-2"
+          >국민건강보험공단</a>
+          공식 사이트에서 직접 확인할 수 있습니다.
+        </p>
       </div>
     </section>
 
@@ -215,11 +231,17 @@ const RATE_REFERENCES = [
       <div class="retro-titlebar">
         <h2 class="retro-title">운영자 정보</h2>
       </div>
-      <div class="retro-panel-content">
+      <div class="retro-panel-content space-y-3">
+        <p class="text-body text-muted-foreground leading-relaxed">
+          본 서비스는 개발 스튜디오 <strong class="text-foreground">ShakiLabs</strong>가 직접 기획·개발·운영합니다.
+          ShakiLabs는 shakilabs.com에서 금융·생활 분야의 무료 웹 계산기를 만들고 있으며,
+          모든 계산 로직을 공식 고시·법령과 대조해 관리합니다.
+          <strong class="text-foreground">운영: ShakiLabs · 문의: skdba1313@gmail.com</strong>
+        </p>
         <div class="retro-board-list text-caption">
           <div class="retro-board-item">
             <span class="text-muted-foreground">운영</span>
-            <strong>Shakilabs</strong>
+            <strong>ShakiLabs</strong>
           </div>
           <div class="retro-board-item">
             <span class="text-muted-foreground">서비스 URL</span>
