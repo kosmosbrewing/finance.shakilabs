@@ -296,6 +296,17 @@ function buildSalaryContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/bonus">성과급 실수령 계산기</a> - 상여금 세금 공제</li>
       </ul>
 
+      <h2 style="${H2_STYLE}">7. 공식 출처</h2>
+      <p style="${P_STYLE}">
+        본 계산에 적용한 세율·요율의 원문 고시와 공식 계산 기준은 아래 정부·공공기관 사이트에서
+        확인할 수 있습니다. 최종 신고·납부 전에는 공식 자료와 교차 확인하세요.
+      </p>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><a href="https://www.nts.go.kr" target="_blank" rel="noopener noreferrer">국세청</a> — 근로소득 간이세액표·소득세 세율</li>
+        <li style="${LI_STYLE}"><a href="https://www.nhis.or.kr" target="_blank" rel="noopener noreferrer">국민건강보험공단</a> — 건강보험·장기요양보험 요율 고시</li>
+        <li style="${LI_STYLE}"><a href="https://www.nps.or.kr" target="_blank" rel="noopener noreferrer">국민연금공단</a> — 국민연금 요율·기준소득월액 상·하한</li>
+      </ul>
+
       <p style="font-size:12px;color:#64748b;margin-top:24px;">
         ※ 본 계산 결과는 2026년 국세청 근로소득 간이세액표와 국민건강보험공단·국민연금공단·고용노동부 고시를 기반으로 한
         추정값이며, 법적 효력이 없는 참고용입니다. 실제 급여명세서와 차이가 있을 수 있습니다.
@@ -802,6 +813,16 @@ function buildInsuranceContent(fee) {
         <li style="${LI_STYLE}"><a href="/finance/regional-health">지역가입자 건보료 계산기</a> - 퇴사 후 건보료</li>
         <li style="${LI_STYLE}"><a href="/finance/withholding">원천세 역산 계산기</a> - 소득세로 연봉 추정</li>
         <li style="${LI_STYLE}"><a href="/finance/4-insurance-employer">사업주 4대보험 계산기</a></li>
+      </ul>
+
+      <h2 style="${H2_STYLE}">7. 공식 출처</h2>
+      <p style="${P_STYLE}">
+        건강보험 요율 고시 원문과 본인의 실제 보수월액·납부 내역은 아래 공공기관 사이트에서
+        직접 확인할 수 있습니다. 역산 결과는 참고용이므로 공식 자료와 교차 확인하세요.
+      </p>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><a href="https://www.nhis.or.kr" target="_blank" rel="noopener noreferrer">국민건강보험공단</a> — 보험료율 고시·개인별 보험료 조회</li>
+        <li style="${LI_STYLE}"><a href="https://www.4insure.or.kr" target="_blank" rel="noopener noreferrer">4대사회보험 정보연계센터</a> — 사업장 가입 내역·보수월액 확인</li>
       </ul>
 
       <p style="font-size:12px;color:#64748b;margin-top:24px;">
@@ -2392,6 +2413,12 @@ function buildAboutContent() {
         </tbody>
       </table>
 
+      <p style="${P_STYLE}">
+        주요 세율·요율의 원문 고시는 <a href="https://www.nts.go.kr" target="_blank" rel="noopener noreferrer">국세청</a>과
+        <a href="https://www.nhis.or.kr" target="_blank" rel="noopener noreferrer">국민건강보험공단</a>
+        공식 사이트에서 직접 확인할 수 있습니다.
+      </p>
+
       <h2 style="${H2_STYLE}">3. 서비스 운영 원칙</h2>
       <ul style="${UL_STYLE}">
         <li style="${LI_STYLE}"><strong>회원가입 불필요</strong> — 개인정보를 수집하지 않으며, 즉시 사용 가능</li>
@@ -2413,11 +2440,17 @@ function buildAboutContent() {
       </p>
 
       <h2 style="${H2_STYLE}">5. 운영자 정보</h2>
+      <p style="${P_STYLE}">
+        본 서비스는 개발 스튜디오 <strong>ShakiLabs</strong>가 직접 기획·개발·운영합니다.
+        ShakiLabs는 shakilabs.com에서 금융·생활 분야의 무료 웹 계산기를 만들고 있으며,
+        모든 계산 로직을 공식 고시·법령과 대조해 관리합니다.
+        <strong>운영: ShakiLabs · 문의: skdba1313@gmail.com</strong>
+      </p>
       <table style="${TABLE_STYLE}">
         <tbody>
           <tr>
             <td style="${TD_STYLE}">운영</td>
-            <td style="${TD_STYLE}">Shakilabs</td>
+            <td style="${TD_STYLE}">ShakiLabs</td>
           </tr>
           <tr>
             <td style="${TD_STYLE}">서비스 URL</td>
@@ -2453,6 +2486,209 @@ function buildAboutContent() {
       <p style="font-size:12px;color:#64748b;margin-top:24px;">
         본 서비스는 대한민국 근로자·프리랜서의 세금·연봉 이해도 향상을 목표로 비영리 개인 프로젝트로 운영되며,
         Google AdSense 광고 수익을 통해 운영비를 충당합니다.
+      </p>
+    </article>`;
+}
+
+// =========================
+// Privacy policy (/privacy)
+// =========================
+// Mirrors src/views/PrivacyView.vue. The prerendered article is the canonical static body:
+// AdSense review and crawlers read this HTML, not the SPA render, so the Google-required
+// disclosures (third-party ad cookies, personalized ads, opt-out links) must live here too.
+function buildPrivacyContent() {
+  return `
+    <article data-seo-prerender="privacy" style="${ARTICLE_STYLE}">
+      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> › 개인정보처리방침
+      </nav>
+
+      <h1 style="${H1_STYLE}">개인정보 처리방침</h1>
+      <p style="${P_STYLE}">시행 2026.03.03 · 개정 2026.08.05</p>
+
+      <p style="${P_STYLE}">
+        shakilabs.com/finance(이하 "서비스")는 이용자의 개인정보를 소중히 여기며, 개인정보 보호법 등
+        관련 법령을 준수합니다. 본 방침은 서비스 이용 과정에서 수집·이용되는 정보의 항목과 목적,
+        보관 기간, 광고 게재에 따른 쿠키 사용, 이용자의 권리와 행사 방법을 안내합니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">1. 수집하는 정보</h2>
+      <p style="${P_STYLE}">
+        본 서비스는 별도의 회원가입 없이 이용할 수 있으며, 이름·연락처 같은 직접적인 개인정보를
+        입력받지 않습니다. 다만 서비스 운영 과정에서 아래 정보가 자동으로, 또는 기능 이용 시 수집될 수 있습니다.
+      </p>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><strong>자동 수집</strong> — 접속 IP, 브라우저 종류, 접속 시간, 방문 페이지</li>
+        <li style="${LI_STYLE}"><strong>광고·통계 쿠키</strong> — Google Analytics·Google AdSense가 발급하는 쿠키 식별자</li>
+        <li style="${LI_STYLE}"><strong>익명 댓글</strong> — 작성 내용, 자동 생성 닉네임, 접속 IP</li>
+        <li style="${LI_STYLE}"><strong>좋아요 중복 방지</strong> — 접속 IP(SHA-256 해시 처리, 24시간 내 파기)</li>
+        <li style="${LI_STYLE}"><strong>브라우저 저장(localStorage)</strong> — 계산기 피드백 상태, 좋아요 기록(기기 내 저장, 서버 미전송)</li>
+      </ul>
+      <p style="${P_STYLE}">
+        이용자가 계산기에 입력하는 연봉·건강보험료·부양가족 수 등 급여·세금 정보는 본 서비스 고유의
+        처리 방식에 따라 <strong>서버로 전송되거나 저장되지 않으며, 이용자의 브라우저 안에서만 연산된 뒤
+        페이지를 떠나면 사라집니다.</strong> 따라서 운영자는 개별 이용자의 소득 정보를 알 수 없습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">2. 수집 정보의 이용 목적</h2>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><strong>IP 주소</strong> — 서비스 통계, 악성 이용 방지, 좋아요 중복 방지</li>
+        <li style="${LI_STYLE}"><strong>방문 기록</strong> — 서비스 개선을 위한 익명 통계 분석</li>
+        <li style="${LI_STYLE}"><strong>광고 쿠키</strong> — Google AdSense 광고 게재 및 광고 성과 측정</li>
+        <li style="${LI_STYLE}"><strong>댓글 내용</strong> — 익명 게시판 운영</li>
+      </ul>
+      <p style="${P_STYLE}">
+        수집한 정보는 위 목적 외의 용도로 이용하지 않으며, 법령에 근거한 요청이 있는 경우를 제외하고
+        제3자에게 제공하지 않습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">3. 이용하는 제3자 서비스</h2>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><strong>Google Analytics 4</strong> — 익명화 방문 통계 수집
+          (<a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">수집 거부 애드온</a>)</li>
+        <li style="${LI_STYLE}"><strong>Google AdSense</strong> — 맞춤 광고 제공(쿠키 사용)</li>
+        <li style="${LI_STYLE}"><strong>Supabase (PostgreSQL)</strong> — 댓글·좋아요 데이터 저장(EU 서버)</li>
+      </ul>
+
+      <h2 style="${H2_STYLE}">4. Google AdSense 광고와 쿠키</h2>
+      <p style="${P_STYLE}">
+        본 서비스는 Google AdSense를 통해 광고를 게재하고, 광고 수익으로 무료 서비스를 운영합니다.
+        광고 게재와 관련해 다음 사항을 안내합니다.
+      </p>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}">Google을 포함한 제3자 광고 사업자는 쿠키를 사용해 이용자의 본 서비스 및 다른
+          웹사이트 방문 기록을 기반으로 광고를 게재합니다.</li>
+        <li style="${LI_STYLE}">Google은 광고 쿠키를 통해 이용자의 이전 방문 기록에 따라 관심사 기반
+          맞춤 광고를 표시할 수 있습니다.</li>
+        <li style="${LI_STYLE}">이용자는 <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">Google 광고 설정</a>에서
+          맞춤 광고를 언제든지 해제할 수 있습니다.</li>
+        <li style="${LI_STYLE}">Google 외 제3자 광고 사업자의 맞춤 광고 쿠키는
+          <a href="https://www.aboutads.info/choices" target="_blank" rel="noopener noreferrer">www.aboutads.info/choices</a>에서
+          일괄 거부할 수 있습니다.</li>
+      </ul>
+      <p style="${P_STYLE}">
+        맞춤 광고를 해제해도 광고 자체는 계속 표시될 수 있으며, 이 경우 이용자의 관심사와 무관한
+        일반 광고가 노출됩니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">5. 쿠키 및 브라우저 저장소</h2>
+      <p style="${P_STYLE}">
+        본 서비스는 통계 분석 및 광고 제공을 위해 쿠키를 사용할 수 있습니다.
+        브라우저 설정에서 쿠키 저장을 거부하거나 저장된 쿠키를 삭제할 수 있으나, 일부 기능이 제한될 수 있습니다.
+        피드백 상태와 좋아요 기록은 브라우저 localStorage에만 저장되며 서버로 전송되지 않습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">6. 개인정보의 보관 및 파기</h2>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><strong>댓글·닉네임</strong> — 운영 유지 기간 보관, 요청 시 즉시 파기</li>
+        <li style="${LI_STYLE}"><strong>좋아요 IP(해시)</strong> — 삽입 후 24시간 이내 자동 파기</li>
+        <li style="${LI_STYLE}"><strong>방문 로그(GA)</strong> — Google 정책에 따라 보관(기본 26개월)</li>
+        <li style="${LI_STYLE}"><strong>광고 쿠키</strong> — Google 광고 쿠키 정책에 따른 유효 기간 후 만료</li>
+      </ul>
+      <p style="${P_STYLE}">보관 기간이 지난 정보는 복구할 수 없는 방법으로 지체 없이 파기합니다.</p>
+
+      <h2 style="${H2_STYLE}">7. 이용자의 권리와 행사 방법</h2>
+      <p style="${P_STYLE}">
+        이용자는 본인이 작성한 댓글 등 자신과 관련된 정보에 대해 열람·정정·삭제·처리정지를
+        요청할 수 있습니다. 아래 문의 이메일로 요청하시면 본인 확인 후 영업일 기준 10일 이내에
+        처리 결과를 회신합니다. 본 서비스는 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.
+      </p>
+      <p style="${P_STYLE}">
+        본 방침이 변경되는 경우 이 페이지에 개정일과 함께 게시하며, 수집 항목이 늘어나는 등
+        중요한 변경은 시행 7일 전부터 공지합니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">8. 문의</h2>
+      <p style="${P_STYLE}">
+        운영: ShakiLabs · 문의: <a href="mailto:skdba1313@gmail.com">skdba1313@gmail.com</a>
+      </p>
+    </article>`;
+}
+
+// =========================
+// Terms of service (/terms)
+// =========================
+// Mirrors src/views/TermsView.vue for the same reason as buildPrivacyContent.
+function buildTermsContent() {
+  return `
+    <article data-seo-prerender="terms" style="${ARTICLE_STYLE}">
+      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> › 이용약관
+      </nav>
+
+      <h1 style="${H1_STYLE}">이용약관</h1>
+      <p style="${P_STYLE}">시행 2026.03.21 · 개정 2026.08.05</p>
+
+      <p style="${P_STYLE}">
+        본 약관은 shakilabs.com/finance(이하 "서비스")가 제공하는 급여·세금·수당 계산 기능의 이용 조건과
+        운영자·이용자의 권리와 의무를 정합니다. 서비스를 이용하는 경우 본 약관에 동의한 것으로 봅니다.
+        약관에 동의하지 않는 경우 서비스 이용을 중단할 수 있으며, 이용 중단에 따른 불이익은 없습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">1. 서비스의 성격</h2>
+      <p style="${P_STYLE}">
+        서비스는 연봉 실수령액, 건강보험료, 종합소득세, 퇴직금, 실업급여 등 급여·세금 관련 계산 기능과
+        해설 콘텐츠를 무료로 제공합니다. 별도의 회원가입 없이 누구나 이용할 수 있으며, 모든 계산은
+        2026년 공식 세율·요율 고시를 기반으로 하되 결과는 참고용 추정치입니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">2. 정보 제공 목적의 한계</h2>
+      <p style="${P_STYLE}">
+        서비스가 제공하는 계산 결과와 해설은 일반적인 정보 제공만을 목적으로 하며,
+        <strong>세무 상담·법률 자문·노무 상담이 아닙니다.</strong>
+        개인의 구체적인 사정(비과세 항목, 감면 요건, 특수 고용 형태 등)에 따라 실제 금액은 달라질 수
+        있으므로, 신고·납부·계약 등 법적 효과가 있는 의사결정 전에는 반드시 세무사·노무사 등
+        자격 있는 전문가 또는 관할 기관(국세청, 국민건강보험공단, 고용노동부)의 확인을 받아야 합니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">3. 면책 조항</h2>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}">계산 결과는 참고용 추정치이며 실제 지급액·납부액과 다를 수 있습니다. 운영자는 계산 결과에 근거한 의사결정으로 발생한 손해에 대해 책임을 지지 않습니다.</li>
+        <li style="${LI_STYLE}">세율, 보험요율, 공제 조건은 관계 기관의 고시 변경에 따라 달라질 수 있으며, 개정 반영에는 시차가 있을 수 있습니다.</li>
+        <li style="${LI_STYLE}">천재지변, 통신 장애, 호스팅 사업자의 사정 등 불가항력으로 인한 서비스 중단에 대해 책임을 지지 않습니다.</li>
+        <li style="${LI_STYLE}">이용자가 작성한 익명 댓글의 내용에 대한 책임은 작성자 본인에게 있습니다.</li>
+      </ul>
+
+      <h2 style="${H2_STYLE}">4. 광고 게재</h2>
+      <p style="${P_STYLE}">
+        서비스는 Google AdSense를 통한 광고를 게재하며, 광고 수익으로 무료 서비스를 운영합니다.
+        광고는 콘텐츠와 구분되도록 표시되며, 광고 게재 위치와 노출 여부는 운영자가 조정할 수 있습니다.
+        광고를 통해 연결되는 외부 사이트의 정보, 상품, 거래에 대한 책임은 해당 광고주와 외부
+        사이트 운영자에게 있으며, 본 서비스는 광고주와 이용자 간 거래에 관여하지 않습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">5. 지식재산권</h2>
+      <p style="${P_STYLE}">
+        서비스의 계산 로직, 해설 콘텐츠, 화면 디자인 등 제작물에 대한 권리는 운영자에게 있습니다.
+        개인적 이용, 링크 공유, 출처를 밝힌 인용은 자유롭게 할 수 있으나, 콘텐츠를 무단으로 복제해
+        상업적으로 재배포하거나 자동화 수단으로 대량 수집하는 행위는 금지됩니다.
+        법령·고시 등 공공 정보 자체에는 별도의 권리를 주장하지 않습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">6. 이용자의 의무</h2>
+      <p style="${P_STYLE}">
+        이용자는 서비스를 본래 목적에 맞게 이용해야 하며, 서버에 비정상적인 부하를 일으키는 행위,
+        취약점을 악용하는 행위, 타인의 권리를 침해하거나 법령에 위반되는 내용을 게시하는 행위를
+        해서는 안 됩니다. 위반 시 해당 이용이 제한될 수 있습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">7. 서비스 변경 및 중단</h2>
+      <p style="${P_STYLE}">
+        운영자는 계산 기준, 화면 구성, 제공 기능을 사전 공지 없이 변경하거나 중단할 수 있습니다.
+        무료 서비스 특성상 변경·중단으로 인한 별도의 보상은 제공되지 않습니다.
+        약관이 변경되는 경우 본 페이지에 개정일과 함께 게시합니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">8. 준거법 및 분쟁 해결</h2>
+      <p style="${P_STYLE}">
+        본 약관은 대한민국 법령에 따라 해석되며, 서비스 이용과 관련해 분쟁이 발생한 경우
+        운영자와 이용자는 우선 성실히 협의해 해결합니다. 협의로 해결되지 않는 분쟁은
+        민사소송법에 따른 관할 법원에 제기할 수 있습니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">9. 문의</h2>
+      <p style="${P_STYLE}">
+        운영: ShakiLabs · 문의: <a href="mailto:skdba1313@gmail.com">skdba1313@gmail.com</a>
       </p>
     </article>`;
 }
@@ -2598,6 +2834,8 @@ function buildLandingContent(route) {
 // =========================
 export function buildRichContent(route, _meta) {
   if (route === "/about") return buildAboutContent();
+  if (route === "/privacy") return buildPrivacyContent();
+  if (route === "/terms") return buildTermsContent();
   const landing = buildLandingContent(route);
   if (landing) return landing;
 

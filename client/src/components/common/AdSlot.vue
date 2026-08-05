@@ -21,7 +21,10 @@ let observer: IntersectionObserver | null = null;
 function ensureAdsenseScript(): void {
   if (!publisherId) return;
 
-  const existing = document.querySelector('script[data-adsense="true"]');
+  // index.html이 정적 스니펫을 이미 싣고 있으므로(애드센스 심사용) src 기준으로도 중복을 막는다
+  const existing = document.querySelector(
+    'script[data-adsense="true"], script[src^="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
+  );
   if (existing) return;
 
   const script = document.createElement("script");
