@@ -13,6 +13,7 @@ import {
   buildScenarioChainHtml,
   getScenarioChain,
 } from "./scenario-chains.mjs";
+import { appendGuideDeepDive } from "./guide-content.mjs";
 import { FAQ_SOURCE_FILES, ROUTE_FAQS } from "./faq-data.mjs";
 import { HOME_ITEM_LIST } from "./home-content.mjs";
 
@@ -1685,7 +1686,10 @@ function applyMeta(html, route, meta) {
 
   // 리치 콘텐츠 우선 시도 → 없으면 기본 스텁
   const rich = buildRichContent(route, meta);
-  let mainContent = rich || buildScenarioChainHtml(route) || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
+  // 가이드 체인은 링크 나열이라 본문이 얇다 — 연말정산·알바 가이드에는 검증 수치 기반 심화 본문을 덧붙인다
+  const scenarioHtml = buildScenarioChainHtml(route);
+  const enrichedScenarioHtml = scenarioHtml ? appendGuideDeepDive(scenarioHtml, route) : null;
+  let mainContent = rich || enrichedScenarioHtml || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
   // 스키마 규칙: FAQPage의 Q/A는 본문에 렌더되는 문구와 동일해야 하므로 같은 데이터로 본문 FAQ도 노출
   if (routeFaqs && !mainContent.includes("자주 묻는")) {
     mainContent = appendFaqSection(mainContent, routeFaqs);

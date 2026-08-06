@@ -7,9 +7,15 @@ import {
   formatWon,
   formatManWonValue,
   formatPercent,
+  INCOME_TAX_BRACKETS,
   RATES_2026,
 } from "./calc-engine.mjs";
-import { INSURANCE_AMOUNTS, UNPAID_WAGE_AMOUNTS } from "./seo-routes.mjs";
+import {
+  COMPARE_PAIRS,
+  COMPREHENSIVE_TAX_AMOUNTS,
+  INSURANCE_AMOUNTS,
+  UNPAID_WAGE_AMOUNTS,
+} from "./seo-routes.mjs";
 import {
   HOME_DESCRIPTION,
   HOME_H1,
@@ -608,6 +614,286 @@ function buildInsuranceNeighborRows(fee) {
     .join("");
 }
 
+// --- 건보료 구간 해석용 파생 상수 (전부 검증된 2026 수치·엔진 상수에서 파생) ---
+const MIN_WAGE_HOURLY_2026 = 10_320;
+// 주휴 포함 월 209시간 환산 — 전일제 최저임금 월급
+const MIN_WAGE_MONTHLY_2026 = MIN_WAGE_HOURLY_2026 * 209;
+const MIN_WAGE_FEE = Math.floor(MIN_WAGE_MONTHLY_2026 * RATES_2026.healthInsurance.employee);
+const PENSION_CAP_TAXABLE = RATES_2026.nationalPension.maxMonthlyIncome;
+const PENSION_CAP_FEE = Math.floor(PENSION_CAP_TAXABLE * RATES_2026.healthInsurance.employee);
+const PENSION_CAP_DEDUCTION = Math.floor(
+  PENSION_CAP_TAXABLE * RATES_2026.nationalPension.employee
+);
+// 피부양자 소득요건 — 기존 검증 문구(연 2,000만원 이하)와 동일 상수
+const DEPENDENT_INCOME_CEILING = 20_000_000;
+
+// 연봉 천만 단위 밴드 + 밴드 내 위치 — 인접 금액 페이지 간 서술이 실제로 갈리게 하는 파생 워딩
+function salaryBandLabel(annual) {
+  if (annual >= 100_000_000) {
+    return `${formatManWonValue(Math.round(annual / 10_000))}원`;
+  }
+  const tenMillions = Math.floor(annual / 10_000_000);
+  const position = (annual % 10_000_000) / 10_000_000;
+  const suffix = position < 0.34 ? "초반" : position < 0.67 ? "중반" : "후반";
+  return `${tenMillions}천만원대 ${suffix}`;
+}
+
+// 과세표준이 속한 소득세 구간 (calc-engine의 누진 구간 상수 사용)
+function findIncomeTaxBracket(taxableBase) {
+  return INCOME_TAX_BRACKETS.find((bracket) => taxableBase <= bracket.limit);
+}
+
+// 금액 구간별 해석 문단 — 저(5~9만)/중(10~25만)/고(26만+) 조건 분기 + 페이지별 파생 수치
+function buildInsuranceBracketInterpretation(fee, monthlyTaxable, estimatedAnnual, result) {
+  const estimatedManWon = Math.round(estimatedAnnual / 10_000);
+  const bracket = findIncomeTaxBracket(result.taxableBase);
+  const paragraphs = [];
+
+  if (fee < 100_000) {
+    const belowMinWage = fee < MIN_WAGE_FEE;
+    paragraphs.push(`
+      이 구간의 역산 보수월액 ${formatWon(monthlyTaxable)}은 2026년 최저시급 10,320원을
+      주 40시간(주휴 포함 월 209시간)으로 환산한 월급 ${formatWon(MIN_WAGE_MONTHLY_2026)}${
+        belowMinWage
+          ? `보다 낮습니다. 전일제 근무라면 나오기 어려운 금액이므로 주 40시간 미만 단시간 근로,
+      휴직·복직이 낀 달, 입사 첫 달 일할 계산일 가능성이 큽니다. 단시간 근로라면
+      <a href="/finance/wage-converter">시급·월급 환산</a>과 <a href="/finance/weekly-holiday-pay">주휴수당 충족 여부</a>를 함께 확인해 보세요.`
+          : ` 부근이거나 그보다 높은 수준입니다. 전일제 최저임금 언저리 급여대로, 상여·수당 반영
+      여부에 따라 실제 월급과 차이가 날 수 있습니다.`
+      }`);
+    if (estimatedAnnual <= DEPENDENT_INCOME_CEILING) {
+      paragraphs.push(`
+      역산 연소득 약 ${formatManWonValue(estimatedManWon)}원은 건강보험 피부양자 소득요건(연 2,000만원 이하)
+      안쪽입니다. 퇴사하게 되면 가족 중 직장가입자가 있는 경우 지역가입 전환 대신
+      <a href="/finance/dependent">피부양자 등록</a>을 검토할 수 있는 경계 구간입니다.`);
+    } else {
+      paragraphs.push(`
+      역산 연소득 약 ${formatManWonValue(estimatedManWon)}원은 피부양자 소득요건(연 2,000만원)을
+      약 ${formatWon(estimatedAnnual - DEPENDENT_INCOME_CEILING)} 넘습니다. 퇴사 후 피부양자 등록은
+      소득요건에서 막히므로, <a href="/finance/regional-health">지역가입 전환 보험료</a>를 미리 확인해
+      두는 편이 안전합니다.`);
+    }
+  } else if (fee < 260_000) {
+    // 연봉 5,000만원 선 통과 여부로 해석 각도가 갈린다 — 인접 페이지 간 실제 서술 차이의 원천
+    const fiftyMillionFee = Math.floor(
+      (50_000_000 / 12 - 200_000) * RATES_2026.healthInsurance.employee
+    );
+    paragraphs.push(`
+      역산 연봉 약 ${formatManWonValue(estimatedManWon)}원은 ${salaryBandLabel(estimatedAnnual)} 밴드입니다.
+      이 추정 연봉의 과세표준 ${formatWon(result.taxableBase)}은 소득세 ${formatPercent(bracket.rate, 0)}
+      구간에 속하고, 4대보험까지 합친 체감 공제율은 ${formatPercent(result.effectiveTaxRate)} 수준이라
+      세전 월 ${formatWon(monthlyTaxable + 200_000)} 가운데 ${formatWon(result.monthlyNet)}이 통장에 남는 구조입니다.
+      ${
+        estimatedAnnual >= 50_000_000
+          ? `연봉 5,000만원 선을 넘어선 구간이라 소득세·지방소득세(월 ${formatWon(result.totalTax)})가
+      4대보험 합계(월 ${formatWon(result.totalInsurance)})의 ${formatPercent(result.totalTax / result.totalInsurance)}까지
+      올라와, 공제의 무게중심이 보험료에서 세금 쪽으로 옮겨가기 시작합니다.`
+          : `연봉 5,000만원 선은 건보료 기준 약 ${formatWon(fiftyMillionFee)}부터로, 지금 고지액에서
+      ${formatWon(fiftyMillionFee - fee)} 남았습니다. 그 전까지는 공제에서 세금(월 ${formatWon(result.totalTax)})보다
+      4대보험(월 ${formatWon(result.totalInsurance)})의 비중이 훨씬 큰 구간입니다.`
+      }`);
+    paragraphs.push(`
+      회사가 매년 4월 보수총액을 신고해 정산하면 보수월액이 달라질 수 있습니다. 정산으로 보수월액이
+      10% 오르면 건보료도 ${formatWon(fee)}에서 약 ${formatWon(Math.floor(fee * 1.1))}으로 같은 비율로
+      오르고, 장기요양보험료(현재 약 ${formatWon(Math.floor(fee * RATES_2026.longTermCare.rateOfHealth))})도
+      함께 늘어납니다. 고지 금액이 몇 달 사이 바뀌었다면 연봉 변동보다 정산 반영일 가능성부터 의심해 보세요.`);
+    if (fee >= PENSION_CAP_FEE) {
+      paragraphs.push(`
+      보수월액 ${formatWon(monthlyTaxable)}은 국민연금 기준소득월액 상한(${formatWon(PENSION_CAP_TAXABLE)})을
+      이미 넘어섰습니다. 국민연금 공제는 ${formatWon(PENSION_CAP_DEDUCTION)}으로 고정되고, 급여가 더
+      올라도 건강보험·장기요양·고용보험과 소득세만 비례해서 늘어납니다.`);
+    } else {
+      paragraphs.push(`
+      국민연금 상한(보수월액 ${formatWon(PENSION_CAP_TAXABLE)})까지는 보수월액 기준
+      ${formatWon(PENSION_CAP_TAXABLE - monthlyTaxable)} 여유가 있어, 급여가 올라도 아직 4대보험
+      전 항목이 비례해서 늘어나는 구간입니다.`);
+    }
+  } else {
+    paragraphs.push(`
+      역산 연봉 약 ${formatManWonValue(estimatedManWon)}원(${salaryBandLabel(estimatedAnnual)})의 보수월액
+      ${formatWon(monthlyTaxable)}은 국민연금 기준소득월액 상한(${formatWon(PENSION_CAP_TAXABLE)})을
+      ${formatWon(monthlyTaxable - PENSION_CAP_TAXABLE)} 초과합니다. 국민연금 공제는 상한 기준
+      ${formatWon(PENSION_CAP_DEDUCTION)}에서 멈추므로, 이 구간부터 급여 인상분에는 건강보험 3.595%·
+      장기요양·고용보험 0.9%와 소득세만 붙습니다. 추정 과세표준의 소득세 한계 구간은
+      ${formatPercent(bracket.rate, 0)}이고 체감 공제율은 ${formatPercent(result.effectiveTaxRate)}입니다.`);
+    paragraphs.push(`
+      월 건보료가 ${Math.round(fee / 10_000)}만원대인데 역산 연봉이 실제 연봉과 크게 다르다면, 보수 외
+      소득에 부과되는 소득월액 보험료가 섞여 있을 수 있습니다. 이자·배당·임대 같은 보수 외 소득이
+      연 2,000만원을 초과하면 초과분에 대해 보수월액 보험료와 별도로 부과되므로, 고지서 합계만 보고
+      연봉을 역산하면 실제보다 높게 추정됩니다.`);
+  }
+
+  const minWageRatio = (fee / MIN_WAGE_FEE).toFixed(2);
+  const capShare = formatPercent(monthlyTaxable / PENSION_CAP_TAXABLE);
+
+  return `
+      <h2 style="${H2_STYLE}">4. 건보료 ${formatWon(fee)}의 위치 해석</h2>
+      <p style="${P_STYLE}">
+        월 ${formatWon(fee)}은 연간 ${formatWon(fee * 12)}을 본인이 부담하는 수준입니다.
+        전일제 최저임금 근로자의 건보료(약 ${formatWon(MIN_WAGE_FEE)})의 ${minWageRatio}배이며,
+        역산 보수월액이 국민연금 기준소득월액 상한(${formatWon(PENSION_CAP_TAXABLE)})에서 차지하는
+        비율은 ${capShare}입니다.
+      </p>
+      ${paragraphs.map((body) => `<p style="${P_STYLE}">${body.trim()}</p>`).join("\n      ")}
+      <table style="${TABLE_STYLE}">
+        <thead>
+          <tr>
+            <th style="${TH_STYLE}">건보료 ${formatWon(fee)} 기준 파생 지표</th>
+            <th style="${TH_STYLE}">값</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="${TD_STYLE}">연간 본인 부담 건강보험료</td>
+            <td style="${TD_STYLE}">${formatWon(fee * 12)}</td>
+          </tr>
+          <tr>
+            <td style="${TD_STYLE}">장기요양 포함 월 부담</td>
+            <td style="${TD_STYLE}">${formatWon(fee + Math.floor(fee * RATES_2026.longTermCare.rateOfHealth))}</td>
+          </tr>
+          <tr>
+            <td style="${TD_STYLE}">사업주 부담 포함 월 총액 (건강보험만)</td>
+            <td style="${TD_STYLE}">${formatWon(fee * 2)} (연 ${formatWon(fee * 24)})</td>
+          </tr>
+          <tr>
+            <td style="${TD_STYLE}">보수월액의 국민연금 상한 대비 비율</td>
+            <td style="${TD_STYLE}">${capShare}</td>
+          </tr>
+          <tr>
+            <td style="${TD_STYLE}">전일제 최저임금 건보료 대비 배율</td>
+            <td style="${TD_STYLE}">${minWageRatio}배</td>
+          </tr>
+        </tbody>
+      </table>`;
+}
+
+// 페이지별 추가 분석 렌즈 — 프리셋 인덱스로 로테이션해 인접 금액 페이지가 같은 문단을
+// 반복하지 않게 한다. 각 렌즈는 계산 엔진 출력에서 파생한 서로 다른 실제 분석이다.
+function buildInsuranceAngleBlock(fee, estimatedAnnual, result) {
+  const index = INSURANCE_AMOUNTS.indexOf(fee);
+  const angle = ((index % 3) + 3) % 3;
+
+  if (angle === 0) {
+    // 렌즈 A: 부양가족 수에 따른 실수령 변화 — 건보료는 그대로인데 통장 금액이 달라진다
+    const s2 = calculateSalaryBreakdown({
+      grossAnnual: estimatedAnnual,
+      nonTaxableMonthly: 200_000,
+      dependents: 2,
+      children: 0,
+      retirementIncluded: false,
+    });
+    const s4 = calculateSalaryBreakdown({
+      grossAnnual: estimatedAnnual,
+      nonTaxableMonthly: 200_000,
+      dependents: 4,
+      children: 2,
+      retirementIncluded: false,
+    });
+    return `
+      <h3 style="${H3_STYLE}">부양가족이 달라지면 — 건보료는 그대로, 실수령만 달라진다</h3>
+      <p style="${P_STYLE}">
+        건강보험료는 부양가족 수와 무관하게 보수월액으로만 정해지므로 이 페이지의 ${formatWon(fee)}은
+        그대로입니다. 달라지는 것은 소득세입니다. 같은 추정 연봉에서 부양가족이 2인(배우자 포함)이면
+        월 실수령이 ${formatWon(s2.monthlyNet)}으로 기본(1인) 대비 ${formatWon(s2.monthlyNet - result.monthlyNet)}
+        늘고, 4인(자녀 2명 포함)이면 ${formatWon(s4.monthlyNet)}으로 ${formatWon(s4.monthlyNet - result.monthlyNet)}
+        늘어납니다. ${
+          s4.monthlyNet - result.monthlyNet < 5_000
+            ? `이 연봉대는 근로소득·표준세액공제만으로 소득세가 거의 상쇄되어, 부양가족을 더 등록해도
+        줄어들 세금 자체가 얼마 남아 있지 않습니다.`
+            : `인적공제·자녀세액공제가 소득세를 줄이기 때문입니다.`
+        }
+      </p>`;
+  }
+
+  if (angle === 1) {
+    // 렌즈 B: 건보료 1만원 상승을 연봉 인상으로 환산 — 고지서 변화를 연봉 언어로 읽는다
+    const nextFeeTaxable = Math.floor((fee + 10_000) / RATES_2026.healthInsurance.employee);
+    const nextFeeAnnual = (nextFeeTaxable + 200_000) * 12;
+    const salaryStep = nextFeeAnnual - estimatedAnnual;
+    const nextResult = calculateSalaryBreakdown({
+      grossAnnual: nextFeeAnnual,
+      nonTaxableMonthly: 200_000,
+      dependents: 1,
+      children: 0,
+      retirementIncluded: false,
+    });
+    return `
+      <h3 style="${H3_STYLE}">건보료 1만원 차이를 연봉으로 환산하면</h3>
+      <p style="${P_STYLE}">
+        월 건보료가 ${formatWon(fee)}에서 ${formatWon(fee + 10_000)}으로 오르려면 연봉이 약
+        ${formatWon(salaryStep)} 올라야 합니다. 그렇게 연봉 ${formatManWonValue(Math.round(nextFeeAnnual / 10_000))}원이
+        되면 월 실수령은 ${formatWon(result.monthlyNet)}에서 ${formatWon(nextResult.monthlyNet)}으로
+        ${formatWon(nextResult.monthlyNet - result.monthlyNet)} 늘어납니다. 고지서의 건보료 변화폭을 보면
+        연봉 협상 결과가 급여에 실제 반영됐는지 역으로 검증할 수 있습니다.
+      </p>`;
+  }
+
+  // 렌즈 C: 누적 부담 — 연·10년 단위로 보는 건보+장기요양 총액
+  const monthlyWithCare = fee + Math.floor(fee * RATES_2026.longTermCare.rateOfHealth);
+  const yearlyWithCare = monthlyWithCare * 12;
+  return `
+      <h3 style="${H3_STYLE}">누적으로 보면 — 건보+장기요양 연간·10년 부담</h3>
+      <p style="${P_STYLE}">
+        장기요양보험까지 합친 월 부담 ${formatWon(monthlyWithCare)}은 연간 ${formatWon(yearlyWithCare)},
+        같은 급여가 10년 유지된다고 가정하면 ${formatWon(yearlyWithCare * 10)}에 이릅니다. 이 연간 부담은
+        추정 연 실수령액 ${formatWon(result.annualNet)}의 ${formatPercent(yearlyWithCare / result.annualNet)}에
+        해당합니다. 사업주 부담분까지 계산에 넣으면 이 급여 자리 하나에 걷히는 건강보험 재원은 그 두 배가
+        됩니다.
+      </p>`;
+}
+
+// 두 번째 로테이션(홀짝) — 3렌즈와 주기가 달라 어떤 인접 쌍에서도 두 블록이 동시에 겹치지 않는다
+function buildInsuranceParityBlock(fee, monthlyTaxable, result) {
+  const index = INSURANCE_AMOUNTS.indexOf(fee);
+
+  if (index % 2 === 0) {
+    // 짝수: 비과세 가정을 바꾸면 역산 결과가 어떻게 달라지는가
+    const annualWith300k = (monthlyTaxable + 300_000) * 12;
+    const resultWith300k = calculateSalaryBreakdown({
+      grossAnnual: annualWith300k,
+      nonTaxableMonthly: 300_000,
+      dependents: 1,
+      children: 0,
+      retirementIncluded: false,
+    });
+    return `
+      <h3 style="${H3_STYLE}">비과세가 다르면 — 식대 30만원 가정으로 다시 역산</h3>
+      <p style="${P_STYLE}">
+        건강보험료는 과세 보수에만 붙습니다. 그래서 회사의 비과세 항목이 월 30만원(식대에 자가운전보조금
+        등이 더해진 경우)이라면, 같은 건보료 ${formatWon(fee)}로 추정하는 연봉은 약
+        ${formatManWonValue(Math.round(annualWith300k / 10_000))}원으로 올라가고 월 실수령도
+        ${formatWon(resultWith300k.monthlyNet)}으로 달라집니다. 이 페이지 기본 가정(비과세 20만원)과의
+        차이가 곧 비과세 설계의 효과입니다.
+      </p>`;
+  }
+
+  // 홀수: 원천세(소득세)로 교차 검증
+  return `
+      <h3 style="${H3_STYLE}">소득세로 교차 검증하기</h3>
+      <p style="${P_STYLE}">
+        역산이 맞는지 확인하는 가장 쉬운 방법은 급여명세서의 소득세와 대조하는 것입니다. 추정 연봉
+        기준 이 페이지의 월 소득세+지방소득세는 ${formatWon(result.totalTax)}입니다. 실제 명세서 소득세가
+        이보다 크게 높다면 부양가족 등록이 빠졌거나 상여가 그 달에 몰렸을 가능성이 있고, 반대로 크게
+        낮다면 비과세 항목이 많다는 신호입니다. 소득세에서 연봉을 거꾸로 확인하려면
+        <a href="/finance/withholding">원천세 역산 계산기</a>를 이용하세요.
+      </p>`;
+}
+
+// 같은 건보료의 직장가입 vs 지역가입 구조 차이 — 페이지 금액을 그대로 대입한 1문단
+function buildInsuranceRegionalCompare(fee) {
+  return `
+      <h2 style="${H2_STYLE}">5. 직장가입 ${formatWon(fee)} vs 지역가입 — 같은 금액의 다른 구조</h2>
+      <p style="${P_STYLE}">
+        직장가입자의 ${formatWon(fee)}은 절반 구조입니다. 사업주가 같은 금액을 함께 내므로 이 급여에
+        실제 걷히는 건강보험료는 월 ${formatWon(fee * 2)}(연 ${formatWon(fee * 24)})이고 본인 부담은 그
+        절반입니다. 반면 지역가입자는 사업주 부담 없이 소득·재산·자동차를 점수화해 세대 단위로
+        부과하므로, 퇴사 후에는 같은 소득이라도 재산이 있으면 월 부담이 ${formatWon(fee)}보다 커지는
+        경우가 많습니다. 퇴사를 앞두고 있다면 <a href="/finance/regional-health">지역가입 예상 보험료</a>를
+        먼저 계산해 보고, 퇴사 후 2개월 안에 임의계속가입(최대 36개월 직장 수준 유지)을 신청할지
+        판단하세요.
+      </p>`;
+}
+
 function buildInsuranceContent(fee) {
   // 건보료 → 월 과세급여 역산
   const monthlyTaxable = Math.floor(fee / RATES_2026.healthInsurance.employee);
@@ -754,8 +1040,12 @@ function buildInsuranceContent(fee) {
           </tr>
         </tbody>
       </table>
+      ${buildInsuranceBracketInterpretation(fee, monthlyTaxable, estimatedAnnual, result)}
+      ${buildInsuranceAngleBlock(fee, estimatedAnnual, result)}
+      ${buildInsuranceParityBlock(fee, monthlyTaxable, result)}
+      ${buildInsuranceRegionalCompare(fee)}
 
-      <h2 style="${H2_STYLE}">4. 인접 건보료 구간 비교</h2>
+      <h2 style="${H2_STYLE}">6. 인접 건보료 구간 비교</h2>
       <p style="${P_STYLE}">
         월 건강보험료가 1~2만원 차이 나면 역산 연봉은 얼마나 달라질까요?
         건보료 ${formatWon(fee)} 전후 구간의 추정 연봉과 월 실수령액을 비교한 표입니다.
@@ -773,41 +1063,56 @@ function buildInsuranceContent(fee) {
         </tbody>
       </table>
 
-      <h2 style="${H2_STYLE}">5. 자주 묻는 질문 (FAQ)</h2>
+      <h2 style="${H2_STYLE}">7. 자주 묻는 질문 (FAQ)</h2>
 
-      <h3 style="${H3_STYLE}">Q1. 회사가 신고한 건보료와 실제 급여가 다를 수 있나요?</h3>
+      <h3 style="${H3_STYLE}">Q1. 건보료 ${feeManWon}만원이면 연봉이 얼마인가요?</h3>
+      <p style="${P_STYLE}">
+        2026년 요율 3.595%로 역산한 보수월액은 ${formatWon(monthlyTaxable)}이고, 비과세 식대 월 20만원을
+        더해 연봉으로 환산하면 약 ${formatManWonValue(estimatedManWon)}원(${formatWon(estimatedAnnual)})입니다.
+        비과세 항목이 더 많은 회사라면 실제 연봉은 이 추정치보다 높을 수 있습니다.
+      </p>
+
+      <h3 style="${H3_STYLE}">Q2. 건보료 ${feeManWon}만원이면 월 실수령액은 얼마인가요?</h3>
+      <p style="${P_STYLE}">
+        부양가족 1인 기준 약 ${formatWon(result.monthlyNet)}입니다. 국민연금 ${formatWon(result.nationalPension)},
+        건강보험·장기요양 ${formatWon(result.healthInsurance + result.longTermCare)}, 고용보험
+        ${formatWon(result.employmentInsurance)}, 소득세·지방소득세 ${formatWon(result.totalTax)}을 공제한
+        값이며, 부양가족이 늘면 소득세가 줄어 실수령이 커집니다.
+      </p>
+
+      <h3 style="${H3_STYLE}">Q3. 회사가 신고한 건보료와 실제 급여가 다를 수 있나요?</h3>
       <p style="${P_STYLE}">
         네. 회사는 매년 4월 "보수총액신고"를 통해 직전 연도의 실제 급여를 반영합니다.
         따라서 성과급·상여금이 포함된 해에는 건보료가 일시적으로 높아질 수 있고, 이후 정산이 이뤄집니다.
         본 역산 결과는 신고된 보수월액 기준의 추정이므로 실제 연봉과 차이가 있을 수 있습니다.
       </p>
 
-      <h3 style="${H3_STYLE}">Q2. 장기요양보험료도 따로 내나요?</h3>
+      <h3 style="${H3_STYLE}">Q4. 장기요양보험료도 따로 내나요?</h3>
       <p style="${P_STYLE}">
         장기요양보험료는 건강보험료의 13.14%(2026년 고시)로 자동 부과되며, 건강보험료와 함께 급여에서 공제됩니다.
         건보료 ${formatWon(fee)} 기준 장기요양보험료는 약 ${formatWon(Math.floor(fee * 0.1314))}입니다.
       </p>
 
-      <h3 style="${H3_STYLE}">Q3. 지역가입자도 같은 요율을 적용하나요?</h3>
+      <h3 style="${H3_STYLE}">Q5. 지역가입자도 같은 요율을 적용하나요?</h3>
       <p style="${P_STYLE}">
         아니오. 지역가입자는 소득·재산·자동차 등을 점수화한 "보험료 부과점수"에 따라 산정되며,
         직장가입자의 3.595% 단순 요율과 다릅니다. 퇴사 후 지역가입자 전환 시 보험료 추정은
         <a href="/finance/regional-health">지역가입자 건보료 계산기</a>를 이용하세요.
       </p>
 
-      <h3 style="${H3_STYLE}">Q4. 피부양자로 등록하면 건보료가 없나요?</h3>
+      <h3 style="${H3_STYLE}">Q6. 피부양자로 등록하면 건보료가 없나요?</h3>
       <p style="${P_STYLE}">
         직장가입자의 배우자·자녀 등이 피부양자 조건(소득 연 2,000만원 이하, 재산 과세표준 5.4억 이하 등)을
         충족하면 별도의 건강보험료 없이 의료보험 혜택을 받을 수 있습니다.
       </p>
 
-      <h3 style="${H3_STYLE}">Q5. 건보료가 매년 오르나요?</h3>
+      <h3 style="${H3_STYLE}">Q7. 건보료가 매년 오르나요?</h3>
       <p style="${P_STYLE}">
         건강보험료율은 매년 국민건강보험공단과 보건복지부가 협의해 고시합니다.
         최근 추세는 연 2~4% 수준의 인상이며, 2026년 근로자 부담 요율은 3.595%입니다.
       </p>
 
-      <h2 style="${H2_STYLE}">6. 관련 계산기</h2>
+      <h2 style="${H2_STYLE}">8. 관련 계산기</h2>
       <ul style="${UL_STYLE}">
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a> - 연봉으로 실수령 순산</li>
         <li style="${LI_STYLE}"><a href="/finance/regional-health">지역가입자 건보료 계산기</a> - 퇴사 후 건보료</li>
@@ -815,7 +1120,7 @@ function buildInsuranceContent(fee) {
         <li style="${LI_STYLE}"><a href="/finance/4-insurance-employer">사업주 4대보험 계산기</a></li>
       </ul>
 
-      <h2 style="${H2_STYLE}">7. 공식 출처</h2>
+      <h2 style="${H2_STYLE}">9. 공식 출처</h2>
       <p style="${P_STYLE}">
         건강보험 요율 고시 원문과 본인의 실제 보수월액·납부 내역은 아래 공공기관 사이트에서
         직접 확인할 수 있습니다. 역산 결과는 참고용이므로 공식 자료와 교차 확인하세요.
@@ -834,8 +1139,28 @@ function buildInsuranceContent(fee) {
 // =========================
 // 종합소득세 (/comprehensive-tax/:amount)
 // =========================
-function buildComprehensiveTaxContent(manWon) {
-  const income = manWon * 10_000;
+// 종합소득세 누진 산출세액 — 프리셋 본계산과 "경비를 더 인정받으면" 시뮬레이션이 공유
+function progressiveComprehensiveTax(taxableBase) {
+  let calculatedTax = 0;
+  if (taxableBase <= 14_000_000) calculatedTax = taxableBase * 0.06;
+  else if (taxableBase <= 50_000_000)
+    calculatedTax = 840_000 + (taxableBase - 14_000_000) * 0.15;
+  else if (taxableBase <= 88_000_000)
+    calculatedTax = 6_240_000 + (taxableBase - 50_000_000) * 0.24;
+  else if (taxableBase <= 150_000_000)
+    calculatedTax = 15_360_000 + (taxableBase - 88_000_000) * 0.35;
+  else calculatedTax = 37_060_000 + (taxableBase - 150_000_000) * 0.38;
+  return Math.floor(calculatedTax);
+}
+
+// 결정세액+지방소득세 — 표준세액공제 7만원 차감 후 10% 가산
+function comprehensiveTotalTaxOf(taxableBase) {
+  const determinedTax = Math.max(0, progressiveComprehensiveTax(taxableBase) - 70_000);
+  return determinedTax + Math.floor(determinedTax * 0.1);
+}
+
+// 프리셋·인접 구간 공용 종합소득세 계산 — 기존 인라인 산식을 그대로 옮겨 수치 동일성 유지
+function computeComprehensiveTax(income) {
   // IT·디자인·작가 등 인적용역 기준 단순경비율 (src/data/freelanceTaxRates.ts)
   // 4천만원 이하: 64.1%, 초과분: 49.7%
   const EXPENSE_RATE_BASE = 0.641;
@@ -848,17 +1173,7 @@ function buildComprehensiveTaxContent(manWon) {
   const personalDeduction = 1_500_000;
   const taxableBase = Math.max(0, netIncome - personalDeduction);
 
-  // 누진세 계산
-  let calculatedTax = 0;
-  if (taxableBase <= 14_000_000) calculatedTax = taxableBase * 0.06;
-  else if (taxableBase <= 50_000_000)
-    calculatedTax = 840_000 + (taxableBase - 14_000_000) * 0.15;
-  else if (taxableBase <= 88_000_000)
-    calculatedTax = 6_240_000 + (taxableBase - 50_000_000) * 0.24;
-  else if (taxableBase <= 150_000_000)
-    calculatedTax = 15_360_000 + (taxableBase - 88_000_000) * 0.35;
-  else calculatedTax = 37_060_000 + (taxableBase - 150_000_000) * 0.38;
-  calculatedTax = Math.floor(calculatedTax);
+  const calculatedTax = progressiveComprehensiveTax(taxableBase);
 
   const standardCredit = 70_000;
   const determinedTax = Math.max(0, calculatedTax - standardCredit);
@@ -868,6 +1183,295 @@ function buildComprehensiveTaxContent(manWon) {
   // 3.3% 원천징수 비교
   const withholdingPrepaid = Math.floor(income * 0.033);
   const refund = withholdingPrepaid - totalTax;
+  // 추가 수입 1원당 경비 인정률 — 4천만원 초과 여부로 갈린다
+  const marginalExpenseRate = income <= EXPENSE_THRESHOLD ? EXPENSE_RATE_BASE : EXPENSE_RATE_EXCESS;
+
+  return {
+    income,
+    expenses,
+    netIncome,
+    personalDeduction,
+    taxableBase,
+    calculatedTax,
+    standardCredit,
+    determinedTax,
+    localTax,
+    totalTax,
+    withholdingPrepaid,
+    refund,
+    marginalExpenseRate,
+  };
+}
+
+// 누진 구간을 사람이 읽는 라벨로 (calc-engine INCOME_TAX_BRACKETS 기준)
+function incomeTaxBracketLabel(bracket) {
+  const limitLabel = Number.isFinite(bracket.limit)
+    ? `${formatManWonValue(Math.round(bracket.limit / 10_000))}원`
+    : null;
+  const baseLabel = `${formatManWonValue(Math.round(bracket.baseIncome / 10_000))}원`;
+  if (bracket.baseIncome === 0) return `${limitLabel} 이하`;
+  if (!limitLabel) return `${baseLabel} 초과`;
+  return `${baseLabel}~${limitLabel}`;
+}
+
+// 과세표준 위치 해석 — 한계세율 vs 실효세율, 다음 구간까지의 거리, 추가 수입 100만원의 세부담
+function buildComprehensiveTaxBracketSection(label, calc) {
+  const bracket = findIncomeTaxBracket(calc.taxableBase);
+  const bracketIndex = INCOME_TAX_BRACKETS.indexOf(bracket);
+  const nextBracket = INCOME_TAX_BRACKETS[bracketIndex + 1] ?? null;
+  const excessOverBase = calc.taxableBase - bracket.baseIncome;
+  const effectiveOnIncome = calc.totalTax / calc.income;
+  // 추가 수입 100만원: 경비율 인정 후 남는 과세표준 증가분에 한계세율·지방소득세 10% 가산
+  const marginalTaxablePerMillion = Math.floor(1_000_000 * (1 - calc.marginalExpenseRate));
+  const deltaPerMillion = Math.floor(marginalTaxablePerMillion * bracket.rate * 1.1);
+
+  return `
+      <h2 style="${H2_STYLE}">3. 과세표준 위치 — 한계세율 vs 실효세율</h2>
+      <p style="${P_STYLE}">
+        수입 ${label}원에서 경비 ${formatWon(calc.expenses)}과 인적공제를 뺀 과세표준
+        ${formatWon(calc.taxableBase)}은 누진세율표의 <strong>${incomeTaxBracketLabel(bracket)} 구간
+        (세율 ${formatPercent(bracket.rate, 0)})</strong>에 있습니다. 구간 하단(${formatWon(bracket.baseIncome)})을
+        ${formatWon(excessOverBase)} 넘긴 위치${
+          nextBracket
+            ? `이고, 다음 구간(세율 ${formatPercent(nextBracket.rate, 0)})까지는 과세표준 기준
+        ${formatWon(bracket.limit - calc.taxableBase)} 남았습니다`
+            : `로, 최고 세율 구간입니다`
+        }.
+      </p>
+      <p style="${P_STYLE}">
+        이 구간의 한계세율은 ${formatPercent(bracket.rate, 0)}이지만 총수입 대비 실제 세부담(실효세율)은
+        ${formatPercent(effectiveOnIncome)}입니다. 격차가 큰 이유는 두 가지입니다. 누진 구조라 과세표준의
+        앞부분에는 낮은 구간 세율이 먼저 적용되고, 수입의 ${formatPercent(calc.expenses / calc.income)}가
+        경비로 인정돼 과세표준 자체가 수입보다 훨씬 작기 때문입니다.
+      </p>
+      <p style="${P_STYLE}">
+        같은 이유로 지금 수입에서 100만원을 더 벌면 세금은 약 ${formatWon(deltaPerMillion)}만 늘어납니다.
+        추가 수입 100만원 중 경비 ${formatPercent(calc.marginalExpenseRate)} 인정 후 남는
+        ${formatWon(marginalTaxablePerMillion)}에 한계세율 ${formatPercent(bracket.rate, 0)}과 지방소득세
+        10%가 붙는 구조입니다.
+      </p>`;
+}
+
+// 페이지별 추가 분석 렌즈 — 프리셋 인덱스 로테이션으로 인접 수입 페이지의 문단 반복을 막는다
+function buildComprehensiveTaxAngleBlock(manWon, calc) {
+  const index = COMPREHENSIVE_TAX_AMOUNTS.indexOf(manWon);
+  const angle = ((index % 3) + 3) % 3;
+
+  if (angle === 0) {
+    // 렌즈 A: 장부 기장 시뮬레이션 — 실제 경비를 500만원 더 인정받으면
+    const reducedBase = Math.max(0, calc.taxableBase - 5_000_000);
+    const reducedTotal = comprehensiveTotalTaxOf(reducedBase);
+    const saving = calc.totalTax - reducedTotal;
+    return `
+      <h3 style="${H3_STYLE}">장부를 쓰면 얼마나 달라질까 — 경비 500만원 추가 인정 시뮬레이션</h3>
+      <p style="${P_STYLE}">
+        실제 지출한 경비가 단순경비율 ${formatWon(calc.expenses)}보다 500만원 더 많다는 것을 장부로
+        입증하면, 과세표준이 ${formatWon(calc.taxableBase)}에서 ${formatWon(reducedBase)}으로 내려가
+        세금은 ${formatWon(reducedTotal)}이 됩니다. 지금 추정치보다 ${formatWon(saving)}이 줄어드는
+        셈입니다. 여기에 복식부기 기장 시 기장세액공제(20%)까지 더해질 수 있으므로, 장비·외주비 지출이
+        큰 해에는 장부 기장을 검토할 가치가 있습니다.
+      </p>`;
+  }
+
+  if (angle === 1) {
+    // 렌즈 B: 캐시플로 — 월 단위로 나눠 본 수입·원천징수·정산
+    const monthlyIncome = Math.round(calc.income / 12);
+    const monthlyWithholding = Math.round(calc.withholdingPrepaid / 12);
+    return `
+      <h3 style="${H3_STYLE}">월 단위 캐시플로로 보면</h3>
+      <p style="${P_STYLE}">
+        연 수입 ${formatManWonValue(manWon)}원은 월평균 ${formatWon(monthlyIncome)}이고, 지급처가 매달
+        3.3%씩 떼는 원천징수는 월평균 ${formatWon(monthlyWithholding)}입니다. 이렇게 1년간 선납한
+        ${formatWon(calc.withholdingPrepaid)}과 실제 세액 ${formatWon(calc.totalTax)}의 차이가 다음 해
+        5월 정산에서 ${calc.refund >= 0 ? `약 ${formatWon(calc.refund)} 환급` : `약 ${formatWon(-calc.refund)} 추가 납부`}으로
+        돌아옵니다. 환급이 예상되더라도 신고를 해야 받을 수 있다는 점이 핵심입니다.
+      </p>`;
+  }
+
+  // 렌즈 C: 사회보험 — 세금 밖에서 함께 늘어나는 부담
+  return `
+      <h3 style="${H3_STYLE}">세금 밖의 부담 — 프리랜서의 건보·연금</h3>
+      <p style="${P_STYLE}">
+        종합소득세가 전부는 아닙니다. 프리랜서는 직장가입자가 아니므로 지역가입자 건강보험료와
+        국민연금(지역가입)을 별도로 부담하며, 지역 건보료는 이 페이지의 소득금액
+        ${formatWon(calc.netIncome)} 같은 소득 자료에 재산·자동차까지 반영해 산정됩니다. 수입 증가는
+        이듬해 보험료에 반영되는 시차가 있어 소득이 늘어난 해에는 미리 대비해 둘 필요가 있습니다.
+        예상 보험료는
+        <a href="/finance/regional-health">지역가입자 건보료 계산기</a>로 미리 확인해 두세요.
+      </p>`;
+}
+
+// 두 번째 로테이션(홀짝) — 3렌즈와 주기가 달라 인접 페이지에서 두 블록이 동시에 겹치지 않는다
+function buildComprehensiveTaxParityBlock(manWon, calc) {
+  const index = COMPREHENSIVE_TAX_AMOUNTS.indexOf(manWon);
+  const bracket = findIncomeTaxBracket(calc.taxableBase);
+
+  if (index % 2 === 0) {
+    // 짝수: 소득공제 400만원 추가 인정 시뮬레이션 (연금보험료 등 전액 공제 항목)
+    const reducedBase = Math.max(0, calc.taxableBase - 4_000_000);
+    const reducedTotal = comprehensiveTotalTaxOf(reducedBase);
+    const reducedBracket = findIncomeTaxBracket(reducedBase);
+    return `
+      <h3 style="${H3_STYLE}">공제 400만원의 효과 — 이 수입 기준 시뮬레이션</h3>
+      <p style="${P_STYLE}">
+        국민연금 보험료나 노란우산공제 부금처럼 전액 소득공제되는 항목으로 400만원을 인정받으면,
+        과세표준이 ${formatWon(calc.taxableBase)}에서 ${formatWon(reducedBase)}으로 내려가 세금은
+        ${formatWon(calc.totalTax)}에서 ${formatWon(reducedTotal)}으로 ${formatWon(calc.totalTax - reducedTotal)}
+        줄어듭니다.${
+          reducedBracket !== bracket
+            ? ` 이 페이지 수입에서는 공제로 과세표준이 ${formatPercent(bracket.rate, 0)} 구간에서
+        ${formatPercent(reducedBracket.rate, 0)} 구간으로 내려가는 효과까지 있어 공제 1원의 가치가 특히 큽니다.`
+            : ` 한계세율 ${formatPercent(bracket.rate, 0)} 구간에 그대로 머물지만, 공제액에 지방소득세까지
+        곱해진 만큼 세금이 줄어드는 구조입니다.`
+        }
+      </p>`;
+  }
+
+  // 홀수: 무신고 가산세 리스크 — 이 페이지 세액 기준 금액 환산
+  return `
+      <h3 style="${H3_STYLE}">신고를 놓치면 — 이 세액 기준 가산세 환산</h3>
+      <p style="${P_STYLE}">
+        5월 신고를 하지 않으면 무신고가산세가 납부세액의 20%로 붙습니다. 이 페이지 추정 세액
+        ${formatWon(calc.totalTax)} 기준으로 약 ${formatWon(Math.floor(calc.determinedTax * 0.2))}(국세분
+        기준)이 더해지는 셈이고, 납부가 늦어지는 기간만큼 납부지연가산세도 별도로 쌓입니다. 환급
+        대상이라도 신고를 해야 돌려받으므로, 수입 규모와 무관하게 5월 신고 자체가 최우선입니다.
+      </p>`;
+}
+
+// 분리과세 임계 — 수치는 src/data/comprehensiveTaxRules.ts 검증 상수의 미러
+function buildComprehensiveTaxSeparateSection(calc) {
+  const bracket = findIncomeTaxBracket(calc.taxableBase);
+  const separateFavorable = bracket.rate > 0.14;
+  // 구체 예시: 미등록 임대수입 1,000만원을 얹었을 때 — 분리과세 기본공제(200만원)는
+  // "분리과세 임대소득 외 종합소득금액 2,000만원 이하"에서만 적용되어 페이지마다 결론 수치가 갈린다
+  const rentalRevenue = 10_000_000;
+  const rentalIncome = Math.floor(rentalRevenue * 0.5);
+  const rentalBasicDeduction = calc.netIncome <= 20_000_000 ? 2_000_000 : 0;
+  const rentalSeparateTax = Math.floor((rentalIncome - rentalBasicDeduction) * 0.14 * 1.1);
+  const rentalComprehensiveTax = Math.floor(rentalIncome * bracket.rate * 1.1);
+  return `
+      <h2 style="${H2_STYLE}">4. 분리과세 선택이 갈리는 임계점</h2>
+      <p style="${P_STYLE}">
+        종합소득에 합산하지 않고 따로 끝낼 수 있는 소득이 있습니다. 주택임대 수입은 연 2,000만원
+        이하일 때 14% 분리과세를 선택할 수 있고(등록임대 소득율 40%·기본공제 400만원, 미등록 50%·
+        기본공제 200만원 — 기본공제는 분리과세 임대소득 외 종합소득금액이 2,000만원 이하일 때),
+        기타소득은 필요경비 60% 인정 후 소득금액 300만원 이하면 분리과세로 종결할 수 있습니다.
+      </p>
+      <p style="${P_STYLE}">
+        ${
+          separateFavorable
+            ? `이 페이지 기준 과세표준의 한계세율 ${formatPercent(bracket.rate, 0)}는 분리과세율 14%보다
+        높습니다. 임대·기타소득을 종합에 합산하면 그 소득에 ${formatPercent(bracket.rate, 0)} 이상이
+        적용되므로, 분리과세 요건이 되는 소득은 분리 선택이 유리할 가능성이 큽니다.`
+            : `이 페이지 기준 과세표준의 한계세율 ${formatPercent(bracket.rate, 0)}는 분리과세율 14%보다
+        낮습니다. 이 수입 규모에서는 임대·기타소득을 종합과세로 합산하는 쪽이 오히려 세부담이 작을 수
+        있으므로, 분리과세가 항상 유리하다고 단정하지 말고 두 방식을 비교해 보세요.`
+        }
+        정확한 판단은 <a href="/finance/comprehensive-tax">종합소득세 계산기</a>의 분리과세 비교 기능으로
+        본인 수치를 넣어 확인할 수 있습니다.
+      </p>
+      <p style="${P_STYLE}">
+        구체 예시로, 이 수입에 미등록 주택임대 수입 1,000만원(소득율 50% → 소득금액 ${formatWon(rentalIncome)})이
+        더해진다고 해 보겠습니다. ${
+          rentalBasicDeduction > 0
+            ? `이 페이지의 사업소득금액 ${formatWon(calc.netIncome)}은 기본공제 요건(2,000만원 이하)을
+        충족해 분리과세 시 기본공제 200만원을 뺀 ${formatWon(rentalIncome - rentalBasicDeduction)}에
+        14%가 적용되어 약 ${formatWon(rentalSeparateTax)}(지방세 포함)로 끝납니다.`
+            : `이 페이지의 사업소득금액 ${formatWon(calc.netIncome)}은 2,000만원을 넘어 분리과세
+        기본공제(200만원)를 받을 수 없으므로, ${formatWon(rentalIncome)} 전액에 14%가 적용되어 약
+        ${formatWon(rentalSeparateTax)}(지방세 포함)입니다.`
+        }
+        같은 소득을 종합에 합산하면 한계세율 ${formatPercent(bracket.rate, 0)} 기준 약
+        ${formatWon(rentalComprehensiveTax)}이 붙어, 이 경우 ${
+          rentalSeparateTax < rentalComprehensiveTax
+            ? `분리과세가 약 ${formatWon(rentalComprehensiveTax - rentalSeparateTax)} 유리합니다`
+            : `종합과세가 약 ${formatWon(rentalSeparateTax - rentalComprehensiveTax)} 유리합니다`
+        }.
+      </p>`;
+}
+
+// 인접 수입 프리셋 대비 세부담 델타 — 페이지마다 이웃이 달라 표·문장이 함께 달라진다
+function buildComprehensiveTaxNeighborSection(manWon, calc) {
+  const index = COMPREHENSIVE_TAX_AMOUNTS.indexOf(manWon);
+  const neighbors = [
+    COMPREHENSIVE_TAX_AMOUNTS[index - 1] ?? null,
+    manWon,
+    COMPREHENSIVE_TAX_AMOUNTS[index + 1] ?? null,
+  ].filter((amount) => amount !== null);
+
+  const rows = neighbors
+    .map((amount) => {
+      const neighborCalc = amount === manWon ? calc : computeComprehensiveTax(amount * 10_000);
+      const isCurrent = amount === manWon;
+      const amountCell = isCurrent
+        ? `${formatManWonValue(amount)}원 (현재 페이지)`
+        : `<a href="/finance/comprehensive-tax/${amount}">${formatManWonValue(amount)}원</a>`;
+      const diff = neighborCalc.totalTax - calc.totalTax;
+      const diffCell = isCurrent
+        ? "기준"
+        : `${diff >= 0 ? "+" : "-"}${formatWon(Math.abs(diff))}`;
+      return `
+          <tr${isCurrent ? ' style="background:#ecfdf5;"' : ""}>
+            <td style="${TD_STYLE}">${amountCell}</td>
+            <td style="${TD_STYLE}">${formatWon(neighborCalc.totalTax)}</td>
+            <td style="${TD_STYLE}">${formatPercent(neighborCalc.totalTax / neighborCalc.income)}</td>
+            <td style="${TD_STYLE}">${diffCell}</td>
+          </tr>`;
+    })
+    .join("");
+
+  const next = COMPREHENSIVE_TAX_AMOUNTS[index + 1] ?? null;
+  const prev = COMPREHENSIVE_TAX_AMOUNTS[index - 1] ?? null;
+  const sentences = [];
+  if (next) {
+    const nextCalc = computeComprehensiveTax(next * 10_000);
+    const incomeDelta = (next - manWon) * 10_000;
+    const taxDelta = nextCalc.totalTax - calc.totalTax;
+    sentences.push(`
+        수입이 ${formatManWonValue(next - manWon)}원 늘어 ${formatManWonValue(next)}원이 되면 세금은
+        ${formatWon(taxDelta)} 늘어난 ${formatWon(nextCalc.totalTax)}이 됩니다. 늘어난 수입 대비 세부담
+        증가율은 ${formatPercent(taxDelta / incomeDelta)}입니다.`);
+  }
+  if (prev) {
+    const prevCalc = computeComprehensiveTax(prev * 10_000);
+    sentences.push(`
+        반대로 수입이 ${formatManWonValue(prev)}원이었다면 세금은 ${formatWon(prevCalc.totalTax)}으로
+        지금보다 ${formatWon(calc.totalTax - prevCalc.totalTax)} 적습니다.`);
+  }
+
+  return `
+      <h2 style="${H2_STYLE}">5. 인접 수입 구간과의 세부담 비교</h2>
+      <table style="${TABLE_STYLE}">
+        <thead>
+          <tr>
+            <th style="${TH_STYLE}">연 수입</th>
+            <th style="${TH_STYLE}">종합소득세 (지방세 포함)</th>
+            <th style="${TH_STYLE}">실효세율</th>
+            <th style="${TH_STYLE}">이 페이지 대비</th>
+          </tr>
+        </thead>
+        <tbody>${rows}
+        </tbody>
+      </table>
+      <p style="${P_STYLE}">${sentences.map((sentence) => sentence.trim()).join(" ")}</p>`;
+}
+
+function buildComprehensiveTaxContent(manWon) {
+  const income = manWon * 10_000;
+  const calc = computeComprehensiveTax(income);
+  const {
+    expenses,
+    netIncome,
+    personalDeduction,
+    taxableBase,
+    calculatedTax,
+    standardCredit,
+    determinedTax,
+    localTax,
+    totalTax,
+    withholdingPrepaid,
+    refund,
+  } = calc;
 
   const label = formatManWonValue(manWon);
 
@@ -959,8 +1563,13 @@ function buildComprehensiveTaxContent(manWon) {
           <tr><td style="${TD_STYLE}">10억원 초과</td><td style="${TD_STYLE}">45%</td><td style="${TD_STYLE}">6,594만원</td></tr>
         </tbody>
       </table>
+      ${buildComprehensiveTaxBracketSection(label, calc)}
+      ${buildComprehensiveTaxAngleBlock(manWon, calc)}
+      ${buildComprehensiveTaxParityBlock(manWon, calc)}
+      ${buildComprehensiveTaxSeparateSection(calc)}
+      ${buildComprehensiveTaxNeighborSection(manWon, calc)}
 
-      <h2 style="${H2_STYLE}">3. 3.3% 원천징수와 종합소득세 관계</h2>
+      <h2 style="${H2_STYLE}">6. 3.3% 원천징수와 종합소득세 관계</h2>
       <p style="${P_STYLE}">
         프리랜서가 수입을 받을 때 지급업체가 3.3%(소득세 3% + 지방소득세 0.3%)를 원천징수합니다.
         이는 종합소득세의 "선납"이며, 5월 종합소득세 신고 시 실제 납부세액과 정산합니다.
@@ -971,7 +1580,7 @@ function buildComprehensiveTaxContent(manWon) {
         <li style="${LI_STYLE}">차이: ${refund >= 0 ? `환급 ${formatWon(refund)}` : `추납 ${formatWon(-refund)}`}</li>
       </ul>
 
-      <h2 style="${H2_STYLE}">4. 자주 묻는 질문 (FAQ)</h2>
+      <h2 style="${H2_STYLE}">7. 자주 묻는 질문 (FAQ)</h2>
 
       <h3 style="${H3_STYLE}">Q1. 단순경비율 64.1%는 어떻게 정해지나요?</h3>
       <p style="${P_STYLE}">
@@ -1005,7 +1614,20 @@ function buildComprehensiveTaxContent(manWon) {
         5월 신고를 반드시 해야 합니다.
       </p>
 
-      <h2 style="${H2_STYLE}">5. 관련 계산기</h2>
+      <h3 style="${H3_STYLE}">Q6. 수입 ${label}원은 3.3% 떼였으면 끝난 것 아닌가요?</h3>
+      <p style="${P_STYLE}">
+        아닙니다. 3.3%는 선납일 뿐이고 확정은 5월 신고에서 이뤄집니다. 수입 ${label}원 기준 선납액은
+        ${formatWon(withholdingPrepaid)}, 이 페이지 추정 세액은 ${formatWon(totalTax)}이므로
+        ${
+          refund >= 0
+            ? `신고를 해야 차액 약 ${formatWon(refund)}을 환급받습니다. 신고하지 않으면 돌려받을 돈을
+        그대로 두는 셈입니다.`
+            : `약 ${formatWon(-refund)}을 추가로 납부해야 합니다. 신고를 미루면 무신고가산세까지 붙어
+        부담이 커집니다.`
+        }
+      </p>
+
+      <h2 style="${H2_STYLE}">8. 관련 계산기</h2>
       <ul style="${UL_STYLE}">
         <li style="${LI_STYLE}"><a href="/finance/freelance-rate">프리랜서 세후 단가 역산</a> - 원천세 제외 실수령</li>
         <li style="${LI_STYLE}"><a href="/finance/withholding">원천세 역산 계산기</a></li>
@@ -1021,6 +1643,195 @@ function buildComprehensiveTaxContent(manWon) {
 // =========================
 // 이직 연봉 비교 (/compare/:a-vs-:b)
 // =========================
+
+// 인상분이 항목별로 어디로 가는지 분해 — 쌍마다 금액·비중이 모두 달라진다
+function buildCompareBreakdownSection(a, b) {
+  const monthlyGrossDiff = b.monthlyGross - a.monthlyGross;
+  const annualGrossDiff = monthlyGrossDiff * 12;
+  const rows = [
+    ["국민연금 (4.75%)", (b.nationalPension - a.nationalPension) * 12],
+    ["건강보험+장기요양", (b.healthInsurance + b.longTermCare - a.healthInsurance - a.longTermCare) * 12],
+    ["고용보험 (0.9%)", (b.employmentInsurance - a.employmentInsurance) * 12],
+    ["소득세+지방소득세", (b.totalTax - a.totalTax) * 12],
+    ["실수령 증가 (통장에 남는 몫)", (b.monthlyNet - a.monthlyNet) * 12],
+  ];
+
+  const rowsHtml = rows
+    .map(([label, amount], index) => {
+      const isNet = index === rows.length - 1;
+      const share = annualGrossDiff > 0 ? formatPercent(amount / annualGrossDiff) : "-";
+      return `
+          <tr${isNet ? ' style="background:#ecfdf5;"' : ""}>
+            <td style="${TD_STYLE}">${isNet ? `<strong>${label}</strong>` : label}</td>
+            <td style="${TD_STYLE}">${isNet ? "+" : "-"}${formatWon(amount)}</td>
+            <td style="${TD_STYLE}">${share}</td>
+          </tr>`;
+    })
+    .join("");
+
+  return `
+      <h2 style="${H2_STYLE}">2. 인상분 ${formatWon(annualGrossDiff)}은 어디로 가나</h2>
+      <p style="${P_STYLE}">
+        월 세전 증가분 ${formatWon(monthlyGrossDiff)}(연 ${formatWon(annualGrossDiff)})을 공제 항목별로
+        분해한 표입니다. 어느 항목이 인상분을 얼마나 가져가는지 비중으로 확인할 수 있습니다.
+      </p>
+      <table style="${TABLE_STYLE}">
+        <thead>
+          <tr>
+            <th style="${TH_STYLE}">항목</th>
+            <th style="${TH_STYLE}">연간 증가액</th>
+            <th style="${TH_STYLE}">인상분 대비 비중</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}
+        </tbody>
+      </table>`;
+}
+
+// 국민연금 상한·소득세 구간 통과 여부 — 이 쌍이 제도 경계선을 건너는지 판정
+function buildCompareThresholdSection(bManWon, a, b) {
+  const paragraphs = [];
+
+  const aCapped = a.taxableMonthly >= PENSION_CAP_TAXABLE;
+  const bCapped = b.taxableMonthly >= PENSION_CAP_TAXABLE;
+  if (!aCapped && !bCapped) {
+    paragraphs.push(`
+      두 연봉 모두 보수월액(A ${formatWon(a.taxableMonthly)}, B ${formatWon(b.taxableMonthly)})이 국민연금
+      기준소득월액 상한 ${formatWon(PENSION_CAP_TAXABLE)} 아래입니다. 이 구간에서는 국민연금도 인상분에
+      4.75%로 비례해 월 ${formatWon(b.nationalPension - a.nationalPension)} 늘어나며, 상한까지는 보수월액
+      기준 ${formatWon(PENSION_CAP_TAXABLE - b.taxableMonthly)} 여유가 있습니다.`);
+  } else if (!aCapped && bCapped) {
+    paragraphs.push(`
+      이 쌍은 국민연금 상한선을 건넙니다. 연봉 ${formatManWonValue(bManWon)}의 보수월액
+      ${formatWon(b.taxableMonthly)}은 기준소득월액 상한 ${formatWon(PENSION_CAP_TAXABLE)}을 넘어 국민연금이
+      ${formatWon(PENSION_CAP_DEDUCTION)}에 고정됩니다. 상한 초과분에는 연금 보험료가 붙지 않으므로,
+      이후 인상부터는 건강보험·소득세만 늘어나 체감 유지율이 소폭 개선되는 효과가 있습니다.`);
+  } else {
+    paragraphs.push(`
+      두 연봉 모두 보수월액이 국민연금 상한 ${formatWon(PENSION_CAP_TAXABLE)}을 넘어, 국민연금은 양쪽 다
+      ${formatWon(PENSION_CAP_DEDUCTION)}으로 동일합니다. 인상분에 연금 부담 증가가 없는 구간입니다.`);
+  }
+
+  const aBracket = findIncomeTaxBracket(a.taxableBase);
+  const bBracket = findIncomeTaxBracket(b.taxableBase);
+  if (aBracket === bBracket) {
+    const nextBracket = INCOME_TAX_BRACKETS[INCOME_TAX_BRACKETS.indexOf(bBracket) + 1] ?? null;
+    paragraphs.push(`
+      소득세는 두 연봉 모두 과세표준 ${incomeTaxBracketLabel(bBracket)} 구간(세율
+      ${formatPercent(bBracket.rate, 0)})에 머뭅니다(A ${formatWon(a.taxableBase)} → B
+      ${formatWon(b.taxableBase)}).${
+        nextBracket
+          ? ` 다음 구간(${formatPercent(nextBracket.rate, 0)})까지는 과세표준 기준
+      ${formatWon(bBracket.limit - b.taxableBase)} 남았습니다.`
+          : ""
+      }`);
+  } else {
+    paragraphs.push(`
+      이 쌍은 소득세 구간도 건너갑니다. 과세표준이 A ${formatWon(a.taxableBase)}
+      (${formatPercent(aBracket.rate, 0)} 구간)에서 B ${formatWon(b.taxableBase)}
+      (${formatPercent(bBracket.rate, 0)} 구간)로 올라가, 인상분 일부에 더 높은 세율이 적용됩니다.
+      유지율이 다른 쌍보다 낮게 나오는 주된 이유입니다.`);
+  }
+
+  paragraphs.push(`
+      건강보험은 구간 없이 보수월액에 3.595% 정률이라, 인상분에 대해 월
+      ${formatWon(b.healthInsurance - a.healthInsurance)}이 그대로 비례해 늘어납니다(장기요양보험은 그
+      건보료의 13.14%가 추가).`);
+
+  return `
+      <h2 style="${H2_STYLE}">3. 이 쌍이 건너는 경계선 — 연금 상한·세율 구간</h2>
+      ${paragraphs.map((body) => `<p style="${P_STYLE}">${body.trim()}</p>`).join("\n      ")}`;
+}
+
+// 협상 관점 — 세전/세후 인상률 괴리와 목표 실수령 역산
+function buildCompareNegotiationSection(bManWon, a, b) {
+  const grossDiff = b.grossAnnual - a.grossAnnual;
+  const netAnnualDiff = b.annualNet - a.annualNet;
+  const grossRaiseRate = grossDiff / a.grossAnnual;
+  const netRaiseRate = netAnnualDiff / a.annualNet;
+  const retention = grossDiff > 0 ? netAnnualDiff / grossDiff : 0;
+  const grossNeededPerNet100k = retention > 0 ? Math.round(1_200_000 / retention) : 0;
+
+  return `
+      <h2 style="${H2_STYLE}">4. 협상 테이블에서 쓰는 법</h2>
+      <p style="${P_STYLE}">
+        제안서의 ${formatManWonValue(bManWon)}은 세전 기준 ${formatPercent(grossRaiseRate)} 인상이지만,
+        통장 기준으로는 ${formatPercent(netRaiseRate)} 인상입니다. 협상에서는 이 괴리를 근거로 쓸 수
+        있습니다. 예컨대 월 실수령을 10만원 더 늘리려면 이 구간 유지율(${formatPercent(retention)})
+        기준으로 세전 연봉을 약 ${formatWon(grossNeededPerNet100k)} 더 올려 받아야 합니다.
+        기본급 인상 여지가 막혔다면 비과세 항목(식대·자가운전보조금)이나 퇴직연금 매칭처럼 공제가
+        붙지 않는 보상을 대안으로 요구하는 편이 유지율 면에서 유리합니다.
+      </p>`;
+}
+
+// 페이지별 추가 분석 렌즈 — 쌍 인덱스 로테이션으로 인접 비교 페이지의 문단 반복을 막는다
+function buildCompareAngleBlock(aManWon, bManWon, a, b) {
+  const index = COMPARE_PAIRS.findIndex(([pa, pb]) => pa === aManWon && pb === bManWon);
+  const angle = ((index % 3) + 3) % 3;
+  const grossDiff = b.grossAnnual - a.grossAnnual;
+
+  if (angle === 0) {
+    // 렌즈 A: 부양가족 2인 기준 재계산 — 가구 조건이 유지율을 얼마나 바꾸나
+    const a2 = calculateSalaryBreakdown({
+      grossAnnual: a.grossAnnual,
+      nonTaxableMonthly: 200_000,
+      dependents: 2,
+      children: 0,
+      retirementIncluded: false,
+    });
+    const b2 = calculateSalaryBreakdown({
+      grossAnnual: b.grossAnnual,
+      nonTaxableMonthly: 200_000,
+      dependents: 2,
+      children: 0,
+      retirementIncluded: false,
+    });
+    const netDiff2 = b2.annualNet - a2.annualNet;
+    return `
+      <h3 style="${H3_STYLE}">부양가족 2인이라면 — 같은 이직, 다른 유지율</h3>
+      <p style="${P_STYLE}">
+        위 표는 부양가족 1인(본인) 기준입니다. 배우자를 포함해 부양가족 2인으로 다시 계산하면 월 실수령은
+        A ${formatWon(a2.monthlyNet)} → B ${formatWon(b2.monthlyNet)}, 연간 실수령 증가는
+        ${formatWon(netDiff2)}(유지율 ${formatPercent(netDiff2 / grossDiff)})입니다. 인적공제가 늘어
+        양쪽 세금이 함께 줄기 때문에 절대 실수령은 커지고, 유지율은 소폭 달라집니다. 가구 조건을 바꾼
+        비교는 <a href="/finance/compare">비교 계산기</a>에서 직접 입력해 확인하세요.
+      </p>`;
+  }
+
+  if (angle === 1) {
+    // 렌즈 B: 하루·한 달 단위 환산 — 인상분의 체감 크기
+    const netAnnualDiff = b.annualNet - a.annualNet;
+    const perDay = Math.floor(netAnnualDiff / 365);
+    const monthlyGrossDiff = b.monthlyGross - a.monthlyGross;
+    return `
+      <h3 style="${H3_STYLE}">체감 크기로 환산하면 — 하루 ${formatWon(perDay)}</h3>
+      <p style="${P_STYLE}">
+        연간 실수령 증가 ${formatWon(netAnnualDiff)}을 일상 단위로 나누면 하루 ${formatWon(perDay)},
+        한 달 ${formatWon(b.monthlyNet - a.monthlyNet)}입니다. 세전으로는 월 ${formatWon(monthlyGrossDiff)}이
+        오르지만 통장에서 체감하는 변화는 이 숫자입니다. 이직에 드는 비용(공백기, 통근 변화, 복지 차이)을
+        하루 단위 증가분과 견줘 보면 제안의 실질 가치를 판단하기 쉬워집니다.
+      </p>`;
+  }
+
+  // 렌즈 C: 역제안 시뮬레이션 — 500만원을 더 받아내면
+  const bPlus = calculateSalaryBreakdown({
+    grossAnnual: b.grossAnnual + 5_000_000,
+    nonTaxableMonthly: 200_000,
+    dependents: 1,
+    children: 0,
+    retirementIncluded: false,
+  });
+  return `
+      <h3 style="${H3_STYLE}">역제안 시뮬레이션 — ${formatManWonValue(bManWon + 500)}을 부르면</h3>
+      <p style="${P_STYLE}">
+        제안 ${formatManWonValue(bManWon)}에서 500만원을 더 받아 ${formatManWonValue(bManWon + 500)}이
+        되면 월 실수령은 ${formatWon(b.monthlyNet)}에서 ${formatWon(bPlus.monthlyNet)}으로
+        ${formatWon(bPlus.monthlyNet - b.monthlyNet)} 더 늘어납니다. 추가 500만원의 유지율은
+        ${formatPercent((bPlus.annualNet - b.annualNet) / 5_000_000)}로, 협상 여지가 있다면 세전 숫자보다
+        이 실수령 증가분을 기준으로 판단하는 것이 정확합니다.
+      </p>`;
+}
+
 function buildCompareContent(aManWon, bManWon) {
   const aGross = aManWon * 10_000;
   const bGross = bManWon * 10_000;
@@ -1125,8 +1936,12 @@ function buildCompareContent(aManWon, bManWon) {
         세전 인상 ${formatWon(grossDiff)} 중 실제 실수령 증가는 ${formatWon(netAnnualDiff)} → 유지율 <strong>${retentionRate.toFixed(1)}%</strong>.
         연봉 구간이 높아질수록 누진세율로 인해 유지율이 점점 떨어집니다.
       </div>
+      ${buildCompareBreakdownSection(a, b)}
+      ${buildCompareThresholdSection(bManWon, a, b)}
+      ${buildCompareNegotiationSection(bManWon, a, b)}
+      ${buildCompareAngleBlock(aManWon, bManWon, a, b)}
 
-      <h2 style="${H2_STYLE}">2. 이직 시 체크리스트</h2>
+      <h2 style="${H2_STYLE}">5. 이직 시 체크리스트</h2>
       <p style="${P_STYLE}">
         실수령 기준 비교 외에도 이직 전에 반드시 확인해야 할 항목이 있습니다.
       </p>
@@ -1139,7 +1954,7 @@ function buildCompareContent(aManWon, bManWon) {
         <li style="${LI_STYLE}"><strong>퇴직금 지급 방식</strong>: IRP 강제 가입, DC형, DB형</li>
       </ul>
 
-      <h2 style="${H2_STYLE}">3. 자주 묻는 질문 (FAQ)</h2>
+      <h2 style="${H2_STYLE}">6. 자주 묻는 질문 (FAQ)</h2>
 
       <h3 style="${H3_STYLE}">Q1. 연봉이 ${formatWon(grossDiff)} 오르는데 왜 실수령은 ${formatWon(netAnnualDiff)}만 오르나요?</h3>
       <p style="${P_STYLE}">
@@ -1160,7 +1975,7 @@ function buildCompareContent(aManWon, bManWon) {
         ${formatManWonValue(bManWon)}을 원한다면 시작 제안을 ${formatManWonValue(Math.round(bManWon * 1.1))}으로 하는 것이 효과적입니다.
       </p>
 
-      <h2 style="${H2_STYLE}">4. 관련 계산기</h2>
+      <h2 style="${H2_STYLE}">7. 관련 계산기</h2>
       <ul style="${UL_STYLE}">
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/raise">연봉 인상률 계산기</a></li>
