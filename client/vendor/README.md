@@ -23,7 +23,7 @@ node client/scripts/verify-vendor-readme.mjs   # 파일명·이 문서·client/p
 ## Update procedure
 
 1. 공급 저장소에서 **깨끗한 체크아웃**으로 패킹한다: `npm pack -w @shakilabs/ui --pack-destination <dir>`.
-   더티 트리에서 패킹하면 tarball 내용이 기록된 소스 커밋과 어긋난다(0.3.11에서 실제로 발생).
+   더티 트리에서 패킹하면 tarball 내용이 기록된 소스 커밋과 어긋난다(과거 릴리스에서 실제로 발생).
 2. 새 tgz를 `client/vendor/`에 복사하고 **이전 tgz는 삭제한다** — 활성 산출물은 항상 1개다.
 3. `client/package.json`의 `file:vendor/...` 참조를 새 파일명으로 바꾸고 `npm install`로 lockfile integrity를 갱신한다.
 4. 이 문서를 공급 저장소에서 다시 생성한다(손으로 고치지 않는다):
