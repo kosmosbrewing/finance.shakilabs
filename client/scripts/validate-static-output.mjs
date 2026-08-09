@@ -14,34 +14,37 @@ import {
   PARAM_ROUTES,
   canonicalPathFor,
 } from "./seo-routes.mjs";
-import { HUB_ROUTES } from "./hub-content.mjs";
-
-// Body-text floors. Measured on the page's own content: the shared header and footer are stripped
-// first, because counting the chrome makes every page look ~700 characters richer than it is and
-// hides exactly the thin pages this gate exists to catch.
+// Body-text floors.
 //
-// MIN: no prerendered route may ship a stub. /freelancer/:amount used to render a heading and one
-// link (67 characters) while still returning 200.
-// HUB_MIN: the base calculators absorb their variants' canonical, so they have to be the
-// substantial page of the family, not a shell the variants point at.
+// The measurement basis matters more than the threshold. This counts the text inside
+// article|section[data-seo-prerender] with whitespace removed — the page's own content, excluding
+// the shared header/footer and excluding the spaces between words.
+//
+// An earlier version of this gate measured everything after <div id="app"></div> and kept the
+// whitespace. That reads ~28% higher: /withholding scored 1,534 there and 1,202 here, so pages
+// passed a 1,500 gate while an external audit measuring the article text called them thin. The
+// stricter basis is the one that matches how the content is actually judged, so the gate uses it.
+//
+// MIN: no prerendered route may ship a stub. /freelancer/:amount once rendered a heading and one
+// link while still returning 200.
+// SITEMAP_MIN: anything submitted for indexing has to stand on its own. Every route in the
+// sitemap is a page we are actively asking a crawler to rank.
 const MIN_BODY_CHARS = 250;
-const HUB_MIN_BODY_CHARS = 1500;
-
-// /salary and /insurance are hubs too — they predate hub-content.mjs and still render through
-// LANDING_CONTENT, so they are not in HUB_ROUTES and have to be named here.
-const HUB_BODY_ROUTES = [...HUB_ROUTES, "/salary", "/insurance"];
+const SITEMAP_MIN_BODY_CHARS = 1500;
 
 function bodyTextLength(html) {
-  const appRoot = html.indexOf('<div id="app"></div>');
-  let body = appRoot >= 0 ? html.slice(appRoot) : html;
-  body = body.replace(/<header data-seo-prerender[\s\S]*?<\/header>/i, "");
-  body = body.replace(/<footer data-seo-prerender[\s\S]*?<\/footer>/i, "");
-  body = body.replace(/<script[\s\S]*?<\/script>/gi, "");
-  return body
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&[a-z]+;/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim().length;
+  const blocks = [
+    ...html.matchAll(/<(article|section)[^>]*\bdata-seo-prerender[^>]*>([\s\S]*?)<\/\1>/gi),
+  ];
+  return blocks
+    .map(([, , inner]) =>
+      inner
+        .replace(/<script[\s\S]*?<\/script>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&[a-z]+;/gi, " "),
+    )
+    .join(" ")
+    .replace(/\s+/g, "").length;
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -77,6 +80,7 @@ function validateVercelConfig() {
 
 function validateRoutes() {
   const routeSet = new Set(SEO_ROUTES);
+  const sitemapRouteSet = new Set(SITEMAP_ROUTES);
   const hashes = new Map();
   const titles = new Map();
 
@@ -120,7 +124,7 @@ function validateRoutes() {
     }
 
     const bodyChars = bodyTextLength(html);
-    const floor = HUB_BODY_ROUTES.includes(route) ? HUB_MIN_BODY_CHARS : MIN_BODY_CHARS;
+    const floor = sitemapRouteSet.has(route) ? SITEMAP_MIN_BODY_CHARS : MIN_BODY_CHARS;
     assert(
       bodyChars >= floor,
       `Thin body for ${route}: ${bodyChars} chars, need ${floor}`,
