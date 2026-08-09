@@ -1,7 +1,7 @@
 // 빌드 후 라우트별 SEO HTML 생성
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
-import { SEO_ROUTES } from "./seo-routes.mjs";
+import { SEO_ROUTES, canonicalPathFor } from "./seo-routes.mjs";
 import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
 import { buildRichContent } from "./prerender-content.mjs";
 import {
@@ -1629,6 +1629,32 @@ function buildPrerenderSection(route, meta) {
     </section>`;
 }
 
+// Doorway-variant consolidation. buildMeta() computes a self-canonical per branch (~25 of them),
+// so instead of touching every branch this rewrites the result in one place: canonical, og:url
+// and both hreflang tags all read meta.canonical downstream, so overriding it here moves them
+// together and they cannot drift apart.
+//
+// jsonLd `url` is retargeted too. A WebApplication node claiming url=/salary/5000 while the
+// canonical says /salary hands crawlers two different identities for one page; the schema must
+// agree with the tag it ships next to. Breadcrumbs are left alone on purpose — they describe how
+// the visitor got here, not which URL is authoritative.
+function consolidateCanonical(route, meta) {
+  const canonicalRoute = canonicalPathFor(route);
+  if (canonicalRoute === route) return meta;
+
+  const canonical = canonicalRoute === "/" ? SITE_URL : `${SITE_URL}${canonicalRoute}`;
+  const retarget = (node) =>
+    node && typeof node === "object" && node.url === meta.canonical
+      ? { ...node, url: canonical }
+      : node;
+
+  return {
+    ...meta,
+    canonical,
+    jsonLd: Array.isArray(meta.jsonLd) ? meta.jsonLd.map(retarget) : retarget(meta.jsonLd),
+  };
+}
+
 function replaceTag(html, pattern, next) {
   if (pattern.test(html)) {
     return html.replace(pattern, next);
@@ -1716,7 +1742,7 @@ for (const route of SEO_ROUTES) {
     mkdirSync(dir, { recursive: true });
   }
 
-  const meta = buildMeta(route);
+  const meta = consolidateCanonical(route, buildMeta(route));
   // 셸의 <noscript>는 JS 없는 크롤러용 fallback이다. 프리렌더된 라우트는 이미 본문이 정적으로
   // 들어 있으므로 남겨두면 h1이 2개가 되고 헤딩 아웃라인이 오염된다(라이브 157페이지 전부 그랬다).
   const html = applyMeta(template, route, meta).replace(

@@ -4,6 +4,7 @@ import {
   filterDuplicateJsonLd,
   prerenderedJsonLdTypesForCurrentPath,
 } from "@/utils/prerenderedJsonLd";
+import { consolidateCanonicalUrl } from "@/utils/canonicalConsolidation";
 
 type SEOOptions = {
   title: MaybeRefOrGetter<string>;
@@ -26,7 +27,10 @@ export function normalizeCanonicalUrl(href: string): string {
     if (url.pathname.length > 1) {
       url.pathname = url.pathname.replace(/\/+$/, "") || "/";
     }
-    return url.toString();
+    // Doorway variants (/salary/5000 …) fold into their base calculator, matching the canonical
+    // the prerender pass already wrote. Without this, hydration would re-point canonical at the
+    // variant and undo the consolidation for any crawler that executes JS.
+    return consolidateCanonicalUrl(url.toString());
   } catch {
     return href.split("#")[0].split("?")[0];
   }

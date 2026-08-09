@@ -8,7 +8,41 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { SEO_ROUTES } from "./seo-routes.mjs";
+import {
+  SEO_ROUTES,
+  SITEMAP_ROUTES,
+  PARAM_ROUTES,
+  canonicalPathFor,
+} from "./seo-routes.mjs";
+import { HUB_ROUTES } from "./hub-content.mjs";
+
+// Body-text floors. Measured on the page's own content: the shared header and footer are stripped
+// first, because counting the chrome makes every page look ~700 characters richer than it is and
+// hides exactly the thin pages this gate exists to catch.
+//
+// MIN: no prerendered route may ship a stub. /freelancer/:amount used to render a heading and one
+// link (67 characters) while still returning 200.
+// HUB_MIN: the base calculators absorb their variants' canonical, so they have to be the
+// substantial page of the family, not a shell the variants point at.
+const MIN_BODY_CHARS = 250;
+const HUB_MIN_BODY_CHARS = 1500;
+
+// /salary and /insurance are hubs too — they predate hub-content.mjs and still render through
+// LANDING_CONTENT, so they are not in HUB_ROUTES and have to be named here.
+const HUB_BODY_ROUTES = [...HUB_ROUTES, "/salary", "/insurance"];
+
+function bodyTextLength(html) {
+  const appRoot = html.indexOf('<div id="app"></div>');
+  let body = appRoot >= 0 ? html.slice(appRoot) : html;
+  body = body.replace(/<header data-seo-prerender[\s\S]*?<\/header>/i, "");
+  body = body.replace(/<footer data-seo-prerender[\s\S]*?<\/footer>/i, "");
+  body = body.replace(/<script[\s\S]*?<\/script>/gi, "");
+  return body
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim().length;
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, "..");
@@ -54,7 +88,14 @@ function validateRoutes() {
     }
     const html = readFileSync(outputPath, "utf8");
 
-    assert(canonicalFrom(html) === urlFor(route), `Invalid canonical for ${route}`);
+    // Consolidated amount variants must canonicalize to their base calculator; every other
+    // route stays self-canonical. This assertion is the reason seo-routes.mjs and this gate
+    // have to move in the same commit — a one-sided change fails the build immediately.
+    const expectedCanonical = urlFor(canonicalPathFor(route));
+    assert(
+      canonicalFrom(html) === expectedCanonical,
+      `Invalid canonical for ${route}: expected ${expectedCanonical}, got ${canonicalFrom(html)}`,
+    );
 
     const title = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
     assert(title.length > 0, `Missing title for ${route}`);
@@ -77,6 +118,13 @@ function validateRoutes() {
         `Unprefixed internal link on ${route}: href="${href}" must be "${canonicalBase.replace("https://shakilabs.com", "")}${href}"`,
       );
     }
+
+    const bodyChars = bodyTextLength(html);
+    const floor = HUB_BODY_ROUTES.includes(route) ? HUB_MIN_BODY_CHARS : MIN_BODY_CHARS;
+    assert(
+      bodyChars >= floor,
+      `Thin body for ${route}: ${bodyChars} chars, need ${floor}`,
+    );
 
     const hash = createHash("sha256").update(html).digest("hex");
     assert(!hashes.has(hash), `Duplicate raw HTML: ${route} equals ${hashes.get(hash)}`);
@@ -101,8 +149,17 @@ function validateSitemap() {
   const listed = new Set(
     [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url.replace(/\/$/, "")),
   );
-  for (const route of SEO_ROUTES) {
-    assert(listed.has(urlFor(route)), `Sitemap is missing prerendered route ${route}`);
+  for (const route of SITEMAP_ROUTES) {
+    assert(listed.has(urlFor(route)), `Sitemap is missing self-canonical route ${route}`);
+  }
+  // The consolidation only pays off if the variants actually leave the sitemap. Without this
+  // assertion, generate-sitemap.mjs could quietly fall back to SEO_ROUTES and re-submit all 120
+  // canonicalized URLs while every other check still passed.
+  for (const route of PARAM_ROUTES) {
+    assert(
+      !listed.has(urlFor(route)),
+      `Sitemap lists ${route}, which canonicalizes to ${canonicalPathFor(route)}`,
+    );
   }
   // Each loc must appear exactly once — adding "/" to SEO_ROUTES is the kind of change that
   // can silently list the home twice (once bare, once with a trailing slash).
@@ -147,4 +204,8 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`Validated ${SEO_ROUTES.length} finance routes, sitemap, and 404 output.`);
+console.log(
+  `Validated ${SEO_ROUTES.length} finance routes ` +
+    `(${SITEMAP_ROUTES.length} sitemap + ${PARAM_ROUTES.length} canonicalized variants), ` +
+    "sitemap, and 404 output.",
+);
