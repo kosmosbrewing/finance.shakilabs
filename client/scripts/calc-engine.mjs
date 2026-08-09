@@ -4,12 +4,13 @@
 // --- 2026년 요율 (src/data/taxRates2026.ts 미러) ---
 export const RATES_2026 = {
   nationalPension: {
+    total: 0.095,
     employee: 0.0475,
     employer: 0.0475,
     minMonthlyIncome: 410_000,
     maxMonthlyIncome: 6_590_000,
   },
-  healthInsurance: { employee: 0.03595, employer: 0.03595 },
+  healthInsurance: { total: 0.0719, employee: 0.03595, employer: 0.03595 },
   longTermCare: { rateOfHealth: 0.1314 },
   employmentInsurance: { employee: 0.009, employer: 0.009 },
 };
@@ -434,6 +435,187 @@ export function eitcAmountFor(income, bracket) {
   return Math.floor(
     (bracket.maxAmount * (bracket.phaseOutEnd - income)) / (bracket.phaseOutEnd - bracket.plateauEnd),
   );
+}
+
+// --- 부가 계산기 산식 (src/utils/benefitCalculators.ts · scenarioCalculator.ts 미러) ---
+// 허브 본문이 인용하는 수치의 출처. 뷰가 쓰는 함수를 그대로 옮겨왔으므로 허브가 말하는 금액과
+// 사용자가 계산기를 열어 보는 금액이 같다. 각 허브는 해당 뷰의 기본 입력값을 시나리오로 쓴다.
+
+export function getAnnualLeaveDays(monthsWorked) {
+  const safeMonths = clamp(Math.floor(monthsWorked), 1, 600);
+  if (safeMonths < 12) return Math.min(11, safeMonths);
+  const serviceYears = Math.floor(safeMonths / 12);
+  return Math.min(25, 15 + Math.floor(Math.max(0, serviceYears - 1) / 2));
+}
+
+export function calcAnnualLeavePay({ monthlySalary, fixedAllowance, monthsWorked, unusedLeaveDays }) {
+  const ordinaryMonthly = Math.max(0, monthlySalary + fixedAllowance);
+  const dailyOrdinaryWage = Math.floor((ordinaryMonthly / 209) * 8);
+  const accruedLeaveDays = getAnnualLeaveDays(monthsWorked);
+  const payableDays = Math.min(unusedLeaveDays, accruedLeaveDays);
+  return {
+    ordinaryMonthly,
+    dailyOrdinaryWage,
+    accruedLeaveDays,
+    payableDays,
+    totalAllowance: dailyOrdinaryWage * payableDays,
+  };
+}
+
+// 조기수령 감액·연기가산 계수 (국민연금법 시행령)
+export const PENSION_AGE_FACTORS = {
+  60: 0.7, 61: 0.76, 62: 0.82, 63: 0.88, 64: 0.94, 65: 1,
+  66: 1.072, 67: 1.144, 68: 1.216, 69: 1.288, 70: 1.36,
+};
+
+export function calcPensionEstimate({ averageMonthlyIncome, insuredYears, claimAge }) {
+  const recognizedYears = clamp(insuredYears, 1, 40);
+  const ageFactor = PENSION_AGE_FACTORS[claimAge] ?? 1;
+  const baseMonthlyPension = (360_000 + averageMonthlyIncome * 0.22) * (recognizedYears / 40);
+  const estimatedMonthlyPension = Math.floor(baseMonthlyPension * ageFactor);
+  return {
+    ageFactor,
+    recognizedYears,
+    eligible: insuredYears >= 10,
+    estimatedMonthlyPension,
+    estimatedAnnualPension: estimatedMonthlyPension * 12,
+    employeeContribution: Math.floor(averageMonthlyIncome * RATES_2026.nationalPension.total),
+  };
+}
+
+// 월세 세액공제 — 총급여 5,500만 이하 17%, 8,000만 이하 15%, 초과 대상 제외. 한도 연 1,000만원
+export function calcMonthlyRentDeduction({ annualSalary, monthlyRent, paidMonths }) {
+  const deductionRate = annualSalary <= 55_000_000 ? 0.17 : annualSalary <= 80_000_000 ? 0.15 : 0;
+  const yearlyRent = monthlyRent * paidMonths;
+  const recognizedRent = Math.min(10_000_000, yearlyRent);
+  const taxCredit = Math.floor(recognizedRent * deductionRate);
+  return {
+    deductionRate,
+    yearlyRent,
+    recognizedRent,
+    taxCredit,
+    monthlyRefundEffect: Math.floor(taxCredit / 12),
+    eligible: deductionRate > 0,
+  };
+}
+
+// 연금계좌 세액공제 — 연금저축 600만 한도, IRP 합산 900만 한도
+export function calcIrpTaxCredit({ annualSalary, pensionSavings, irpContribution }) {
+  const taxCreditRate = annualSalary <= 55_000_000 ? 0.15 : 0.12;
+  const recognizedPensionSavings = Math.min(6_000_000, pensionSavings);
+  const recognizedIrp = Math.min(Math.max(0, 9_000_000 - recognizedPensionSavings), irpContribution);
+  const recognizedContribution = recognizedPensionSavings + recognizedIrp;
+  return {
+    taxCreditRate,
+    recognizedPensionSavings,
+    recognizedIrp,
+    recognizedContribution,
+    overflowAmount:
+      Math.max(0, pensionSavings - recognizedPensionSavings) +
+      Math.max(0, irpContribution - recognizedIrp),
+    taxCredit: Math.floor(recognizedContribution * taxCreditRate),
+  };
+}
+
+export function calcEmployerInsuranceBurden({ monthlySalary, employmentRatePercent, accidentRatePercent }) {
+  const pensionBase = clamp(
+    monthlySalary,
+    RATES_2026.nationalPension.minMonthlyIncome,
+    RATES_2026.nationalPension.maxMonthlyIncome
+  );
+  const nationalPension = Math.floor(pensionBase * RATES_2026.nationalPension.employer);
+  const healthInsurance = Math.floor(monthlySalary * RATES_2026.healthInsurance.employer);
+  const longTermCare = Math.floor(healthInsurance * RATES_2026.longTermCare.rateOfHealth);
+  const employmentInsurance = Math.floor(monthlySalary * (employmentRatePercent / 100));
+  const industrialAccident = Math.floor(monthlySalary * (accidentRatePercent / 100));
+  const totalMonthlyBurden =
+    nationalPension + healthInsurance + longTermCare + employmentInsurance + industrialAccident;
+  return {
+    nationalPension,
+    healthInsurance,
+    longTermCare,
+    employmentInsurance,
+    industrialAccident,
+    totalMonthlyBurden,
+    totalAnnualBurden: totalMonthlyBurden * 12,
+    employerRate: monthlySalary > 0 ? totalMonthlyBurden / monthlySalary : 0,
+  };
+}
+
+const STANDARD_PAYROLL = { dependents: 1, children: 0, nonTaxableMonthly: 200_000, retirementIncluded: false };
+
+export function calcRaiseImpact({ currentAnnual, raisePercent }) {
+  const raiseAmount = Math.round(currentAnnual * (raisePercent / 100));
+  const current = calculateSalaryBreakdown({ grossAnnual: currentAnnual, ...STANDARD_PAYROLL });
+  const next = calculateSalaryBreakdown({ grossAnnual: currentAnnual + raiseAmount, ...STANDARD_PAYROLL });
+  return {
+    current,
+    next,
+    raiseAmount,
+    monthlyNetDiff: next.monthlyNet - current.monthlyNet,
+    annualNetDiff: next.annualNet - current.annualNet,
+    insuranceDelta: next.totalInsurance - current.totalInsurance,
+    taxDelta: next.totalTax - current.totalTax,
+  };
+}
+
+export function calcBonusImpact({ annualSalary, bonusAmount }) {
+  const base = calculateSalaryBreakdown({ grossAnnual: annualSalary, ...STANDARD_PAYROLL });
+  const withBonus = calculateSalaryBreakdown({ grossAnnual: annualSalary + bonusAmount, ...STANDARD_PAYROLL });
+  const netBonus = withBonus.annualNet - base.annualNet;
+  return {
+    base,
+    withBonus,
+    netBonus,
+    effectiveBonusRate: bonusAmount > 0 ? netBonus / bonusAmount : 0,
+    bonusTax: bonusAmount - netBonus,
+  };
+}
+
+export function calcOvertimeImpact({ monthlySalary, monthlyBaseHours, overtimeHours, nightHours, holidayHours }) {
+  const hourlyRate = Math.floor(monthlySalary / monthlyBaseHours);
+  const overtimePay = Math.floor(hourlyRate * overtimeHours * 1.5);
+  const nightPay = Math.floor(hourlyRate * nightHours * 0.5);
+  const holidayPay = Math.floor(hourlyRate * holidayHours * 1.5);
+  const totalExtraGross = overtimePay + nightPay + holidayPay;
+  const before = calculateSalaryBreakdown({ grossAnnual: monthlySalary * 12, ...STANDARD_PAYROLL });
+  const after = calculateSalaryBreakdown({
+    grossAnnual: (monthlySalary + totalExtraGross) * 12,
+    ...STANDARD_PAYROLL,
+  });
+  return {
+    hourlyRate,
+    overtimePay,
+    nightPay,
+    holidayPay,
+    totalExtraGross,
+    totalExtraNet: after.monthlyNet - before.monthlyNet,
+  };
+}
+
+// 목표 실수령 → 필요 청구액 역산. 뷰는 업종별 계산기를 쓰지만 프리렌더에서는 /freelancer와 같은
+// 단순경비율 엔진으로 이분탐색한다 — 두 프리랜서 페이지가 서로 다른 세액을 말하면 안 되기 때문.
+export function calcFreelanceRate({ targetMonthlyNet, workDaysMonthly, billableHoursDaily }) {
+  const annualTargetNet = targetMonthlyNet * 12;
+  const netFromGross = (gross) => gross - computeComprehensiveTax(gross).totalTax;
+  let low = annualTargetNet;
+  let high = Math.max(annualTargetNet + 12_000_000, Math.floor(annualTargetNet * 1.4));
+  while (netFromGross(high) < annualTargetNet && high < 2_000_000_000) high = Math.floor(high * 1.35);
+  for (let i = 0; i < 42; i += 1) {
+    const mid = Math.floor((low + high) / 2);
+    if (netFromGross(mid) >= annualTargetNet) high = mid;
+    else low = mid + 1;
+  }
+  const annualGross = Math.ceil(high / 1_000) * 1_000;
+  const monthlyGross = Math.floor(annualGross / 12);
+  return {
+    annualTargetNet,
+    annualGross,
+    monthlyGross,
+    dailyRate: Math.floor(monthlyGross / workDaysMonthly),
+    hourlyRate: Math.floor(monthlyGross / (workDaysMonthly * billableHoursDaily)),
+    tax: computeComprehensiveTax(annualGross),
+  };
 }
 
 // --- 포맷팅 유틸 ---

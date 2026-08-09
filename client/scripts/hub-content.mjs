@@ -29,7 +29,13 @@ import {
   TH_STYLE,
   UL_STYLE,
 } from "./hub-styles.mjs";
-import { HUB_PAGES } from "./hub-pages.mjs";
+import { HUB_PAGES as FAMILY_HUB_PAGES } from "./hub-pages.mjs";
+import { TOOL_HUB_PAGES } from "./hub-pages-tools.mjs";
+
+// Family hubs (a base calculator that absorbs amount variants) and single-tool hubs share one
+// renderer but live in separate files — the family set is driven by the consolidation, the tool
+// set by the thin-page audit, and they change for different reasons.
+const HUB_PAGES = { ...FAMILY_HUB_PAGES, ...TOOL_HUB_PAGES };
 
 function renderTable(table) {
   const head = table.head
