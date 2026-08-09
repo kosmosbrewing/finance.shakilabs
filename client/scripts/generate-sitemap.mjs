@@ -1,7 +1,7 @@
 // sitemap.xml 생성
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { resolve } from "path";
-import { SEO_ROUTES } from "./seo-routes.mjs";
+import { SITEMAP_ROUTES } from "./seo-routes.mjs";
 
 const SITE_URL = "https://shakilabs.com/finance";
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
@@ -31,7 +31,10 @@ function resolveLoc(route) {
   return route === "/" ? SITE_URL : `${SITE_URL}${route}`;
 }
 
-const urls = SEO_ROUTES.map((route) => `  <url>
+// SITEMAP_ROUTES, not SEO_ROUTES: consolidated amount variants keep their prerendered HTML and
+// keep returning 200, but they canonicalize to their base calculator, so submitting them would
+// hand crawlers a list of URLs that all point somewhere else.
+const urls = SITEMAP_ROUTES.map((route) => `  <url>
     <loc>${resolveLoc(route)}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${resolveChangeFreq(route)}</changefreq>
@@ -52,4 +55,4 @@ if (existsSync(DIST_DIR)) {
   writeFileSync(resolve(DIST_DIR, "sitemap.xml"), sitemap, "utf-8");
 }
 
-console.log(`[sitemap] Generated with ${SEO_ROUTES.length} URLs`);
+console.log(`[sitemap] Generated with ${SITEMAP_ROUTES.length} URLs`);

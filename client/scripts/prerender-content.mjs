@@ -4,18 +4,36 @@
 
 import {
   calculateSalaryBreakdown,
+  comprehensiveTotalTaxOf,
+  computeComprehensiveTax,
+  EITC_BRACKET_TABLE,
+  eitcAmountFor,
   formatWon,
   formatManWonValue,
   formatPercent,
   INCOME_TAX_BRACKETS,
+  parentalLeavePay,
   RATES_2026,
+  SEVERANCE_ASSUMED_MONTHLY,
+  SIMPLE_EXPENSE_THRESHOLD,
+  regionalHealthEstimate,
+  severancePayEstimate,
+  unemploymentDailyAllowance,
+  UNPAID_WAGE_RATE_TABLE,
+  unpaidWageInterest,
+  wageConversion,
+  weeklyHolidayPay,
+  withholdingReverse,
 } from "./calc-engine.mjs";
 import {
   COMPARE_PAIRS,
   COMPREHENSIVE_TAX_AMOUNTS,
+  FREELANCER_AMOUNTS,
   INSURANCE_AMOUNTS,
+  SALARY_AMOUNTS,
   UNPAID_WAGE_AMOUNTS,
 } from "./seo-routes.mjs";
+import { buildHubContent } from "./hub-content.mjs";
 import {
   HOME_DESCRIPTION,
   HOME_H1,
@@ -42,6 +60,7 @@ const WAGE_CONVERTER_RE = /^\/wage-converter\/(\d+)$/;
 const SEVERANCE_PAY_RE = /^\/severance-pay\/(\d+)$/;
 const UNPAID_WAGE_RE = /^\/unpaid-wage\/(\d+)$/;
 const EITC_RE = /^\/eitc\/(single|single-income|double-income)$/;
+const FREELANCER_RE = /^\/freelancer\/(\d+)$/;
 
 function parseInt10(s) {
   const n = Number.parseInt(s, 10);
@@ -321,45 +340,262 @@ function buildSalaryContent(manWon) {
 }
 
 // =========================
+// 프리랜서 수입별 (/freelancer/:amount)
+// =========================
+// These six URLs shipped as 67-character stubs (a title and a "open the calculator" link) — thin
+// enough to be the exact thing an AdSense reviewer flags, and thin enough that consolidating them
+// into /freelancer would have been folding nothing into nothing.
+//
+// The angle is deliberately NOT the one /comprehensive-tax/:amount uses. Both families run the
+// same engine on the same income, so repeating the tax breakdown here would create a genuine
+// cross-family duplicate. This page answers the freelancer's cash-flow question instead — how
+// much of each payment to set aside, and what changes besides income tax — while the
+// comprehensive-tax page walks the statutory computation.
+function buildFreelancerContent(manWon) {
+  const income = manWon * 10_000;
+  const calc = computeComprehensiveTax(income);
+  const label = formatManWonValue(manWon);
+  const monthlyGross = Math.floor(income / 12);
+  const monthlyWithheld = Math.floor(monthlyGross * 0.033);
+  const monthlyNet = monthlyGross - monthlyWithheld;
+  // 수입 대비 확정세액 비율 — 매달 따로 떼어둘 비율의 근거
+  const effectiveRate = calc.totalTax / income;
+  const reserveMonthly = Math.max(0, Math.floor((calc.totalTax - calc.withholdingPrepaid) / 12));
+  const overThreshold = income > SIMPLE_EXPENSE_THRESHOLD;
+
+  const otherLinks = FREELANCER_AMOUNTS.filter((value) => value !== manWon)
+    .map((value) => `<a href="/finance/freelancer/${value}">${formatManWonValue(value)}원</a>`)
+    .join(" · ");
+
+  return `
+    <article data-seo-prerender="freelancer" style="${ARTICLE_STYLE}">
+      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
+        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+        &nbsp;›&nbsp;
+        <a href="/finance/freelancer" style="color:#64748b;text-decoration:none;">프리랜서 세금 계산기</a>
+        &nbsp;›&nbsp;
+        연 수입 ${label}
+      </nav>
+
+      <h1 style="${H1_STYLE}">프리랜서 연 수입 ${label}원 세금과 월 현금흐름 (2026)</h1>
+
+      <p style="${P_STYLE}">
+        연 수입 <strong>${label}원</strong>을 12개월로 나누면 월 ${formatWon(monthlyGross)}이고, 여기서 3.3%인
+        ${formatWon(monthlyWithheld)}이 원천징수되어 실제 입금액은 월 <strong>${formatWon(monthlyNet)}</strong>입니다.
+        1년간 미리 낸 세금은 ${formatWon(calc.withholdingPrepaid)}이고, 5월 신고로 확정되는 세액은
+        <strong>${formatWon(calc.totalTax)}</strong>(수입 대비 ${formatPercent(effectiveRate)})입니다.
+      </p>
+
+      <p style="${P_STYLE}">
+        ${calc.refund >= 0
+          ? `확정세액이 기납부액보다 적으므로 <strong style="color:#047857;">약 ${formatWon(calc.refund)}을 환급</strong>받게 됩니다. 이 구간에서는 3.3%가 실제 세부담보다 크게 떼이고 있다는 뜻입니다.`
+          : `확정세액이 기납부액을 넘어 <strong style="color:#dc2626;">약 ${formatWon(Math.abs(calc.refund))}을 추가로 납부</strong>해야 합니다. 매달 ${formatWon(reserveMonthly)}씩 따로 모아두면 5월에 목돈을 마련하지 않아도 됩니다.`}
+      </p>
+
+      <h2 style="${H2_STYLE}">1. 월 현금흐름 요약</h2>
+      <table style="${TABLE_STYLE}">
+        <tbody>
+          <tr><td style="${TD_STYLE}">월 청구액(세전)</td><td style="${TD_STYLE}">${formatWon(monthlyGross)}</td></tr>
+          <tr><td style="${TD_STYLE}">3.3% 원천징수</td><td style="${TD_STYLE}">-${formatWon(monthlyWithheld)}</td></tr>
+          <tr style="background:#ecfdf5;">
+            <td style="${TD_STYLE}"><strong>월 실입금액</strong></td>
+            <td style="${TD_STYLE}"><strong>${formatWon(monthlyNet)}</strong></td>
+          </tr>
+          <tr>
+            <td style="${TD_STYLE}">5월 신고 시 정산</td>
+            <td style="${TD_STYLE}">${calc.refund >= 0 ? `+${formatWon(calc.refund)} 환급` : `-${formatWon(Math.abs(calc.refund))} 추가 납부`}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 style="${H2_STYLE}">2. 이 수입에서 실제로 인정되는 경비</h2>
+      <p style="${P_STYLE}">
+        장부를 쓰지 않으면 인적용역 단순경비율이 적용되어 ${formatWon(calc.expenses)}이 필요경비로 인정됩니다.
+        ${overThreshold
+          ? `수입이 4,000만원을 넘으므로 4,000만원까지는 64.1%, 초과분 ${formatWon(income - SIMPLE_EXPENSE_THRESHOLD)}에는 49.7%가 적용된 결과입니다. 추가 수입 1원당 인정 경비가 0.497원으로 낮아진 구간이라, 실제 경비가 이보다 크다면 장부 작성이 유리합니다.`
+          : `수입이 4,000만원 이하이므로 전액에 64.1%가 적용됩니다. 실제 지출이 수입의 64.1%를 넘지 않는다면 장부를 쓰지 않는 편이 오히려 유리합니다.`}
+      </p>
+      <p style="${P_STYLE}">
+        여기에 기본공제 150만원을 빼면 과세표준은 ${formatWon(calc.taxableBase)}이 되고, 누진세율을 적용한 산출세액에서
+        표준세액공제 7만원을 뺀 뒤 지방소득세 10%를 더해 ${formatWon(calc.totalTax)}이 나옵니다.
+      </p>
+
+      <h2 style="${H2_STYLE}">3. 세금 말고 함께 늘어나는 부담</h2>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><strong>건강보험료</strong> — 프리랜서는 지역가입자입니다. 5월 신고 소득이 그해 11월 보험료 재산정에 반영되므로, 수입이 늘어난 다음 해에 보험료가 함께 오릅니다.</li>
+        <li style="${LI_STYLE}"><strong>국민연금</strong> — 지역가입자 보험료는 신고 소득의 9%를 본인이 전액 부담합니다. 직장가입자가 4.75%만 내는 것과 대비됩니다.</li>
+        <li style="${LI_STYLE}"><strong>부가가치세</strong> — 인적용역은 면세라 대체로 해당이 없지만, 사업자등록을 내고 용역을 공급하면 과세 대상이 될 수 있습니다.</li>
+        ${overThreshold
+          ? `<li style="${LI_STYLE}"><strong>기장 의무</strong> — 직전 연도 수입이 일정 기준을 넘으면 복식부기 의무자가 되며, 추계신고 시 무기장가산세 20%가 부과됩니다.</li>`
+          : `<li style="${LI_STYLE}"><strong>기장 의무</strong> — 이 수입대에서는 간편장부 대상이지만, 장부를 쓰면 기장세액공제(산출세액의 20%, 한도 100만원)를 받을 수 있습니다.</li>`}
+      </ul>
+
+      <h2 style="${H2_STYLE}">4. 다른 수입 구간과 비교</h2>
+      <p style="${P_STYLE}">다른 수입 금액으로 보기: ${otherLinks}</p>
+      <ul style="${UL_STYLE}">
+        <li style="${LI_STYLE}"><a href="/finance/freelancer">프리랜서 세금 계산기</a> - 수입 직접 입력</li>
+        <li style="${LI_STYLE}"><a href="/finance/comprehensive-tax/${manWon}">종합소득세 ${label}원 상세 계산</a> - 구간별 산출세액</li>
+        <li style="${LI_STYLE}"><a href="/finance/freelance-rate">세후 단가 역산 계산기</a> - 목표 실수령 기준 견적</li>
+        <li style="${LI_STYLE}"><a href="/finance/regional-health">지역가입자 건보료 계산기</a></li>
+      </ul>
+
+      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+        ※ 단순경비율 적용 인적용역 기준 추정치입니다. 업종 코드·장부 작성 여부·다른 소득·부양가족에 따라 실제 세액이
+        달라지며, 확정 금액은 국세청 홈택스 신고 화면에서 확인하세요.
+      </p>
+    </article>`;
+}
+
+// =========================
 // 근로장려금 (/eitc/:household)
 // =========================
 // src/data/eitc.ts · src/utils/eitcCalculator.ts 미러 — 점증·평탄·점감 산식
-const EITC_BRACKETS = {
-  "single": {
-    label: "단독 가구",
-    phaseInEnd: 4_000_000,
-    plateauEnd: 9_000_000,
-    phaseOutEnd: 22_000_000,
-    maxAmount: 1_650_000,
+const EITC_BRACKETS = EITC_BRACKET_TABLE;
+
+// Household-specific copy. These three routes stay independently indexable (they are the one
+// family excluded from the canonical consolidation) because household type changes the statutory
+// ceiling and the payout — but that only justifies three URLs if the three pages actually read
+// differently. Sharing one template made them 0.96+ similar, so the qualifying rules, the failure
+// modes and the decision each household actually faces are written out per slug here.
+const EITC_HOUSEHOLD_DETAIL = {
+  single: {
+    lead: "혼자 사는 근로자가 아르바이트·단시간 근로로 번 소득에 대해 받을 수 있는 근로장려금을 계산합니다. 단독 가구는 세 유형 중 기준선이 가장 낮게 설정돼 있어, 소득이 조금만 늘어도 점감 구간에 들어간다는 점이 판단의 핵심입니다.",
+    tableNote:
+      "단독 가구는 구간 폭이 좁아 총급여 200만원 차이로도 지급액이 크게 달라집니다. 표는 산식 기준 간이 추정치이며 국세청 산정표의 구간 단위·단수 조정에 따라 소액 차이가 날 수 있습니다.",
+    callout:
+      "<strong>1인 가구가 특히 확인할 것</strong> — 전세보증금은 재산에 포함되고 부채는 차감되지 않습니다. 소득이 적어도 보증금이 큰 원룸·오피스텔에 살면 재산 1억7,000만원 기준에 걸려 50% 감액될 수 있습니다.",
+    relatedLinks: [
+      ["/finance/weekly-holiday-pay", "주휴수당 계산기", "주 15시간 이상 근무 시 필수 확인"],
+      ["/finance/wage-converter", "시급 월급 환산기", "아르바이트 소득의 연간 총급여 환산"],
+      ["/finance/regional-health", "지역가입자 건보료", "1인 가구 건강보험료 확인"],
+    ],
+    exampleH2: "월 100만원을 버는 단독 가구는 얼마를 받나",
+    example: [
+      "월 100만원씩 12개월을 일해 연간 총급여가 1,200만원이라면, 이 금액은 평탄 구간(400만~900만원)을 지나 <strong>점감 구간</strong>에 들어와 있습니다. 최대액 165만원을 그대로 받는 것이 아니라 상한 2,200만원을 향해 줄어드는 중인 금액을 받습니다.",
+      "역설적이지만 단독 가구가 최대액을 받는 지점은 연 400만~900만원 구간입니다. 월 33만~75만원 수준의 소득으로, 주 15~20시간 정도의 단시간 근로에 해당합니다. 그보다 적게 벌면 점증 구간이라 장려금도 함께 줄어듭니다.",
+      "따라서 단독 가구는 '많이 벌수록 유리'도 '적게 벌수록 유리'도 아닙니다. 위 표에서 본인의 연간 총급여에 가장 가까운 행을 찾아 어느 구간에 있는지부터 확인하는 편이 정확합니다.",
+    ],
+    faq: [
+      {
+        q: "부모님과 함께 사는데 단독 가구인가요?",
+        a: "부모가 70세 미만이거나 본인이 부양하지 않는다면 단독 가구입니다. 70세 이상 직계존속을 부양하고 있다면 홑벌이 가구로 분류되어 소득 상한과 최대액이 모두 올라갑니다.",
+      },
+      {
+        q: "20대인데 나이 때문에 안 되나요?",
+        a: "연령 요건은 폐지되었습니다. 과거에는 30세 이상만 단독 가구로 신청할 수 있었지만 지금은 소득·재산 요건만 충족하면 20대도 신청할 수 있습니다.",
+      },
+      {
+        q: "자녀장려금도 같이 받을 수 있나요?",
+        a: "받을 수 없습니다. 자녀장려금은 부양자녀가 있어야 하는데, 부양자녀가 있으면 단독 가구가 아니라 홑벌이 가구로 분류되기 때문입니다.",
+      },
+    ],
+    definitionH2: "단독 가구로 분류되는 조건",
+    definition: [
+      "단독 가구는 <strong>배우자·부양자녀·70세 이상 직계존속이 모두 없는</strong> 가구입니다. 셋 중 하나라도 있으면 홑벌이 이상으로 분류되므로, 단독은 사실상 1인 가구를 뜻합니다.",
+      "세 유형 중 소득 상한이 가장 낮고 최대 지급액도 가장 적습니다. 대신 요건이 단순해 판정이 쉽고, 아르바이트·단시간 근로로 소득이 적은 청년층과 고령 단신 가구가 주된 대상입니다.",
+      "부모와 같은 집에 살아도 부모가 70세 미만이거나 본인이 부양하지 않는다면 단독 가구입니다. 주민등록상 세대 분리 여부가 아니라 부양 관계로 판단합니다.",
+    ],
+    pitfallH2: "단독 가구에서 자주 놓치는 지점",
+    pitfalls: [
+      "<strong>연령 제한은 없습니다.</strong> 과거에는 30세 이상만 단독 가구로 신청할 수 있었지만 이 요건은 폐지되어, 20대 1인 가구도 소득·재산 요건만 맞으면 신청할 수 있습니다.",
+      "<strong>자녀장려금은 받을 수 없습니다.</strong> 자녀장려금은 부양자녀가 있어야 하는데, 부양자녀가 있으면 단독 가구가 아니게 되므로 정의상 대상에서 제외됩니다.",
+      "<strong>가구 유형은 매년 다시 판정합니다.</strong> 결혼하거나 자녀가 생기면 다음 신청부터 홑벌이·맞벌이 기준이 적용되어 소득 상한과 최대액이 모두 올라갑니다.",
+    ],
   },
   "single-income": {
-    label: "홑벌이 가구",
-    phaseInEnd: 7_000_000,
-    plateauEnd: 14_000_000,
-    phaseOutEnd: 32_000_000,
-    maxAmount: 2_850_000,
+    lead: "배우자가 소득이 거의 없거나, 혼자 아이를 키우며 일하는 가구가 받을 수 있는 근로장려금을 계산합니다. 홑벌이 가구는 자녀장려금과 중복 수급이 가능해, 부양자녀가 있으면 실제 수령 총액이 근로장려금만 볼 때보다 크게 늘어납니다.",
+    tableNote:
+      "표의 금액은 근로장려금만입니다. 부양자녀가 있으면 자녀 1인당 최대 100만원의 자녀장려금이 별도로 더해지므로, 실제 입금액은 이 표보다 큽니다. 국세청 산정표의 구간 단위·단수 조정에 따라 소액 차이가 날 수 있습니다.",
+    callout:
+      "<strong>부양가족 중복 신청 주의</strong> — 같은 부양자녀를 다른 가구(예: 조부모)가 함께 올리면 양쪽 모두 정정 대상이 됩니다. 연말정산 인적공제와 근로장려금 가구원 판정에 같은 자녀를 중복으로 올리지 않았는지 확인하세요.",
+    relatedLinks: [
+      ["/finance/year-end-settlement", "연말정산 계산기", "자녀세액공제와 함께 확인"],
+      ["/finance/parental-leave", "육아휴직 급여 계산기", "휴직 기간 소득 변화 확인"],
+      ["/finance/dependent", "건보 피부양자 판정기", "배우자 피부양자 자격 확인"],
+    ],
+    exampleH2: "자녀 한 명을 키우는 홑벌이 가구의 실제 수령 총액",
+    example: [
+      "연간 총급여 2,000만원에 18세 미만 자녀가 한 명 있는 홑벌이 가구를 가정해 봅니다. 총급여 2,000만원은 평탄 구간(700만~1,400만원)을 지난 <strong>점감 구간</strong>이므로 근로장려금은 최대액 285만원보다 줄어든 금액이 됩니다.",
+      "여기에 <strong>자녀장려금</strong>이 더해집니다. 총급여 2,100만원까지는 자녀 1인당 100만원 전액이 지급되므로, 이 가구는 근로장려금과 별도로 100만원을 더 받습니다. 두 제도를 합치면 실제 수령액은 위 표의 금액에 100만원을 더한 값입니다.",
+      "총급여가 2,100만원을 넘어서면 자녀장려금도 점감이 시작돼 7,000만원까지 줄어들며 최소 50만원이 지급됩니다. 즉 홑벌이 가구는 2,100만원 언저리에서 근로장려금과 자녀장려금이 <strong>동시에</strong> 줄기 시작합니다.",
+    ],
+    faq: [
+      {
+        q: "배우자가 파트타임으로 일하는데 홑벌이인가요?",
+        a: "배우자의 연간 총급여가 300만원 미만이면 홑벌이 가구입니다. 300만원 이상이면 맞벌이 가구로 분류되어 소득 판정이 부부 합산으로 바뀝니다.",
+      },
+      {
+        q: "한부모 가구도 홑벌이인가요?",
+        a: "배우자가 없어도 부양자녀 또는 70세 이상 직계존속이 있으면 홑벌이 가구로 분류됩니다. 단독 가구보다 소득 상한과 최대 지급액이 모두 높습니다.",
+      },
+      {
+        q: "자녀가 아르바이트를 하면 어떻게 되나요?",
+        a: "부양자녀는 18세 미만이면서 연간 소득금액 100만원 이하여야 인정됩니다. 자녀 소득이 이를 넘으면 부양자녀에서 제외되어 가구 유형 자체가 바뀔 수 있습니다.",
+      },
+    ],
+    definitionH2: "홑벌이 가구로 분류되는 조건",
+    definition: [
+      "홑벌이 가구는 ① 배우자의 총급여가 <strong>300만원 미만</strong>이거나, ② 배우자는 없지만 부양자녀 또는 70세 이상 직계존속이 있는 가구입니다.",
+      "즉 배우자가 있어도 소득이 거의 없으면 홑벌이이고, 한부모 가구도 홑벌이로 분류됩니다. 단독보다 소득 상한과 최대 지급액이 모두 큽니다.",
+      "부양자녀는 18세 미만이면서 연간 소득금액이 100만원 이하여야 인정됩니다. 자녀가 아르바이트로 소득을 올렸다면 부양자녀에서 빠질 수 있어 가구 유형이 바뀔 수 있습니다.",
+    ],
+    pitfallH2: "배우자 총급여 300만원이 만드는 분기점",
+    pitfalls: [
+      "<strong>300만원을 넘으면 맞벌이가 됩니다.</strong> 배우자 총급여가 300만원 이상이 되는 순간 맞벌이 기준으로 넘어가, 최대 지급액은 올라가지만 소득 판정이 부부 합산으로 바뀝니다.",
+      "<strong>합산으로 바뀌면 오히려 불리할 수 있습니다.</strong> 최대액이 커져도 부부 소득을 합쳐 점감 구간에 더 빨리 진입하면 실제 수령액은 줄어들 수 있으므로, 경계 근처라면 두 유형을 모두 계산해 비교해야 합니다.",
+      "<strong>자녀장려금과 중복 수급이 가능합니다.</strong> 부양자녀가 있는 홑벌이 가구는 근로장려금과 별도로 자녀 1인당 최대 100만원의 자녀장려금을 함께 받을 수 있습니다.",
+    ],
   },
   "double-income": {
-    label: "맞벌이 가구",
-    phaseInEnd: 8_000_000,
-    plateauEnd: 17_000_000,
-    phaseOutEnd: 44_000_000,
-    maxAmount: 3_300_000,
+    lead: "부부가 모두 일하는 가구가 받을 수 있는 근로장려금을 계산합니다. 맞벌이 가구는 최대 지급액이 세 유형 중 가장 크지만 소득을 부부 합산으로 판정하므로, 각자의 급여가 낮아도 합치면 지급 대상에서 벗어나는 경우가 많습니다.",
+    tableNote:
+      "표의 '연간 총급여'는 <strong>부부 합산</strong> 금액입니다. 본인 급여만으로 행을 찾으면 실제보다 훨씬 큰 금액을 기대하게 되니, 배우자 급여를 더한 뒤 확인하세요. 국세청 산정표의 구간 단위·단수 조정에 따라 소액 차이가 날 수 있습니다.",
+    callout:
+      "<strong>재산도 부부 합산</strong> — 재산 1억7,000만원(50% 감액)·2억4,000만원(지급 제외) 기준 역시 가구원 전체 재산을 합쳐 판단합니다. 부부가 각각 주택이나 자동차를 보유하면 소득 요건을 통과해도 재산에서 걸리는 경우가 많습니다.",
+    relatedLinks: [
+      ["/finance/year-end-settlement", "연말정산 계산기", "부부 각각의 환급액 비교"],
+      ["/finance/compare", "연봉 비교 계산기", "부부 합산 실수령액 확인"],
+      ["/finance/salary", "연봉 실수령액 계산기", "총급여 기준 확인"],
+    ],
+    exampleH2: "부부가 각각 월 150만원을 벌면 대상이 되나",
+    example: [
+      "부부가 각각 월 150만원씩 벌면 1인당 연 1,800만원, <strong>합산 3,600만원</strong>입니다. 맞벌이 가구의 소득 상한은 4,400만원이므로 아직 대상이지만, 평탄 구간(800만~1,700만원)을 한참 지난 점감 구간이라 최대액 330만원에는 크게 못 미칩니다.",
+      "각자 기준으로 보면 1,800만원은 평탄 구간을 살짝 넘긴 수준이라 상당한 금액을 받을 것처럼 보입니다. 하지만 판정은 <strong>합산</strong>으로 하므로 실제 산정액은 위 표의 3,600만원 행을 보아야 합니다. 맞벌이 가구가 가장 많이 오해하는 지점입니다.",
+      "부부가 각각 월 190만원(합산 4,560만원)을 넘어서면 상한 4,400만원을 초과해 지급 대상에서 제외됩니다. 맞벌이 가구의 최대액이 가장 크다는 사실과 실제로 받을 확률이 낮다는 사실이 동시에 성립하는 이유입니다.",
+    ],
+    faq: [
+      {
+        q: "부부가 각각 신청해야 하나요?",
+        a: "아닙니다. 근로장려금은 가구 단위 제도이므로 부부 중 한 사람만 신청합니다. 둘 다 신청하면 국세청이 한 명을 신청자로 확정해 한 건만 지급합니다.",
+      },
+      {
+        q: "누가 신청하느냐에 따라 금액이 달라지나요?",
+        a: "달라지지 않습니다. 부부 합산 소득으로 산정하므로 신청자가 누구든 금액은 같으며, 지급 계좌와 안내 통지만 신청자 기준으로 처리됩니다.",
+      },
+      {
+        q: "한쪽 소득이 300만원 아래로 떨어지면 어떻게 되나요?",
+        a: "홑벌이 가구로 재분류됩니다. 최대액은 330만원에서 285만원으로 낮아지지만 소득 판정 기준도 함께 바뀌므로, 경계 근처라면 두 유형을 모두 계산해 비교하는 편이 정확합니다.",
+      },
+    ],
+    definitionH2: "맞벌이 가구로 분류되는 조건",
+    definition: [
+      "맞벌이 가구는 부부 <strong>모두</strong> 총급여가 300만원 이상인 가구입니다. 한쪽이라도 300만원 미만이면 홑벌이로 분류됩니다.",
+      "세 유형 중 소득 상한이 가장 높고 최대 지급액도 가장 큽니다. 맞벌이로 소득이 늘어난 만큼 기준선도 함께 올려둔 구조입니다.",
+      "다만 소득 판정은 <strong>부부 합산</strong>입니다. 개인 소득이 아니라 둘을 더한 금액으로 구간을 정하므로, 각자의 소득이 낮아도 합치면 점감 구간에 들어갈 수 있습니다.",
+    ],
+    pitfallH2: "부부 합산 판정과 신청자 지정",
+    pitfalls: [
+      "<strong>신청은 부부 중 한 사람만 합니다.</strong> 근로장려금은 가구 단위 제도이므로 부부가 각각 신청해도 한 건만 인정됩니다. 둘 다 신청하면 국세청이 한 명을 신청자로 확정합니다.",
+      "<strong>누가 신청해도 금액은 같습니다.</strong> 가구 합산 소득으로 계산하므로 신청자를 누구로 하든 산정액은 동일하며, 지급 계좌와 안내 통지만 신청자 기준으로 처리됩니다.",
+      "<strong>상한 도달이 빠릅니다.</strong> 최대액이 가장 크지만 합산 소득 기준이라, 부부가 각각 평균 임금을 받으면 점감 구간을 지나 지급 대상에서 벗어나는 경우가 많습니다.",
+    ],
   },
 };
 
-function eitcAmountFor(income, bracket) {
-  if (income >= bracket.phaseOutEnd) return 0;
-  if (income < bracket.phaseInEnd) return Math.floor((bracket.maxAmount * income) / bracket.phaseInEnd);
-  if (income <= bracket.plateauEnd) return bracket.maxAmount;
-  return Math.floor(
-    (bracket.maxAmount * (bracket.phaseOutEnd - income)) / (bracket.phaseOutEnd - bracket.plateauEnd),
-  );
-}
-
 function buildEitcContent(householdSlug) {
   const bracket = EITC_BRACKETS[householdSlug];
-  if (!bracket) return null;
+  const detail = EITC_HOUSEHOLD_DETAIL[householdSlug];
+  if (!bracket || !detail) return null;
 
   const incomeRows = [];
   for (let income = 2_000_000; income < bracket.phaseOutEnd; income += 2_000_000) {
@@ -395,8 +631,10 @@ function buildEitcContent(householdSlug) {
 
       <h1 style="${H1_STYLE}">${bracket.label} 근로장려금 — 소득별 지급액 (2026)</h1>
 
+      <p style="${P_STYLE}">${detail.lead}</p>
+
       <p style="${P_STYLE}">
-        ${bracket.label}의 근로장려금은 연간 총급여 <strong>${formatWon(bracket.phaseOutEnd)}</strong> 미만일 때 신청할 수 있고,
+        ${bracket.label}는 연간 총급여 <strong>${formatWon(bracket.phaseOutEnd)}</strong> 미만일 때 신청할 수 있고,
         최대 <strong style="color:#047857;">${formatWon(bracket.maxAmount)}</strong>까지 받을 수 있습니다.
         총급여 ${formatWon(bracket.phaseInEnd)}까지는 소득에 비례해 늘어나는 점증 구간,
         ${formatWon(bracket.plateauEnd)}까지는 최대액을 유지하는 평탄 구간,
@@ -415,42 +653,36 @@ function buildEitcContent(householdSlug) {
         <tbody>${tableRows}
         </tbody>
       </table>
-      <p style="${P_STYLE}">
-        위 금액은 산식 기준 간이 추정치입니다. 실제 산정표는 총급여 구간 단위와 단수 조정이 있어 소액 차이가 날 수 있으며,
-        가구원 재산 합계가 1억7,000만원 이상이면 50% 감액, 2억4,000만원 이상이면 지급 대상에서 제외됩니다.
-      </p>
+      <p style="${P_STYLE}">${detail.tableNote}</p>
 
-      <div style="${CALLOUT_STYLE}">
-        <strong>신청 시기</strong> — 정기 신청 5월, 근로소득자 반기 신청은 상반기분 9월·하반기분 다음 해 3월.
-        기한 후 신청(정기분)은 지급액이 5% 감액됩니다.
-      </div>
+      <div style="${CALLOUT_STYLE}">${detail.callout}</div>
 
-      <h2 style="${H2_STYLE}">2. 자녀장려금도 함께 확인</h2>
-      <p style="${P_STYLE}">
-        ${householdSlug === "single"
-          ? "단독 가구는 부양자녀가 없는 가구이므로 자녀장려금 대상이 아닙니다. 결혼·출산으로 가구 유형이 바뀌면 홑벌이·맞벌이 기준을 다시 확인하세요."
-          : `${bracket.label}는 부양자녀(18세 미만) 1인당 최대 100만원의 자녀장려금을 함께 받을 수 있습니다. 총급여 2,100만원까지는 자녀당 100만원, 이후 7,000만원까지 점감해 최소 50만원이 지급됩니다.`}
-      </p>
+      <h2 style="${H2_STYLE}">2. ${detail.definitionH2}</h2>
+      ${detail.definition.map((text) => `<p style="${P_STYLE}">${text}</p>`).join("")}
 
-      <h2 style="${H2_STYLE}">3. 자주 묻는 질문 (FAQ)</h2>
+      <h2 style="${H2_STYLE}">3. ${detail.pitfallH2}</h2>
+      <ul style="${UL_STYLE}">
+        ${detail.pitfalls.map((text) => `<li style="${LI_STYLE}">${text}</li>`).join("")}
+      </ul>
 
-      <h3 style="${H3_STYLE}">Q1. ${bracket.label}의 소득 상한은 얼마인가요?</h3>
-      <p style="${P_STYLE}">
-        연간 총급여 등이 ${formatWon(bracket.phaseOutEnd)} 미만이어야 합니다. 상한에 가까울수록 점감 구간이 적용되어 지급액이 줄어듭니다.
-      </p>
+      <h2 style="${H2_STYLE}">4. ${detail.exampleH2}</h2>
+      ${detail.example.map((text) => `<p style="${P_STYLE}">${text}</p>`).join("")}
 
-      <h3 style="${H3_STYLE}">Q2. 최대 ${formatWon(bracket.maxAmount)}은 언제 받나요?</h3>
-      <p style="${P_STYLE}">
-        총급여가 ${formatWon(bracket.phaseInEnd)}~${formatWon(bracket.plateauEnd)} 사이(평탄 구간)이고 재산 요건(1억7,000만원 미만)을 충족할 때
-        최대액이 산정됩니다.
-      </p>
+      <h2 style="${H2_STYLE}">5. 자주 묻는 질문 (FAQ)</h2>
+      ${detail.faq
+        .map(
+          (item, index) => `
+      <h3 style="${H3_STYLE}">Q${index + 1}. ${item.q}</h3>
+      <p style="${P_STYLE}">${item.a}</p>`,
+        )
+        .join("")}
 
-      <h2 style="${H2_STYLE}">4. 관련 계산기</h2>
+      <h2 style="${H2_STYLE}">6. 관련 계산기</h2>
       <ul style="${UL_STYLE}">
         <li style="${LI_STYLE}"><a href="/finance/eitc">근로장려금 계산기</a> - 조건 직접 입력</li>
-        <li style="${LI_STYLE}"><a href="/finance/year-end-settlement">연말정산 계산기</a> - 예상 환급액</li>
-        <li style="${LI_STYLE}"><a href="/finance/weekly-holiday-pay">주휴수당 계산기</a> - 아르바이트 수당</li>
-        <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
+        ${detail.relatedLinks
+          .map(([href, label, note]) => `<li style="${LI_STYLE}"><a href="${href}">${label}</a> - ${note}</li>`)
+          .join("")}
       </ul>
       <p style="${P_STYLE}">다른 가구 유형으로 보기: ${otherLinks}</p>
 
@@ -465,12 +697,7 @@ function buildEitcContent(householdSlug) {
 // 임금체불 지연이자 (/unpaid-wage/:amount)
 // =========================
 // src/utils/unpaidWageCalculator.ts 미러 — 체불액 × 연이율 × 일수 ÷ 365
-const UNPAID_WAGE_RATES = [
-  { label: "민법 연 5% (재직·일반)", rate: 0.05 },
-  { label: "상법 연 6% (재직·상사)", rate: 0.06 },
-  { label: "소촉법 연 12% (소장 송달 후)", rate: 0.12 },
-  { label: "근로기준법 연 20% (퇴직 후)", rate: 0.2 },
-];
+const UNPAID_WAGE_RATES = UNPAID_WAGE_RATE_TABLE;
 const UNPAID_WAGE_PERIODS = [30, 90, 180, 365];
 
 function buildUnpaidWageContent(manWon) {
@@ -481,7 +708,7 @@ function buildUnpaidWageContent(manWon) {
 
   const tableRows = UNPAID_WAGE_PERIODS.map((days) => {
     const cells = UNPAID_WAGE_RATES.map(
-      (item) => `<td style="${TD_STYLE}">${formatWon(Math.floor((amount * item.rate * days) / 365))}</td>`,
+      (item) => `<td style="${TD_STYLE}">${formatWon(unpaidWageInterest(amount, item.rate, days))}</td>`,
     ).join("");
     return `
           <tr>
@@ -1140,69 +1367,6 @@ function buildInsuranceContent(fee) {
 // 종합소득세 (/comprehensive-tax/:amount)
 // =========================
 // 종합소득세 누진 산출세액 — 프리셋 본계산과 "경비를 더 인정받으면" 시뮬레이션이 공유
-function progressiveComprehensiveTax(taxableBase) {
-  let calculatedTax = 0;
-  if (taxableBase <= 14_000_000) calculatedTax = taxableBase * 0.06;
-  else if (taxableBase <= 50_000_000)
-    calculatedTax = 840_000 + (taxableBase - 14_000_000) * 0.15;
-  else if (taxableBase <= 88_000_000)
-    calculatedTax = 6_240_000 + (taxableBase - 50_000_000) * 0.24;
-  else if (taxableBase <= 150_000_000)
-    calculatedTax = 15_360_000 + (taxableBase - 88_000_000) * 0.35;
-  else calculatedTax = 37_060_000 + (taxableBase - 150_000_000) * 0.38;
-  return Math.floor(calculatedTax);
-}
-
-// 결정세액+지방소득세 — 표준세액공제 7만원 차감 후 10% 가산
-function comprehensiveTotalTaxOf(taxableBase) {
-  const determinedTax = Math.max(0, progressiveComprehensiveTax(taxableBase) - 70_000);
-  return determinedTax + Math.floor(determinedTax * 0.1);
-}
-
-// 프리셋·인접 구간 공용 종합소득세 계산 — 기존 인라인 산식을 그대로 옮겨 수치 동일성 유지
-function computeComprehensiveTax(income) {
-  // IT·디자인·작가 등 인적용역 기준 단순경비율 (src/data/freelanceTaxRates.ts)
-  // 4천만원 이하: 64.1%, 초과분: 49.7%
-  const EXPENSE_RATE_BASE = 0.641;
-  const EXPENSE_RATE_EXCESS = 0.497;
-  const EXPENSE_THRESHOLD = 40_000_000;
-  const expenses = income <= EXPENSE_THRESHOLD
-    ? Math.floor(income * EXPENSE_RATE_BASE)
-    : Math.floor(EXPENSE_THRESHOLD * EXPENSE_RATE_BASE + (income - EXPENSE_THRESHOLD) * EXPENSE_RATE_EXCESS);
-  const netIncome = income - expenses;
-  const personalDeduction = 1_500_000;
-  const taxableBase = Math.max(0, netIncome - personalDeduction);
-
-  const calculatedTax = progressiveComprehensiveTax(taxableBase);
-
-  const standardCredit = 70_000;
-  const determinedTax = Math.max(0, calculatedTax - standardCredit);
-  const localTax = Math.floor(determinedTax * 0.1);
-  const totalTax = determinedTax + localTax;
-
-  // 3.3% 원천징수 비교
-  const withholdingPrepaid = Math.floor(income * 0.033);
-  const refund = withholdingPrepaid - totalTax;
-  // 추가 수입 1원당 경비 인정률 — 4천만원 초과 여부로 갈린다
-  const marginalExpenseRate = income <= EXPENSE_THRESHOLD ? EXPENSE_RATE_BASE : EXPENSE_RATE_EXCESS;
-
-  return {
-    income,
-    expenses,
-    netIncome,
-    personalDeduction,
-    taxableBase,
-    calculatedTax,
-    standardCredit,
-    determinedTax,
-    localTax,
-    totalTax,
-    withholdingPrepaid,
-    refund,
-    marginalExpenseRate,
-  };
-}
-
 // 누진 구간을 사람이 읽는 라벨로 (calc-engine INCOME_TAX_BRACKETS 기준)
 function incomeTaxBracketLabel(bracket) {
   const limitLabel = Number.isFinite(bracket.limit)
@@ -1994,14 +2158,11 @@ function buildCompareContent(aManWon, bManWon) {
 // =========================
 function buildQuitContent(years) {
   // 가정: 평균 월급 300만원, 평균임금 330만원(상여금 포함 1.1배), 3개월 생존비 200만원/월
-  const assumedMonthlyGross = 3_000_000;
-  const avgWage = Math.floor(assumedMonthlyGross * 1.1);
-  // 퇴직금: 30일분 × 근속연수 × (평균임금 ÷ 30 × 30) ≈ 평균임금 × 근속연수 × (1년 / 1년)
-  const severancePay = Math.floor(avgWage * years);
-
-  // 실업급여: 이직 전 평균임금의 60%, 하한 66,048원/일, 상한 68,100원/일 (2026)
-  const dailyWage = Math.floor(avgWage / 30);
-  const unemploymentDaily = Math.min(68_100, Math.max(66_048, Math.floor(dailyWage * 0.6)));
+  // 퇴직금·실업급여 모두 /severance-pay·/unemployment와 같은 공용 산식을 쓴다 — 퇴사 시뮬레이션이
+  // 개별 계산기와 다른 금액을 내면 사용자는 어느 쪽을 믿어야 할지 알 수 없다.
+  const { avgWage, severance: severancePay } = severancePayEstimate(years);
+  const { avgDailyWage: dailyWage, dailyAmount: unemploymentDaily } =
+    unemploymentDailyAllowance(avgWage);
   // 나이·가입기간별 수급일수 (40세 미만·가입 3~5년 = 180일 가정)
   let totalDays = 120;
   if (years >= 5 && years < 10) totalDays = 210;
@@ -2047,7 +2208,7 @@ function buildQuitContent(years) {
           </tr>
           <tr>
             <td style="${TD_STYLE}">가정 월 급여 (3개월 평균)</td>
-            <td style="${TD_STYLE}">${formatWon(assumedMonthlyGross)}</td>
+            <td style="${TD_STYLE}">${formatWon(SEVERANCE_ASSUMED_MONTHLY)}</td>
           </tr>
           <tr>
             <td style="${TD_STYLE}">평균임금 (상여금 포함 1.1배)</td>
@@ -2167,9 +2328,7 @@ function buildQuitContent(years) {
 // =========================
 function buildUnemploymentContent(manWon) {
   const monthly = manWon * 10_000;
-  const avgDailyWage = Math.floor(monthly / 30);
-  const rawDaily = Math.floor(avgDailyWage * 0.6);
-  const dailyAmount = Math.min(68_100, Math.max(66_048, rawDaily));
+  const { rawDaily, dailyAmount } = unemploymentDailyAllowance(monthly);
   // 시나리오: 40세 미만, 가입 3년 미만 = 120일
   const scenarios = [
     { label: "50세 미만, 가입 1년 미만", days: 120 },
@@ -2311,23 +2470,9 @@ function buildUnemploymentContent(manWon) {
 // 퇴직금 (/severance-pay/:years)
 // =========================
 function buildSeverancePayContent(years) {
-  // 가정: 평균 월급 300만원, 상여금 포함 평균임금 330만원
-  const assumedMonthly = 3_000_000;
-  const avgWage = Math.floor(assumedMonthly * 1.1);
-  const severance = Math.floor(avgWage * years);
-
-  // 간단한 퇴직소득세 추정 (근속연수 공제 적용)
-  let yearDeduction;
-  if (years <= 5) yearDeduction = 1_000_000 * years;
-  else if (years <= 10) yearDeduction = 5_000_000 + 2_000_000 * (years - 5);
-  else if (years <= 20) yearDeduction = 15_000_000 + 2_500_000 * (years - 10);
-  else yearDeduction = 40_000_000 + 3_000_000 * (years - 20);
-
-  const envBase = Math.max(0, severance - yearDeduction);
-  const annualConverted = envBase / Math.max(1, years) * 12;
-  // 6% 근사치
-  const estimatedTax = Math.floor(annualConverted * 0.06 * years / 12);
-  const netSeverance = severance - estimatedTax;
+  // 가정: 평균 월급 300만원, 상여금 포함 평균임금 330만원 (calc-engine 공용 산식)
+  const { avgWage, severance, yearDeduction, estimatedTax, netSeverance } =
+    severancePayEstimate(years);
 
   return `
     <article data-seo-prerender="severance" style="${ARTICLE_STYLE}">
@@ -2592,13 +2737,8 @@ function buildParentalLeaveContent(manWon) {
   // 2026 기준 일반 육아휴직 (src/data/parentalLeave.ts):
   //   1~3개월: 통상임금 100%, 상한 250만원
   //   4~6개월: 통상임금 100%, 상한 200만원
-  //   7~12개월: 통상임금 80%, 상한 160만원
-  // 하한: 70만원
-  const PL_FLOOR = 700_000;
-  const pay1_3 = Math.min(2_500_000, Math.max(PL_FLOOR, Math.floor(wage * 1.0)));
-  const pay4_6 = Math.min(2_000_000, Math.max(PL_FLOOR, Math.floor(wage * 1.0)));
-  const pay7_12 = Math.min(1_600_000, Math.max(PL_FLOOR, Math.floor(wage * 0.8)));
-  const total = pay1_3 * 3 + pay4_6 * 3 + pay7_12 * 6; // 12개월 가정
+  //   7~12개월: 통상임금 80%, 상한 160만원 / 하한 70만원
+  const { pay1_3, pay4_6, pay7_12, total } = parentalLeavePay(wage); // 12개월 가정
 
   return `
     <article data-seo-prerender="parental-leave" style="${ARTICLE_STYLE}">
@@ -2704,11 +2844,8 @@ function buildWithholdingContent(amount) {
   // 실제는 간이세액표이지만 prerender에서는 대략적 추정으로
   const monthlyTax = amount;
   const annualTax = monthlyTax * 12;
-  // 간이세액표 근사: 결정세액 = 과세표준 × 15% - 누진공제
-  // 역산: 추정 연봉 = (annualTax + 누진공제) / 0.06 (저연봉) ~ 0.15
-  // 단순 추정: 연봉 = (monthlyTax * 12 + 2_000_000) / 0.1 정도
-  const estimatedAnnual = Math.round((monthlyTax * 12 + 1_000_000) / 0.05);
-  const estimatedManWon = Math.round(estimatedAnnual / 10_000);
+  // 간이세액표 근사 역산 (calc-engine 공용 산식)
+  const { estimatedAnnual, estimatedManWon } = withholdingReverse(monthlyTax);
 
   return `
     <article data-seo-prerender="withholding" style="${ARTICLE_STYLE}">
@@ -2786,12 +2923,8 @@ function buildWithholdingContent(amount) {
 // 주휴수당 (/weekly-holiday-pay/:hourly)
 // =========================
 function buildWeeklyHolidayPayContent(hourly) {
-  const weeklyHours = 40;
-  const weeklyBase = hourly * weeklyHours;
-  const weeklyHoliday = Math.floor(hourly * 8);
-  const weeklyTotal = weeklyBase + weeklyHoliday;
-  const monthlyTotal = Math.floor(weeklyTotal * 4.345);
-  const effectiveHourly = Math.floor(hourly * 1.2);
+  const { weeklyBase, weeklyHoliday, weeklyTotal, monthlyTotal, effectiveHourly } =
+    weeklyHolidayPay(hourly);
 
   return `
     <article data-seo-prerender="weekly-holiday-pay" style="${ARTICLE_STYLE}">
@@ -2891,11 +3024,7 @@ function buildWeeklyHolidayPayContent(hourly) {
 // 시급 환산 (/wage-converter/:hourly)
 // =========================
 function buildWageConverterContent(hourly) {
-  const dailyWage = hourly * 8;
-  const weeklyBase = hourly * 40;
-  const weeklyTotal = weeklyBase + hourly * 8; // 주휴수당 포함
-  const monthlyTotal = Math.floor(weeklyTotal * 4.345);
-  const annualTotal = monthlyTotal * 12;
+  const { dailyWage, weeklyBase, weeklyTotal, monthlyTotal, annualTotal } = wageConversion(hourly);
 
   return `
     <article data-seo-prerender="wage-converter" style="${ARTICLE_STYLE}">
@@ -3003,8 +3132,8 @@ function buildRegionalHealthContent(manWon) {
   const monthlyIncome = manWon * 10_000;
   // 지역가입자 실제 산식과 다르므로 건강보험 총 요율로 소득분만 단순 추정
   // 재산·자동차 점수는 개인별로 편차가 커서 프리렌더에서는 제외
-  const estimatedRegionalIncomeOnly = Math.max(20_000, Math.floor(monthlyIncome * 0.0719));
-  const formerEmployed = Math.floor(monthlyIncome * 0.03595);
+  const { regionalIncomeOnly: estimatedRegionalIncomeOnly, formerEmployed } =
+    regionalHealthEstimate(monthlyIncome);
   const maxContinued = formerEmployed; // 임의계속가입: 직전 부담분 유지
 
   return `
@@ -3511,6 +3640,61 @@ function buildTermsContent() {
 // =========================
 // 루트 랜딩 페이지 리치 콘텐츠
 // =========================
+
+// 연봉 구간 표 — /salary 대표 페이지가 자기 변종들의 결과를 요약해 보여준다.
+// 변종이 사이트맵에서 빠졌으므로 이 표의 링크가 크롤러의 유일한 진입 경로다.
+function buildSalaryBandTable() {
+  const rows = SALARY_AMOUNTS.map((amount) => {
+    const result = calculateSalaryBreakdown({
+      grossAnnual: amount * 10_000,
+      nonTaxableMonthly: 200_000,
+      dependents: 1,
+      children: 0,
+      retirementIncluded: false,
+    });
+    return `<tr>
+      <td style="${TD_STYLE}"><a href="/finance/salary/${amount}">${formatManWonValue(amount)}원</a></td>
+      <td style="${TD_STYLE}"><strong>${formatWon(result.monthlyNet)}</strong></td>
+      <td style="${TD_STYLE}">${formatWon(result.totalDeduction)}</td>
+      <td style="${TD_STYLE}">${formatPercent(result.effectiveTaxRate)}</td>
+    </tr>`;
+  }).join("");
+
+  return `<table style="${TABLE_STYLE}">
+      <thead><tr>
+        <th style="${TH_STYLE}">연봉</th>
+        <th style="${TH_STYLE}">월 실수령액</th>
+        <th style="${TH_STYLE}">월 공제 합계</th>
+        <th style="${TH_STYLE}">실효세율</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="${P_STYLE}">부양가족 1인·비과세 식대 월 20만원 기준입니다. 연봉이 오를수록 실효세율이 함께 오르는 누진 구조가 그대로 드러나며, 연봉을 클릭하면 해당 금액의 공제 항목별 상세 계산으로 이동합니다.</p>`;
+}
+
+// 건보료 구간 표 — 역산 결과를 구간별로 미리 보여주고 변종 31개로 가는 경로를 연다.
+function buildInsuranceBandTable() {
+  const rows = INSURANCE_AMOUNTS.map((fee) => {
+    const monthlyTaxable = Math.floor(fee / RATES_2026.healthInsurance.employee);
+    const estimatedAnnual = Math.round(((monthlyTaxable + 200_000) * 12) / 10_000);
+    return `<tr>
+      <td style="${TD_STYLE}"><a href="/finance/insurance/${fee}">${formatWon(fee)}</a></td>
+      <td style="${TD_STYLE}">${formatWon(monthlyTaxable)}</td>
+      <td style="${TD_STYLE}"><strong>약 ${formatManWonValue(estimatedAnnual)}원</strong></td>
+    </tr>`;
+  }).join("");
+
+  return `<table style="${TABLE_STYLE}">
+      <thead><tr>
+        <th style="${TH_STYLE}">월 건강보험료(근로자 부담)</th>
+        <th style="${TH_STYLE}">추정 월 과세급여</th>
+        <th style="${TH_STYLE}">추정 세전 연봉</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="${P_STYLE}">비과세 식대 월 20만원을 더해 연봉으로 환산한 값입니다. 건보료를 클릭하면 해당 금액의 상세 역산 페이지로 이동합니다.</p>`;
+}
+
 const LANDING_CONTENT = {
   // App home. Copy lives in home-content.mjs because src/views/HomeView.vue renders the exact
   // same H1, H2 order and body text — the home no longer redirects to /salary, so a crawler and
@@ -3549,8 +3733,13 @@ const LANDING_CONTENT = {
         body: "월 20만원 식대 비과세는 과세표준에서 제외되어 4대보험과 소득세 모두 감면됩니다. 자가운전보조금(월 20만원 한도), 연구활동비(월 20만원 한도), 육아수당(월 10만원 한도) 등도 비과세 대상이므로 회사에 해당 항목 지급을 요청하면 실수령이 늘어날 수 있습니다.",
       },
       {
-        h2: "인기 연봉별 실수령액",
-        body: "연봉 3000 / 4000 / 5000 / 6000 / 7000 / 8000 / 1억 등 주요 구간별 상세 계산 페이지를 제공합니다. 각 구간의 월 실수령, 4대보험 공제, 소득세, 부양가족별 차이, FAQ를 확인하세요.",
+        h2: "연봉 구간별 월 실수령액 한눈에 보기",
+        body: "아래 표는 이 계산기가 다루는 연봉 2,000만원~5억원 구간의 계산 결과를 요약한 것입니다. 각 구간의 상세 페이지에는 4대보험 항목별 공제액, 소득세 산출 과정, 부양가족 수에 따른 차이가 들어 있습니다.",
+        extra: buildSalaryBandTable(),
+      },
+      {
+        h2: "같은 인상률이라도 체감이 달라지는 이유",
+        body: "표의 실효세율 열을 보면 연봉이 오를수록 세부담 비율이 함께 올라갑니다. 소득세가 6~45% 누진 구조이기 때문인데, 국민연금은 기준소득월액 상한 659만원(2026.7.1 시행)에서 멈추므로 고연봉 구간에서는 보험료 증가가 둔화되는 반대 효과도 있습니다. 두 힘이 겹쳐 실수령 증가폭은 연봉대마다 다르며, 이직 제안을 비교할 때는 인상률(%)이 아니라 월 실수령 증가액(원)으로 환산해 보아야 합니다.",
       },
     ],
     links: [
@@ -3592,6 +3781,11 @@ const LANDING_CONTENT = {
         h2: "피부양자 등록 요건",
         body: "직장가입자의 배우자·자녀·부모 등은 소득 연 2,000만원 이하, 재산 과세표준 5.4억 이하 요건을 충족하면 피부양자로 등록해 건보료를 면제받을 수 있습니다. 금융소득·연금소득·근로소득·사업소득의 합계로 판단합니다.",
       },
+      {
+        h2: "건보료 구간별 추정 연봉 표",
+        body: "아래 표는 이 계산기가 다루는 월 건보료 5만원~50만원 구간의 역산 결과입니다. 본인 급여명세서의 건강보험 항목(근로자 부담분)과 가장 가까운 금액을 찾아 상세 페이지로 이동하면, 해당 구간의 4대보험 총액과 추정 실수령액까지 확인할 수 있습니다.",
+        extra: buildInsuranceBandTable(),
+      },
     ],
     links: [
       { path: "/finance/insurance/100000", label: "건보료 10만원 연봉 계산" },
@@ -3616,7 +3810,8 @@ function buildLandingContent(route) {
     .join("");
 
   const sectionsHtml = data.sections.map(
-    (s) => `<h2 style="${H2_STYLE}">${s.h2}</h2><p style="${P_STYLE}">${s.body}</p>`
+    (s) =>
+      `<h2 style="${H2_STYLE}">${s.h2}</h2><p style="${P_STYLE}">${s.body}</p>${s.extra ?? ""}`
   );
 
   const linksBlock = `<h2 style="${H2_STYLE}">${data.linksH2 ?? "관련 계산기 바로가기"}</h2><ul style="${UL_STYLE}">${linksHtml}</ul>`;
@@ -3654,6 +3849,12 @@ export function buildRichContent(route, _meta) {
   const landing = buildLandingContent(route);
   if (landing) return landing;
 
+  // Base calculator hubs. Checked before the amount-variant matchers below because "/salary" and
+  // "/salary/5000" are different routes, and before prerender.mjs falls back to buildPrerenderGuide
+  // — the hub replaces that 4-heading template with a body written for this specific calculator.
+  const hub = buildHubContent(route);
+  if (hub) return hub;
+
   const salaryMatch = route.match(SALARY_RE);
   if (salaryMatch) {
     const amount = parseInt10(salaryMatch[1]);
@@ -3670,6 +3871,12 @@ export function buildRichContent(route, _meta) {
   if (unpaidWageMatch) {
     const amount = parseInt10(unpaidWageMatch[1]);
     if (amount !== null && amount > 0) return buildUnpaidWageContent(amount);
+  }
+
+  const freelancerMatch = route.match(FREELANCER_RE);
+  if (freelancerMatch) {
+    const amount = parseInt10(freelancerMatch[1]);
+    if (amount !== null && amount > 0) return buildFreelancerContent(amount);
   }
 
   const eitcMatch = route.match(EITC_RE);

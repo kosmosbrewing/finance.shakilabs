@@ -104,6 +104,41 @@ export const WEEKLY_HOLIDAY_PAY_AMOUNTS = [10320, 11000, 12000, 15000];
 export const WAGE_CONVERTER_AMOUNTS = [10320, 12000, 15000, 20000];
 export const SEVERANCE_PAY_AMOUNTS = [1, 3, 5, 10];
 
+// Doorway-variant consolidation (AdSense "low value content" remediation).
+//
+// Every family below was compared pair-by-pair on the tag-stripped prerendered body and came
+// back above 0.90 similarity — /parental-leave and /unemployment peaked at 0.997, i.e. the only
+// thing that differs between two URLs is the amount substituted into the same sentences. That
+// is a doorway set, and no amount of padding fixes it, so the variants canonicalize into their
+// base calculator instead: ranking signals merge into one page rather than splitting 120 ways.
+//
+// Deliberately NOT here: /eitc/:household. Household type changes the statutory income ceiling
+// and the maximum payout, so each variant reaches a genuinely different conclusion and keeps
+// its own place in the index.
+//
+// This is reversible. If a family later grows body content that actually diverges per URL,
+// delete it from this list — the route returns to the sitemap and becomes self-canonical again
+// with no other change, because the sitemap and the canonical tag both derive from this array.
+export const PARAM_ROUTES = [
+  ...INSURANCE_AMOUNTS.map((amount) => `/insurance/${amount}`),
+  ...SALARY_AMOUNTS.map((amount) => `/salary/${amount}`),
+  ...COMPREHENSIVE_TAX_AMOUNTS.map((amount) => `/comprehensive-tax/${amount}`),
+  ...COMPARE_PAIRS.map(([a, b]) => `/compare/${a}-vs-${b}`),
+  ...WITHHOLDING_AMOUNTS.map((amount) => `/withholding/${amount}`),
+  ...YEAR_END_AMOUNTS.map((amount) => `/year-end-settlement/${amount}`),
+  ...PARENTAL_LEAVE_AMOUNTS.map((amount) => `/parental-leave/${amount}`),
+  ...UNPAID_WAGE_AMOUNTS.map((amount) => `/unpaid-wage/${amount}`),
+  ...FREELANCER_AMOUNTS.map((amount) => `/freelancer/${amount}`),
+  ...QUIT_YEARS.map((years) => `/quit/${years}years`),
+  ...SEVERANCE_PAY_AMOUNTS.map((amount) => `/severance-pay/${amount}`),
+  ...WEEKLY_HOLIDAY_PAY_AMOUNTS.map((amount) => `/weekly-holiday-pay/${amount}`),
+  ...WAGE_CONVERTER_AMOUNTS.map((amount) => `/wage-converter/${amount}`),
+  ...REGIONAL_HEALTH_AMOUNTS.map((amount) => `/regional-health/${amount}`),
+  ...UNEMPLOYMENT_AMOUNTS.map((amount) => `/unemployment/${amount}`),
+];
+
+const PARAM_ROUTE_SET = new Set(PARAM_ROUTES);
+
 export const SEO_ROUTES = [
   // The app home. prerender.mjs already routed "/" to dist/index.html, but the route was
   // never listed here, so the home shipped as an empty shell with no body and no footer links.
@@ -159,3 +194,29 @@ export const SEO_ROUTES = [
   "/severance-pay",
   ...SEVERANCE_PAY_AMOUNTS.map((amount) => `/severance-pay/${amount}`),
 ];
+
+// PARAM_ROUTES is written by hand from the amount arrays, so it can silently drift out of
+// SEO_ROUTES (a renamed slug, a family added to one list but not the other). A drifted entry
+// would canonicalize a URL that is never prerendered, so fail the build here rather than ship it.
+const SEO_ROUTE_SET = new Set(SEO_ROUTES);
+for (const route of PARAM_ROUTES) {
+  if (!SEO_ROUTE_SET.has(route)) {
+    throw new Error(`[seo-routes] PARAM_ROUTES lists ${route}, which is not a prerendered route`);
+  }
+}
+
+// The sitemap advertises only self-canonical pages. A consolidated variant still returns 200 and
+// still gets crawled through internal links — it just should not be *submitted*, because every
+// submitted URL that immediately points elsewhere spends crawl budget for nothing.
+export const SITEMAP_ROUTES = SEO_ROUTES.filter((route) => !PARAM_ROUTE_SET.has(route));
+
+// Canonical target for a prerendered route: a consolidated variant points at its base
+// calculator (/salary/5000 -> /salary), everything else points at itself.
+export function canonicalPathFor(route) {
+  return PARAM_ROUTE_SET.has(route) ? route.slice(0, route.lastIndexOf("/")) : route;
+}
+
+// PRERENDER_ROUTES intentionally still covers PARAM_ROUTES. Dropping a consolidated variant from
+// the prerender pass would leave the Vercel rewrite serving an empty SPA shell for that URL,
+// which reads as a soft-404 — strictly worse than the duplicate it was meant to fix.
+export const PRERENDER_ROUTES = SEO_ROUTES;
