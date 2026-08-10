@@ -69,21 +69,21 @@ function parseInt10(s) {
 
 // --- 공통 HTML 스타일 ---
 const ARTICLE_STYLE =
-  "max-width:920px;margin:0 auto;padding:24px 16px;line-height:1.75;font-size:15px;color:#334155;";
-const H1_STYLE = "font-size:28px;line-height:1.3;margin:0 0 16px;color:#0f172a;";
+  "max-width:920px;margin:0 auto;padding:24px 16px;line-height:1.75;font-size:15px;color:hsl(var(--foreground));";
+const H1_STYLE = "font-size:28px;line-height:1.3;margin:0 0 16px;color:hsl(var(--foreground));";
 const H2_STYLE =
-  "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #10b98133;color:#0f172a;";
-const H3_STYLE = "font-size:16px;line-height:1.4;margin:18px 0 6px;color:#0f172a;";
+  "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--highlight) / 0.3);color:hsl(var(--foreground));";
+const H3_STYLE = "font-size:16px;line-height:1.4;margin:18px 0 6px;color:hsl(var(--foreground));";
 const P_STYLE = "margin:0 0 10px;";
 const TABLE_STYLE =
   "width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:14px;";
 const TH_STYLE =
-  "padding:8px 10px;background:#f1f5f9;text-align:left;border:1px solid #cbd5e1;color:#334155;font-weight:600;";
-const TD_STYLE = "padding:8px 10px;border:1px solid #cbd5e1;";
+  "padding:8px 10px;background:hsl(var(--muted));text-align:left;border:1px solid hsl(var(--border));color:hsl(var(--foreground));font-weight:600;";
+const TD_STYLE = "padding:8px 10px;border:1px solid hsl(var(--border));";
 const UL_STYLE = "margin:0 0 12px 20px;padding:0;";
 const LI_STYLE = "margin-bottom:4px;";
 const CALLOUT_STYLE =
-  "background:#ecfdf5;border-left:4px solid #10b981;padding:12px 14px;margin:12px 0 16px;border-radius:4px;";
+  "background:hsl(var(--accent));border-left:4px solid hsl(var(--highlight));padding:12px 14px;margin:12px 0 16px;border-radius:4px;";
 
 // =========================
 // 연봉 실수령액 (/salary/:amount)
@@ -118,10 +118,10 @@ function buildSalaryContent(manWon) {
 
   return `
     <article data-seo-prerender="salary" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">연봉 실수령액 계산기</a>
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">연봉 실수령액 계산기</a>
         &nbsp;›&nbsp;
         연봉 ${label}
       </nav>
@@ -130,7 +130,7 @@ function buildSalaryContent(manWon) {
 
       <p style="${P_STYLE}">
         2026년 최신 세율·요율을 적용한 연봉 <strong>${label}원</strong>의 월 실수령액은
-        <strong style="color:#047857;">${formatWon(result.monthlyNet)}</strong>입니다.
+        <strong style="color:hsl(var(--primary));">${formatWon(result.monthlyNet)}</strong>입니다.
         세전 월급 ${formatWon(result.monthlyGross)}에서 4대보험 ${formatWon(result.totalInsurance)}과
         소득세·지방소득세 ${formatWon(result.totalTax)}이 공제되며, 연간 실수령액은 약
         ${formatWon(result.annualNet)}, 실효세율은 ${formatPercent(result.effectiveTaxRate)}입니다.
@@ -167,9 +167,9 @@ function buildSalaryContent(manWon) {
             <td style="${TD_STYLE}">-${formatWon(result.totalTax)}</td>
             <td style="${TD_STYLE}">-${formatWon(result.determinedTax + result.annualLocalTax)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>실수령액</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:#047857;">${formatWon(result.monthlyNet)}</strong></td>
+            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatWon(result.monthlyNet)}</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(result.annualNet)}</strong></td>
           </tr>
         </tbody>
@@ -209,7 +209,7 @@ function buildSalaryContent(manWon) {
             <td style="${TD_STYLE}">0.9%</td>
             <td style="${TD_STYLE}">${formatWon(result.employmentInsurance)}</td>
           </tr>
-          <tr style="background:#f8fafc;">
+          <tr style="background:hsl(var(--muted));">
             <td style="${TD_STYLE}"><strong>합계</strong></td>
             <td style="${TD_STYLE}"><strong>약 9.24%</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(result.totalInsurance)}</strong></td>
@@ -332,7 +332,7 @@ function buildSalaryContent(manWon) {
         <li style="${LI_STYLE}"><a href="https://www.nps.or.kr" target="_blank" rel="noopener noreferrer">국민연금공단</a> — 국민연금 요율·기준소득월액 상·하한</li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 계산 결과는 2026년 국세청 근로소득 간이세액표와 국민건강보험공단·국민연금공단·고용노동부 고시를 기반으로 한
         추정값이며, 법적 효력이 없는 참고용입니다. 실제 급여명세서와 차이가 있을 수 있습니다.
       </p>
@@ -369,10 +369,10 @@ function buildFreelancerContent(manWon) {
 
   return `
     <article data-seo-prerender="freelancer" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/freelancer" style="color:#64748b;text-decoration:none;">프리랜서 세금 계산기</a>
+        <a href="/finance/freelancer" style="color:hsl(var(--muted-foreground));text-decoration:none;">프리랜서 세금 계산기</a>
         &nbsp;›&nbsp;
         연 수입 ${label}
       </nav>
@@ -388,8 +388,8 @@ function buildFreelancerContent(manWon) {
 
       <p style="${P_STYLE}">
         ${calc.refund >= 0
-          ? `확정세액이 기납부액보다 적으므로 <strong style="color:#047857;">약 ${formatWon(calc.refund)}을 환급</strong>받게 됩니다. 이 구간에서는 3.3%가 실제 세부담보다 크게 떼이고 있다는 뜻입니다.`
-          : `확정세액이 기납부액을 넘어 <strong style="color:#dc2626;">약 ${formatWon(Math.abs(calc.refund))}을 추가로 납부</strong>해야 합니다. 매달 ${formatWon(reserveMonthly)}씩 따로 모아두면 5월에 목돈을 마련하지 않아도 됩니다.`}
+          ? `확정세액이 기납부액보다 적으므로 <strong style="color:hsl(var(--primary));">약 ${formatWon(calc.refund)}을 환급</strong>받게 됩니다. 이 구간에서는 3.3%가 실제 세부담보다 크게 떼이고 있다는 뜻입니다.`
+          : `확정세액이 기납부액을 넘어 <strong style="color:hsl(var(--destructive));">약 ${formatWon(Math.abs(calc.refund))}을 추가로 납부</strong>해야 합니다. 매달 ${formatWon(reserveMonthly)}씩 따로 모아두면 5월에 목돈을 마련하지 않아도 됩니다.`}
       </p>
 
       <h2 style="${H2_STYLE}">1. 월 현금흐름 요약</h2>
@@ -397,7 +397,7 @@ function buildFreelancerContent(manWon) {
         <tbody>
           <tr><td style="${TD_STYLE}">월 청구액(세전)</td><td style="${TD_STYLE}">${formatWon(monthlyGross)}</td></tr>
           <tr><td style="${TD_STYLE}">3.3% 원천징수</td><td style="${TD_STYLE}">-${formatWon(monthlyWithheld)}</td></tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>월 실입금액</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(monthlyNet)}</strong></td>
           </tr>
@@ -423,7 +423,7 @@ function buildFreelancerContent(manWon) {
       <h2 style="${H2_STYLE}">3. 세금 말고 함께 늘어나는 부담</h2>
       <ul style="${UL_STYLE}">
         <li style="${LI_STYLE}"><strong>건강보험료</strong> — 프리랜서는 지역가입자입니다. 5월 신고 소득이 그해 11월 보험료 재산정에 반영되므로, 수입이 늘어난 다음 해에 보험료가 함께 오릅니다.</li>
-        <li style="${LI_STYLE}"><strong>국민연금</strong> — 지역가입자 보험료는 신고 소득의 9%를 본인이 전액 부담합니다. 직장가입자가 4.75%만 내는 것과 대비됩니다.</li>
+        <li style="${LI_STYLE}"><strong>국민연금</strong> — 지역가입자 보험료는 신고 소득의 9.5%를 본인이 전액 부담합니다. 직장가입자가 절반인 4.75%만 내는 것과 대비됩니다.</li>
         <li style="${LI_STYLE}"><strong>부가가치세</strong> — 인적용역은 면세라 대체로 해당이 없지만, 사업자등록을 내고 용역을 공급하면 과세 대상이 될 수 있습니다.</li>
         ${overThreshold
           ? `<li style="${LI_STYLE}"><strong>기장 의무</strong> — 직전 연도 수입이 일정 기준을 넘으면 복식부기 의무자가 되며, 추계신고 시 무기장가산세 20%가 부과됩니다.</li>`
@@ -439,7 +439,7 @@ function buildFreelancerContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/regional-health">지역가입자 건보료 계산기</a></li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 단순경비율 적용 인적용역 기준 추정치입니다. 업종 코드·장부 작성 여부·다른 소득·부양가족에 따라 실제 세액이
         달라지며, 확정 금액은 국세청 홈택스 신고 화면에서 확인하세요.
       </p>
@@ -606,7 +606,7 @@ function buildEitcContent(householdSlug) {
       const amount = eitcAmountFor(income, bracket);
       const zone = income < bracket.phaseInEnd ? "점증" : income <= bracket.plateauEnd ? "평탄(최대)" : "점감";
       return `
-          <tr${amount === bracket.maxAmount ? ' style="background:#ecfdf5;"' : ""}>
+          <tr${amount === bracket.maxAmount ? ' style="background:hsl(var(--accent));"' : ""}>
             <td style="${TD_STYLE}">${formatWon(income)}</td>
             <td style="${TD_STYLE}">${zone}</td>
             <td style="${TD_STYLE}"><strong>${formatWon(amount)}</strong></td>
@@ -621,10 +621,10 @@ function buildEitcContent(householdSlug) {
 
   return `
     <article data-seo-prerender="eitc" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/eitc" style="color:#64748b;text-decoration:none;">근로장려금 계산기</a>
+        <a href="/finance/eitc" style="color:hsl(var(--muted-foreground));text-decoration:none;">근로장려금 계산기</a>
         &nbsp;›&nbsp;
         ${bracket.label}
       </nav>
@@ -635,7 +635,7 @@ function buildEitcContent(householdSlug) {
 
       <p style="${P_STYLE}">
         ${bracket.label}는 연간 총급여 <strong>${formatWon(bracket.phaseOutEnd)}</strong> 미만일 때 신청할 수 있고,
-        최대 <strong style="color:#047857;">${formatWon(bracket.maxAmount)}</strong>까지 받을 수 있습니다.
+        최대 <strong style="color:hsl(var(--primary));">${formatWon(bracket.maxAmount)}</strong>까지 받을 수 있습니다.
         총급여 ${formatWon(bracket.phaseInEnd)}까지는 소득에 비례해 늘어나는 점증 구간,
         ${formatWon(bracket.plateauEnd)}까지는 최대액을 유지하는 평탄 구간,
         그 이후는 상한에서 0원이 되는 점감 구간입니다.
@@ -686,7 +686,7 @@ function buildEitcContent(householdSlug) {
       </ul>
       <p style="${P_STYLE}">다른 가구 유형으로 보기: ${otherLinks}</p>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 조세특례제한법 산식 기준 간이 추정치이며, 국세청 산정표·단수 조정, 국민연금 수급 등 제외 요건에 따라
         실제 지급액과 차이가 있을 수 있습니다. 확정 금액은 홈택스 모의계산을 이용하세요.
       </p>
@@ -722,10 +722,10 @@ function buildUnpaidWageContent(manWon) {
 
   return `
     <article data-seo-prerender="unpaid-wage" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/unpaid-wage" style="color:#64748b;text-decoration:none;">임금체불 지연이자 계산기</a>
+        <a href="/finance/unpaid-wage" style="color:hsl(var(--muted-foreground));text-decoration:none;">임금체불 지연이자 계산기</a>
         &nbsp;›&nbsp;
         체불액 ${label}원
       </nav>
@@ -734,7 +734,7 @@ function buildUnpaidWageContent(manWon) {
 
       <p style="${P_STYLE}">
         밀린 임금·퇴직금 <strong>${formatWon(amount)}</strong>은 퇴직일부터 14일(금품청산 기한)이 지난
-        다음 날부터 근로기준법 제37조에 따라 <strong style="color:#047857;">연 20%</strong>의 지연이자가 붙습니다.
+        다음 날부터 근로기준법 제37조에 따라 <strong style="color:hsl(var(--primary));">연 20%</strong>의 지연이자가 붙습니다.
         하루 약 ${formatWon(dailyRetired)}, 한 달 기준 약 ${formatWon(monthlyRetired)}씩 늘어나는 셈입니다.
         재직 중 체불이나 소송 단계에서는 민법 5%·상법 6%·소송촉진법 12%가 적용됩니다.
       </p>
@@ -799,7 +799,7 @@ function buildUnpaidWageContent(manWon) {
       </ul>
       <p style="${P_STYLE}">다른 체불액으로 보기: ${otherAmountLinks}</p>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 근로기준법·민법·상법·소송촉진법의 법정이율을 단순 적용한 참고용 추정치입니다.
         일부 변제, 지연이자 적용 제외 사유, 판결 주문에 따라 실제 금액은 달라질 수 있습니다.
       </p>
@@ -832,7 +832,7 @@ function buildInsuranceNeighborRows(fee) {
         ? `<a href="/finance/insurance/${neighborFee}">${formatWon(neighborFee)}</a>`
         : `${formatWon(neighborFee)}${isCurrent ? " (현재 페이지)" : ""}`;
       return `
-          <tr${isCurrent ? ' style="background:#ecfdf5;"' : ""}>
+          <tr${isCurrent ? ' style="background:hsl(var(--accent));"' : ""}>
             <td style="${TD_STYLE}">${feeCell}</td>
             <td style="${TD_STYLE}">${formatManWonValue(Math.round(annual / 10_000))}원</td>
             <td style="${TD_STYLE}">${formatWon(breakdown.monthlyNet)}</td>
@@ -1139,10 +1139,10 @@ function buildInsuranceContent(fee) {
 
   return `
     <article data-seo-prerender="insurance" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/insurance" style="color:#64748b;text-decoration:none;">건강보험료 계산기</a>
+        <a href="/finance/insurance" style="color:hsl(var(--muted-foreground));text-decoration:none;">건강보험료 계산기</a>
         &nbsp;›&nbsp;
         건보료 ${feeManWon}만원
       </nav>
@@ -1151,7 +1151,7 @@ function buildInsuranceContent(fee) {
 
       <p style="${P_STYLE}">
         월 건강보험료가 <strong>${formatWon(fee)}</strong>이라면, 2026년 건보료 요율 3.595%(근로자 부담)를
-        기준으로 역산한 월 과세 급여는 약 <strong style="color:#047857;">${formatWon(monthlyTaxable)}</strong>,
+        기준으로 역산한 월 과세 급여는 약 <strong style="color:hsl(var(--primary));">${formatWon(monthlyTaxable)}</strong>,
         비과세 식대(월 20만원) 포함 월 총 지급액은 약 ${formatWon(monthlyTaxable + 200_000)}이며,
         연봉으로 환산하면 <strong>약 ${formatManWonValue(estimatedManWon)}원</strong>입니다.
       </p>
@@ -1183,9 +1183,9 @@ function buildInsuranceContent(fee) {
             <td style="${TD_STYLE}">추정 월 세전 급여 (비과세 20만원 포함)</td>
             <td style="${TD_STYLE}">${formatWon(monthlyTaxable + 200_000)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>추정 연봉</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:#047857;">${formatManWonValue(estimatedManWon)}원 (${formatWon(estimatedAnnual)})</strong></td>
+            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatManWonValue(estimatedManWon)}원 (${formatWon(estimatedAnnual)})</strong></td>
           </tr>
           <tr>
             <td style="${TD_STYLE}">예상 월 실수령액</td>
@@ -1261,7 +1261,7 @@ function buildInsuranceContent(fee) {
             <td style="${TD_STYLE}">소득세+지방소득세</td>
             <td style="${TD_STYLE}">${formatWon(result.totalTax)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>월 실수령액</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(result.monthlyNet)}</strong></td>
           </tr>
@@ -1357,7 +1357,7 @@ function buildInsuranceContent(fee) {
         <li style="${LI_STYLE}"><a href="https://www.4insure.or.kr" target="_blank" rel="noopener noreferrer">4대사회보험 정보연계센터</a> — 사업장 가입 내역·보수월액 확인</li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 국민건강보험공단 2026년 요율 고시를 기반으로 한 역산 추정치이며, 법적 효력이 없는 참고용입니다.
       </p>
     </article>`;
@@ -1575,7 +1575,7 @@ function buildComprehensiveTaxNeighborSection(manWon, calc) {
         ? "기준"
         : `${diff >= 0 ? "+" : "-"}${formatWon(Math.abs(diff))}`;
       return `
-          <tr${isCurrent ? ' style="background:#ecfdf5;"' : ""}>
+          <tr${isCurrent ? ' style="background:hsl(var(--accent));"' : ""}>
             <td style="${TD_STYLE}">${amountCell}</td>
             <td style="${TD_STYLE}">${formatWon(neighborCalc.totalTax)}</td>
             <td style="${TD_STYLE}">${formatPercent(neighborCalc.totalTax / neighborCalc.income)}</td>
@@ -1641,10 +1641,10 @@ function buildComprehensiveTaxContent(manWon) {
 
   return `
     <article data-seo-prerender="comprehensive-tax" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/comprehensive-tax" style="color:#64748b;text-decoration:none;">종합소득세 계산기</a>
+        <a href="/finance/comprehensive-tax" style="color:hsl(var(--muted-foreground));text-decoration:none;">종합소득세 계산기</a>
         &nbsp;›&nbsp;
         수입 ${label}
       </nav>
@@ -1654,9 +1654,9 @@ function buildComprehensiveTaxContent(manWon) {
       <p style="${P_STYLE}">
         프리랜서·개인사업자가 연 수입 <strong>${label}원</strong>을 올렸을 때,
         단순경비율(IT·디자인·작가 등 인적용역 기준: 4천만원 이하 64.1% + 초과분 49.7%) 적용 시 종합소득세는 약
-        <strong style="color:#047857;">${formatWon(totalTax)}</strong>(지방소득세 포함)입니다.
+        <strong style="color:hsl(var(--primary));">${formatWon(totalTax)}</strong>(지방소득세 포함)입니다.
         3.3% 원천징수로 미리 납부한 금액이 ${formatWon(withholdingPrepaid)}이라면,
-        ${refund >= 0 ? `<strong style="color:#047857;">약 ${formatWon(refund)} 환급</strong>` : `<strong style="color:#dc2626;">약 ${formatWon(-refund)} 추가 납부</strong>`}이 예상됩니다.
+        ${refund >= 0 ? `<strong style="color:hsl(var(--primary));">약 ${formatWon(refund)} 환급</strong>` : `<strong style="color:hsl(var(--destructive));">약 ${formatWon(-refund)} 추가 납부</strong>`}이 예상됩니다.
       </p>
 
       <p style="${P_STYLE}">
@@ -1700,9 +1700,9 @@ function buildComprehensiveTaxContent(manWon) {
             <td style="${TD_STYLE}">지방소득세 (결정세액의 10%)</td>
             <td style="${TD_STYLE}">+${formatWon(localTax)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>최종 납부세액</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:#047857;">${formatWon(totalTax)}</strong></td>
+            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatWon(totalTax)}</strong></td>
           </tr>
         </tbody>
       </table>
@@ -1798,7 +1798,7 @@ function buildComprehensiveTaxContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a> - 근로소득자</li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 계산은 인적용역 단순경비율(4천만원 이하 64.1%, 초과분 49.7%)·인적공제 1인 기준 단순 추정이며, 실제 경비율·공제는 업종과 장부 여부에 따라 달라집니다. 정확한 세액은 국세청 홈택스 모의계산 또는 세무대리인 상담이 필요합니다.
       </p>
     </article>`;
@@ -1825,7 +1825,7 @@ function buildCompareBreakdownSection(a, b) {
       const isNet = index === rows.length - 1;
       const share = annualGrossDiff > 0 ? formatPercent(amount / annualGrossDiff) : "-";
       return `
-          <tr${isNet ? ' style="background:#ecfdf5;"' : ""}>
+          <tr${isNet ? ' style="background:hsl(var(--accent));"' : ""}>
             <td style="${TD_STYLE}">${isNet ? `<strong>${label}</strong>` : label}</td>
             <td style="${TD_STYLE}">${isNet ? "+" : "-"}${formatWon(amount)}</td>
             <td style="${TD_STYLE}">${share}</td>
@@ -2022,10 +2022,10 @@ function buildCompareContent(aManWon, bManWon) {
 
   return `
     <article data-seo-prerender="compare" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/compare" style="color:#64748b;text-decoration:none;">이직 연봉 비교</a>
+        <a href="/finance/compare" style="color:hsl(var(--muted-foreground));text-decoration:none;">이직 연봉 비교</a>
         &nbsp;›&nbsp;
         ${aManWon.toLocaleString("ko-KR")} vs ${bManWon.toLocaleString("ko-KR")}
       </nav>
@@ -2035,7 +2035,7 @@ function buildCompareContent(aManWon, bManWon) {
       <p style="${P_STYLE}">
         연봉 ${formatManWonValue(aManWon)}에서 ${formatManWonValue(bManWon)}으로 이직(또는 인상) 시
         세전 연봉은 <strong>${formatWon(grossDiff)}</strong> 증가하지만,
-        실제 월 실수령액 증가는 <strong style="color:#047857;">${formatWon(netDiff)}</strong>,
+        실제 월 실수령액 증가는 <strong style="color:hsl(var(--primary));">${formatWon(netDiff)}</strong>,
         연간 실수령 증가는 <strong>${formatWon(netAnnualDiff)}</strong>입니다.
         즉, 연봉 인상분의 약 <strong>${retentionRate.toFixed(1)}%</strong>만 실제 통장에 남습니다.
       </p>
@@ -2074,10 +2074,10 @@ function buildCompareContent(aManWon, bManWon) {
             <td style="${TD_STYLE}">-${formatWon(b.totalTax)}</td>
             <td style="${TD_STYLE}">-${formatWon(b.totalTax - a.totalTax)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>월 실수령</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(a.monthlyNet)}</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:#047857;">${formatWon(b.monthlyNet)}</strong></td>
+            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatWon(b.monthlyNet)}</strong></td>
             <td style="${TD_STYLE}"><strong>+${formatWon(netDiff)}</strong></td>
           </tr>
           <tr>
@@ -2147,7 +2147,7 @@ function buildCompareContent(aManWon, bManWon) {
         <li style="${LI_STYLE}"><a href="/finance/quit">퇴사 계산기</a> - 이직 준비 시 참고</li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 2026년 세율·요율 기준 추정치이며, 실제 급여명세와 차이가 있을 수 있습니다.
       </p>
     </article>`;
@@ -2177,10 +2177,10 @@ function buildQuitContent(years) {
 
   return `
     <article data-seo-prerender="quit" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/quit" style="color:#64748b;text-decoration:none;">퇴사 계산기</a>
+        <a href="/finance/quit" style="color:hsl(var(--muted-foreground));text-decoration:none;">퇴사 계산기</a>
         &nbsp;›&nbsp;
         ${years}년 근속
       </nav>
@@ -2189,7 +2189,7 @@ function buildQuitContent(years) {
 
       <p style="${P_STYLE}">
         평균 월급 300만원 기준으로 <strong>${years}년 근속</strong> 후 퇴사하면,
-        예상 퇴직금은 <strong style="color:#047857;">약 ${formatWon(severancePay)}</strong>,
+        예상 퇴직금은 <strong style="color:hsl(var(--primary));">약 ${formatWon(severancePay)}</strong>,
         실업급여 총액은 <strong>약 ${formatWon(unemploymentTotal)}</strong>(${totalDays}일간)이며,
         월 200만원 생활비 기준 <strong>약 ${survivalMonths}개월</strong>의 생존 기간을 확보할 수 있습니다.
       </p>
@@ -2230,7 +2230,7 @@ function buildQuitContent(years) {
             <td style="${TD_STYLE}">실업급여 총액</td>
             <td style="${TD_STYLE}">${formatWon(unemploymentTotal)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>총 재원 (퇴직금 + 실업급여)</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(severancePay + unemploymentTotal)}</strong></td>
           </tr>
@@ -2317,7 +2317,7 @@ function buildQuitContent(years) {
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a> - 재취업 시 참고</li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 시뮬레이션은 평균 월급 300만원·표준 수급일수 가정의 추정이며, 실제 퇴직금·실업급여는 근로계약·이직사유·나이 등에 따라 달라집니다.
       </p>
     </article>`;
@@ -2340,10 +2340,10 @@ function buildUnemploymentContent(manWon) {
 
   return `
     <article data-seo-prerender="unemployment" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/unemployment" style="color:#64748b;text-decoration:none;">실업급여 계산기</a>
+        <a href="/finance/unemployment" style="color:hsl(var(--muted-foreground));text-decoration:none;">실업급여 계산기</a>
         &nbsp;›&nbsp;
         월급 ${formatManWonValue(manWon)}
       </nav>
@@ -2353,7 +2353,7 @@ function buildUnemploymentContent(manWon) {
       <p style="${P_STYLE}">
         월급 <strong>${formatManWonValue(manWon)}원</strong> 기준으로 실업급여(구직급여)의 일 수급액은
         평균임금의 60%인 <strong>${formatWon(rawDaily)}</strong>이지만, 2026년 고시 상한액 68,100원과 하한액 66,048원이 적용되어
-        실제 수급액은 <strong style="color:#047857;">${formatWon(dailyAmount)}/일</strong>입니다.
+        실제 수급액은 <strong style="color:hsl(var(--primary));">${formatWon(dailyAmount)}/일</strong>입니다.
       </p>
 
       <p style="${P_STYLE}">
@@ -2460,7 +2460,7 @@ function buildUnemploymentContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/regional-health">지역가입자 건보료 계산기</a></li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 고용노동부 2026년 실업급여 고시 기준 추정이며, 실제 수급액은 고용센터 심사를 거쳐 확정됩니다.
       </p>
     </article>`;
@@ -2476,10 +2476,10 @@ function buildSeverancePayContent(years) {
 
   return `
     <article data-seo-prerender="severance" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a>
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a>
         &nbsp;›&nbsp;
-        <a href="/finance/severance-pay" style="color:#64748b;text-decoration:none;">퇴직금 계산기</a>
+        <a href="/finance/severance-pay" style="color:hsl(var(--muted-foreground));text-decoration:none;">퇴직금 계산기</a>
         &nbsp;›&nbsp;
         ${years}년 근속
       </nav>
@@ -2488,7 +2488,7 @@ function buildSeverancePayContent(years) {
 
       <p style="${P_STYLE}">
         평균 월급 300만원·상여금 포함 평균임금 ${formatWon(avgWage)} 기준으로
-        <strong>${years}년 근속</strong> 시 세전 퇴직금은 약 <strong style="color:#047857;">${formatWon(severance)}</strong>,
+        <strong>${years}년 근속</strong> 시 세전 퇴직금은 약 <strong style="color:hsl(var(--primary));">${formatWon(severance)}</strong>,
         근속연수 공제 ${formatWon(yearDeduction)} 적용 후 예상 퇴직소득세는 약 ${formatWon(estimatedTax)},
         실수령 퇴직금은 <strong>약 ${formatWon(netSeverance)}</strong>입니다.
       </p>
@@ -2506,9 +2506,10 @@ function buildSeverancePayContent(years) {
 
       <h2 style="${H2_STYLE}">2. 퇴직소득세 구조</h2>
       <p style="${P_STYLE}">
-        퇴직소득세는 근속연수에 따른 공제를 먼저 차감한 후, "연분연승법"(12 ÷ 근속연수 × 과세표준)으로
-        1년치로 환산해 세율을 적용한 뒤 다시 근속연수를 곱해 산출하는 방식입니다.
-        이로 인해 근속연수가 길수록 낮은 세율 구간에 해당되어 유리합니다.
+        퇴직소득세는 근속연수공제를 먼저 차감하고, 남은 금액을 "연분연승법"(× 12 ÷ 근속연수)으로
+        1년치 환산급여로 바꾼 뒤 <strong>환산급여공제</strong>까지 뺀 과세표준에 세율을 적용하고
+        다시 근속연수를 곱해 산출합니다. 아래 표의 세액은 이 순서를 그대로 적용하고 지방소득세 10%를
+        더한 금액이라 계산기 결과와 같습니다. 근속연수가 길수록 두 공제가 모두 커져 세부담이 줄어듭니다.
       </p>
       <table style="${TABLE_STYLE}">
         <thead>
@@ -2548,9 +2549,9 @@ function buildSeverancePayContent(years) {
             <td style="${TD_STYLE}">예상 퇴직소득세(추정)</td>
             <td style="${TD_STYLE}">-${formatWon(estimatedTax)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>실수령 퇴직금</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:#047857;">${formatWon(netSeverance)}</strong></td>
+            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatWon(netSeverance)}</strong></td>
           </tr>
         </tbody>
       </table>
@@ -2600,7 +2601,7 @@ function buildSeverancePayContent(years) {
         <li style="${LI_STYLE}"><a href="/finance/pension">국민연금 수령액 계산기</a></li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 평균 월급 300만원 가정의 단순 추정이며, 실제 퇴직금·퇴직소득세는 급여 구조와 근속연수에 따라 달라집니다.
       </p>
     </article>`;
@@ -2625,9 +2626,9 @@ function buildYearEndContent(manWon) {
 
   return `
     <article data-seo-prerender="year-end" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
-        <a href="/finance/year-end-settlement" style="color:#64748b;text-decoration:none;">연말정산 계산기</a> ›
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> ›
+        <a href="/finance/year-end-settlement" style="color:hsl(var(--muted-foreground));text-decoration:none;">연말정산 계산기</a> ›
         연봉 ${label}
       </nav>
 
@@ -2636,7 +2637,7 @@ function buildYearEndContent(manWon) {
       <p style="${P_STYLE}">
         연봉 <strong>${label}원</strong> 기준 원천징수된 소득세는 연간 약 ${formatWon(result.determinedTax)}이며,
         신용카드·의료비·교육비·월세·연금저축 등 공제 항목을 모두 적용할 경우 예상 환급액은
-        <strong style="color:#047857;">약 ${formatWon(refundEstimate)}</strong> 수준입니다. (표준 시나리오 기준)
+        <strong style="color:hsl(var(--primary));">약 ${formatWon(refundEstimate)}</strong> 수준입니다. (표준 시나리오 기준)
       </p>
 
       <p style="${P_STYLE}">
@@ -2682,7 +2683,7 @@ function buildYearEndContent(manWon) {
             <td style="${TD_STYLE}">인적공제 2인 + 신용카드 평균</td>
             <td style="${TD_STYLE}">${formatWon(Math.floor(refundEstimate * 0.5))}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>표준 시나리오 (본 페이지 기준)</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(refundEstimate)}</strong></td>
           </tr>
@@ -2723,7 +2724,7 @@ function buildYearEndContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/irp">IRP 세액공제 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 표준 공제 시나리오 기준 추정이며, 정확한 환급액은 국세청 홈택스 연말정산 미리보기로 확인하세요.
       </p>
     </article>`;
@@ -2742,9 +2743,9 @@ function buildParentalLeaveContent(manWon) {
 
   return `
     <article data-seo-prerender="parental-leave" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
-        <a href="/finance/parental-leave" style="color:#64748b;text-decoration:none;">육아휴직 급여</a> ›
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> ›
+        <a href="/finance/parental-leave" style="color:hsl(var(--muted-foreground));text-decoration:none;">육아휴직 급여</a> ›
         월급 ${formatManWonValue(manWon)}
       </nav>
 
@@ -2755,7 +2756,7 @@ function buildParentalLeaveContent(manWon) {
         1~3개월 동안 월 <strong>${formatWon(pay1_3)}</strong>(통상임금 100%·상한 250만원),
         4~6개월 동안 월 <strong>${formatWon(pay4_6)}</strong>(통상임금 100%·상한 200만원),
         7~12개월 동안 월 <strong>${formatWon(pay7_12)}</strong>(통상임금 80%·상한 160만원)을 받으며,
-        총 수령액은 약 <strong style="color:#047857;">${formatWon(total)}</strong>입니다.
+        총 수령액은 약 <strong style="color:hsl(var(--primary));">${formatWon(total)}</strong>입니다.
       </p>
 
       <p style="${P_STYLE}">
@@ -2790,7 +2791,7 @@ function buildParentalLeaveContent(manWon) {
           <tr><td style="${TD_STYLE}">3개월 합계</td><td style="${TD_STYLE}">${formatWon(pay4_6 * 3)}</td></tr>
           <tr><td style="${TD_STYLE}">7~12개월 (80% 지급)</td><td style="${TD_STYLE}">월 ${formatWon(pay7_12)}</td></tr>
           <tr><td style="${TD_STYLE}">6개월 합계</td><td style="${TD_STYLE}">${formatWon(pay7_12 * 6)}</td></tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>12개월 총 수령</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(total)}</strong></td>
           </tr>
@@ -2830,7 +2831,7 @@ function buildParentalLeaveContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/year-end-settlement">연말정산 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 2026년 고용노동부 육아휴직급여 고시 기준 추정이며, 사후지급분·특례 적용 여부에 따라 달라질 수 있습니다.
       </p>
     </article>`;
@@ -2849,9 +2850,9 @@ function buildWithholdingContent(amount) {
 
   return `
     <article data-seo-prerender="withholding" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
-        <a href="/finance/withholding" style="color:#64748b;text-decoration:none;">원천세 계산기</a> ›
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> ›
+        <a href="/finance/withholding" style="color:hsl(var(--muted-foreground));text-decoration:none;">원천세 계산기</a> ›
         월 소득세 ${formatWon(amount)}
       </nav>
 
@@ -2859,7 +2860,7 @@ function buildWithholdingContent(amount) {
 
       <p style="${P_STYLE}">
         매월 소득세 <strong>${formatWon(amount)}</strong>이 원천징수되고 있다면,
-        국세청 근로소득 간이세액표(2026년 개정) 기준 추정 연봉은 약 <strong style="color:#047857;">${formatManWonValue(estimatedManWon)}원</strong> 수준입니다.
+        국세청 근로소득 간이세액표(2026년 개정) 기준 추정 연봉은 약 <strong style="color:hsl(var(--primary));">${formatManWonValue(estimatedManWon)}원</strong> 수준입니다.
         (부양가족 1인, 비과세 식대 월 20만원 가정)
       </p>
 
@@ -2913,7 +2914,7 @@ function buildWithholdingContent(amount) {
         <li style="${LI_STYLE}"><a href="/finance/insurance">건보료 역산 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/year-end-settlement">연말정산 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 국세청 근로소득 간이세액표를 기준으로 한 역산 추정치이며, 실제 연봉은 회사 급여 구조에 따라 달라집니다.
       </p>
     </article>`;
@@ -2928,9 +2929,9 @@ function buildWeeklyHolidayPayContent(hourly) {
 
   return `
     <article data-seo-prerender="weekly-holiday-pay" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
-        <a href="/finance/weekly-holiday-pay" style="color:#64748b;text-decoration:none;">주휴수당 계산기</a> ›
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> ›
+        <a href="/finance/weekly-holiday-pay" style="color:hsl(var(--muted-foreground));text-decoration:none;">주휴수당 계산기</a> ›
         시급 ${hourly.toLocaleString("ko-KR")}원
       </nav>
 
@@ -2938,7 +2939,7 @@ function buildWeeklyHolidayPayContent(hourly) {
 
       <p style="${P_STYLE}">
         시급 <strong>${hourly.toLocaleString("ko-KR")}원</strong>으로 주 40시간을 일하면 기본 주급은 ${formatWon(weeklyBase)},
-        추가로 지급되는 주휴수당은 <strong style="color:#047857;">${formatWon(weeklyHoliday)}</strong>(8시간분),
+        추가로 지급되는 주휴수당은 <strong style="color:hsl(var(--primary));">${formatWon(weeklyHoliday)}</strong>(8시간분),
         주휴수당 포함 실질 시급은 <strong>${formatWon(effectiveHourly)}</strong>입니다.
       </p>
 
@@ -2964,7 +2965,7 @@ function buildWeeklyHolidayPayContent(hourly) {
             <td style="${TD_STYLE}">주휴수당 (8시간분)</td>
             <td style="${TD_STYLE}">+${formatWon(weeklyHoliday)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>주급 (주휴 포함)</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(weeklyTotal)}</strong></td>
           </tr>
@@ -3014,7 +3015,7 @@ function buildWeeklyHolidayPayContent(hourly) {
         <li style="${LI_STYLE}"><a href="/finance/overtime">연장·야간·휴일수당 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/annual-leave">연차수당 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 근로기준법 제55조 주휴수당 규정 기준 계산이며, 실제 지급은 근로계약서와 사업장 정책에 따라 달라질 수 있습니다.
       </p>
     </article>`;
@@ -3028,9 +3029,9 @@ function buildWageConverterContent(hourly) {
 
   return `
     <article data-seo-prerender="wage-converter" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
-        <a href="/finance/wage-converter" style="color:#64748b;text-decoration:none;">시급 환산기</a> ›
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> ›
+        <a href="/finance/wage-converter" style="color:hsl(var(--muted-foreground));text-decoration:none;">시급 환산기</a> ›
         시급 ${hourly.toLocaleString("ko-KR")}원
       </nav>
 
@@ -3038,7 +3039,7 @@ function buildWageConverterContent(hourly) {
 
       <p style="${P_STYLE}">
         시급 <strong>${hourly.toLocaleString("ko-KR")}원</strong>으로 주 40시간·월 4.345주 근무 시
-        주휴수당을 포함한 월급은 <strong style="color:#047857;">${formatWon(monthlyTotal)}</strong>,
+        주휴수당을 포함한 월급은 <strong style="color:hsl(var(--primary));">${formatWon(monthlyTotal)}</strong>,
         연봉은 <strong>${formatWon(annualTotal)}</strong>으로 환산됩니다.
       </p>
 
@@ -3049,7 +3050,7 @@ function buildWageConverterContent(hourly) {
           <tr><td style="${TD_STYLE}">일급 (8시간)</td><td style="${TD_STYLE}">${formatWon(dailyWage)}</td></tr>
           <tr><td style="${TD_STYLE}">주급 (40시간 기본)</td><td style="${TD_STYLE}">${formatWon(weeklyBase)}</td></tr>
           <tr><td style="${TD_STYLE}">주급 (주휴수당 포함)</td><td style="${TD_STYLE}">${formatWon(weeklyTotal)}</td></tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>월급 (주휴 포함)</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(monthlyTotal)}</strong></td>
           </tr>
@@ -3083,7 +3084,7 @@ function buildWageConverterContent(hourly) {
             <td style="${TD_STYLE}">주휴수당 미포함 (시급 × 209시간)</td>
             <td style="${TD_STYLE}">${formatWon(hourly * 209)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>주휴수당 포함 (시급 × 주 48시간 환산)</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(monthlyTotal)}</strong></td>
           </tr>
@@ -3119,7 +3120,7 @@ function buildWageConverterContent(hourly) {
         <li style="${LI_STYLE}"><a href="/finance/overtime">연장·야간·휴일수당</a></li>
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 환산은 근로기준법 주휴수당 포함·주 40시간 기본 근로 기준이며, 실제 월급은 근로계약에 따라 달라질 수 있습니다.
       </p>
     </article>`;
@@ -3138,9 +3139,9 @@ function buildRegionalHealthContent(manWon) {
 
   return `
     <article data-seo-prerender="regional-health" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> ›
-        <a href="/finance/regional-health" style="color:#64748b;text-decoration:none;">지역가입자 건보료</a> ›
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> ›
+        <a href="/finance/regional-health" style="color:hsl(var(--muted-foreground));text-decoration:none;">지역가입자 건보료</a> ›
         월급 ${formatManWonValue(manWon)}
       </nav>
 
@@ -3148,8 +3149,8 @@ function buildRegionalHealthContent(manWon) {
 
       <p style="${P_STYLE}">
         월급 <strong>${formatManWonValue(manWon)}원</strong>으로 근무 중이던 근로자가 퇴사할 경우,
-        <strong>지역가입자</strong>(소득 점수만 반영) 월 건강보험료는 약 <strong style="color:#dc2626;">${formatWon(estimatedRegionalIncomeOnly)}</strong>,
-        <strong>임의계속가입</strong>(최대 36개월) 시 직전 근무 때와 동일한 <strong style="color:#047857;">${formatWon(formerEmployed)}</strong>으로
+        <strong>지역가입자</strong>(소득 점수만 반영) 월 건강보험료는 약 <strong style="color:hsl(var(--destructive));">${formatWon(estimatedRegionalIncomeOnly)}</strong>,
+        <strong>임의계속가입</strong>(최대 36개월) 시 직전 근무 때와 동일한 <strong style="color:hsl(var(--primary));">${formatWon(formerEmployed)}</strong>으로
         유지할 수 있습니다. (재산·자동차 점수는 개인별 편차가 커서 제외한 최소 추정)
       </p>
 
@@ -3174,7 +3175,7 @@ function buildRegionalHealthContent(manWon) {
             <td style="${TD_STYLE}">기본 (무조건 적용)</td>
             <td style="${TD_STYLE}">약 ${formatWon(estimatedRegionalIncomeOnly)}~${formatWon(Math.floor(estimatedRegionalIncomeOnly * 2.5))} (소득+재산 편차 큼)</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>임의계속가입</strong></td>
             <td style="${TD_STYLE}">퇴사 2개월 내 신청, 이전 1년 중 1개월 이상 근무</td>
             <td style="${TD_STYLE}"><strong>${formatWon(maxContinued)} (직전 부담 유지)</strong></td>
@@ -3236,7 +3237,7 @@ function buildRegionalHealthContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/insurance">건강보험료 역산 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/unemployment">실업급여 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 소득 기준 단순 추정이며, 실제 지역가입자 건보료는 재산·자동차 포함 종합 산정이 필요합니다.
       </p>
     </article>`;
@@ -3248,8 +3249,8 @@ function buildRegionalHealthContent(manWon) {
 function buildAboutContent() {
   return `
     <article data-seo-prerender="about" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> › 서비스 소개
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> › 서비스 소개
       </nav>
 
       <h1 style="${H1_STYLE}">서비스 소개 — ShakiLabs 연봉·세금 계산기</h1>
@@ -3427,7 +3428,7 @@ function buildAboutContent() {
         <li style="${LI_STYLE}"><strong>2025.11</strong> — 지역가입자 건보료·임의계속가입 비교 기능 추가</li>
       </ul>
 
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         본 서비스는 대한민국 근로자·프리랜서의 세금·연봉 이해도 향상을 목표로 비영리 개인 프로젝트로 운영되며,
         Google AdSense 광고 수익을 통해 운영비를 충당합니다.
       </p>
@@ -3443,8 +3444,8 @@ function buildAboutContent() {
 function buildPrivacyContent() {
   return `
     <article data-seo-prerender="privacy" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> › 개인정보처리방침
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> › 개인정보처리방침
       </nav>
 
       <h1 style="${H1_STYLE}">개인정보 처리방침</h1>
@@ -3462,10 +3463,10 @@ function buildPrivacyContent() {
         입력받지 않습니다. 다만 서비스 운영 과정에서 아래 정보가 자동으로, 또는 기능 이용 시 수집될 수 있습니다.
       </p>
       <ul style="${UL_STYLE}">
-        <li style="${LI_STYLE}"><strong>자동 수집</strong> — 접속 IP, 브라우저 종류, 접속 시간, 방문 페이지</li>
+        <li style="${LI_STYLE}"><strong>자동 수집</strong> — 접속 IP, User-Agent(브라우저·운영체제 정보), 접속 시간, 방문 페이지</li>
         <li style="${LI_STYLE}"><strong>광고·통계 쿠키</strong> — Google Analytics·Google AdSense가 발급하는 쿠키 식별자</li>
-        <li style="${LI_STYLE}"><strong>익명 댓글</strong> — 작성 내용, 자동 생성 닉네임, 접속 IP</li>
-        <li style="${LI_STYLE}"><strong>좋아요 중복 방지</strong> — 접속 IP(SHA-256 해시 처리, 24시간 내 파기)</li>
+        <li style="${LI_STYLE}"><strong>익명 댓글</strong> — 작성 내용, 자동 생성 닉네임, 접속 IP, User-Agent</li>
+        <li style="${LI_STYLE}"><strong>좋아요 중복 방지</strong> — 접속 IP(원문 저장, 해당 좋아요 기록과 함께 보관)</li>
         <li style="${LI_STYLE}"><strong>브라우저 저장(localStorage)</strong> — 계산기 피드백 상태, 좋아요 기록(기기 내 저장, 서버 미전송)</li>
       </ul>
       <p style="${P_STYLE}">
@@ -3476,7 +3477,7 @@ function buildPrivacyContent() {
 
       <h2 style="${H2_STYLE}">2. 수집 정보의 이용 목적</h2>
       <ul style="${UL_STYLE}">
-        <li style="${LI_STYLE}"><strong>IP 주소</strong> — 서비스 통계, 악성 이용 방지, 좋아요 중복 방지</li>
+        <li style="${LI_STYLE}"><strong>IP 주소·User-Agent</strong> — 서비스 통계, 악성 이용 방지, 좋아요·댓글 중복 방지</li>
         <li style="${LI_STYLE}"><strong>방문 기록</strong> — 서비스 개선을 위한 익명 통계 분석</li>
         <li style="${LI_STYLE}"><strong>광고 쿠키</strong> — Google AdSense 광고 게재 및 광고 성과 측정</li>
         <li style="${LI_STYLE}"><strong>댓글 내용</strong> — 익명 게시판 운영</li>
@@ -3492,6 +3493,7 @@ function buildPrivacyContent() {
           (<a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">수집 거부 애드온</a>)</li>
         <li style="${LI_STYLE}"><strong>Google AdSense</strong> — 맞춤 광고 제공(쿠키 사용)</li>
         <li style="${LI_STYLE}"><strong>Supabase (PostgreSQL)</strong> — 댓글·좋아요 데이터 저장(EU 서버)</li>
+        <li style="${LI_STYLE}"><strong>Sentry</strong> — 오류 진단 로그 수집(운영 환경에 설정된 경우)</li>
       </ul>
 
       <h2 style="${H2_STYLE}">4. Google AdSense 광고와 쿠키</h2>
@@ -3524,12 +3526,12 @@ function buildPrivacyContent() {
 
       <h2 style="${H2_STYLE}">6. 개인정보의 보관 및 파기</h2>
       <ul style="${UL_STYLE}">
-        <li style="${LI_STYLE}"><strong>댓글·닉네임</strong> — 운영 유지 기간 보관, 요청 시 즉시 파기</li>
-        <li style="${LI_STYLE}"><strong>좋아요 IP(해시)</strong> — 삽입 후 24시간 이내 자동 파기</li>
+        <li style="${LI_STYLE}"><strong>댓글·닉네임·IP·User-Agent</strong> — 서비스 운영 기간 보관, 삭제 요청 시 운영자가 해당 기록을 파기</li>
+        <li style="${LI_STYLE}"><strong>좋아요 IP</strong> — 중복 방지를 위해 좋아요 기록과 함께 보관, 기록 삭제 시 함께 파기</li>
         <li style="${LI_STYLE}"><strong>방문 로그(GA)</strong> — Google 정책에 따라 보관(기본 26개월)</li>
         <li style="${LI_STYLE}"><strong>광고 쿠키</strong> — Google 광고 쿠키 정책에 따른 유효 기간 후 만료</li>
       </ul>
-      <p style="${P_STYLE}">보관 기간이 지난 정보는 복구할 수 없는 방법으로 지체 없이 파기합니다.</p>
+      <p style="${P_STYLE}">댓글·좋아요 기록에 포함된 접속 IP와 User-Agent는 해당 기록이 삭제될 때 함께 파기되며, 그 외 별도의 자동 파기 주기는 두고 있지 않습니다. 파기할 때는 복구할 수 없는 방법으로 지체 없이 처리합니다.</p>
 
       <h2 style="${H2_STYLE}">7. 이용자의 권리와 행사 방법</h2>
       <p style="${P_STYLE}">
@@ -3556,8 +3558,8 @@ function buildPrivacyContent() {
 function buildTermsContent() {
   return `
     <article data-seo-prerender="terms" style="${ARTICLE_STYLE}">
-      <nav aria-label="breadcrumb" style="font-size:13px;color:#64748b;margin-bottom:10px;">
-        <a href="/finance/salary" style="color:#64748b;text-decoration:none;">홈</a> › 이용약관
+      <nav aria-label="breadcrumb" style="font-size:13px;color:hsl(var(--muted-foreground));margin-bottom:10px;">
+        <a href="/finance/salary" style="color:hsl(var(--muted-foreground));text-decoration:none;">홈</a> › 이용약관
       </nav>
 
       <h1 style="${H1_STYLE}">이용약관</h1>
@@ -3858,7 +3860,7 @@ function buildLandingContent(route) {
       <p style="${P_STYLE}">${data.intro}</p>
       <p style="${P_STYLE}">${data.description}</p>
       ${bodyHtml}
-      <p style="font-size:12px;color:#64748b;margin-top:24px;">
+      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 계산기는 2026년 공식 세율·요율 기반 추정치를 제공합니다. 법적 효력이 없는 참고용입니다.
       </p>
     </article>`;

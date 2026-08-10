@@ -91,13 +91,13 @@ function buildFaqSectionHtml(items) {
   const qaHtml = items
     .map(
       (item) => `
-      <h3 style="font-size:16px;line-height:1.4;margin:18px 0 6px;color:#0f172a;">${item.question}</h3>
+      <h3 style="font-size:16px;line-height:1.4;margin:18px 0 6px;color:hsl(var(--foreground));">${item.question}</h3>
       <p style="margin:0 0 10px;">${item.answer}</p>`
     )
     .join("");
 
   return `
-      <h2 style="font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #10b98133;color:#0f172a;">자주 묻는 질문 (FAQ)</h2>${qaHtml}`;
+      <h2 style="font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--highlight) / 0.3);color:hsl(var(--foreground));">자주 묻는 질문 (FAQ)</h2>${qaHtml}`;
 }
 
 // 본문 마지막 닫는 태그 앞에 FAQ 섹션 삽입 (guide article·fallback section 공용)
@@ -1834,6 +1834,14 @@ const notFoundHtml = applyMeta(template, "/404", notFoundMeta)
   .replace(
     "</head>",
     '    <meta name="robots" content="noindex,nofollow" />\n  </head>'
+  )
+  // Google "Valuable Inventory": a screen with no content must not carry an ad loader. The 404
+  // is built from the same shell as every route, so it inherits the shell's AdSense snippet —
+  // noindex keeps it out of the index but the policy judges whether the loader is present at
+  // all. NotFoundView renders no AdSlot, so stripping the shell tag removes the last one.
+  .replace(
+    /\n?\s*<script[^>]*pagead2\.googlesyndication\.com[^>]*><\/script>/i,
+    ""
   )
   .replace(
     /<noscript>[\s\S]*?<\/noscript>/i,

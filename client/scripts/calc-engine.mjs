@@ -320,14 +320,52 @@ export function severanceYearDeduction(years) {
   return 40_000_000 + 3_000_000 * (years - 20);
 }
 
+// 환산급여공제 (소득세법 제48조② 별표) — 환산급여 구간별 공제액
+function severanceConvertedDeduction(convertedSalary) {
+  if (convertedSalary <= 8_000_000) return convertedSalary;
+  if (convertedSalary <= 70_000_000) return 8_000_000 + (convertedSalary - 8_000_000) * 0.6;
+  if (convertedSalary <= 100_000_000) return 45_200_000 + (convertedSalary - 70_000_000) * 0.55;
+  if (convertedSalary <= 300_000_000) return 61_700_000 + (convertedSalary - 100_000_000) * 0.45;
+  return 151_700_000 + (convertedSalary - 300_000_000) * 0.35;
+}
+
+// 퇴직소득세 (지방소득세 포함) — src/utils/laborCalculator.ts의 calculateSeveranceTax 미러.
+//
+// 왜 미러인가: 이 값은 /severance-pay 본문 표에 그대로 찍히고, 같은 입력을 인터랙티브 계산기에
+// 넣으면 사용자가 두 숫자를 나란히 보게 된다. 이전 구현은 환산급여공제를 통째로 빼먹은 6% 근사치라
+// 근속 3년·퇴직금 990만 기준 414,000원(정답 129,360원의 3.2배)을 냈다. 산식을 줄이지 말고
+// 연분연승법 전 단계를 그대로 따라간다. laborCalculator.ts를 고치면 이 함수도 같이 고쳐야 한다.
+export function severanceIncomeTax(severancePay, years) {
+  if (years <= 0 || severancePay <= 0) return 0;
+
+  const afterServiceDeduction = Math.max(0, severancePay - severanceYearDeduction(years));
+  // 환산급여 = (퇴직급여 - 근속연수공제) × 12 / 근속연수
+  const convertedSalary = Math.round((afterServiceDeduction * 12) / years);
+  const taxBase = Math.max(
+    0,
+    convertedSalary - Math.round(severanceConvertedDeduction(convertedSalary)),
+  );
+
+  let convertedTax;
+  if (taxBase <= 14_000_000) convertedTax = taxBase * 0.06;
+  else if (taxBase <= 50_000_000) convertedTax = 840_000 + (taxBase - 14_000_000) * 0.15;
+  else if (taxBase <= 88_000_000) convertedTax = 6_240_000 + (taxBase - 50_000_000) * 0.24;
+  else if (taxBase <= 150_000_000) convertedTax = 15_360_000 + (taxBase - 88_000_000) * 0.35;
+  else if (taxBase <= 300_000_000) convertedTax = 37_060_000 + (taxBase - 150_000_000) * 0.38;
+  else if (taxBase <= 500_000_000) convertedTax = 94_060_000 + (taxBase - 300_000_000) * 0.4;
+  else if (taxBase <= 1_000_000_000) convertedTax = 174_060_000 + (taxBase - 500_000_000) * 0.42;
+  else convertedTax = 384_060_000 + (taxBase - 1_000_000_000) * 0.45;
+
+  // 산출세액 = 환산산출세액 × 근속연수 / 12, 지방소득세 10% 별도
+  const calculatedTax = Math.round((convertedTax * years) / 12);
+  return calculatedTax + Math.round(calculatedTax * 0.1);
+}
+
 export function severancePayEstimate(years) {
   const avgWage = Math.floor(SEVERANCE_ASSUMED_MONTHLY * 1.1);
   const severance = Math.floor(avgWage * years);
   const yearDeduction = severanceYearDeduction(years);
-  const envBase = Math.max(0, severance - yearDeduction);
-  const annualConverted = (envBase / Math.max(1, years)) * 12;
-  // 6% 근사치 — 연분연승법을 최저 구간 세율로 단순화한 추정
-  const estimatedTax = Math.floor((annualConverted * 0.06 * years) / 12);
+  const estimatedTax = severanceIncomeTax(severance, years);
   return {
     avgWage,
     severance,

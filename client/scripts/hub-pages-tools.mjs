@@ -59,7 +59,7 @@ function raiseHub() {
           rows: [
             { cells: ["4대보험료 증가", `-${won(r.insuranceDelta)}`] },
             { cells: ["소득세·지방소득세 증가", `-${won(r.taxDelta)}`] },
-            { cells: ["<strong>월 실수령 증가</strong>", `<strong style="color:#047857;">${won(r.monthlyNetDiff)}</strong>`], highlight: true },
+            { cells: ["<strong>월 실수령 증가</strong>", `<strong style="color:hsl(var(--primary));">${won(r.monthlyNetDiff)}</strong>`], highlight: true },
           ],
         },
         tableNote:
@@ -148,7 +148,7 @@ function bonusHub() {
           head: ["성과급(세전)", "세금·보험료", "실수령액", "수령률"],
           rows: grid.map((g) => ({
             highlight: g.amount === bonus,
-            cells: [won(g.amount), `-${won(g.bonusTax)}`, `<strong style="color:#047857;">${won(g.netBonus)}</strong>`, pct(g.effectiveBonusRate)],
+            cells: [won(g.amount), `-${won(g.bonusTax)}`, `<strong style="color:hsl(var(--primary));">${won(g.netBonus)}</strong>`, pct(g.effectiveBonusRate)],
           })),
         },
         tableNote: `연봉 ${won(salary)}·부양가족 1인 기준입니다. 성과급이 커질수록 수령률이 떨어지는 것은 늘어난 금액이 더 높은 누진 구간에 들어가기 때문입니다.`,
@@ -310,7 +310,7 @@ function overtimeHub() {
             { cells: ["야간근로", "6시간", "0.5배 추가", won(o.nightPay)] },
             { cells: ["휴일근로", "8시간", "1.5배", won(o.holidayPay)] },
             { cells: ["<strong>세전 합계</strong>", "26시간", "—", `<strong>${won(o.totalExtraGross)}</strong>`], highlight: true },
-            { cells: ["<strong>세후 실수령 증가</strong>", "—", "—", `<strong style="color:#047857;">${won(o.totalExtraNet)}</strong>`] },
+            { cells: ["<strong>세후 실수령 증가</strong>", "—", "—", `<strong style="color:hsl(var(--primary));">${won(o.totalExtraNet)}</strong>`] },
           ],
         },
         tableNote: `통상시급 ${won(o.hourlyRate)}(월급 ÷ 209) 기준입니다. 세후 금액은 가산수당이 더해진 연봉으로 4대보험과 소득세를 다시 계산해 구한 차액입니다.`,
@@ -435,7 +435,7 @@ function pensionHub() {
           "실업크레딧은 본인이 신청해야 합니다. 구직급여를 받는 중이라면 고용센터나 국민연금공단에 함께 신청하는 편이 좋습니다.",
         ],
         callout:
-          "<strong>직장가입자와 지역가입자의 차이</strong> — 보험료율 9%는 같지만 직장가입자는 회사가 절반을 부담해 본인은 4.75%만 냅니다. 퇴사 후 지역가입자가 되면 9% 전액을 본인이 부담합니다.",
+          "<strong>직장가입자와 지역가입자의 차이</strong> — 보험료율 9.5%는 같지만 직장가입자는 회사가 절반을 부담해 본인은 4.75%만 냅니다. 퇴사 후 지역가입자가 되면 9.5% 전액을 본인이 부담합니다.",
       },
     ],
     variants: {
@@ -486,7 +486,7 @@ function monthlyRentHub() {
             cells: [
               `${won(g.s)} 이하`,
               g.eligible ? pct(g.deductionRate) : "대상 아님",
-              g.eligible ? `<strong style="color:#047857;">${won(g.taxCredit)}</strong>` : "0원",
+              g.eligible ? `<strong style="color:hsl(var(--primary));">${won(g.taxCredit)}</strong>` : "0원",
             ],
           })),
         },
@@ -561,7 +561,7 @@ function irpHub() {
           rows: [
             {
               highlight: true,
-              cells: [`${won(55_000_000)} 이하`, `${pct(maxLow.taxCreditRate)} (16.5%)`, `<strong style="color:#047857;">${won(maxLow.taxCredit)}</strong>`],
+              cells: [`${won(55_000_000)} 이하`, `${pct(maxLow.taxCreditRate)} (16.5%)`, `<strong style="color:hsl(var(--primary));">${won(maxLow.taxCredit)}</strong>`],
             },
             {
               cells: [`${won(55_000_000)} 초과`, `${pct(maxHigh.taxCreditRate)} (13.2%)`, `<strong>${won(maxHigh.taxCredit)}</strong>`],
@@ -661,7 +661,7 @@ function employerInsuranceHub() {
             { cells: ["장기요양보험", "건보료의 13.14%", won(e.longTermCare)] },
             { cells: ["고용보험", "0.9%", won(e.employmentInsurance)] },
             { cells: ["산재보험", "1.5% (업종별 상이)", won(e.industrialAccident)] },
-            { cells: ["<strong>합계</strong>", `<strong>${pct(e.employerRate)}</strong>`, `<strong style="color:#dc2626;">${won(e.totalMonthlyBurden)}</strong>`], highlight: true },
+            { cells: ["<strong>합계</strong>", `<strong>${pct(e.employerRate)}</strong>`, `<strong style="color:hsl(var(--destructive));">${won(e.totalMonthlyBurden)}</strong>`], highlight: true },
           ],
         },
         tableNote:
@@ -740,7 +740,7 @@ function freelanceRateHub() {
           head: ["목표 월 실수령", "필요 월 청구액", "일 단가(월 18일)", "시급(일 6시간)"],
           rows: grid.map((g) => ({
             highlight: g.t === target,
-            cells: [won(g.t), `<strong>${won(g.monthlyGross)}</strong>`, won(g.dailyRate), `<strong style="color:#047857;">${won(g.hourlyRate)}</strong>`],
+            cells: [won(g.t), `<strong>${won(g.monthlyGross)}</strong>`, won(g.dailyRate), `<strong style="color:hsl(var(--primary));">${won(g.hourlyRate)}</strong>`],
           })),
         },
         tableNote:
@@ -751,7 +751,7 @@ function freelanceRateHub() {
         list: [
           "<strong>비청구 시간</strong> — 영업·미팅·견적서 작성·정산은 청구되지 않습니다. 실제 청구 가능 시간이 근무시간의 60~70%라면 시급을 그만큼 올려 잡아야 합니다.",
           "<strong>공백 기간</strong> — 프로젝트 사이의 비가동 기간에는 수입이 0입니다. 연 10개월 가동을 가정하면 청구 단가에 20%를 더해야 12개월치가 됩니다.",
-          "<strong>건강보험·국민연금</strong> — 지역가입자는 회사 부담분이 없어 전액 본인이 냅니다. 국민연금은 신고 소득의 9%로 직장가입자의 두 배입니다.",
+          "<strong>건강보험·국민연금</strong> — 지역가입자는 회사 부담분이 없어 전액 본인이 냅니다. 국민연금은 신고 소득의 9.5%로 직장가입자 본인부담(4.75%)의 두 배입니다.",
           "<strong>유급휴가·상병</strong> — 아프거나 쉬는 날에도 수입이 없습니다. 직장인의 연차·병가에 해당하는 몫을 단가에 반영해야 합니다.",
           "<strong>장비·소프트웨어</strong> — 노트북, 라이선스, 사무공간은 본인 부담입니다. 필요경비로 인정되면 세금은 줄지만 현금은 먼저 나갑니다.",
         ],

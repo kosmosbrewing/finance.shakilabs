@@ -99,8 +99,8 @@ function comprehensiveTaxHub() {
               won(calc.taxableBase),
               won(calc.totalTax),
               calc.refund >= 0
-                ? `<strong style="color:#047857;">${won(calc.refund)} 환급</strong>`
-                : `<strong style="color:#dc2626;">${won(Math.abs(calc.refund))} 추가 납부</strong>`,
+                ? `<strong style="color:hsl(var(--primary));">${won(calc.refund)} 환급</strong>`
+                : `<strong style="color:hsl(var(--destructive));">${won(Math.abs(calc.refund))} 추가 납부</strong>`,
             ],
           })),
         },
@@ -178,7 +178,7 @@ function compareHub() {
               `<strong>${won(row.monthlyGap)}</strong>`,
               won(row.annualGap),
               formatPercent(row.nominal),
-              `<strong style="color:#047857;">${formatPercent(row.afterTax)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">${formatPercent(row.afterTax)}</strong>`,
             ],
           })),
         },
@@ -259,7 +259,7 @@ function quitHub() {
               won(row.severance),
               `${row.days}일`,
               won(row.unemploymentTotal),
-              `<strong style="color:#047857;">약 ${row.survivalMonths}개월</strong>`,
+              `<strong style="color:hsl(var(--primary));">약 ${row.survivalMonths}개월</strong>`,
             ],
           })),
         },
@@ -280,7 +280,7 @@ function quitHub() {
         body: [
           "표의 생존기간은 퇴직금과 실업급여를 월 생활비로 나눈 값입니다. 실제로는 재직 중에 없던 지출이 새로 생기므로 이보다 짧아집니다.",
           "가장 큰 항목이 <strong>건강보험료</strong>입니다. 직장가입자일 때는 회사가 절반을 냈지만 퇴사하면 지역가입자로 전환되어 전액을 부담합니다. 재산·자동차까지 점수화되므로 소득이 0이어도 월 20만~50만원이 나올 수 있습니다.",
-          "<strong>국민연금</strong>도 마찬가지입니다. 지역가입자는 신고 소득의 9%를 전액 본인이 냅니다. 납부예외를 신청하면 부담은 없지만 그 기간은 가입기간에서 빠져 나중에 받을 연금이 줄어듭니다.",
+          "<strong>국민연금</strong>도 마찬가지입니다. 지역가입자는 신고 소득의 9.5%를 전액 본인이 냅니다. 납부예외를 신청하면 부담은 없지만 그 기간은 가입기간에서 빠져 나중에 받을 연금이 줄어듭니다.",
           "여기에 퇴직소득세도 반영해야 합니다. 표의 퇴직금은 세전 금액이므로, 실제 손에 쥐는 돈은 그보다 적습니다.",
         ],
       },
@@ -326,7 +326,7 @@ function withholdingHub() {
             cells: [
               won(row.tax),
               won(row.tax * 12),
-              `<strong style="color:#047857;">약 ${manWon(row.estimatedManWon)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">약 ${manWon(row.estimatedManWon)}</strong>`,
             ],
           })),
         },
@@ -409,8 +409,8 @@ function freelancerHub() {
               won(calc.withholdingPrepaid),
               won(calc.totalTax),
               calc.refund >= 0
-                ? `<strong style="color:#047857;">${won(calc.refund)} 환급</strong>`
-                : `<strong style="color:#dc2626;">${won(Math.abs(calc.refund))} 추가 납부</strong>`,
+                ? `<strong style="color:hsl(var(--primary));">${won(calc.refund)} 환급</strong>`
+                : `<strong style="color:hsl(var(--destructive));">${won(Math.abs(calc.refund))} 추가 납부</strong>`,
             ],
           })),
         },
@@ -552,12 +552,12 @@ function severancePayHub() {
               won(row.severance),
               won(row.yearDeduction),
               won(row.estimatedTax),
-              `<strong style="color:#047857;">${won(row.netSeverance)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">${won(row.netSeverance)}</strong>`,
             ],
           })),
         },
         tableNote:
-          "퇴직소득세는 연분연승법을 최저 세율 구간으로 단순화한 추정치입니다. 실제 세액은 환산급여공제·근속연수공제를 정확히 적용해 산출되며 국세청 퇴직소득세 계산 프로그램으로 확인할 수 있습니다.",
+          "퇴직소득세는 소득세법 제48조의 근속연수공제와 환산급여공제를 적용한 연분연승법으로 산출했으며 지방소득세 10%를 포함한 금액입니다. 실제 세액은 비과세 퇴직급여나 중간정산 이력에 따라 달라질 수 있어 국세청 퇴직소득세 계산 프로그램으로 확인하는 것이 정확합니다.",
       },
       {
         h2: "근속연수 공제가 5년·10년에서 단가가 바뀐다",
@@ -618,7 +618,7 @@ function parentalLeaveHub() {
               won(row.pay1_3),
               won(row.pay4_6),
               won(row.pay7_12),
-              `<strong style="color:#047857;">${won(row.total)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">${won(row.total)}</strong>`,
             ],
           })),
         },
@@ -682,7 +682,7 @@ function weeklyHolidayPayHub() {
               won(row.weeklyBase),
               `<strong>+${won(row.weeklyHoliday)}</strong>`,
               won(row.weeklyTotal),
-              `<strong style="color:#047857;">${won(row.effectiveHourly)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">${won(row.effectiveHourly)}</strong>`,
             ],
           })),
         },
@@ -742,8 +742,8 @@ function regionalHealthHub() {
           rows: rows.map((row) => ({
             cells: [
               manWon(row.amount),
-              `<strong style="color:#dc2626;">${won(row.regionalIncomeOnly)}</strong>`,
-              `<strong style="color:#047857;">${won(row.formerEmployed)}</strong>`,
+              `<strong style="color:hsl(var(--destructive));">${won(row.regionalIncomeOnly)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">${won(row.formerEmployed)}</strong>`,
               won(row.regionalIncomeOnly - row.formerEmployed),
             ],
           })),
@@ -823,7 +823,7 @@ function unemploymentHub() {
             cells: [
               manWon(row.amount),
               won(row.rawDaily),
-              `<strong style="color:#047857;">${won(row.dailyAmount)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">${won(row.dailyAmount)}</strong>`,
               won(row.dailyAmount * 150),
               won(row.dailyAmount * 270),
             ],
@@ -910,7 +910,7 @@ function yearEndHub() {
               manWon(row.amount),
               won(row.determinedTax),
               won(row.extraDeduction),
-              `<strong style="color:#047857;">약 ${won(row.refund)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">약 ${won(row.refund)}</strong>`,
             ],
           })),
         },
@@ -982,7 +982,7 @@ function unpaidWageHub() {
               manWon(row.amount),
               won(row.d30),
               won(row.d90),
-              `<strong style="color:#dc2626;">${won(row.d365)}</strong>`,
+              `<strong style="color:hsl(var(--destructive));">${won(row.d365)}</strong>`,
               won(row.retired365),
             ],
           })),
@@ -1149,7 +1149,7 @@ function eitcHub() {
               `~${won(bracket.phaseInEnd)}`,
               `${won(bracket.phaseInEnd)}~${won(bracket.plateauEnd)}`,
               won(bracket.phaseOutEnd),
-              `<strong style="color:#047857;">${won(bracket.maxAmount)}</strong>`,
+              `<strong style="color:hsl(var(--primary));">${won(bracket.maxAmount)}</strong>`,
             ],
           })),
         },

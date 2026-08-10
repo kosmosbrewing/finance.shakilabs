@@ -163,7 +163,9 @@ export type SeverancePayResult = {
  * 6. 산출세액 = 환산산출세액 × 근속연수 / 12
  * 7. 지방소득세 = 산출세액 × 10%
  */
-function calculateSeveranceTax(severancePay: number, years: number): number {
+// export인 이유: scripts/calc-engine.mjs가 프리렌더 본문에 같은 세액을 찍어야 해서 이 산식을
+// 미러링한다. 두 구현이 같은 답을 내는지 calcEngineParity.test.ts가 직접 비교한다.
+export function calculateSeveranceTax(severancePay: number, years: number): number {
   if (years <= 0 || severancePay <= 0) return 0;
 
   // 근속연수공제

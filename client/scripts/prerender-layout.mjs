@@ -57,15 +57,15 @@ function buildOtherServicesBlock() {
       const links = items
         .map(
           (service) =>
-            `<a href="${service.href}" style="color:#64748b;text-decoration:none;margin-right:12px;">${service.shortLabel}</a>`,
+            `<a href="${service.href}" style="color:hsl(var(--muted-foreground));text-decoration:none;margin-right:12px;">${service.shortLabel}</a>`,
         )
         .join("");
-      return `<p style="margin:0 0 4px;"><span style="display:inline-block;min-width:78px;color:#94a3b8;">${category.label}</span>${links}</p>`;
+      return `<p style="margin:0 0 4px;"><span style="display:inline-block;min-width:78px;color:hsl(var(--muted-foreground));">${category.label}</span>${links}</p>`;
     })
     .filter(Boolean)
     .join("");
-  return `<nav aria-label="다른 서비스" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e2e8f0;font-size:12px;line-height:2;">
-        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#334155;">다른 서비스</p>
+  return `<nav aria-label="다른 서비스" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid hsl(var(--border));font-size:12px;line-height:2;">
+        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:hsl(var(--foreground));">다른 서비스</p>
         ${rows}
       </nav>`;
 }
@@ -78,17 +78,17 @@ function buildOtherServicesBlock() {
  */
 export function buildPrerenderHeader() {
   return `
-    <header data-seo-prerender="header" style="max-width:1120px;margin:0 auto;padding:14px 16px;border-bottom:1px solid #e2e8f0;">
+    <header data-seo-prerender="header" style="max-width:1120px;margin:0 auto;padding:14px 16px;border-bottom:1px solid hsl(var(--border));">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <a href="/finance/salary" style="font-weight:700;font-size:18px;color:#065f46;text-decoration:none;">ShakiLabs 연봉계산기</a>
+        <a href="/finance/salary" style="font-weight:700;font-size:18px;color:hsl(var(--primary));text-decoration:none;">ShakiLabs 연봉계산기</a>
         <nav aria-label="주요 계산기" style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
-          <a href="/finance/salary" style="color:#334155;text-decoration:none;">연봉 실수령</a>
-          <a href="/finance/insurance" style="color:#334155;text-decoration:none;">건강보험료</a>
-          <a href="/finance/comprehensive-tax" style="color:#334155;text-decoration:none;">종합소득세</a>
-          <a href="/finance/year-end-settlement" style="color:#334155;text-decoration:none;">연말정산</a>
-          <a href="/finance/quit" style="color:#334155;text-decoration:none;">퇴사 계산</a>
-          <a href="/finance/all" style="color:#334155;text-decoration:none;">전체 계산기</a>
-          <a href="/finance/about" style="color:#334155;text-decoration:none;">서비스 소개</a>
+          <a href="/finance/salary" style="color:hsl(var(--foreground));text-decoration:none;">연봉 실수령</a>
+          <a href="/finance/insurance" style="color:hsl(var(--foreground));text-decoration:none;">건강보험료</a>
+          <a href="/finance/comprehensive-tax" style="color:hsl(var(--foreground));text-decoration:none;">종합소득세</a>
+          <a href="/finance/year-end-settlement" style="color:hsl(var(--foreground));text-decoration:none;">연말정산</a>
+          <a href="/finance/quit" style="color:hsl(var(--foreground));text-decoration:none;">퇴사 계산</a>
+          <a href="/finance/all" style="color:hsl(var(--foreground));text-decoration:none;">전체 계산기</a>
+          <a href="/finance/about" style="color:hsl(var(--foreground));text-decoration:none;">서비스 소개</a>
         </nav>
       </div>
     </header>`;
@@ -105,29 +105,29 @@ export function buildPrerenderFooter() {
       const links = items
         .map(
           (item) =>
-            `<li style="margin-bottom:4px;"><a href="${item.href}" style="color:#64748b;text-decoration:none;font-size:13px;">${item.label}</a></li>`
+            `<li style="margin-bottom:4px;"><a href="${item.href}" style="color:hsl(var(--muted-foreground));text-decoration:none;font-size:13px;">${item.label}</a></li>`
         )
         .join("");
       return `
       <div>
-        <h3 style="font-size:13px;font-weight:700;color:#334155;margin:0 0 8px;">${category}</h3>
+        <h3 style="font-size:13px;font-weight:700;color:hsl(var(--foreground));margin:0 0 8px;">${category}</h3>
         <ul style="list-style:none;padding:0;margin:0;">${links}</ul>
       </div>`;
     })
     .join("");
 
   return `
-    <footer data-seo-prerender="footer" style="max-width:1120px;margin:40px auto 0;padding:24px 16px;border-top:1px solid #e2e8f0;background:#f8fafc;">
+    <footer data-seo-prerender="footer" style="max-width:1120px;margin:40px auto 0;padding:24px 16px;border-top:1px solid hsl(var(--border));background:hsl(var(--muted));">
       <nav aria-label="전체 계산기" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px;margin-bottom:20px;">
         ${categoryBlocks}
       </nav>
       ${buildOtherServicesBlock()}
-      <div style="padding-top:16px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;line-height:1.8;">
-        <p style="margin:0 0 6px;">운영 <strong>Shakilabs</strong> · 문의 <a href="mailto:skdba1313@gmail.com" style="color:#64748b;">skdba1313@gmail.com</a></p>
+      <div style="padding-top:16px;border-top:1px solid hsl(var(--border));font-size:12px;color:hsl(var(--muted-foreground));line-height:1.8;">
+        <p style="margin:0 0 6px;">운영 <strong>Shakilabs</strong> · 문의 <a href="mailto:skdba1313@gmail.com" style="color:hsl(var(--muted-foreground));">skdba1313@gmail.com</a></p>
         <p style="margin:0 0 6px;">
-          <a href="/finance/about" style="color:#64748b;margin-right:12px;">서비스 소개</a>
-          <a href="/finance/privacy" style="color:#64748b;margin-right:12px;">개인정보처리방침</a>
-          <a href="/finance/terms" style="color:#64748b;">이용약관</a>
+          <a href="/finance/about" style="color:hsl(var(--muted-foreground));margin-right:12px;">서비스 소개</a>
+          <a href="/finance/privacy" style="color:hsl(var(--muted-foreground));margin-right:12px;">개인정보처리방침</a>
+          <a href="/finance/terms" style="color:hsl(var(--muted-foreground));">이용약관</a>
         </p>
         <p style="margin:0;">본 계산기는 2026년 최신 세율·요율을 기반으로 하며, 국세청 근로소득 간이세액표·국민건강보험공단 고시·고용노동부 고시를 참고합니다. 결과는 법적 효력이 없는 참고용 추정값입니다.</p>
       </div>
