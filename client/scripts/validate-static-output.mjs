@@ -193,6 +193,12 @@ function validateNotFound() {
     "404.html must be noindex,nofollow",
   );
   assert(html.includes('href="/finance"'), "404.html must contain a recovery link");
+  // Ads on a contentless screen violate Google's Valuable Inventory policy. noindex keeps the
+  // page out of the index but the policy judges the presence of the loader, not the indexing.
+  assert(
+    !/adsbygoogle|googlesyndication/i.test(html),
+    "404.html must not load the AdSense script (Valuable Inventory policy)",
+  );
 }
 
 validateVercelConfig();

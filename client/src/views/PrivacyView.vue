@@ -50,7 +50,7 @@ useSEO({
           <div class="retro-board-list text-caption">
             <div class="retro-board-item">
               <span class="text-muted-foreground">자동 수집</span>
-              <span>접속 IP, 브라우저 종류, 접속 시간, 방문 페이지</span>
+              <span>접속 IP, User-Agent(브라우저·운영체제 정보), 접속 시간, 방문 페이지</span>
             </div>
             <div class="retro-board-item">
               <span class="text-muted-foreground">광고·통계 쿠키</span>
@@ -58,11 +58,11 @@ useSEO({
             </div>
             <div class="retro-board-item">
               <span class="text-muted-foreground">익명 댓글</span>
-              <span>작성 내용, 자동 생성 닉네임, 접속 IP</span>
+              <span>작성 내용, 자동 생성 닉네임, 접속 IP, User-Agent</span>
             </div>
             <div class="retro-board-item">
               <span class="text-muted-foreground">좋아요 중복 방지</span>
-              <span>접속 IP(SHA-256 해시 처리, 24시간 내 파기)</span>
+              <span>접속 IP(원문 저장, 해당 좋아요 기록과 함께 보관)</span>
             </div>
             <div class="retro-board-item">
               <span class="text-muted-foreground">브라우저 저장(localStorage)</span>
@@ -83,8 +83,8 @@ useSEO({
           <h2 class="text-heading font-semibold">2. 수집 정보의 이용 목적</h2>
           <div class="retro-board-list text-caption">
             <div class="retro-board-item">
-              <span class="text-muted-foreground">IP 주소</span>
-              <span>서비스 통계, 악성 이용 방지, 좋아요 중복 방지</span>
+              <span class="text-muted-foreground">IP 주소·User-Agent</span>
+              <span>서비스 통계, 악성 이용 방지, 좋아요·댓글 중복 방지</span>
             </div>
             <div class="retro-board-item">
               <span class="text-muted-foreground">방문 기록</span>
@@ -122,6 +122,10 @@ useSEO({
             <div class="retro-board-item">
               <span class="font-semibold text-foreground">Supabase (PostgreSQL)</span>
               <span class="text-muted-foreground">댓글·좋아요 데이터 저장(EU 서버)</span>
+            </div>
+            <div class="retro-board-item">
+              <span class="font-semibold text-foreground">Sentry</span>
+              <span class="text-muted-foreground">오류 진단 로그 수집(운영 환경에 설정된 경우)</span>
             </div>
           </div>
           <p class="text-tiny text-muted-foreground">
@@ -204,12 +208,12 @@ useSEO({
           <h2 class="text-heading font-semibold">6. 개인정보의 보관 및 파기</h2>
           <div class="retro-board-list text-caption">
             <div class="retro-board-item">
-              <span class="text-muted-foreground">댓글·닉네임</span>
-              <span>운영 유지 기간 보관, 요청 시 즉시 파기</span>
+              <span class="text-muted-foreground">댓글·닉네임·IP·User-Agent</span>
+              <span>서비스 운영 기간 보관, 삭제 요청 시 운영자가 해당 기록을 파기</span>
             </div>
             <div class="retro-board-item">
-              <span class="text-muted-foreground">좋아요 IP(해시)</span>
-              <span>삽입 후 24시간 이내 자동 파기</span>
+              <span class="text-muted-foreground">좋아요 IP</span>
+              <span>중복 방지를 위해 좋아요 기록과 함께 보관, 기록 삭제 시 함께 파기</span>
             </div>
             <div class="retro-board-item">
               <span class="text-muted-foreground">방문 로그(GA)</span>
@@ -221,7 +225,9 @@ useSEO({
             </div>
           </div>
           <p class="text-tiny text-muted-foreground">
-            보관 기간이 지난 정보는 복구할 수 없는 방법으로 지체 없이 파기합니다.
+            댓글·좋아요 기록에 포함된 접속 IP와 User-Agent는 해당 기록이 삭제될 때 함께 파기되며,
+            그 외 별도의 자동 파기 주기는 두고 있지 않습니다. 파기할 때는 복구할 수 없는 방법으로
+            지체 없이 처리합니다.
           </p>
         </section>
 

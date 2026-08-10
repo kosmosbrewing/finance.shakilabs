@@ -5,11 +5,11 @@
 // 이 본문은 크롤러가 보는 정적 HTML에만 들어간다(다른 계산기 상세 페이지와 같은 패턴).
 import { calculateSalaryBreakdown, formatPercent, formatWon } from "./calc-engine.mjs";
 
-const H2 = "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid #10b98133;color:#0f172a;";
+const H2 = "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--highlight) / 0.3);color:hsl(var(--foreground));";
 const P = "margin:0 0 10px;";
 const TABLE = "width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:14px;";
-const TH = "padding:8px 10px;background:#f1f5f9;text-align:left;border:1px solid #cbd5e1;color:#334155;font-weight:600;";
-const TD = "padding:8px 10px;border:1px solid #cbd5e1;";
+const TH = "padding:8px 10px;background:hsl(var(--muted));text-align:left;border:1px solid hsl(var(--border));color:hsl(var(--foreground));font-weight:600;";
+const TD = "padding:8px 10px;border:1px solid hsl(var(--border));";
 
 const MIN_WAGE_HOURLY = 10_320;
 const WEEKS_PER_MONTH = 4.345;
@@ -89,7 +89,7 @@ function buildYearEndDeepDive() {
             <td style="${TD}">4대보험료 공제 (연간)</td>
             <td style="${TD}">-${formatWon(example.annualInsuranceDeduction)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD}"><strong>과세표준</strong></td>
             <td style="${TD}"><strong>${formatWon(example.taxableBase)}</strong></td>
           </tr>
@@ -105,7 +105,7 @@ function buildYearEndDeepDive() {
             <td style="${TD}">표준세액공제</td>
             <td style="${TD}">-${formatWon(example.standardTaxCredit)}</td>
           </tr>
-          <tr style="background:#ecfdf5;">
+          <tr style="background:hsl(var(--accent));">
             <td style="${TD}"><strong>결정세액 (지방소득세 별도)</strong></td>
             <td style="${TD}"><strong>${formatWon(example.determinedTax)} (+지방 ${formatWon(example.annualLocalTax)})</strong></td>
           </tr>

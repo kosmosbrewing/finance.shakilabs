@@ -8,7 +8,12 @@ import "./assets/css/responsive-accessibility.css";
 import { initAnalytics } from "./lib/analytics";
 import { captureSentryException, initSentry } from "./lib/sentry";
 import { reportRuntimeError } from "./lib/runtimeError";
-import { removePrerenderFallback } from "./utils/prerenderFallback";
+import {
+  adoptPrerenderArticle,
+  capturePrerenderArticle,
+  installPrerenderArticleCleanup,
+  removePrerenderChrome,
+} from "./utils/prerenderFallback";
 
 function registerRuntimeHandlers(): void {
   router.onError((error) => {
@@ -30,6 +35,10 @@ function registerRuntimeHandlers(): void {
 }
 
 async function bootstrap(): Promise<void> {
+  // mount 전에 떼어낸다 — 그래야 본문이 Vue 푸터 아래에 잠깐 노출되지 않는다.
+  const prerenderedArticle = capturePrerenderArticle();
+  removePrerenderChrome();
+
   const app = createApp(App);
   const head = createHead();
 
@@ -43,8 +52,10 @@ async function bootstrap(): Promise<void> {
   initSentry(app);
   registerRuntimeHandlers();
   await router.isReady();
+  const entryPath = router.currentRoute.value.path;
   app.mount("#app");
-  removePrerenderFallback();
+  adoptPrerenderArticle(prerenderedArticle);
+  installPrerenderArticleCleanup(router, entryPath);
 
   // GA 초기화를 LCP 이후로 미룸
   if (typeof requestIdleCallback === "function") {

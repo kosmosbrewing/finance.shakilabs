@@ -46,7 +46,7 @@ function renderTable(table) {
       const cells = row.cells
         .map((cell) => `<td style="${TD_STYLE}">${cell}</td>`)
         .join("");
-      return `<tr${row.highlight ? ' style="background:#ecfdf5;"' : ""}>${cells}</tr>`;
+      return `<tr${row.highlight ? ' style="background:hsl(var(--accent));"' : ""}>${cells}</tr>`;
     })
     .join("");
   return `<table style="${TABLE_STYLE}">${head}<tbody>${rows}</tbody></table>`;

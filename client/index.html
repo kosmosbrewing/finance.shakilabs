@@ -136,7 +136,10 @@
         font-size: 16px;
       }
 
-      #app:not(:empty) ~ [data-seo-prerender] {
+      /* 프리렌더 헤더·푸터만 숨긴다. 본문 article은 하이드레이션 후 <main> 안으로 옮겨져
+         사람에게도 그대로 보여야 하므로 여기서 숨기면 안 된다 (utils/prerenderFallback.ts). */
+      #app:not(:empty) ~ header[data-seo-prerender],
+      #app:not(:empty) ~ footer[data-seo-prerender] {
         display: none;
       }
 
