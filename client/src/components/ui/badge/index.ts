@@ -11,7 +11,9 @@ export const badgeVariants = cva(
         outline: "text-foreground",
         deduction: "border-transparent bg-deduction text-deduction-foreground",
         highlight: "border-transparent bg-highlight text-highlight-foreground",
-        neutral: "border-border/50 bg-muted-foreground/70 text-white",
+        // text-white 하드코딩은 다크에서 밝은 회색 위 흰 텍스트(3.46:1)가 됐다.
+        // 토큰 쌍(muted-foreground / background)은 라이트·다크 모두 6.5:1 이상이다.
+        neutral: "border-border/50 bg-muted-foreground text-background",
       },
     },
     defaultVariants: {
