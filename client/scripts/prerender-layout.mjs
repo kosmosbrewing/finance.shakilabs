@@ -127,7 +127,8 @@ export function buildPrerenderFooter() {
         <p style="margin:0 0 6px;">
           <a href="/finance/about" style="color:hsl(var(--muted-foreground));margin-right:12px;">서비스 소개</a>
           <a href="/finance/privacy" style="color:hsl(var(--muted-foreground));margin-right:12px;">개인정보처리방침</a>
-          <a href="/finance/terms" style="color:hsl(var(--muted-foreground));">이용약관</a>
+          <a href="/finance/terms" style="color:hsl(var(--muted-foreground));margin-right:12px;">이용약관</a>
+          <a href="/blog" style="color:hsl(var(--muted-foreground));">블로그</a>
         </p>
         <p style="margin:0;">본 계산기는 2026년 최신 세율·요율을 기반으로 하며, 국세청 근로소득 간이세액표·국민건강보험공단 고시·고용노동부 고시를 참고합니다. 결과는 법적 효력이 없는 참고용 추정값입니다.</p>
       </div>
