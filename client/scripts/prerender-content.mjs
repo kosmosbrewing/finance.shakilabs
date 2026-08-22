@@ -34,6 +34,24 @@ import {
   UNPAID_WAGE_AMOUNTS,
 } from "./seo-routes.mjs";
 import { buildHubContent } from "./hub-content.mjs";
+// 파생 상수·헬퍼는 hub-digests.mjs가 원천이다. 변종(이 파일)과 허브 다이제스트가 같은 값을 써야
+// 법령 개정 때 한쪽만 바뀌는 일이 없다.
+import {
+  DEPENDENT_INCOME_CEILING,
+  findIncomeTaxBracket,
+  incomeTaxBracketLabel,
+  insuranceBracketDigest,
+  insuranceCrossoverDigest,
+  MIN_WAGE_FEE,
+  MIN_WAGE_MONTHLY_2026,
+  PENSION_CAP_DEDUCTION,
+  PENSION_CAP_FEE,
+  PENSION_CAP_TAXABLE,
+  salaryBandLabel,
+  salaryDependentDigest,
+  salaryPensionCapDigest,
+  toLandingSection,
+} from "./hub-digests.mjs";
 import {
   HOME_DESCRIPTION,
   HOME_H1,
@@ -841,34 +859,8 @@ function buildInsuranceNeighborRows(fee) {
     .join("");
 }
 
-// --- 건보료 구간 해석용 파생 상수 (전부 검증된 2026 수치·엔진 상수에서 파생) ---
-const MIN_WAGE_HOURLY_2026 = 10_320;
-// 주휴 포함 월 209시간 환산 — 전일제 최저임금 월급
-const MIN_WAGE_MONTHLY_2026 = MIN_WAGE_HOURLY_2026 * 209;
-const MIN_WAGE_FEE = Math.floor(MIN_WAGE_MONTHLY_2026 * RATES_2026.healthInsurance.employee);
-const PENSION_CAP_TAXABLE = RATES_2026.nationalPension.maxMonthlyIncome;
-const PENSION_CAP_FEE = Math.floor(PENSION_CAP_TAXABLE * RATES_2026.healthInsurance.employee);
-const PENSION_CAP_DEDUCTION = Math.floor(
-  PENSION_CAP_TAXABLE * RATES_2026.nationalPension.employee
-);
-// 피부양자 소득요건 — 기존 검증 문구(연 2,000만원 이하)와 동일 상수
-const DEPENDENT_INCOME_CEILING = 20_000_000;
-
-// 연봉 천만 단위 밴드 + 밴드 내 위치 — 인접 금액 페이지 간 서술이 실제로 갈리게 하는 파생 워딩
-function salaryBandLabel(annual) {
-  if (annual >= 100_000_000) {
-    return `${formatManWonValue(Math.round(annual / 10_000))}원`;
-  }
-  const tenMillions = Math.floor(annual / 10_000_000);
-  const position = (annual % 10_000_000) / 10_000_000;
-  const suffix = position < 0.34 ? "초반" : position < 0.67 ? "중반" : "후반";
-  return `${tenMillions}천만원대 ${suffix}`;
-}
-
-// 과세표준이 속한 소득세 구간 (calc-engine의 누진 구간 상수 사용)
-function findIncomeTaxBracket(taxableBase) {
-  return INCOME_TAX_BRACKETS.find((bracket) => taxableBase <= bracket.limit);
-}
+// 파생 상수(MIN_WAGE_FEE·PENSION_CAP_* 등)와 salaryBandLabel/findIncomeTaxBracket은
+// hub-digests.mjs로 옮겨 허브 다이제스트와 공유한다. 이 파일 상단 import 참조.
 
 // 금액 구간별 해석 문단 — 저(5~9만)/중(10~25만)/고(26만+) 조건 분기 + 페이지별 파생 수치
 function buildInsuranceBracketInterpretation(fee, monthlyTaxable, estimatedAnnual, result) {
@@ -1367,16 +1359,7 @@ function buildInsuranceContent(fee) {
 // 종합소득세 (/comprehensive-tax/:amount)
 // =========================
 // 종합소득세 누진 산출세액 — 프리셋 본계산과 "경비를 더 인정받으면" 시뮬레이션이 공유
-// 누진 구간을 사람이 읽는 라벨로 (calc-engine INCOME_TAX_BRACKETS 기준)
-function incomeTaxBracketLabel(bracket) {
-  const limitLabel = Number.isFinite(bracket.limit)
-    ? `${formatManWonValue(Math.round(bracket.limit / 10_000))}원`
-    : null;
-  const baseLabel = `${formatManWonValue(Math.round(bracket.baseIncome / 10_000))}원`;
-  if (bracket.baseIncome === 0) return `${limitLabel} 이하`;
-  if (!limitLabel) return `${baseLabel} 초과`;
-  return `${baseLabel}~${limitLabel}`;
-}
+// (누진 구간 라벨 incomeTaxBracketLabel은 hub-digests.mjs 소유 — 허브 다이제스트도 같은 라벨을 쓴다)
 
 // 과세표준 위치 해석 — 한계세율 vs 실효세율, 다음 구간까지의 거리, 추가 수입 100만원의 세부담
 function buildComprehensiveTaxBracketSection(label, calc) {
@@ -3768,6 +3751,11 @@ const LANDING_CONTENT = {
         h2: "같은 인상률이라도 체감이 달라지는 이유",
         body: "표의 실효세율 열을 보면 연봉이 오를수록 세부담 비율이 함께 올라갑니다. 소득세가 6~45% 누진 구조이기 때문인데, 국민연금은 기준소득월액 상한 659만원(2026.7.1 시행)에서 멈추므로 고연봉 구간에서는 보험료 증가가 둔화되는 반대 효과도 있습니다. 두 힘이 겹쳐 실수령 증가폭은 연봉대마다 다르며, 이직 제안을 비교할 때는 인상률(%)이 아니라 월 실수령 증가액(원)으로 환산해 보아야 합니다.",
       },
+      // 금액 변종에만 있던 해석을 "전 구간 횡단" 형태로 승격한 절. 변종은 자기 연봉 하나만
+      // 다루므로 아래 두 절(부양가족 값어치의 연봉대별 변화, 연금 상한 도달 지점)은 대표
+      // 페이지에서만 성립한다.
+      toLandingSection(salaryDependentDigest()),
+      toLandingSection(salaryPensionCapDigest()),
     ],
     links: [
       { path: "/finance/salary/3000", label: "연봉 3000만원 실수령액" },
@@ -3813,6 +3801,10 @@ const LANDING_CONTENT = {
         body: "아래 표는 이 계산기가 다루는 월 건보료 5만원~50만원 구간의 역산 결과입니다. 본인 급여명세서의 건강보험 항목(근로자 부담분)과 가장 가까운 금액을 찾아 상세 페이지로 이동하면, 해당 구간의 4대보험 총액과 추정 실수령액까지 확인할 수 있습니다.",
         extra: buildInsuranceBandTable(),
       },
+      // 31개 금액 변종은 각자 자기 위치만 해석한다. 경계선이 어디에 있고 어느 페이지가 어느
+      // 쪽인지는 전 구간을 한 번에 봐야 나오는 답이라 대표 페이지에만 둔다.
+      toLandingSection(insuranceBracketDigest()),
+      toLandingSection(insuranceCrossoverDigest()),
     ],
     links: [
       { path: "/finance/insurance/100000", label: "건보료 10만원 연봉 계산" },

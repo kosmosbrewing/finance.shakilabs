@@ -40,6 +40,13 @@ import {
   WITHHOLDING_AMOUNTS,
   YEAR_END_AMOUNTS,
 } from "./seo-routes.mjs";
+// 금액 변종 안에만 있던 해석을 "전 구간 횡단" 형태로 승격한 절. renderSection 스키마를 그대로
+// 반환하므로 sections 배열에 얹기만 하면 된다.
+import {
+  compareRetentionDigest,
+  comprehensiveTaxGapDigest,
+  comprehensiveTaxSeparateDigest,
+} from "./hub-digests.mjs";
 
 const STANDARD_SALARY_INPUT = {
   nonTaxableMonthly: 200_000,
@@ -118,6 +125,8 @@ function comprehensiveTaxHub() {
         callout:
           "<strong>신고 기한</strong> — 종합소득세 확정신고·납부는 매년 5월 1일~5월 31일(성실신고확인 대상은 6월 30일)입니다. 기한을 넘기면 무신고가산세 20%와 납부지연가산세가 붙습니다.",
       },
+      comprehensiveTaxGapDigest(),
+      comprehensiveTaxSeparateDigest(),
     ],
     variants: {
       h2: "수입 금액별 상세 계산 보기",
@@ -197,6 +206,7 @@ function compareHub() {
         callout:
           "<strong>협상 팁</strong> — 같은 인건비라면 과세 연봉을 올리는 것보다 비과세 항목(식대 월 20만원, 자가운전보조금 월 20만원)을 늘리는 쪽이 4대보험과 소득세를 함께 줄여 실수령이 더 늘어납니다.",
       },
+      compareRetentionDigest(),
     ],
     variants: {
       h2: "연봉 조합별 상세 비교",
