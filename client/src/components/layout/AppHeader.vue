@@ -84,7 +84,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <header class="border-b border-border bg-primary/8">
+  <header class="border-b border-border bg-primary/[8%]">
     <div class="container pt-2.5 pb-2.5">
       <div class="overflow-hidden">
         <div class="retro-titlebar h-[44px] border-b-0 px-2 bg-transparent">

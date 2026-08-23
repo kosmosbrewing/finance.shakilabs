@@ -411,7 +411,7 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="quit-main" @share-request="openShare" />
+        <CommunitySidebar page-key="quit-main" />
         <RecentCalcPanel />
       </div>
     </section>

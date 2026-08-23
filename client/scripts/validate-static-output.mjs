@@ -5,7 +5,7 @@
 //   (b) 157페이지 전부가 셸 <noscript>를 남겨 h1이 2개였다.
 // 두 결함 모두 04.card의 게이트가 이미 검사하던 항목이라, 코드가 아니라 게이트 부재가 원인이다.
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -147,7 +147,7 @@ function validateSitemap() {
   const sitemapPath = resolve(distRoot, "sitemap.xml");
   if (!existsSync(sitemapPath)) {
     assert(false, "Missing dist/sitemap.xml");
-    return;
+    return null;
   }
   const sitemap = readFileSync(sitemapPath, "utf8");
   const listed = new Set(
@@ -179,6 +179,148 @@ function validateSitemap() {
       `Sitemap lists ${url} but no static output is generated for it`,
     );
   }
+  return listed;
+}
+
+// Router <-> sitemap, both directions.
+//
+// Why: the Vue router and seo-routes.mjs are two hand-maintained lists of the same thing. Adding a
+// calculator to the router and forgetting seo-routes.mjs costs nothing at build time — vite still
+// bundles the view, the dev server still serves it, and the live SPA still renders it on a click.
+// The page just never gets prerendered and never enters the sitemap, so it is invisible to a
+// crawler while looking perfectly healthy to a human. Nothing here caught that; only counting the
+// XML by hand did.
+//
+// Both directions are checked because each one alone passes a state that is worse than the bug it
+// prevents. "Every router route must be listed" alone accepts a route turned into a redirect while
+// its URL stays in the sitemap — submitting a URL whose canonical points elsewhere. "Every listed
+// URL must be reachable" alone accepts a brand-new calculator that is simply missing everywhere.
+function parseRouterRoutes(source) {
+  const start = source.indexOf("const routes: RouteRecordRaw[]");
+  assert(
+    start !== -1,
+    "router/index.ts: could not find `const routes: RouteRecordRaw[]` — route extraction failed",
+  );
+  if (start === -1) return [];
+
+  const body = source.slice(start);
+  const marks = [...body.matchAll(/path:\s*"([^"]+)"/g)].map((match) => ({
+    // A TS string literal escapes its backslashes, so the source text "\\d+" is the value "\d+".
+    path: match[1].replace(/\\\\/g, "\\"),
+    index: match.index,
+  }));
+  // No fallback. A gate that silently inspects zero routes is worse than no gate at all: it prints
+  // a reassuring pass line while checking nothing.
+  assert(marks.length > 0, "router/index.ts: no `path:` declarations parsed — route extraction failed");
+
+  return marks.map((mark, i) => ({
+    path: mark.path,
+    // Everything up to the next `path:` belongs to this record.
+    redirect: /redirect:/.test(body.slice(mark.index, marks[i + 1]?.index ?? body.length)),
+  }));
+}
+
+// A router path compiled to the set of URLs it can serve. Used only for the reachability
+// direction, so it stays deliberately narrow: named params with an optional inline constraint.
+function routePattern(path) {
+  const source = path.replace(/:(\w+)(\(([^)]*)\))?/g, (_, __, ___, constraint) =>
+    constraint ? `(?:${constraint})` : "[^/]+",
+  );
+  return new RegExp(`^${source}$`);
+}
+
+function validateRouterSitemapParity(listed) {
+  if (!listed) return;
+  const routerRoutes = parseRouterRoutes(
+    readFileSync(resolve(projectRoot, "src", "router", "index.ts"), "utf8"),
+  );
+  if (routerRoutes.length === 0) return;
+
+  assert(
+    routerRoutes.some((route) => route.path === "/" && !route.redirect),
+    "router/index.ts must register an index route that renders its own view",
+  );
+
+  for (const route of routerRoutes) {
+    // Amount variants are declared as params (`/salary/:amount`). They are prerendered but
+    // canonicalize into their base, so their absence from the sitemap is the intended state —
+    // PARAM_ROUTES is already asserted separately above. Only concrete paths are checked here.
+    if (route.path.includes(":")) continue;
+    if (route.redirect) {
+      assert(
+        !listed.has(urlFor(route.path)),
+        `Redirect route must not be listed in the sitemap: ${urlFor(route.path)}`,
+      );
+      continue;
+    }
+    assert(
+      listed.has(urlFor(route.path)),
+      `Router route is missing from the sitemap: ${urlFor(route.path)}`,
+    );
+  }
+
+  // Reverse: a submitted URL the router cannot match renders NotFound once JS boots, so the
+  // crawler is served prerendered content the visitor never sees.
+  const matchers = routerRoutes
+    // The catch-all exists to render NotFound; letting it match here would satisfy every URL.
+    .filter((route) => !route.redirect && !/\(\.\*\)/.test(route.path))
+    .map((route) => routePattern(route.path));
+  for (const url of listed) {
+    const path = url.replace(canonicalBase, "") || "/";
+    assert(
+      matchers.some((matcher) => matcher.test(path)),
+      `Sitemap lists ${url} but no router route matches ${path} (it would render NotFound)`,
+    );
+  }
+}
+
+// Tailwind's slash-opacity modifier only emits a class when the number is on the opacity scale
+// (5·10·20·25…). Write `bg-primary/8` and the build says nothing, no rule is generated, and the
+// element simply has no background — it inherits whatever is behind it. A theme-less colour name
+// (`bg-warning` where the token is `status.warning`) disappears the same silent way.
+//
+// This is not hypothetical here: the site header shipped as `bg-primary/8`, so its background was
+// dead on every page and read as the page background. The neighbouring `border-primary/20` and
+// `border-status-success/30` ARE on the scale and did render, which is exactly why nobody noticed
+// — the boxes had their outline and just no fill.
+function collectSourceFiles(dir, out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) collectSourceFiles(full, out);
+    else if (/\.(vue|ts)$/.test(entry.name) && !/\.test\.ts$/.test(entry.name)) out.push(full);
+  }
+  return out;
+}
+
+function validateOpacityUtilitiesAreGenerated() {
+  const cssDir = resolve(distRoot, "assets");
+  if (!existsSync(cssDir)) {
+    assert(false, "No built CSS directory to validate utilities against");
+    return;
+  }
+  const cssFiles = readdirSync(cssDir).filter((name) => name.endsWith(".css"));
+  assert(cssFiles.length > 0, "No built CSS found to validate utilities against");
+  const css = cssFiles.map((name) => readFileSync(resolve(cssDir, name), "utf8")).join("\n");
+
+  // Only colour utilities carrying a slash opacity. Widening this to layout utilities pulls in
+  // runtime-composed class strings and the false positives swamp the signal.
+  const utility =
+    /(?:[a-z-]+:)*(?:bg|text|border|ring|divide|fill|stroke|outline|placeholder|from|via|to)-[a-z][a-z0-9-]*\/(?:\d+|\[[0-9.]+%?\])/g;
+  const toSelector = (cls) => cls.replace(/[/[\]%.:]/g, (ch) => "\\" + ch);
+
+  const missing = [];
+  for (const file of collectSourceFiles(resolve(projectRoot, "src"))) {
+    for (const cls of new Set(readFileSync(file, "utf8").match(utility) ?? [])) {
+      if (css.includes("." + toSelector(cls))) continue;
+      missing.push(`${cls}  (${file.slice(projectRoot.length + 1)})`);
+    }
+  }
+  assert(
+    missing.length === 0,
+    "These opacity utilities generated no CSS — if the number is off Tailwind's opacity scale use " +
+      "the arbitrary-value form (/[8%]), and check the colour name exists in the theme:\n  " +
+      missing.join("\n  "),
+  );
 }
 
 function validateNotFound() {
@@ -203,7 +345,8 @@ function validateNotFound() {
 
 validateVercelConfig();
 validateRoutes();
-validateSitemap();
+validateRouterSitemapParity(validateSitemap());
+validateOpacityUtilitiesAreGenerated();
 validateNotFound();
 
 if (failures.length > 0) {

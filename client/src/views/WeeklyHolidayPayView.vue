@@ -67,8 +67,7 @@ watch(
         summary: `주휴수당 ${formatWon(result.value.weeklyHolidayPay)} · 실질시급 ${formatWon(result.value.effectiveHourlyWage)}`,
       });
     }, 1200);
-  },
-  { immediate: true },
+  }
 );
 </script>
 
@@ -167,7 +166,7 @@ watch(
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="weekly-holiday-pay-main" @share-request="openShare" />
+        <CommunitySidebar page-key="weekly-holiday-pay-main" />
         <RecentCalcPanel />
       </div>
     </section>

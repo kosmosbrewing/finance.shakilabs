@@ -221,7 +221,7 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="withholding-main" @share-request="openShare" />
+        <CommunitySidebar page-key="withholding-main" />
         <RecentCalcPanel />
       </div>
     </section>

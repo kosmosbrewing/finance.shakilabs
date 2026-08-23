@@ -52,7 +52,7 @@ const items: RelatedServiceItem[] = [
               <p class="[text-wrap-style:balance] text-body font-bold text-foreground">{{ item.title }}</p>
               <p class="mt-1.5 text-caption text-muted-foreground">{{ item.description }}</p>
             </div>
-            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/[12%] text-primary">
               <component :is="item.icon" class="h-5 w-5" />
             </span>
           </div>

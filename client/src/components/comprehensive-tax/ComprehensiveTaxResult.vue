@@ -172,9 +172,9 @@ function taxationLabel(source: SourceResult): string {
         <div
           class="rounded-xl border px-4 py-3 flex items-center justify-between"
           :class="isRefund
-            ? 'bg-status-success/8 border-status-success/30'
+            ? 'bg-status-success/[8%] border-status-success/30'
             : hasTax && result.netPayable !== 0
-              ? 'bg-status-danger/8 border-status-danger/30'
+              ? 'bg-status-danger/[8%] border-status-danger/30'
               : 'bg-muted/20 border-border/60'"
         >
           <span class="text-body font-bold text-foreground">납부 / 환급 세액</span>

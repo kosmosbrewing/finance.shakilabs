@@ -69,8 +69,7 @@ watch(
         summary: `퇴직금 ${formatWon(result.value.severancePay)} · 실수령 ${formatWon(result.value.netSeverancePay)}`,
       });
     }, 1200);
-  },
-  { immediate: true },
+  }
 );
 </script>
 
@@ -187,7 +186,7 @@ watch(
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="severance-pay-main" @share-request="openShare" />
+        <CommunitySidebar page-key="severance-pay-main" />
         <RecentCalcPanel />
       </div>
     </section>

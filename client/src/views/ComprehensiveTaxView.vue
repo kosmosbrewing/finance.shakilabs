@@ -356,8 +356,7 @@ watch(
         summary: netLabel.value,
       });
     }, 2000);
-  },
-  { immediate: true }
+  }
 );
 </script>
 
@@ -462,7 +461,7 @@ watch(
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" @share-request="openShare" />
+        <CommunitySidebar :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" />
         <RecentCalcPanel />
       </div>
     </section>

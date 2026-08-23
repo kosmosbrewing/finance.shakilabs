@@ -113,8 +113,7 @@ watch(
         summary: `월 실수령 +${formatWon(result.value.totalExtraNet)}`,
       });
     }, 1200);
-  },
-  { immediate: true }
+  }
 );
 </script>
 <template>
@@ -190,7 +189,7 @@ watch(
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="overtime-main" @share-request="openShare" />
+        <CommunitySidebar page-key="overtime-main" />
         <RecentCalcPanel />
       </div>
     </section>
