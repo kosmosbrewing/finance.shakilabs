@@ -55,7 +55,17 @@ async function handleClear(): Promise<void> {
 </script>
 
 <template>
-  <section class="retro-panel overflow-hidden">
+  <!--
+    빈 패널은 렌더하지 않는다.
+
+    이 패널은 26개 뷰의 우측 레일에 있지만 기록을 쌓는 계산기는 14개뿐이라, 나머지 12개
+    (연차·피부양자·근로장려금·IRP·연금·육아휴직·실업급여·체불임금·연말정산·월세·지역건보·사업주
+    4대보험)에서는 "계산 결과를 확인하면 저장됩니다"라는 안내가 그 페이지에서 영원히 지켜지지
+    않는 약속이었다. 저장소는 앱 전역 키 하나라서 어느 계산기든 한 번 쓰면 26개 뷰 모두에서
+    패널이 살아난다 — 즉 비었을 때만 감추면 교차 이동 가치는 그대로 두고 거짓 안내만 사라진다.
+    하이드레이션 전에는 스켈레톤을 유지해, 기록이 있는 사용자에게 빈 화면이 깜빡이지 않게 한다.
+  -->
+  <section v-if="!hydrated || hasEntries" class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <div class="flex items-center gap-1.5">
         <History class="h-3.5 w-3.5" />
@@ -79,7 +89,7 @@ async function handleClear(): Promise<void> {
       </div>
     </div>
 
-    <div v-else-if="hasEntries" class="divide-y divide-border/50 min-h-[144px]">
+    <div v-else class="divide-y divide-border/50 min-h-[144px]">
       <RouterLink
         v-for="entry in entries"
         :key="`${entry.type}-${entry.timestamp}`"
@@ -98,12 +108,6 @@ async function handleClear(): Promise<void> {
         </div>
         <span class="shrink-0 text-tiny text-muted-foreground">{{ relativeTime(entry.timestamp) }}</span>
       </RouterLink>
-    </div>
-
-    <div v-else class="flex min-h-[144px] items-center px-4 py-4 sm:px-5 sm:py-4">
-      <p class="text-caption leading-6 text-muted-foreground">
-        계산 결과를 확인하면 최근 기록이 여기에 저장됩니다.
-      </p>
     </div>
   </section>
 </template>

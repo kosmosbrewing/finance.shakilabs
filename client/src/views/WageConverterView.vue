@@ -84,8 +84,7 @@ watch(
         summary: `시급 ${formatWon(result.value.hourly)} · 월급 ${formatWon(result.value.monthly)} · 연봉 ${formatWon(result.value.annual)}`,
       });
     }, 1200);
-  },
-  { immediate: true },
+  }
 );
 </script>
 
@@ -174,7 +173,7 @@ watch(
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="wage-converter-main" @share-request="openShare" />
+        <CommunitySidebar page-key="wage-converter-main" />
         <RecentCalcPanel />
       </div>
     </section>

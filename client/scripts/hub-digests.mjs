@@ -23,11 +23,20 @@ import {
   INCOME_TAX_BRACKETS,
   PERSONAL_DEDUCTION_PER_PERSON,
   RATES_2026,
+  severancePayEstimate,
+  SEVERANCE_ASSUMED_MONTHLY,
+  SIMPLE_EXPENSE_RATE_BASE,
+  SIMPLE_EXPENSE_RATE_EXCESS,
+  SIMPLE_EXPENSE_THRESHOLD,
+  unemploymentDailyAllowance,
+  UNEMPLOYMENT_DAILY_MIN,
 } from "./calc-engine.mjs";
 import {
   COMPARE_PAIRS,
   COMPREHENSIVE_TAX_AMOUNTS,
+  FREELANCER_AMOUNTS,
   INSURANCE_AMOUNTS,
+  QUIT_YEARS,
   SALARY_AMOUNTS,
 } from "./seo-routes.mjs";
 import {
@@ -456,5 +465,182 @@ export function compareRetentionDigest() {
     },
     tableNote: `부양가족 1인·비과세 식대 월 ${formatWon(NON_TAXABLE_MONTHLY)} 기준입니다. 유지율은 세후 연 증가액을 세전 연 증가액으로 나눈 값이라, 제안 연봉의 세전 인상분에 그대로 곱하면 세후 증가액을 암산할 수 있습니다.`,
     callout: `<strong>쓰는 법</strong> — 세전 ${formatWon(5_000_000)} 인상 제안을 받았다면, 본인 구간 유지율이 ${formatPercent(worst.retention)}일 때 연 세후 증가액은 약 ${formatWon(Math.round(5_000_000 * worst.retention))}(월 ${formatWon(Math.round((5_000_000 * worst.retention) / 12))})입니다. 이 금액이 이직에 따르는 비용을 덮는지가 실제 판단 기준입니다.`,
+  };
+}
+
+// =========================
+// /quit — 근속연수를 가로지르는 두 개의 시선
+// =========================
+const QUIT_MONTHLY_LIVING = 2_000_000;
+
+// 수급일수는 나이·가입기간 구간표를 따른다. quitHub와 buildQuitContent가 같은 계단을 쓰므로
+// 한 곳에서만 파생시켜야 세 화면이 어긋나지 않는다.
+export function unemploymentDaysFor(years) {
+  if (years >= 10) return 240;
+  if (years >= 5) return 210;
+  if (years >= 3) return 180;
+  if (years >= 1) return 150;
+  return 120;
+}
+
+function quitRow(years) {
+  const estimate = severancePayEstimate(years);
+  const { dailyAmount, rawDaily } = unemploymentDailyAllowance(estimate.avgWage);
+  const days = unemploymentDaysFor(years);
+  const unemploymentTotal = dailyAmount * days;
+  return {
+    years,
+    ...estimate,
+    dailyAmount,
+    rawDaily,
+    days,
+    unemploymentTotal,
+    // 세전 총재원과 세후 총재원을 같이 들고 다녀야 "세금이 몇 달을 깎았나"를 뺄셈으로 보여줄 수 있다
+    grossFunding: estimate.severance + unemploymentTotal,
+    netFunding: estimate.netSeverance + unemploymentTotal,
+    effectiveTaxRate: estimate.estimatedTax / estimate.severance,
+  };
+}
+
+export function quitSeveranceTaxDigest() {
+  const rows = QUIT_YEARS.map(quitRow);
+  const flat = rows.filter((row) => row.years <= 5);
+  const last = rows[rows.length - 1];
+  const first = rows[0];
+  // 세금이 갉아먹는 생존 일수 — 개월이 아니라 일로 환산해야 크기가 정직하게 보인다
+  const daysLost = (row) => (row.estimatedTax / QUIT_MONTHLY_LIVING) * 30;
+
+  return {
+    h2: "퇴직소득세는 근속 5년을 넘는 순간 가벼워진다",
+    body: [
+      `위 표의 퇴직금은 세전 금액이고, 생존기간 계산에서도 퇴직소득세를 뺐습니다. 그 빠진 값을 근속 ${first.years}년부터 ${last.years}년까지 한 줄로 세워 보면, 퇴직소득세가 <strong>근속에 비례해 늘지 않는다</strong>는 사실이 드러납니다. 한 페이지에서 근속 하나만 보면 그냥 하나의 금액이지만, 네 근속을 나란히 놓으면 실효세율이 어느 지점에서 꺾이는지가 보입니다.`,
+      `근속 ${flat[0].years}년부터 ${flat[flat.length - 1].years}년까지는 실효세율이 ${formatPercent(flat[0].effectiveTaxRate, 2)}로 완전히 평평합니다. 퇴직금도 근속연수공제도 근속에 정비례해 늘어나(각각 연 ${formatWon(first.severance)}·연 ${formatWon(first.yearDeduction)}) 환산급여가 그대로이기 때문입니다. 그런데 ${last.years}년에서는 ${formatPercent(last.effectiveTaxRate, 2)}로 내려갑니다. 근속연수공제 단가가 5년 초과분부터 연 ${formatWon(1_000_000)}에서 ${formatWon(2_000_000)}으로 두 배가 되어, 과세 대상이 되는 몫 자체가 줄기 때문입니다.`,
+      `크기를 생활비로 환산하면 체감이 분명해집니다. 월 ${formatWon(QUIT_MONTHLY_LIVING)} 기준으로 퇴직소득세가 갉아먹는 생존 시간은 근속 ${first.years}년에서 약 ${daysLost(first).toFixed(1)}일, ${last.years}년에서도 약 ${daysLost(last).toFixed(1)}일에 그칩니다. 위 표의 생존 개월 수가 세금을 넣어도 바뀌지 않는 이유입니다. 퇴사 재무에서 실제로 무서운 항목은 퇴직소득세가 아니라, 재직 중에는 없던 지역가입 건강보험료 쪽입니다.`,
+    ],
+    table: {
+      head: ["근속", "퇴직금 (세전)", "근속연수공제", "퇴직소득세", "실효세율", "세후 퇴직금"],
+      rows: rows.map((row) => ({
+        highlight: row.years === last.years,
+        cells: [
+          `<a href="/finance/quit/${row.years}years">${row.years}년</a>`,
+          formatWon(row.severance),
+          formatWon(row.yearDeduction),
+          formatWon(row.estimatedTax),
+          `<strong>${formatPercent(row.effectiveTaxRate, 2)}</strong>`,
+          formatWon(row.netSeverance),
+        ],
+      })),
+    },
+    tableNote: `평균임금 ${formatWon(first.avgWage)}(월 급여 ${formatWon(SEVERANCE_ASSUMED_MONTHLY)}·상여 포함 1.1배) 가정이며, 지방소득세를 포함한 값입니다. 실효세율은 퇴직소득세를 세전 퇴직금으로 나눈 값으로, 근속 ${last.years}년의 세금 ${formatWon(last.estimatedTax)}은 ${first.years}년(${formatWon(first.estimatedTax)})의 ${(last.estimatedTax / first.estimatedTax).toFixed(1)}배지만 퇴직금은 ${last.years}배라 부담 비율은 오히려 내려갑니다.`,
+  };
+}
+
+export function quitFundingMixDigest() {
+  const rows = QUIT_YEARS.map(quitRow);
+  const crossover = rows.find((row) => row.severance > row.unemploymentTotal);
+  const before = rows[rows.indexOf(crossover) - 1];
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+  const share = (row) => row.unemploymentTotal / row.grossFunding;
+
+  return {
+    h2: "재원의 무게가 실업급여에서 퇴직금으로 넘어가는 근속",
+    body: [
+      `퇴사 자금은 퇴직금과 실업급여 두 갈래인데, 둘 중 어느 쪽이 주력인지는 근속에 따라 <strong>뒤바뀝니다</strong>. 근속 ${first.years}년에서는 총재원 ${formatWon(first.grossFunding)} 가운데 실업급여가 ${formatPercent(share(first))}를 차지해 퇴직금의 ${(first.unemploymentTotal / first.severance).toFixed(1)}배지만, 근속 ${last.years}년에서는 실업급여 비중이 ${formatPercent(share(last))}로 내려가고 퇴직금이 실업급여의 ${(last.severance / last.unemploymentTotal).toFixed(1)}배가 됩니다.`,
+      `역전이 일어나는 지점은 근속 ${before.years}년과 ${crossover.years}년 사이입니다. ${before.years}년에서는 실업급여 ${formatWon(before.unemploymentTotal)}이 퇴직금 ${formatWon(before.severance)}보다 크지만, ${crossover.years}년에서는 퇴직금 ${formatWon(crossover.severance)}이 실업급여 ${formatWon(crossover.unemploymentTotal)}을 앞지릅니다.`,
+      `두 재원이 전혀 다른 식으로 자라기 때문입니다. 퇴직금은 근속에 정비례해 매끄럽게 늘지만, 실업급여는 일액이 아니라 <strong>수급일수만</strong> 계단식으로 늘어납니다. 이 표준 시나리오에서 일액은 네 근속 모두 ${formatWon(first.dailyAmount)}로 같습니다. 평균임금 ${formatWon(first.avgWage)}의 60%인 ${formatWon(first.rawDaily)}이 2026년 하한액 ${formatWon(UNEMPLOYMENT_DAILY_MIN)}에 못 미쳐 하한이 대신 적용되기 때문이고, 그래서 실업급여 총액의 차이는 오로지 ${first.days}일에서 ${last.days}일로 늘어난 일수에서만 나옵니다.`,
+      `실무적으로 갈리는 것은 "무엇을 확인해야 하는가"입니다. 근속이 짧아 실업급여가 주력인 쪽은 <strong>수급 자격</strong>(이직 사유가 비자발적인지)이 재원의 절반 이상을 좌우하므로 이직확인서 사유 코드가 가장 중요합니다. 근속이 길어 퇴직금이 주력인 쪽은 자격보다 <strong>평균임금 산정</strong>(퇴직 전 3개월에 상여·연차수당이 제대로 들어갔는지)이 금액을 더 크게 움직입니다.`,
+    ],
+    table: {
+      head: ["근속", "퇴직금", "실업급여 총액", "수급일수", "총재원 중 실업급여 비중"],
+      rows: rows.map((row) => ({
+        highlight: row.years === crossover.years,
+        cells: [
+          `<a href="/finance/quit/${row.years}years">${row.years}년</a>`,
+          formatWon(row.severance),
+          formatWon(row.unemploymentTotal),
+          `${row.days}일`,
+          `<strong>${formatPercent(share(row))}</strong>`,
+        ],
+      })),
+    },
+    callout: `<strong>하한액에 걸려 있다는 뜻</strong> — 일액이 하한 ${formatWon(UNEMPLOYMENT_DAILY_MIN)}에 붙어 있으면, 퇴사 전 급여가 올라도 실업급여는 1원도 늘지 않습니다. 평균임금이 월 약 ${formatWon(Math.ceil((UNEMPLOYMENT_DAILY_MIN / 0.6) * 30))}을 넘어서야 비로소 일액이 하한 위로 올라섭니다.`,
+  };
+}
+
+// =========================
+// /freelancer — 경비율 절벽과 3.3% 선납의 사각
+// =========================
+function freelancerRow(amount) {
+  const calc = computeComprehensiveTax(amount * 10_000);
+  return {
+    amount,
+    calc,
+    effectiveExpenseRate: calc.expenses / calc.income,
+    coverage: calc.withholdingPrepaid / calc.totalTax,
+    shortfall: calc.totalTax - calc.withholdingPrepaid,
+  };
+}
+
+export function freelancerExpenseCliffDigest() {
+  const rows = FREELANCER_AMOUNTS.map(freelancerRow);
+  const lastFlat = [...rows]
+    .reverse()
+    .find((row) => row.calc.income <= SIMPLE_EXPENSE_THRESHOLD);
+  const firstOver = rows[rows.indexOf(lastFlat) + 1];
+  const top = rows[rows.length - 1];
+
+  return {
+    h2: "경비율 절벽은 한 번에 떨어지지 않는다",
+    body: [
+      `단순경비율이 ${formatPercent(SIMPLE_EXPENSE_RATE_BASE, 1)}에서 ${formatPercent(SIMPLE_EXPENSE_RATE_EXCESS, 1)}로 꺾인다는 말은 흔히 "수입 ${formatWon(SIMPLE_EXPENSE_THRESHOLD)}을 넘으면 경비 인정이 반 토막"으로 읽힙니다. 실제로는 그렇지 않습니다. 낮은 율은 <strong>초과분에만</strong> 붙기 때문에, 수입 전체로 따진 실효 경비율은 절벽처럼 떨어지지 않고 천천히 미끄러집니다. 이 차이는 수입대 하나만 보고 있으면 절대 보이지 않고, 전 구간을 나란히 놓아야 드러납니다.`,
+      `표의 실효 경비율 열을 보면 ${manWon(lastFlat.amount)}까지는 ${formatPercent(lastFlat.effectiveExpenseRate, 2)}로 평평하다가, 절벽을 갓 넘은 ${manWon(firstOver.amount)}에서 ${formatPercent(firstOver.effectiveExpenseRate, 2)}로 내려앉습니다. 그런데 이 계산기의 최대 수입인 ${manWon(top.amount)}에서도 실효 경비율은 여전히 ${formatPercent(top.effectiveExpenseRate, 2)}이고, ${formatPercent(SIMPLE_EXPENSE_RATE_EXCESS, 1)}에는 닿지 않습니다. 앞의 ${formatWon(SIMPLE_EXPENSE_THRESHOLD)}이 높은 율을 계속 붙들고 있기 때문이며, 수입이 아무리 커져도 ${formatPercent(SIMPLE_EXPENSE_RATE_EXCESS, 1)}에 수렴할 뿐 그 아래로는 내려가지 않습니다.`,
+      `진짜 부담은 경비율 자체가 아니라 <strong>과세표준이 수입보다 빨리 자란다</strong>는 데 있습니다. ${manWon(lastFlat.amount)}에서 ${manWon(top.amount)}로 수입이 ${(top.calc.income / lastFlat.calc.income).toFixed(1)}배가 될 때 과세표준은 ${(top.calc.taxableBase / lastFlat.calc.taxableBase).toFixed(1)}배가 됩니다. 경비 인정률이 낮아진 몫이 그대로 과세표준에 얹히고, 그 위에 누진세율이 다시 곱해지므로 세액은 ${(top.calc.totalTax / lastFlat.calc.totalTax).toFixed(1)}배까지 벌어집니다.`,
+    ],
+    table: {
+      head: ["연 수입", "인정 경비", "실효 경비율", "과세표준", "확정세액"],
+      rows: rows.map((row) => ({
+        highlight: row.amount === firstOver.amount,
+        cells: [
+          `<a href="/finance/freelancer/${row.amount}">${manWon(row.amount)}</a>`,
+          formatWon(row.calc.expenses),
+          `<strong>${formatPercent(row.effectiveExpenseRate, 2)}</strong>`,
+          formatWon(row.calc.taxableBase),
+          formatWon(row.calc.totalTax),
+        ],
+      })),
+    },
+    tableNote: `인적용역 단순경비율 기준입니다. 실효 경비율은 인정 경비를 수입으로 나눈 값이라, 장부를 쓸지 판단할 때 비교해야 하는 기준선이 바로 이 열입니다. 실제 경비가 이 비율을 넘는 해에만 장부 작성이 유리합니다 — ${manWon(top.amount)} 구간이라면 ${formatPercent(SIMPLE_EXPENSE_RATE_EXCESS, 1)}이 아니라 ${formatPercent(top.effectiveExpenseRate, 2)}가 손익분기점입니다.`,
+  };
+}
+
+export function freelancerPrepaidGapDigest() {
+  const rows = FREELANCER_AMOUNTS.map(freelancerRow);
+  const owing = rows.filter((row) => row.shortfall > 0);
+  const firstOwing = owing[0];
+  const top = rows[rows.length - 1];
+  const reserveRate = (row) => row.shortfall / row.calc.income;
+
+  return {
+    h2: "3.3%가 확정세액을 덮는 비율과 따로 떼어둘 돈",
+    body: [
+      `원천징수 ${formatPercent(0.033, 1)}는 세율이 아니라 선납금입니다. 그래서 실무에서 중요한 질문은 "3.3%가 맞느냐"가 아니라 <strong>"3.3%가 5월 고지서의 몇 %를 덮어 주느냐"</strong>입니다. 이 커버리지를 전 수입대에 걸쳐 계산하면 ${formatPercent(rows[0].coverage, 0)}에서 ${formatPercent(top.coverage, 0)}까지 내려갑니다.`,
+      `커버리지가 100%를 밑도는 순간부터 5월은 환급이 아니라 납부의 달이 됩니다. 이 계산기 범위에서 그 지점은 연 수입 ${manWon(firstOwing.amount)}이며, 커버리지 ${formatPercent(firstOwing.coverage, 0)}로 확정세액 ${formatWon(firstOwing.calc.totalTax)} 가운데 ${formatWon(firstOwing.calc.withholdingPrepaid)}만 이미 내 있고 ${formatWon(firstOwing.shortfall)}이 모자랍니다.`,
+      `모자란 몫을 수입 대비 비율로 바꾸면 그대로 <strong>적립률</strong>이 됩니다. ${manWon(firstOwing.amount)} 구간은 수입의 ${formatPercent(reserveRate(firstOwing), 2)}, ${manWon(top.amount)} 구간은 ${formatPercent(reserveRate(top), 2)}입니다. 즉 3.3%가 빠져나간 대금을 받을 때마다 그 위에 수입의 ${formatPercent(reserveRate(firstOwing), 1)}~${formatPercent(reserveRate(top), 1)}를 따로 떼어 두면 5월에 현금을 융통할 일이 없습니다. 월 단위로는 ${manWon(firstOwing.amount)} 구간이 ${formatWon(Math.round(firstOwing.shortfall / 12))}, ${manWon(top.amount)} 구간이 ${formatWon(Math.round(top.shortfall / 12))}입니다.`,
+    ],
+    table: {
+      head: ["연 수입", "3.3%가 덮는 비율", "부족분 (5월 납부)", "권장 적립률", "월 적립액"],
+      rows: rows.map((row) => ({
+        highlight: row.amount === firstOwing.amount,
+        cells: [
+          `<a href="/finance/freelancer/${row.amount}">${manWon(row.amount)}</a>`,
+          `<strong>${formatPercent(row.coverage, 0)}</strong>`,
+          row.shortfall > 0 ? formatWon(row.shortfall) : `없음 (${formatWon(-row.shortfall)} 환급)`,
+          row.shortfall > 0 ? formatPercent(reserveRate(row), 2) : "0%",
+          row.shortfall > 0 ? formatWon(Math.round(row.shortfall / 12)) : "0원",
+        ],
+      })),
+    },
+    callout: `<strong>적립률은 한 해 늦게 따라온다</strong> — 위 비율은 그해 수입이 확정된 뒤의 값입니다. 수입이 빠르게 늘고 있다면 작년 구간이 아니라 <em>올해 예상 수입</em>의 구간으로 떼어 두어야 합니다. 전년 대비 수입이 뛴 해에 5월 납부액이 예상을 크게 벗어나는 것은 거의 이 시차 때문입니다.`,
   };
 }

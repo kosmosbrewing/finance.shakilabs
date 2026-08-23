@@ -46,6 +46,10 @@ import {
   compareRetentionDigest,
   comprehensiveTaxGapDigest,
   comprehensiveTaxSeparateDigest,
+  freelancerExpenseCliffDigest,
+  freelancerPrepaidGapDigest,
+  quitFundingMixDigest,
+  quitSeveranceTaxDigest,
 } from "./hub-digests.mjs";
 
 const STANDARD_SALARY_INPUT = {
@@ -294,6 +298,8 @@ function quitHub() {
           "여기에 퇴직소득세도 반영해야 합니다. 표의 퇴직금은 세전 금액이므로, 실제 손에 쥐는 돈은 그보다 적습니다.",
         ],
       },
+      quitSeveranceTaxDigest(),
+      quitFundingMixDigest(),
     ],
     variants: {
       h2: "근속연수별 상세 시뮬레이션",
@@ -447,6 +453,8 @@ function freelancerHub() {
           "사업이 부진해 올해 소득이 크게 줄었다면 중간예납 추계액 신고로 납부액을 낮출 수 있습니다. 자동 고지된 금액을 그대로 내지 않아도 됩니다.",
         ],
       },
+      freelancerExpenseCliffDigest(),
+      freelancerPrepaidGapDigest(),
     ],
     variants: {
       h2: "수입 금액별 상세 계산",

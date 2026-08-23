@@ -154,7 +154,7 @@ const eligibleLabel: Record<string, string> = {
       </div>
 
       <!-- 합계 -->
-      <div class="rounded-xl bg-primary/8 border border-primary/20 px-4 py-3 flex items-center justify-between">
+      <div class="rounded-xl bg-primary/[8%] border border-primary/20 px-4 py-3 flex items-center justify-between">
         <span class="text-body font-bold text-foreground">총 합계</span>
         <span class="text-body font-bold tabular-nums text-primary">{{ formatKrwAuto(totalReceivables) }}</span>
       </div>

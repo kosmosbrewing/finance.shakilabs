@@ -116,8 +116,7 @@ watch(
         summary: `월 실수령 +${formatWon(result.value.monthlyNetDiff)}`,
       });
     }, 1200);
-  },
-  { immediate: true }
+  }
 );
 </script>
 
@@ -192,7 +191,7 @@ watch(
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="raise-main" @share-request="openShare" />
+        <CommunitySidebar page-key="raise-main" />
         <RecentCalcPanel />
       </div>
     </section>

@@ -88,6 +88,10 @@ export function hydrateRecentCalcs(): void {
   persist();
 }
 
+// 호출부 규약: 이 함수를 부르는 watch에 `{ immediate: true }`를 붙이지 마라.
+// immediate는 마운트 시점에 한 번 발화하므로, 사용자가 아무것도 하지 않고 페이지에 들어오기만 해도
+// 기본값(예: 시급 10,320원)이 "최근 계산"에 쌓인다. 실제로 8개 뷰가 그 상태였고, 목록 5칸이
+// 방문만으로 채워져 진짜 계산 기록을 밀어냈다. 기록은 값이 바뀐 뒤에만 남아야 한다.
 export function addEntry(entry: Omit<RecentCalcEntry, "timestamp">): void {
   hydrateRecentCalcs();
   const now = Date.now();

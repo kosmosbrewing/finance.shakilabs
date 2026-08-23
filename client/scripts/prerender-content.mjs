@@ -2143,7 +2143,11 @@ function buildQuitContent(years) {
   // 가정: 평균 월급 300만원, 평균임금 330만원(상여금 포함 1.1배), 3개월 생존비 200만원/월
   // 퇴직금·실업급여 모두 /severance-pay·/unemployment와 같은 공용 산식을 쓴다 — 퇴사 시뮬레이션이
   // 개별 계산기와 다른 금액을 내면 사용자는 어느 쪽을 믿어야 할지 알 수 없다.
-  const { avgWage, severance: severancePay } = severancePayEstimate(years);
+  const {
+    avgWage,
+    severance: severancePay,
+    estimatedTax: severanceTax,
+  } = severancePayEstimate(years);
   const { avgDailyWage: dailyWage, dailyAmount: unemploymentDaily } =
     unemploymentDailyAllowance(avgWage);
   // 나이·가입기간별 수급일수 (40세 미만·가입 3~5년 = 180일 가정)
@@ -2275,7 +2279,7 @@ function buildQuitContent(years) {
       <h3 style="${H3_STYLE}">Q3. 퇴직소득세는 얼마나 나오나요?</h3>
       <p style="${P_STYLE}">
         퇴직소득세는 근속연수에 따른 공제(12년 초과 시 크게 감면)와 연분연승법(연평균 과세표준 × 12)으로 계산됩니다.
-        근속 ${years}년 기준 퇴직금 ${formatWon(severancePay)}의 퇴직소득세는 약 ${formatWon(Math.floor(severancePay * 0.03))}
+        근속 ${years}년 기준 퇴직금 ${formatWon(severancePay)}의 퇴직소득세는 약 ${formatWon(severanceTax)}
         수준(근속이 길수록 낮음)이며, 정확한 계산은 <a href="/finance/severance-pay">퇴직금 계산기</a>를 이용하세요.
       </p>
 

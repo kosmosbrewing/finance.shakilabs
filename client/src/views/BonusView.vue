@@ -104,8 +104,7 @@ watch(
         summary: `실수령 ${formatWon(result.value.netBonus)}`,
       });
     }, 1200);
-  },
-  { immediate: true }
+  }
 );
 </script>
 
@@ -183,7 +182,7 @@ watch(
       </div>
 
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="bonus-main" @share-request="openShare" />
+        <CommunitySidebar page-key="bonus-main" />
         <RecentCalcPanel />
       </div>
     </section>

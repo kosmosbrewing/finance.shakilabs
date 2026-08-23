@@ -110,8 +110,7 @@ watch(
         summary: `월 청구 ${formatWon(result.value.monthlyInvoice)}`,
       });
     }, 1200);
-  },
-  { immediate: true }
+  }
 );
 
 const industryOptions = computed<{ value: IndustryKey; label: string }[]>(() =>
@@ -192,7 +191,7 @@ const incomeTypeOptions = [
         <InternalLink current="freelance-rate" />
       </div>
       <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="freelance-rate-main" @share-request="openShare" />
+        <CommunitySidebar page-key="freelance-rate-main" />
         <RecentCalcPanel />
       </div>
     </section>
