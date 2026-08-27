@@ -1,5 +1,6 @@
 import { nextTick } from "vue";
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
+import { CALCULATOR_COUNT } from "@/data/calculatorCount";
 import { trackPageView } from "@/lib/analytics";
 import { queryFirst } from "@/lib/routeState";
 import { clearRuntimeError } from "@/lib/runtimeError";
@@ -368,7 +369,7 @@ const routes: RouteRecordRaw[] = [
     path: "/all",
     name: "AllCalculators",
     component: () => import("@/views/AllCalculatorsView.vue"),
-    meta: { title: "2026 세금·연봉·수당 계산기 모음 | 26개 계산기" },
+    meta: { title: `2026 세금·연봉·수당 계산기 모음 | ${CALCULATOR_COUNT}개 계산기` },
   },
   {
     path: "/guide/resignation",

@@ -210,6 +210,24 @@ for (const route of PARAM_ROUTES) {
 // submitted URL that immediately points elsewhere spends crawl budget for nothing.
 export const SITEMAP_ROUTES = SEO_ROUTES.filter((route) => !PARAM_ROUTE_SET.has(route));
 
+// Everything in the sitemap that is not a calculator: the hub, the situation guides and the
+// policy pages. Listed by hand because it is the short, stable half — a new calculator must never
+// require an edit here, or the count below would drift again the moment one is added.
+const NON_CALCULATOR_ROUTES = new Set(["/", "/all", "/about", "/terms", "/privacy"]);
+
+// The calculators, derived — never counted by hand.
+//
+// Why this exists: /finance/llms.txt advertised "23개 계산기" for three weeks after /dependent,
+// /unpaid-wage and /eitc shipped, because the number and the URL list were both typed in. Anything
+// that states how many calculators this site has now reads it from here, so the only way to change
+// the number is to add or remove a route.
+//
+// Depth filter: a two-segment sitemap route is a sub-page of a calculator (/eitc/single is a
+// household variant of /eitc, /guide/* is a guide), never a calculator of its own.
+export const CALCULATOR_ROUTES = SITEMAP_ROUTES.filter(
+  (route) => route.split("/").length === 2 && !NON_CALCULATOR_ROUTES.has(route),
+);
+
 // Canonical target for a prerendered route: a consolidated variant points at its base
 // calculator (/salary/5000 -> /salary), everything else points at itself.
 export function canonicalPathFor(route) {

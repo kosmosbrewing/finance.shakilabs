@@ -1,42 +1,8 @@
 // 프리렌더 공통 레이아웃: header nav + footer
 // 모든 프리렌더 페이지에 정적 HTML로 주입되어 크롤러의 사이트 항해를 가능하게 함
 
-const CALCULATORS = {
-  "급여·연봉": [
-    { href: "/finance/salary", label: "연봉 실수령액 계산기" },
-    { href: "/finance/insurance", label: "건강보험료 역산 계산기" },
-    { href: "/finance/compare", label: "이직 연봉 비교" },
-    { href: "/finance/raise", label: "연봉 인상률 계산기" },
-    { href: "/finance/bonus", label: "성과급 실수령 계산기" },
-  ],
-  "세금·신고": [
-    { href: "/finance/comprehensive-tax", label: "종합소득세 계산기" },
-    { href: "/finance/withholding", label: "원천세 역산 계산기" },
-    { href: "/finance/freelance-rate", label: "프리랜서 단가 역산" },
-    { href: "/finance/4-insurance-employer", label: "사업주 4대보험" },
-  ],
-  "수당·시급": [
-    { href: "/finance/weekly-holiday-pay", label: "주휴수당 계산기" },
-    { href: "/finance/wage-converter", label: "시급↔월급↔연봉 환산기" },
-    { href: "/finance/overtime", label: "연장·야간·휴일수당" },
-    { href: "/finance/annual-leave", label: "연차수당 계산기" },
-  ],
-  "퇴직·구직": [
-    { href: "/finance/quit", label: "퇴사 계산기" },
-    { href: "/finance/severance-pay", label: "퇴직금 계산기" },
-    { href: "/finance/unemployment", label: "실업급여 계산기" },
-    { href: "/finance/parental-leave", label: "육아휴직 급여" },
-    { href: "/finance/regional-health", label: "지역가입자 건보료" },
-  ],
-  "절세·공제": [
-    { href: "/finance/year-end-settlement", label: "연말정산 계산기" },
-    { href: "/finance/monthly-rent-deduction", label: "월세 세액공제" },
-    { href: "/finance/irp", label: "IRP 세액공제" },
-    { href: "/finance/pension", label: "국민연금 수령액" },
-  ],
-};
-
 import { readFileSync } from "node:fs";
+import { CALCULATOR_CATALOG } from "./calculator-catalog.mjs";
 
 // 공유 카탈로그 단일 출처 — Vue 푸터와 같은 목록을 정적 HTML에도 심는다(JS 없이도 크롤 경로 확보)
 const SERVICE_CATALOG = JSON.parse(
@@ -96,16 +62,18 @@ export function buildPrerenderHeader() {
 
 /**
  * 모든 프리렌더 페이지 최하단에 삽입되는 정적 footer HTML
- * - 22개 전체 계산기 링크 (5 카테고리)
+ * - 전체 계산기 링크 (5 카테고리) — 목록은 calculator-catalog.mjs에서만 온다.
+ *   여기에 링크를 손으로 적어 두었던 동안 Vue 푸터는 26개, 이 푸터는 22개였고,
+ *   JS를 실행하지 않는 크롤러에게는 계산기 4개로 가는 경로가 아예 없었다.
  * - 운영자·문의·법적 고지
  */
 export function buildPrerenderFooter() {
-  const categoryBlocks = Object.entries(CALCULATORS)
-    .map(([category, items]) => {
+  const categoryBlocks = CALCULATOR_CATALOG
+    .map(({ category, items }) => {
       const links = items
         .map(
           (item) =>
-            `<li style="margin-bottom:4px;"><a href="${item.href}" style="color:hsl(var(--muted-foreground));text-decoration:none;font-size:13px;">${item.label}</a></li>`
+            `<li style="margin-bottom:4px;"><a href="/finance${item.route}" style="color:hsl(var(--muted-foreground));text-decoration:none;font-size:13px;">${item.label}</a></li>`
         )
         .join("");
       return `

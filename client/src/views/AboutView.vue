@@ -181,7 +181,7 @@ const RATE_REFERENCES = [
         <ul class="space-y-2 text-caption text-muted-foreground">
           <li class="flex gap-2">
             <span class="text-primary shrink-0">▸</span>
-            <span><strong class="text-foreground">회원가입 불필요</strong> — 개인정보를 수집하지 않으며, 즉시 사용 가능합니다.</span>
+            <span><strong class="text-foreground">회원가입 불필요</strong> — 계정·이름·연락처를 받지 않고 즉시 사용 가능</span>
           </li>
           <li class="flex gap-2">
             <span class="text-primary shrink-0">▸</span>
@@ -193,7 +193,7 @@ const RATE_REFERENCES = [
           </li>
           <li class="flex gap-2">
             <span class="text-primary shrink-0">▸</span>
-            <span><strong class="text-foreground">정기 업데이트</strong> — 매년 1월 세법·요율 개정을 즉시 반영합니다.</span>
+            <span><strong class="text-foreground">정기 업데이트</strong> — 매년 1월 세법·요율 개정 즉시 반영 (최근: 2026년 1월)</span>
           </li>
           <li class="flex gap-2">
             <span class="text-primary shrink-0">▸</span>
