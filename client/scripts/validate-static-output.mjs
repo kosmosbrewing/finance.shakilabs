@@ -12,6 +12,7 @@ import {
   SEO_ROUTES,
   SITEMAP_ROUTES,
   PARAM_ROUTES,
+  CALCULATOR_ROUTES,
   canonicalPathFor,
 } from "./seo-routes.mjs";
 // Body-text floors.
@@ -323,6 +324,48 @@ function validateOpacityUtilitiesAreGenerated() {
   );
 }
 
+// llms.txt <-> sitemap.
+//
+// Why: llms.txt is the one shipped file that states, in plain text, how many calculators this site
+// has. It said "23개 계산기" twice for three weeks after the 24th, 25th and 26th shipped, and it
+// listed 23 URLs. Nothing failed, because no gate had ever read it.
+//
+// Both halves are checked. The count alone would pass a file that names the right number of wrong
+// URLs; the URL list alone would pass a file that lists 26 URLs under the sentence "23개 계산기".
+// The generator derives both from the same array, so this is the assertion that the generator
+// actually ran and that its output reached dist.
+function validateLlmsTxt() {
+  const llmsPath = resolve(distRoot, "llms.txt");
+  if (!existsSync(llmsPath)) {
+    assert(false, "Missing dist/llms.txt");
+    return;
+  }
+  const llms = readFileSync(llmsPath, "utf8");
+
+  const counts = [...llms.matchAll(/(\d+)개 계산기/g)].map(([, value]) => Number(value));
+  assert(counts.length > 0, "llms.txt states no calculator count");
+  for (const stated of new Set(counts)) {
+    assert(
+      stated === CALCULATOR_ROUTES.length,
+      `llms.txt claims ${stated}개 계산기 but the sitemap has ${CALCULATOR_ROUTES.length}`,
+    );
+  }
+
+  // Only the calculator links: the hub, guides and policy pages may or may not be listed, but a
+  // calculator URL that is missing (or one that no longer exists) is a factual error about the
+  // site's own contents.
+  const listed = new Set(
+    [...llms.matchAll(/https:\/\/shakilabs\.com\/finance(\/[a-z0-9-]+)/g)].map(([, route]) => route),
+  );
+  for (const route of CALCULATOR_ROUTES) {
+    assert(listed.has(route), `llms.txt is missing calculator ${route}`);
+  }
+  const routeSet = new Set(SEO_ROUTES);
+  for (const route of listed) {
+    assert(routeSet.has(route), `llms.txt links ${route}, which is not a route of this app`);
+  }
+}
+
 function validateNotFound() {
   const notFoundPath = resolve(distRoot, "404.html");
   if (!existsSync(notFoundPath)) {
@@ -346,6 +389,7 @@ function validateNotFound() {
 validateVercelConfig();
 validateRoutes();
 validateRouterSitemapParity(validateSitemap());
+validateLlmsTxt();
 validateOpacityUtilitiesAreGenerated();
 validateNotFound();
 

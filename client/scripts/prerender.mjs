@@ -1,7 +1,8 @@
 // 빌드 후 라우트별 SEO HTML 생성
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
-import { SEO_ROUTES, canonicalPathFor } from "./seo-routes.mjs";
+import { SEO_ROUTES, CALCULATOR_ROUTES, canonicalPathFor } from "./seo-routes.mjs";
+import { CALCULATOR_CATALOG } from "./calculator-catalog.mjs";
 import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
 import { buildRichContent } from "./prerender-content.mjs";
 import {
@@ -338,8 +339,8 @@ function buildMeta(route) {
   }
 
   if (route === "/all") {
-    const title = "2026 세금·연봉·수당 계산기 모음 | 26개 계산기";
-    const description = "연봉 실수령액, 종합소득세, 연말정산, 퇴직금, 실업급여, 주휴수당 등 26개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
+    const title = `2026 세금·연봉·수당 계산기 모음 | ${CALCULATOR_ROUTES.length}개 계산기`;
+    const description = `연봉 실수령액, 종합소득세, 연말정산, 퇴직금, 실업급여, 주휴수당 등 ${CALCULATOR_ROUTES.length}개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.`;
     const canonical = `${SITE_URL}/all`;
     return {
       title,
@@ -1570,47 +1571,19 @@ function buildPrerenderSection(route, meta) {
   }
 
   if (route === "/all") {
+    // 목록은 calculator-catalog.mjs에서만 온다. 여기 손으로 적어 두었을 때는 22개 링크에
+    // "23개 계산기"라고 적혀 있었고, 둘 다 실제 개수(26)와 달랐다.
+    const categoryBlocks = CALCULATOR_CATALOG.map(
+      ({ category, items }) => `
+      <h2 style="font-size:18px;margin:16px 0 6px;">${category}</h2>
+      <ul style="margin:0 0 8px;padding-left:20px;">
+        ${items.map((item) => `<li><a href="/finance${item.route}">${item.label}</a></li>`).join("\n        ")}
+      </ul>`,
+    ).join("");
     return `
     <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">2026 세금·연봉·수당 계산기 모음</h1>
-      <p style="margin:0 0 10px;">급여·세금·수당·퇴직·절세까지, 23개 계산기를 한곳에서 확인하세요.</p>
-      <h2 style="font-size:18px;margin:16px 0 6px;">급여·연봉</h2>
-      <ul style="margin:0 0 8px;padding-left:20px;">
-        <li><a href="/finance/salary">연봉 실수령액 계산기</a></li>
-        <li><a href="/finance/insurance">건보료 역산 계산기</a></li>
-        <li><a href="/finance/compare">이직 연봉 비교</a></li>
-        <li><a href="/finance/raise">연봉 인상률 계산기</a></li>
-        <li><a href="/finance/bonus">성과급 실수령 계산기</a></li>
-      </ul>
-      <h2 style="font-size:18px;margin:16px 0 6px;">세금·신고</h2>
-      <ul style="margin:0 0 8px;padding-left:20px;">
-        <li><a href="/finance/comprehensive-tax">종합소득세 계산기</a></li>
-        <li><a href="/finance/withholding">원천세 계산기</a></li>
-        <li><a href="/finance/freelance-rate">프리랜서 단가 역산</a></li>
-        <li><a href="/finance/4-insurance-employer">사업주 4대보험</a></li>
-      </ul>
-      <h2 style="font-size:18px;margin:16px 0 6px;">수당·시급</h2>
-      <ul style="margin:0 0 8px;padding-left:20px;">
-        <li><a href="/finance/weekly-holiday-pay">주휴수당 계산기</a></li>
-        <li><a href="/finance/wage-converter">시급↔월급↔연봉 환산기</a></li>
-        <li><a href="/finance/overtime">연장·야간·휴일수당</a></li>
-        <li><a href="/finance/annual-leave">연차수당 계산기</a></li>
-      </ul>
-      <h2 style="font-size:18px;margin:16px 0 6px;">퇴직·구직</h2>
-      <ul style="margin:0 0 8px;padding-left:20px;">
-        <li><a href="/finance/quit">퇴사 계산기</a></li>
-        <li><a href="/finance/severance-pay">퇴직금 계산기</a></li>
-        <li><a href="/finance/unemployment">실업급여 계산기</a></li>
-        <li><a href="/finance/parental-leave">육아휴직 급여</a></li>
-        <li><a href="/finance/regional-health">지역가입자 건보료</a></li>
-      </ul>
-      <h2 style="font-size:18px;margin:16px 0 6px;">절세·공제</h2>
-      <ul style="margin:0 0 8px;padding-left:20px;">
-        <li><a href="/finance/year-end-settlement">연말정산 계산기</a></li>
-        <li><a href="/finance/monthly-rent-deduction">월세 세액공제</a></li>
-        <li><a href="/finance/irp">IRP 세액공제</a></li>
-        <li><a href="/finance/pension">국민연금 수령액</a></li>
-      </ul>
+      <p style="margin:0 0 10px;">급여·세금·수당·퇴직·절세까지, ${CALCULATOR_ROUTES.length}개 계산기를 한곳에서 확인하세요.</p>${categoryBlocks}
     </section>`;
   }
 

@@ -2,10 +2,11 @@
 import { RouterLink } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
 import RecentCalcStorageNote from "@/components/finance/RecentCalcStorageNote.vue";
+import { CALCULATOR_COUNT } from "@/data/calculatorCount";
 import { SCENARIO_CHAINS as scenarioChains } from "../../scripts/scenario-chains.mjs";
 
-const seoTitle = "2026 세금·연봉·수당 계산기 모음 | 26개 계산기";
-const seoDescription = "연봉 실수령액, 종합소득세, 프리랜서 세금, 연말정산, 퇴직금, 실업급여, 근로장려금 등 26개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.";
+const seoTitle = `2026 세금·연봉·수당 계산기 모음 | ${CALCULATOR_COUNT}개 계산기`;
+const seoDescription = `연봉 실수령액, 종합소득세, 프리랜서 세금, 연말정산, 퇴직금, 실업급여, 근로장려금 등 ${CALCULATOR_COUNT}개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.`;
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
@@ -104,7 +105,7 @@ const categories = [
       <div class="retro-titlebar rounded-t-2xl">
         <div class="space-y-1">
           <h1 class="retro-title">전체 계산기</h1>
-          <p class="text-caption text-muted-foreground">급여·세금·수당·퇴직·절세까지, 26개 계산기를 한곳에서 확인하세요.</p>
+          <p class="text-caption text-muted-foreground">급여·세금·수당·퇴직·절세까지, {{ CALCULATOR_COUNT }}개 계산기를 한곳에서 확인하세요.</p>
         </div>
       </div>
 

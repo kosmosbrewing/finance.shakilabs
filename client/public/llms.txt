@@ -1,19 +1,21 @@
 # 연봉·세금·수당 계산기 — shakilabs.com/finance
 
-> 2026년 법령 기준 연봉 실수령액, 4대보험, 종합소득세, 퇴직금, 실업급여 등 23개 계산기를 제공하는 무료 서비스입니다. 모든 계산은 클라이언트에서 처리되며 개인정보를 수집하지 않습니다.
+> 2026년 법령 기준 연봉 실수령액, 4대보험, 종합소득세, 퇴직금, 실업급여 등 26개 계산기를 제공하는 무료 서비스입니다. 입력한 급여·세금 정보는 서버로 전송되지 않고 브라우저 안에서 계산합니다.
 
 ## 사이트 정보
 
 - URL: https://shakilabs.com/finance
 - 언어: 한국어
-- 데이터 기준: 2026년 법령·요율 (매년 1월 갱신)
-- 계산기 수: 23개
+- 데이터 기준: 2026년 법령·요율
+- 갱신 방식: 요율 변동을 자동으로 수집하는 수단이 없어, 법령 개정·정부 고시를 사람이 확인해 계산 로직과 안내 문구를 함께 고칩니다 (가장 최근 반영: 2026년 7월 국민연금 기준소득월액 상한 659만원)
+- 계산기 수: 26개
+- 전체 목록 페이지: https://shakilabs.com/finance/all
 
-## 주요 계산기
+## 계산기 목록
 
 ### 급여·연봉
 - [연봉 실수령액 계산기](https://shakilabs.com/finance/salary): 연봉에서 4대보험+소득세 공제 후 월 실수령액 계산
-- [건강보험료 연봉 계산기](https://shakilabs.com/finance/insurance): 건보료로 역산한 예상 연봉 계산
+- [건강보험료 역산 계산기](https://shakilabs.com/finance/insurance): 건보료로 역산한 예상 연봉 계산
 - [이직 연봉 비교](https://shakilabs.com/finance/compare): 두 연봉의 실수령 차이 비교
 - [연봉 인상률 계산기](https://shakilabs.com/finance/raise): 연봉 인상 시 실수령액 변화 시뮬레이션
 - [성과급 실수령 계산기](https://shakilabs.com/finance/bonus): 상여금 세후 실수령액 계산
@@ -21,15 +23,15 @@
 ### 세금·신고
 - [종합소득세 계산기](https://shakilabs.com/finance/comprehensive-tax): 사업·프리랜서 소득 종합소득세 계산
 - [프리랜서 세금 계산기](https://shakilabs.com/finance/freelancer): 3.3% 원천징수 프리랜서 세금 계산
-- [원천세 계산기](https://shakilabs.com/finance/withholding): 소득세로 연봉 역추정
-- [프리랜서 세후 단가 역산](https://shakilabs.com/finance/freelance-rate): 원천세 제외 실수령 단가 계산
+- [원천세 역산 계산기](https://shakilabs.com/finance/withholding): 소득세로 연봉 역추정
+- [프리랜서 단가 역산](https://shakilabs.com/finance/freelance-rate): 원천세 제외 실수령 단가 계산
 - [사업주 4대보험 계산기](https://shakilabs.com/finance/4-insurance-employer): 고용주 부담금·인건비 계산
 
 ### 수당·시급
 - [주휴수당 계산기](https://shakilabs.com/finance/weekly-holiday-pay): 아르바이트 주휴수당·실질 시급 계산
 - [시급↔월급↔연봉 환산기](https://shakilabs.com/finance/wage-converter): 주휴수당 포함·미포함 환산
 - [연장·야간·휴일수당 계산기](https://shakilabs.com/finance/overtime): 초과근무 수당 계산
-- [연차 수당 계산기](https://shakilabs.com/finance/annual-leave): 미사용 연차 보상금 계산
+- [연차수당 계산기](https://shakilabs.com/finance/annual-leave): 미사용 연차 보상금 계산
 
 ### 퇴직·구직
 - [퇴사 계산기](https://shakilabs.com/finance/quit): 퇴직금·실업급여·생존기간 종합 시뮬레이션
@@ -37,19 +39,29 @@
 - [실업급여 계산기](https://shakilabs.com/finance/unemployment): 구직급여 수급액·수급기간 계산
 - [육아휴직 급여 계산기](https://shakilabs.com/finance/parental-leave): 6+6 부모육아휴직제 급여 계산
 - [지역가입자 건보료 계산기](https://shakilabs.com/finance/regional-health): 퇴사 후 건보·임의계속가입 비교
+- [피부양자 자격 판정](https://shakilabs.com/finance/dependent): 합산소득·재산세 과세표준 기준 건강보험 피부양자 자격 판정
+- [임금체불 지연이자 계산기](https://shakilabs.com/finance/unpaid-wage): 밀린 임금·퇴직금의 지연이자 계산 (퇴직 후 연 20%)
 
 ### 절세·공제
 - [연말정산 계산기](https://shakilabs.com/finance/year-end-settlement): 환급액·세액공제 시뮬레이션
 - [월세 세액공제 계산기](https://shakilabs.com/finance/monthly-rent-deduction): 연말정산 월세 환급액 계산
 - [IRP 세액공제 계산기](https://shakilabs.com/finance/irp): 개인형 퇴직연금 절세 효과 계산
 - [국민연금 수령액 계산기](https://shakilabs.com/finance/pension): 예상 연금액·납부액 조회
+- [근로장려금 계산기](https://shakilabs.com/finance/eitc): 가구 유형별 근로장려금·자녀장려금 예상 지급액 계산
 
 ## 데이터 출처
 
 - 4대보험 요율: 국민건강보험공단, 국민연금공단, 고용노동부 고시 (2026년)
 - 소득세 누진세율: 소득세법 제55조 (6%~45%, 8구간)
+- 퇴직소득세: 소득세법 제48조 (근속연수공제·환산급여공제)
 - 최저임금: 고용노동부 고시 10,320원 (2026년)
 - 실업급여 상한: 68,100원/일 (2026년 고시)
+- 임금체불 지연이자: 근로기준법 제37조·시행령 제17조 (퇴직 후 연 20%)
+- 근로장려금·자녀장려금: 조세특례제한법 제100조의5, 제100조의30
+
+## 한계
+
+- 모든 결과는 법적 효력이 없는 참고용 추정값입니다. 비과세 항목, 중도 입·퇴사, 성과급 지급 시점에 따라 실제 급여명세서와 차이가 날 수 있습니다.
 
 ## 연락처
 

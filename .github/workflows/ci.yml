@@ -37,6 +37,17 @@ jobs:
       - name: Build
         run: npm run build
 
+      # 하이드레이션 생존율 게이트는 실제 브라우저가 있어야 한다 — 프리렌더 본문이 마운트 때
+      # Vue 레이아웃으로 옮겨지고 중복 구간이 잘려 나간 뒤에도 같은 문장이 DOM에 남는지를
+      # 보는 검사라서, 정적 파일 대조로는 판정할 수 없다. 브라우저 다운로드가 Vercel 빌드에
+      # 얹히지 않도록 devDependency는 playwright-core(브라우저 미포함)만 두고, 크로미움은
+      # CI에서만 받는다.
+      - name: Install Chromium
+        run: npx playwright-core install --with-deps chromium
+
+      - name: Verify hydration survival
+        run: npm run verify:hydration
+
       - name: Generate production SBOM
         run: npm run sbom:prod
 

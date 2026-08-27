@@ -3353,7 +3353,7 @@ function buildAboutContent() {
 
       <h2 style="${H2_STYLE}">3. 서비스 운영 원칙</h2>
       <ul style="${UL_STYLE}">
-        <li style="${LI_STYLE}"><strong>회원가입 불필요</strong> — 개인정보를 수집하지 않으며, 즉시 사용 가능</li>
+        <li style="${LI_STYLE}"><strong>회원가입 불필요</strong> — 계정·이름·연락처를 받지 않고 즉시 사용 가능</li>
         <li style="${LI_STYLE}"><strong>클라이언트 연산</strong> — 입력한 급여·세금 정보는 서버로 전송되지 않음</li>
         <li style="${LI_STYLE}"><strong>법령 기반</strong> — 모든 계산은 국세청·건보공단·고용부 공식 고시에 기반</li>
         <li style="${LI_STYLE}"><strong>정기 업데이트</strong> — 매년 1월 세법·요율 개정 즉시 반영 (최근: 2026년 1월)</li>

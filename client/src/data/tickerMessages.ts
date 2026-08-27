@@ -1,3 +1,5 @@
+import { CALCULATOR_COUNT } from "./calculatorCount";
+
 export const insuranceTickerMessages = [
   "건보료로 연봉 알 수 있다는 거 알고 계셨나요?",
   "2026년 건강보험 7.19% 기준으로 계산 중이에요.",
@@ -131,6 +133,6 @@ export const wageConverterTickerMessages = [
 ] as const;
 
 export const allCalculatorsTickerMessages = [
-  "23개 계산기를 한눈에 모아봤어요. 필요한 걸 골라보세요.",
+  `${CALCULATOR_COUNT}개 계산기를 한눈에 모아봤어요. 필요한 걸 골라보세요.`,
   "연봉·세금·수당·퇴직·절세까지 한곳에서 계산합니다.",
 ] as const;
