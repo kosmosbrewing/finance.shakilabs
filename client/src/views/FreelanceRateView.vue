@@ -19,6 +19,7 @@ import {
 import { normalizeFreelanceRateInput } from "@/lib/validators";
 import { buildAbsoluteUrl, buildQuery, parseQueryInt, queryFirst } from "@/lib/routeState";
 import { formatPercent, formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 import { calculateFreelanceRateImpact } from "@/utils/scenarioCalculator";
 
 const route = useRoute();
@@ -149,11 +150,8 @@ const incomeTypeOptions = [
               <ScenarioChipGroup v-if="incomeType === 'business'" v-model="industryKey" label="업종 경비율" :options="industryOptions" />
             </div>
             <div class="space-y-4">
+              <ResultHero label="월 청구액" :value="formatWon(result.monthlyInvoice)" />
               <div class="retro-stat-grid">
-                <div class="retro-stat">
-                  <p class="retro-stat-label">월 청구액</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.monthlyInvoice) }}</p>
-                </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">일 단가</p>
                   <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.dailyRate) }}</p>

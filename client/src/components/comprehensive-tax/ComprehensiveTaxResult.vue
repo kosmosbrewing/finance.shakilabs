@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { formatPercent, formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
 
 import type {
@@ -55,13 +56,9 @@ function taxationLabel(source: SourceResult): string {
     <div class="retro-panel-content space-y-3">
 
       <!-- 핵심 배너 -->
-      <div class="text-center py-3">
-        <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1">종합소득세 정산 결과</p>
-        <p class="text-display font-bold font-title tabular-nums" :class="toneClass">
-          {{ formatWon(netAmountAbs) }}
-        </p>
-        <p class="text-body font-semibold mt-1.5" :class="toneClass">{{ netLabel }}</p>
-      </div>
+      <ResultHero label="종합소득세 정산 결과" :value="formatWon(netAmountAbs)">
+        <template #secondary>{{ netLabel }}</template>
+      </ResultHero>
 
       <div v-if="hasSources" class="space-y-2 text-caption">
 

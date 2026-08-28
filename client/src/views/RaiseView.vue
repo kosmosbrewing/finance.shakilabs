@@ -15,6 +15,7 @@ import { addEntry } from "@/composables/useRecentCalcs";
 import { normalizeRaiseInput } from "@/lib/validators";
 import { buildAbsoluteUrl, buildQuery, parseQueryFloat, parseQueryInt } from "@/lib/routeState";
 import { formatManWon, formatPercent, formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 import { calculateRaiseImpact } from "@/utils/scenarioCalculator";
 
 const route = useRoute();
@@ -144,6 +145,7 @@ watch(
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="월 체감 증가" :value="`+${formatWon(result.monthlyNetDiff)}`" />
               <div class="retro-stat-grid">
                 <div class="retro-stat">
                   <p class="retro-stat-label">현재 월 실수령</p>
@@ -154,12 +156,8 @@ watch(
                   <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.next.monthlyNet) }}</p>
                 </div>
                 <div class="retro-stat">
-                  <p class="retro-stat-label">월 체감 증가</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">+{{ formatWon(result.monthlyNetDiff) }}</p>
-                </div>
-                <div class="retro-stat">
                   <p class="retro-stat-label">연간 실수령 증가</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">+{{ formatWon(result.annualNetDiff) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">+{{ formatWon(result.annualNetDiff) }}</p>
                 </div>
               </div>
 

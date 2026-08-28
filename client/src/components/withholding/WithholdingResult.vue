@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue";
+import { computed } from "vue";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { formatKrwAuto, formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
 import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 import SalarySummaryStatGrid from "@/components/salary/SalarySummaryStatGrid.vue";
@@ -22,55 +23,8 @@ const taxDiff = computed(() => Math.abs(calculatedIncomeTax.value - props.monthl
 // ±5,000원 이상 차이 시 안내 문구 표시
 const showDiffWarning = computed(() => taxDiff.value >= 5_000 && props.monthlyIncomeTax > 0);
 
-// 애니메이션 카운트업 (InsuranceResult 동일 패턴)
-const displayedMonthlyNet = ref(0);
-const hasAnimatedInitial = ref(false);
-let rafId: number | null = null;
-
-function animateInitialMonthlyNet(target: number): void {
-  const durationMs = 600;
-  const start = performance.now();
-  const sign = target < 0 ? -1 : 1;
-  const absTarget = Math.abs(target);
-
-  const step = (timestamp: number): void => {
-    const progress = Math.min(1, (timestamp - start) / durationMs);
-    displayedMonthlyNet.value = Math.round(absTarget * progress) * sign;
-
-    if (progress < 1) {
-      rafId = requestAnimationFrame(step);
-      return;
-    }
-
-    hasAnimatedInitial.value = true;
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-    rafId = null;
-  };
-
-  rafId = requestAnimationFrame(step);
-}
-
-watchEffect(() => {
-  if (hasAnimatedInitial.value) {
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-  }
-});
-
-onMounted(() => {
-  if (
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-  ) {
-    hasAnimatedInitial.value = true;
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-    return;
-  }
-  animateInitialMonthlyNet(props.calc.monthlyNet.value);
-});
-
-onUnmounted(() => {
-  if (rafId !== null) cancelAnimationFrame(rafId);
-});
+// Count-up animation removed on purpose (fleet-wide policy): 23 of 26 calculators
+// were already static, and animating from 0 would blank the prerendered value.
 </script>
 
 <template>
@@ -82,16 +36,12 @@ onUnmounted(() => {
 
     <div class="retro-panel-content space-y-3">
       <!-- 핵심 배너: 추정 연봉 -->
-      <div class="text-center py-3">
-        <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1">추정 연봉</p>
-        <p class="text-display font-bold font-title text-primary tabular-nums">
-          {{ formatKrwAuto(estimatedAnnualGross) }}
-        </p>
-        <p class="text-body text-muted-foreground mt-1.5">
+      <ResultHero label="추정 연봉" :value="formatKrwAuto(estimatedAnnualGross)">
+        <template #secondary>
           추정 월 실수령액
-          <strong class="tabular-nums text-foreground font-semibold">{{ formatWon(displayedMonthlyNet) }}</strong>
-        </p>
-      </div>
+          <strong class="tabular-nums text-foreground font-semibold">{{ formatWon(calc.monthlyNet.value) }}</strong>
+        </template>
+      </ResultHero>
 
       <SalarySummaryStatGrid
         :monthly-gross="calc.monthlyGross.value"

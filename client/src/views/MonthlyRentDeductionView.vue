@@ -8,6 +8,7 @@ import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import { monthlyRentFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
 import { normalizeMonthlyRentDeductionInput } from "@/lib/benefitValidators";
@@ -54,8 +55,8 @@ const seoDescription = computed(
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="예상 세액공제" :value="formatWon(result.taxCredit)" />
               <BenefitStatGrid :items="[
-                { label: '예상 세액공제', value: formatWon(result.taxCredit), tone: 'success' },
                 { label: '공제율', value: formatPercent(result.deductionRate, 0) },
                 { label: '공제 인정 월세', value: formatWon(result.recognizedRent) },
                 { label: '월 환급 체감', value: formatWon(result.monthlyRefundEffect) },

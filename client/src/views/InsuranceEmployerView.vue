@@ -7,6 +7,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import BreakdownDonut from "@/components/result-visualization/BreakdownDonut.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { employerInsuranceFaqs } from "@/data/benefitFaqs";
@@ -62,11 +63,11 @@ const seoDescription = computed(
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="월 총 부담금" :value="formatWon(result.totalMonthlyBurden)" />
               <BenefitStatGrid :items="[
-                { label: '월 총 부담금', value: formatWon(result.totalMonthlyBurden), tone: 'success' },
                 { label: '연 총 부담금', value: formatWon(result.totalAnnualBurden) },
                 { label: '사업주 부담률', value: formatPercent(result.employerRate, 1) },
-                { label: '산재보험', value: formatWon(result.industrialAccident), tone: 'danger' },
+                { label: '산재보험', value: formatWon(result.industrialAccident) },
               ]" />
 
               <div class="retro-panel-muted retro-panel-content space-y-3">

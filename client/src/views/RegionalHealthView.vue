@@ -7,6 +7,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { regionalHealthFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
@@ -128,12 +129,12 @@ const cheapestLabel = computed(() => {
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="지역가입자 추정" :value="formatWon(result.regionalMonthly)" />
               <BenefitStatGrid
                 :items="[
                   { label: '현재 근로자 부담', value: formatWon(result.currentMonthly) },
-                  { label: '임의계속가입', value: formatWon(result.voluntaryMonthly), tone: result.cheapestOption === 'voluntary' ? 'success' : undefined },
-                  { label: '지역가입자 추정', value: formatWon(result.regionalMonthly), tone: result.cheapestOption === 'regional' ? 'success' : undefined },
-                  { label: '추천', value: cheapestLabel, tone: 'success' },
+                  { label: '임의계속가입', value: formatWon(result.voluntaryMonthly) },
+                  { label: '추천', value: cheapestLabel },
                 ]"
               />
 

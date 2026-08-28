@@ -8,6 +8,7 @@ import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import { irpFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
 import { normalizeIrpInput } from "@/lib/benefitValidators";
@@ -54,11 +55,11 @@ const seoDescription = computed(
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="예상 세액공제" :value="formatWon(result.taxCredit)" />
               <BenefitStatGrid :items="[
-                { label: '예상 세액공제', value: formatWon(result.taxCredit), tone: 'success' },
                 { label: '적용 공제율', value: formatPercent(result.taxCreditRate, 0) },
                 { label: '인정 납입액', value: formatWon(result.recognizedContribution) },
-                { label: '한도 초과분', value: formatWon(result.overflowAmount), tone: 'danger' },
+                { label: '한도 초과분', value: formatWon(result.overflowAmount) },
               ]" />
 
               <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">

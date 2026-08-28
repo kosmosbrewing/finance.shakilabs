@@ -8,6 +8,7 @@ import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import { useYearEndSettlement } from "@/composables/useYearEndSettlement";
 import {
   YEAR_END_FAQS,
@@ -32,15 +33,11 @@ const seoDesc = computed(() =>
     : `예상 추가 납부액은 ${formatWon(r.value.settlementAmount)}입니다.`,
 );
 
+// The settlement amount itself is promoted to the ResultHero above the grid.
 const summaryItems = computed(() => [
-  {
-    label: r.value.isRefund ? "예상 환급액" : "추가 납부액",
-    value: formatWon(Math.abs(r.value.settlementAmount)),
-    tone: r.value.isRefund ? ("success" as const) : ("danger" as const),
-  },
   { label: "결정세액", value: formatWon(r.value.totalTax) },
   { label: "기납부세액", value: formatWon(r.value.withheldTax + r.value.withheldLocalTax) },
-  { label: "총 세액공제", value: formatWon(r.value.totalTaxCredit), tone: "success" as const },
+  { label: "총 세액공제", value: formatWon(r.value.totalTaxCredit) },
 ]);
 
 const deductionItems = computed(() => [
@@ -114,12 +111,10 @@ const deductionItems = computed(() => [
           </div>
 
           <div class="retro-panel-content space-y-5">
-            <div class="rounded-xl border-2 p-4 text-center" :class="r.isRefund ? 'border-status-success/30 bg-status-success/5' : 'border-status-danger/30 bg-status-danger/5'">
-              <p class="text-caption text-muted-foreground">{{ r.isRefund ? '예상 환급액' : '추가 납부 예상' }}</p>
-              <p class="text-display font-bold tabular-nums" :class="r.isRefund ? 'text-status-success' : 'text-status-danger'">
-                {{ formatWon(Math.abs(r.settlementAmount)) }}
-              </p>
-            </div>
+            <ResultHero
+              :label="r.isRefund ? '예상 환급액' : '추가 납부 예상'"
+              :value="formatWon(Math.abs(r.settlementAmount))"
+            />
 
             <BenefitStatGrid :items="summaryItems" />
 

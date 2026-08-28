@@ -9,6 +9,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { eitcFaqs } from "@/data/benefitFaqs";
 import {
@@ -60,12 +61,8 @@ const householdOptions = (Object.keys(EITC_2026) as EitcHousehold[]).map((key) =
   label: EITC_2026[key].label,
 }));
 
+// The EITC amount is promoted to the ResultHero above the grid.
 const statItems = computed(() => [
-  {
-    label: "근로장려금",
-    value: formatWon(result.value.eitcAfterProperty),
-    tone: "success" as const,
-  },
   {
     label: "자녀장려금",
     value: formatWon(result.value.ctcAfterProperty),
@@ -73,7 +70,6 @@ const statItems = computed(() => [
   {
     label: "합계 (예상)",
     value: formatWon(result.value.total),
-    tone: result.value.total > 0 ? ("success" as const) : ("danger" as const),
   },
   {
     label: "재산 요건",
@@ -82,7 +78,6 @@ const statItems = computed(() => [
       : result.value.isHalfReduced
         ? "1.7억 이상 · 50% 감액"
         : "충족",
-    tone: result.value.isExcludedByProperty ? ("danger" as const) : ("default" as const),
   },
 ]);
 </script>
@@ -167,6 +162,7 @@ const statItems = computed(() => [
           </div>
         </section>
 
+        <ResultHero label="근로장려금" :value="formatWon(result.eitcAfterProperty)" />
         <BenefitStatGrid :items="statItems" />
 
         <section class="retro-panel overflow-hidden">

@@ -8,6 +8,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { useParentalLeave } from "@/composables/useParentalLeave";
 import {
@@ -45,8 +46,8 @@ const seoDesc = computed(() =>
   `육아휴직 ${calc.months.value}개월 예상 총 급여는 ${formatWon(r.value.totalBenefit)}입니다.`,
 );
 
+// The total benefit is promoted to the ResultHero above the grid.
 const summaryItems = computed(() => [
-  { label: "총 수령액", value: formatWon(r.value.totalBenefit), tone: "success" as const },
   { label: "월 평균 급여", value: formatWon(r.value.averageMonthly) },
   { label: "소득대체율", value: formatPercent(r.value.incomeReplacementRate, 1) },
   { label: "휴직 기간", value: `${calc.months.value}개월` },
@@ -88,6 +89,7 @@ const summaryItems = computed(() => [
             <h2 id="parental-leave-result-title" class="retro-title">육아휴직 예상 결과</h2>
           </div>
           <div class="retro-panel-content space-y-5">
+            <ResultHero label="총 수령액" :value="formatWon(r.totalBenefit)" />
             <BenefitStatGrid :items="summaryItems" />
 
             <div class="space-y-2">

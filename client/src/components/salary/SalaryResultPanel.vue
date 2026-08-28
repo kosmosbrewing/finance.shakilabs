@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watchEffect } from "vue";
 import { formatKrwAuto, formatWon } from "@/lib/utils";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
+import ResultHero from "@/components/common/ResultHero.vue";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
 import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 import SalarySummaryStatGrid from "@/components/salary/SalarySummaryStatGrid.vue";
 
+// Count-up animation removed on purpose (fleet-wide policy): 23 of 26 calculators
+// were already static, and animating from 0 would blank the prerendered value.
 const props = defineProps<{
   calc: SalaryCalcResult;
 }>();
@@ -13,58 +15,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   shareRequest: [];
 }>();
-
-const displayedMonthlyNet = ref(0);
-const hasAnimatedInitial = ref(false);
-let rafId: number | null = null;
-
-function animateInitialMonthlyNet(target: number): void {
-  const durationMs = 600;
-  const start = performance.now();
-  const sign = target < 0 ? -1 : 1;
-  const absTarget = Math.abs(target);
-
-  const step = (timestamp: number): void => {
-    const progress = Math.min(1, (timestamp - start) / durationMs);
-    displayedMonthlyNet.value = Math.round(absTarget * progress) * sign;
-
-    if (progress < 1) {
-      rafId = requestAnimationFrame(step);
-      return;
-    }
-
-    hasAnimatedInitial.value = true;
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-    rafId = null;
-  };
-
-  rafId = requestAnimationFrame(step);
-}
-
-watchEffect(() => {
-  if (hasAnimatedInitial.value) {
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-  }
-});
-
-onMounted(() => {
-  if (
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-  ) {
-    hasAnimatedInitial.value = true;
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-    return;
-  }
-
-  animateInitialMonthlyNet(props.calc.monthlyNet.value);
-});
-
-onUnmounted(() => {
-  if (rafId !== null) {
-    cancelAnimationFrame(rafId);
-  }
-});
 </script>
 
 <template>
@@ -75,16 +25,12 @@ onUnmounted(() => {
     </div>
     <div class="retro-panel-content space-y-3">
       <!-- 월 실수령액 (메인) -->
-      <div class="text-center py-3">
-        <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1">월 실수령액</p>
-        <p class="text-display font-bold font-title text-primary tabular-nums">
-          {{ formatWon(displayedMonthlyNet) }}
-        </p>
-        <p class="text-body text-muted-foreground mt-1.5">
+      <ResultHero label="월 실수령액" :value="formatWon(props.calc.monthlyNet.value)">
+        <template #secondary>
           연 실수령액
           <strong class="tabular-nums text-foreground font-semibold">{{ formatKrwAuto(props.calc.annualNet.value) }}</strong>
-        </p>
-      </div>
+        </template>
+      </ResultHero>
 
       <SalarySummaryStatGrid
         :monthly-gross="props.calc.monthlyGross.value"
@@ -96,7 +42,7 @@ onUnmounted(() => {
       <div class="retro-board-list text-caption">
         <div class="retro-board-item bg-primary/5 text-body font-bold text-foreground">
           <span>공제 내역</span>
-          <strong class="tabular-nums text-primary">{{ formatWon(props.calc.totalDeduction.value) }}</strong>
+          <strong class="tabular-nums">{{ formatWon(props.calc.totalDeduction.value) }}</strong>
         </div>
         <div class="px-3 py-1.5">
           <SalaryDeductionBar :calc="props.calc" />

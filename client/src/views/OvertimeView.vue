@@ -15,6 +15,7 @@ import { addEntry } from "@/composables/useRecentCalcs";
 import { normalizeOvertimeInput } from "@/lib/validators";
 import { buildAbsoluteUrl, buildQuery, parseQueryInt } from "@/lib/routeState";
 import { formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 import { calculateOvertimeImpact } from "@/utils/scenarioCalculator";
 const route = useRoute();
 const monthlySalary = ref(3_200_000);
@@ -140,14 +141,11 @@ watch(
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="추가 세전 수당" :value="formatWon(result.totalExtraGross)" />
               <div class="retro-stat-grid">
                 <div class="retro-stat">
-                  <p class="retro-stat-label">추가 세전 수당</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.totalExtraGross) }}</p>
-                </div>
-                <div class="retro-stat">
                   <p class="retro-stat-label">월 실수령 증가</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">+{{ formatWon(result.totalExtraNet) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">+{{ formatWon(result.totalExtraNet) }}</p>
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">통상 시급</p>
