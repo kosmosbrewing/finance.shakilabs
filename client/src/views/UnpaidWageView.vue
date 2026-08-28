@@ -9,6 +9,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { unpaidWageFaqs } from "@/data/benefitFaqs";
 import {
@@ -53,6 +54,7 @@ const selectedStageNote = computed(
   () => UNPAID_WAGE_STAGE_OPTIONS.find((opt) => opt.value === stage.value)?.note ?? "",
 );
 
+// The interest amount is promoted to the ResultHero above the grid.
 const statItems = computed(() => [
   {
     label: "적용 연이율",
@@ -61,11 +63,6 @@ const statItems = computed(() => [
   {
     label: "이자 발생일수",
     value: `${result.value.effectiveDays}일`,
-  },
-  {
-    label: "예상 지연이자",
-    value: formatWon(result.value.totalInterest),
-    tone: "success" as const,
   },
   {
     label: "원금+이자 합계",
@@ -138,6 +135,7 @@ const statItems = computed(() => [
           </div>
         </section>
 
+        <ResultHero label="예상 지연이자" :value="formatWon(result.totalInterest)" />
         <BenefitStatGrid :items="statItems" />
 
         <section class="retro-panel overflow-hidden">

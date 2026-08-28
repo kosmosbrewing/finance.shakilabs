@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -147,13 +148,22 @@ watch(
             <h2 id="wage-converter-result-title" class="retro-title">임금 환산 결과</h2>
           </div>
           <div class="retro-panel-content space-y-4">
+            <ResultHero
+              :label="base === 'monthly' ? '연봉' : '월급'"
+              :value="base === 'monthly' ? formatWon(result.annual) : formatWon(result.monthly)"
+            />
             <BenefitStatGrid
-              :items="[
-                { label: '시급', value: formatWon(result.hourly), tone: base === 'hourly' ? undefined : 'success' },
-                { label: '일급 (8시간)', value: formatWon(result.daily) },
-                { label: '월급', value: formatWon(result.monthly), tone: base === 'monthly' ? undefined : 'success' },
-                { label: '연봉', value: formatWon(result.annual), tone: base === 'annual' ? undefined : 'success' },
-              ]"
+              :items="base === 'monthly'
+                ? [
+                  { label: '시급', value: formatWon(result.hourly) },
+                  { label: '일급 (8시간)', value: formatWon(result.daily) },
+                  { label: '월급', value: formatWon(result.monthly) },
+                ]
+                : [
+                  { label: '시급', value: formatWon(result.hourly) },
+                  { label: '일급 (8시간)', value: formatWon(result.daily) },
+                  { label: '연봉', value: formatWon(result.annual) },
+                ]"
             />
 
             <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">

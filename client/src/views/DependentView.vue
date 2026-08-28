@@ -9,6 +9,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { dependentFaqs } from "@/data/benefitFaqs";
 import { DEPENDENT_2026 } from "@/data/dependentEligibility";
@@ -34,12 +35,8 @@ const result = useDependentEligibility(
   })),
 );
 
+// The eligibility verdict is promoted to the ResultHero above the grid.
 const statItems = computed(() => [
-  {
-    label: "판정 결과",
-    value: result.value.isEligible ? "피부양자 유지 가능" : "탈락 예상",
-    tone: result.value.isEligible ? ("success" as const) : ("danger" as const),
-  },
   {
     label: "적용 소득 상한",
     value: formatWon(result.value.appliedIncomeLimit),
@@ -49,14 +46,12 @@ const statItems = computed(() => [
     value: result.value.incomeMargin >= 0
       ? formatWon(result.value.incomeMargin)
       : `${formatWon(-result.value.incomeMargin)} 초과`,
-    tone: result.value.incomeMargin >= 0 ? ("default" as const) : ("danger" as const),
   },
   {
     label: "다음 재산 기준까지",
     value: result.value.propertyMargin >= 0
       ? formatWon(result.value.propertyMargin)
       : `${formatWon(-result.value.propertyMargin)} 초과`,
-    tone: result.value.propertyMargin >= 0 ? ("default" as const) : ("danger" as const),
   },
 ]);
 
@@ -145,6 +140,10 @@ const registrationOptions = [
           </div>
         </section>
 
+        <ResultHero
+          label="판정 결과"
+          :value="result.isEligible ? '피부양자 유지 가능' : '탈락 예상'"
+        />
         <BenefitStatGrid :items="statItems" />
 
         <section v-if="!result.isEligible" class="retro-panel overflow-hidden">

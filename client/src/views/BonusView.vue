@@ -15,6 +15,7 @@ import { addEntry } from "@/composables/useRecentCalcs";
 import { normalizeBonusInput } from "@/lib/validators";
 import { buildAbsoluteUrl, buildQuery, parseQueryInt } from "@/lib/routeState";
 import { formatManWon, formatPercent, formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 import { calculateBonusImpact } from "@/utils/scenarioCalculator";
 
 const route = useRoute();
@@ -132,11 +133,8 @@ watch(
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="성과급 실수령" :value="formatWon(result.netBonus)" />
               <div class="retro-stat-grid">
-                <div class="retro-stat">
-                  <p class="retro-stat-label">성과급 실수령</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-success">{{ formatWon(result.netBonus) }}</p>
-                </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">실효 수령률</p>
                   <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatPercent(result.effectiveBonusRate, 1) }}</p>
@@ -147,7 +145,7 @@ watch(
                 </div>
                 <div class="retro-stat">
                   <p class="retro-stat-label">추가 공제 추정</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading text-status-danger">{{ formatWon(result.bonusTax) }}</p>
+                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.bonusTax) }}</p>
                 </div>
               </div>
 

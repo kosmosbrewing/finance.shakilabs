@@ -6,6 +6,7 @@ import {
   estimateAnnualRemuneration,
 } from "@/lib/health-insurance-tiers";
 import { formatManWon, formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -47,15 +48,9 @@ const nearestAnnualRemuneration = computed(() => {
       <h2 class="retro-title">건강보험료 환산 기준</h2>
     </div>
     <div class="retro-panel-content space-y-3">
-      <div class="text-center py-3 space-y-2">
-        <p class="text-caption text-muted-foreground">{{ subtitle }}</p>
-        <p class="text-display font-bold font-title text-primary tabular-nums">
-          {{ formatManWon(annualRemuneration) }}
-        </p>
-        <p class="text-caption text-muted-foreground">
-          근로자 부담률 3.595%로 역산한 연간 보수 추정값
-        </p>
-      </div>
+      <ResultHero :label="subtitle" :value="formatManWon(annualRemuneration)">
+        <template #secondary>근로자 부담률 3.595%로 역산한 연간 보수 추정값</template>
+      </ResultHero>
 
       <!-- 티어 비교 테이블 -->
       <details class="retro-details">

@@ -77,13 +77,6 @@ export function deductionToneClass(rate: number): string {
   return "bg-status-success/10 text-status-success border-status-success/20";
 }
 
-// 공제비율 텍스트 색상만: 결과 카드 stat 값 공용
-export function deductionTextClass(rate: number): string {
-  if (rate >= 0.32) return "text-status-danger";
-  if (rate >= 0.24) return "text-status-caution";
-  return "text-status-success";
-}
-
 // 통화 포맷: (14900, "KRW") → "₩14,900"
 export function formatCurrency(amount: number | null | undefined, currency: string): string {
   if (amount == null) return "-";

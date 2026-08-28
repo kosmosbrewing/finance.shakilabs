@@ -8,6 +8,7 @@ import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import { annualLeaveFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
 import { normalizeAnnualLeaveInput } from "@/lib/benefitValidators";
@@ -60,8 +61,8 @@ const seoDescription = computed(
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="예상 연차수당" :value="formatWon(result.totalAllowance)" />
               <BenefitStatGrid :items="[
-                { label: '예상 연차수당', value: formatWon(result.totalAllowance), tone: 'success' },
                 { label: '1일 통상임금', value: formatWon(result.dailyOrdinaryWage) },
                 { label: '발생 연차', value: `${result.accruedLeaveDays}일` },
                 { label: '정산 반영 일수', value: `${result.payableDays}일` },

@@ -13,6 +13,7 @@ import {
 } from "@/composables/useHomeQuickCalc";
 import { readClampedNumber } from "@/utils/numericInput";
 import { formatKrwCompact, formatNumber, formatPercent, formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 
 const props = defineProps<{ heading: string; note: string }>();
 
@@ -114,12 +115,10 @@ const detailRoute = computed(() =>
       </div>
 
       <div class="retro-panel-muted space-y-3 p-4">
-        <p class="retro-stat-label">
-          연봉 {{ formatKrwCompact(appliedAnnualGross) }} · 월 실수령액
-        </p>
-        <p class="break-keep text-display font-bold tabular-nums text-primary">
-          {{ formatWon(monthlyNet) }}
-        </p>
+        <ResultHero
+          :label="`연봉 ${formatKrwCompact(appliedAnnualGross)} · 월 실수령액`"
+          :value="formatWon(monthlyNet)"
+        />
         <div class="result-stat-grid">
           <div class="result-stat-card retro-stat">
             <p class="retro-stat-label whitespace-nowrap">월 공제 합계</p>

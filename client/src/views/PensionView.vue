@@ -7,6 +7,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { pensionFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
@@ -54,11 +55,11 @@ const seoDescription = computed(
             </div>
 
             <div class="space-y-4">
+              <ResultHero label="예상 월연금" :value="formatWon(result.estimatedMonthlyPension)" />
               <BenefitStatGrid :items="[
-                { label: '예상 월연금', value: formatWon(result.estimatedMonthlyPension), tone: 'success' },
                 { label: '예상 연수령액', value: formatWon(result.estimatedAnnualPension) },
                 { label: '나이 보정률', value: formatPercent(result.ageFactor, 1) },
-                { label: '월 납부 보험료 추정', value: formatWon(result.employeeContribution), tone: 'danger' },
+                { label: '월 납부 보험료 추정', value: formatWon(result.employeeContribution) },
               ]" />
 
               <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">

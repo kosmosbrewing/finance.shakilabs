@@ -16,6 +16,7 @@ import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { unemploymentFaqs } from "@/data/benefitFaqs";
 import { UNEMPLOYMENT_2026, type QuitReason } from "@/data/unemploymentTable";
@@ -133,11 +134,11 @@ const quitReasonOptions = [
             <h2 id="unemployment-result-title" class="retro-title">실업급여 예상 결과</h2>
           </div>
           <div class="retro-panel-content min-w-0 space-y-4">
+            <ResultHero label="총 예상 수급액" :value="formatWon(result.totalBenefit)" />
             <BenefitStatGrid
               :items="[
-                { label: '일 수급액', value: formatWon(result.dailyBenefit), tone: result.isEligible ? 'success' : undefined },
+                { label: '일 수급액', value: formatWon(result.dailyBenefit) },
                 { label: '수급 기간', value: result.isEligible ? `${result.durationDays}일` : '-' },
-                { label: '총 예상 수급액', value: formatWon(result.totalBenefit), tone: result.isEligible ? 'success' : undefined },
                 { label: '수급 종료일', value: result.endDateLabel },
               ]"
             />

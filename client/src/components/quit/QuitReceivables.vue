@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { formatKrwAuto, formatWon } from "@/lib/utils";
+import ResultHero from "@/components/common/ResultHero.vue";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
 import BreakdownDonut from "@/components/result-visualization/BreakdownDonut.vue";
 
@@ -53,15 +54,9 @@ const eligibleLabel: Record<string, string> = {
 
     <div class="retro-panel-content space-y-3">
       <!-- 핵심 배너 -->
-      <div class="text-center py-3">
-        <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1">퇴사 시 총 수령 예상액</p>
-        <p class="text-display font-bold font-title text-primary tabular-nums">
-          {{ formatKrwAuto(totalReceivables) }}
-        </p>
-        <p class="text-body text-muted-foreground mt-1.5">
-          퇴직금 + 실업급여 + 연차수당 + 마지막 급여
-        </p>
-      </div>
+      <ResultHero label="퇴사 시 총 수령 예상액" :value="formatKrwAuto(totalReceivables)">
+        <template #secondary>퇴직금 + 실업급여 + 연차수당 + 마지막 급여</template>
+      </ResultHero>
 
       <div class="retro-chart">
         <p class="text-caption font-semibold text-foreground">총 수령액 구성</p>

@@ -1,17 +1,12 @@
 <script setup lang="ts">
+// Stat-grid values are always neutral bold (result grammar, 2026-08 decision):
+// brand/status colors on grid values diluted the single brand hook of the hero.
 const props = defineProps<{
   items: {
     label: string;
     value: string;
-    tone?: "default" | "success" | "danger";
   }[];
 }>();
-
-function valueClass(tone?: "default" | "success" | "danger"): string {
-  if (tone === "success") return "text-status-success";
-  if (tone === "danger") return "text-status-danger";
-  return "text-foreground";
-}
 </script>
 
 <template>
@@ -26,7 +21,7 @@ function valueClass(tone?: "default" | "success" | "danger"): string {
     >
       <div v-for="item in props.items" :key="item.label" class="retro-stat">
         <p class="retro-stat-label">{{ item.label }}</p>
-        <p class="retro-stat-value text-[0.95rem] sm:text-heading" :class="valueClass(item.tone)">
+        <p class="retro-stat-value text-[0.95rem] sm:text-heading text-foreground">
           {{ item.value }}
         </p>
       </div>

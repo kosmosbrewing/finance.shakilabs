@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watchEffect } from "vue";
+import { computed } from "vue";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { formatKrwAuto, formatWon, formatPercent } from "@/lib/utils";
 import { RATES_2026 } from "@/data/taxRates2026";
+import ResultHero from "@/components/common/ResultHero.vue";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
 import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 import SalarySummaryStatGrid from "@/components/salary/SalarySummaryStatGrid.vue";
@@ -40,57 +41,8 @@ const title = computed(() => {
   return `연봉 ${formatKrwAuto(props.calc.annualGross.value)} 기준`;
 });
 
-const displayedMonthlyNet = ref(0);
-const hasAnimatedInitial = ref(false);
-let rafId: number | null = null;
-
-function animateInitialMonthlyNet(target: number): void {
-  const durationMs = 600;
-  const start = performance.now();
-  const sign = target < 0 ? -1 : 1;
-  const absTarget = Math.abs(target);
-
-  const step = (timestamp: number): void => {
-    const progress = Math.min(1, (timestamp - start) / durationMs);
-    displayedMonthlyNet.value = Math.round(absTarget * progress) * sign;
-
-    if (progress < 1) {
-      rafId = requestAnimationFrame(step);
-      return;
-    }
-
-    hasAnimatedInitial.value = true;
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-    rafId = null;
-  };
-
-  rafId = requestAnimationFrame(step);
-}
-
-watchEffect(() => {
-  if (hasAnimatedInitial.value) {
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-  }
-});
-
-onMounted(() => {
-  if (
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-  ) {
-    hasAnimatedInitial.value = true;
-    displayedMonthlyNet.value = props.calc.monthlyNet.value;
-    return;
-  }
-
-  animateInitialMonthlyNet(props.calc.monthlyNet.value);
-});
-
-onUnmounted(() => {
-  if (rafId !== null) {
-    cancelAnimationFrame(rafId);
-  }
-});
+// Count-up animation removed on purpose (fleet-wide policy): 23 of 26 calculators
+// were already static, and animating from 0 would blank the prerendered value.
 </script>
 
 <template>
@@ -101,18 +53,15 @@ onUnmounted(() => {
     </div>
 
     <div class="retro-panel-content space-y-3">
-      <div class="text-center py-3">
-        <p class="text-caption uppercase tracking-wide text-muted-foreground mb-1">
-          {{ mode === 'reverse' ? '추정 월 실수령액' : '월 실수령액' }}
-        </p>
-        <p class="text-display font-bold font-title text-primary tabular-nums">
-          {{ formatWon(displayedMonthlyNet) }}
-        </p>
-        <p class="text-body text-muted-foreground mt-1.5">
+      <ResultHero
+        :label="mode === 'reverse' ? '추정 월 실수령액' : '월 실수령액'"
+        :value="formatWon(calc.monthlyNet.value)"
+      >
+        <template #secondary>
           {{ mode === 'reverse' ? '추정 연봉' : '연 실수령액' }}
           <strong class="tabular-nums text-foreground font-semibold">{{ formatKrwAuto(mode === 'reverse' ? estimatedAnnualGross : calc.annualNet.value) }}</strong>
-        </p>
-      </div>
+        </template>
+      </ResultHero>
 
       <SalarySummaryStatGrid
         :monthly-gross="calc.monthlyGross.value"
@@ -125,7 +74,7 @@ onUnmounted(() => {
         <!-- 총공제 헤더 -->
         <div class="retro-board-item bg-primary/5 text-body font-bold text-foreground">
           <span>공제 내역</span>
-          <strong class="tabular-nums text-primary">{{ formatWon(displayedTotalDeduction) }}</strong>
+          <strong class="tabular-nums">{{ formatWon(displayedTotalDeduction) }}</strong>
         </div>
 
         <div class="px-3 py-1.5">

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -123,11 +124,11 @@ watch(
             <h2 id="severance-result-title" class="retro-title">퇴직금 예상 결과</h2>
           </div>
           <div class="retro-panel-content space-y-4">
+            <ResultHero label="퇴직금" :value="formatWon(result.severancePay)" />
             <BenefitStatGrid
               :items="[
-                { label: '퇴직금', value: formatWon(result.severancePay), tone: result.isEligible ? 'success' : undefined },
-                { label: '퇴직소득세', value: formatWon(result.severanceTax), tone: result.severanceTax > 0 ? 'danger' : undefined },
-                { label: '실수령 퇴직금', value: formatWon(result.netSeverancePay), tone: result.isEligible ? 'success' : undefined },
+                { label: '퇴직소득세', value: formatWon(result.severanceTax) },
+                { label: '실수령 퇴직금', value: formatWon(result.netSeverancePay) },
                 { label: '1일 평균임금', value: formatWon(result.dailyAvgWage) },
               ]"
             />

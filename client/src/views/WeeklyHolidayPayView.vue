@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
+import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -132,10 +133,10 @@ watch(
             <h2 id="weekly-pay-result-title" class="retro-title">주휴수당 예상 결과</h2>
           </div>
           <div class="retro-panel-content space-y-4">
+            <ResultHero label="주휴수당" :value="formatWon(result.weeklyHolidayPay)" />
             <BenefitStatGrid
               :items="[
-                { label: '주휴수당', value: formatWon(result.weeklyHolidayPay), tone: result.isEligible ? 'success' : undefined },
-                { label: '실질 시급', value: formatWon(result.effectiveHourlyWage), tone: result.isEligible ? 'success' : undefined },
+                { label: '실질 시급', value: formatWon(result.effectiveHourlyWage) },
                 { label: '예상 월급', value: formatWon(result.estimatedMonthlyPay) },
                 { label: '주 근무시간', value: `${result.weeklyHours}시간` },
               ]"

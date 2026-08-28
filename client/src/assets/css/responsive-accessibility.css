@@ -118,7 +118,10 @@
     white-space: nowrap;
   }
 
-  .text-resize-layout .text-h2.tabular-nums {
+  /* CompareResult company cards moved from the undefined `text-h2` utility
+     to `text-heading` (result grammar sweep); keep the resize clamp working.
+     Scoped to <p> so retro-input fields sharing the classes are untouched. */
+  .text-resize-layout p.text-heading.tabular-nums {
     font-size: clamp(0.9375rem, 7vw, 1.5rem);
     line-height: 1.2;
   }
