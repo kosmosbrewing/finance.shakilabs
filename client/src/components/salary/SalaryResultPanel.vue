@@ -6,8 +6,8 @@ import SectionShareButton from "@/components/common/SectionShareButton.vue";
 import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 import SalarySummaryStatGrid from "@/components/salary/SalarySummaryStatGrid.vue";
 
-// Count-up animation removed on purpose (fleet-wide policy): 23 of 26 calculators
-// were already static, and animating from 0 would blank the prerendered value.
+// Count-up animation is provided by ResultHero itself (single shared
+// implementation) - views must not add a local rAF copy (gate: resultHeroGrammar).
 const props = defineProps<{
   calc: SalaryCalcResult;
 }>();

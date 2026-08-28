@@ -5,7 +5,8 @@
 //  3. ResultHero itself keeps the grammar: label above value, display size,
 //     brand color, tabular numerals, centered
 //  4. stat-grid values stay neutral (no brand/status color)
-//  5. no count-up animation revival in result components
+//  5. count-up animation is allowed ONLY as the single ResultHero implementation
+//     (no view-local rAF copies - one implementation serves all 26 calculators)
 import { describe, expect, it } from "vitest";
 
 const vueSources = import.meta.glob("/src/**/*.vue", {
@@ -108,10 +109,20 @@ describe("result hero grammar", () => {
     }
   });
 
-  it("no count-up animation in result components", () => {
-    const offenders = Object.keys(vueSources).filter((path) =>
-      vueSources[path].includes("animateInitialMonthlyNet")
-    );
+  it("count-up lives only in ResultHero (no view-local rAF)", () => {
+    // the single implementation must exist ...
+    const hero = vueSources[HERO_PATH];
+    expect(hero).toContain("requestAnimationFrame");
+    // ... and must show the final value before mount: prerendered/SSR output
+    // and the first hydration render must never paint 0.
+    expect(hero).toContain("const displayValue = ref(props.value)");
+    // ... and no other component may reimplement it (2026-08 policy reversal
+    // restored the animation, but only as this one shared implementation)
+    const offenders = Object.keys(vueSources)
+      .filter((path) => path !== HERO_PATH)
+      .filter((path) =>
+        /requestAnimationFrame|animateInitialMonthlyNet/.test(vueSources[path])
+      );
     expect(offenders).toEqual([]);
   });
 });
