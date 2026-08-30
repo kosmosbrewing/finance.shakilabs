@@ -2533,7 +2533,7 @@ function buildSeverancePayContent(years) {
             <td style="${TD_STYLE}">-${formatWon(yearDeduction)}</td>
           </tr>
           <tr>
-            <td style="${TD_STYLE}">예상 퇴직소득세(추정)</td>
+            <td style="${TD_STYLE}">예상 세금 합계(퇴직소득세+지방소득세, 추정)</td>
             <td style="${TD_STYLE}">-${formatWon(estimatedTax)}</td>
           </tr>
           <tr style="background:hsl(var(--accent));">

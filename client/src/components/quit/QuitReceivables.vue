@@ -10,7 +10,8 @@ import type { QuitReason } from "@/data/unemploymentTable";
 const props = defineProps<{
   servicePeriodLabel: string;
   retirementGross: number;
-  retirementTax: number;
+  retirementIncomeTax: number;
+  retirementLocalTax: number;
   retirementNet: number;
   unemploymentEligible: boolean;
   unemploymentDailyBenefit: number;
@@ -84,7 +85,11 @@ const eligibleLabel: Record<string, string> = {
             </div>
             <div class="px-3 py-1.5 flex items-center justify-between text-muted-foreground">
               <span>퇴직소득세 (추정)</span>
-              <span class="tabular-nums text-status-danger">− {{ formatWon(retirementTax) }}</span>
+              <span class="tabular-nums text-status-danger">− {{ formatWon(retirementIncomeTax) }}</span>
+            </div>
+            <div class="px-3 py-1.5 flex items-center justify-between text-muted-foreground">
+              <span>지방소득세 (추정)</span>
+              <span class="tabular-nums text-status-danger">− {{ formatWon(retirementLocalTax) }}</span>
             </div>
             <div class="px-3 py-2 flex items-center justify-between font-semibold text-foreground">
               <span>세후 수령</span>

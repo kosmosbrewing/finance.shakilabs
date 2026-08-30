@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  averageWageWindowDays,
   calculateWeeklyHolidayPay,
   calculateWageConversion,
   calculateSeverancePay,
 } from "@/utils/laborCalculator";
+import { useRetirementCalc } from "@/composables/useRetirementCalc";
 
 describe("calculateWeeklyHolidayPay", () => {
   it("2026 최저시급 10,320원, 주 5일 8시간 근무", () => {
@@ -106,18 +108,36 @@ describe("calculateWageConversion", () => {
   });
 });
 
+describe("averageWageWindowDays", () => {
+  it("실제 달력 일수를 센다 (마지막 근무일 2026-08-31 -> 6~8월 = 92일)", () => {
+    expect(averageWageWindowDays(new Date("2026-08-31T00:00:00"))).toBe(92);
+  });
+
+  it("2월이 끼면 90일 (마지막 근무일 2026-02-28 -> 12~2월 = 90일)", () => {
+    expect(averageWageWindowDays(new Date("2026-02-28T00:00:00"))).toBe(90);
+  });
+
+  it("월말 넘침을 보정한다 (마지막 근무일 2026-05-30 -> 2/28~5/30 = 92일)", () => {
+    expect(averageWageWindowDays(new Date("2026-05-30T00:00:00"))).toBe(92);
+  });
+});
+
 describe("calculateSeverancePay", () => {
-  it("1년 근속 월급 300만원", () => {
+  // lastWorkedDay를 고정해야 결정적: 2026-08-31 퇴사 -> 산정기간 92일
+  const AUG_WINDOW = { lastWorkedDay: "2026-08-31" };
+
+  it("1년 근속 월급 300만원 (92일 창)", () => {
     const result = calculateSeverancePay({
       yearsOfService: 1,
       averageMonthlySalary: 3_000_000,
+      ...AUG_WINDOW,
     });
     expect(result.isEligible).toBe(true);
-    // 1일 평균임금 = 3,000,000 × 3 / 90 = 100,000
-    expect(result.dailyAvgWage).toBe(100_000);
-    // 퇴직금 = 100,000 × 30 × (365/365) = 3,000,000
-    expect(result.severancePay).toBe(3_000_000);
-    // 소액이므로 세금 매우 적음
+    expect(result.windowDays).toBe(92);
+    // 1일 평균임금 = floor(9,000,000 / 92) = 97,826 (법정 산식: 실제 총일수로 나눔)
+    expect(result.dailyAvgWage).toBe(97_826);
+    // 퇴직금 = floor(97,826 × 30 × (365/365)) = 2,934,780
+    expect(result.severancePay).toBe(2_934_780);
     expect(result.netSeverancePay).toBeLessThanOrEqual(result.severancePay);
   });
 
@@ -125,18 +145,19 @@ describe("calculateSeverancePay", () => {
     const result = calculateSeverancePay({
       yearsOfService: 5,
       averageMonthlySalary: 4_000_000,
+      ...AUG_WINDOW,
     });
     expect(result.isEligible).toBe(true);
-    const expectedDailyWage = Math.round((4_000_000 * 3) / 90);
+    const expectedDailyWage = Math.floor((4_000_000 * 3) / 92);
     expect(result.dailyAvgWage).toBe(expectedDailyWage);
-    // 퇴직금 = 일평균 × 30 × 5
-    expect(result.severancePay).toBe(Math.round(expectedDailyWage * 30 * 5));
+    expect(result.severancePay).toBe(Math.floor(expectedDailyWage * 30 * 5));
   });
 
   it("1년 미만은 수급요건 미충족", () => {
     const result = calculateSeverancePay({
       yearsOfService: 0,
       averageMonthlySalary: 3_000_000,
+      ...AUG_WINDOW,
     });
     expect(result.isEligible).toBe(false);
     expect(result.severancePay).toBe(0);
@@ -146,19 +167,69 @@ describe("calculateSeverancePay", () => {
     const result = calculateSeverancePay({
       yearsOfService: 10,
       averageMonthlySalary: 3_500_000,
+      ...AUG_WINDOW,
     });
     expect(result.comparisonData).toHaveLength(6);
     // 1년차 < 10년차
     expect(result.comparisonData[0].amount).toBeLessThan(result.comparisonData[3].amount);
   });
 
-  it("퇴직소득세가 계산되어 실수령이 줄어든다 (고액)", () => {
+  it("퇴직소득세와 지방소득세가 분리 산출되고 합계·실수령이 정합한다 (고액)", () => {
     const result = calculateSeverancePay({
       yearsOfService: 20,
       averageMonthlySalary: 8_000_000,
+      ...AUG_WINDOW,
     });
-    expect(result.severanceTax).toBeGreaterThan(0);
+    expect(result.severanceIncomeTax).toBeGreaterThan(0);
+    // 지방소득세 = 퇴직소득세의 10%
+    expect(result.severanceLocalTax).toBe(Math.round(result.severanceIncomeTax * 0.1));
+    expect(result.severanceTax).toBe(result.severanceIncomeTax + result.severanceLocalTax);
     expect(result.netSeverancePay).toBeLessThan(result.severancePay);
     expect(result.netSeverancePay).toBe(result.severancePay - result.severanceTax);
+  });
+
+  it("lastWorkedDay 미지정 시 오늘 기준 창(89~92일)을 쓴다", () => {
+    const result = calculateSeverancePay({
+      yearsOfService: 3,
+      averageMonthlySalary: 3_000_000,
+    });
+    expect(result.windowDays).toBeGreaterThanOrEqual(89);
+    expect(result.windowDays).toBeLessThanOrEqual(92);
+  });
+});
+
+// 산식 이원화 회귀 게이트: /severance-pay(laborCalculator)와 /quit(useRetirementCalc)이
+// 동일 시나리오에서 원 단위까지 같은 값을 내야 한다. 과거 한쪽은 ÷90+지방세 포함,
+// 다른쪽은 ÷92+지방세 미포함으로 퇴직금 2.17%·세금 14.8% 차이가 라이브에 나갔다.
+describe("severance engine parity: laborCalculator === useRetirementCalc", () => {
+  it("동일 시나리오(월 350만·10년·2026-08-31 퇴사)에서 원 단위 일치", () => {
+    // 근속 정확히 3,650일(10년): 시작일 = 종료일 - 3,649일 (양끝 포함)
+    const end = new Date("2026-08-31T00:00:00");
+    const start = new Date(end.getTime() - 3_649 * 24 * 60 * 60 * 1000);
+    const iso = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+    const quit = useRetirementCalc(() => ({
+      startDate: iso(start),
+      endDate: "2026-08-31",
+      monthlySalary: 3_500_000,
+      annualBonus: 0,
+    })).value;
+    expect(quit.serviceDays).toBe(3_650);
+    expect(quit.serviceYears).toBe(10);
+
+    const severance = calculateSeverancePay({
+      yearsOfService: 10,
+      averageMonthlySalary: 3_500_000,
+      lastWorkedDay: "2026-08-31",
+    });
+
+    expect(severance.windowDays).toBe(quit.windowDays);
+    expect(severance.dailyAvgWage).toBe(quit.averageDailyWage);
+    expect(severance.severancePay).toBe(quit.severanceGross);
+    expect(severance.severanceIncomeTax).toBe(quit.retirementIncomeTax);
+    expect(severance.severanceLocalTax).toBe(quit.retirementLocalTax);
+    expect(severance.severanceTax).toBe(quit.retirementTax);
+    expect(severance.netSeverancePay).toBe(quit.severanceNet);
   });
 });
