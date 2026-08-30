@@ -133,6 +133,11 @@ export interface SeverancePayInput {
   yearsOfService: number;
   /** 최근 3개월 평균 월급 (원) */
   averageMonthlySalary: number;
+  /**
+   * 마지막 근무일 (YYYY-MM-DD). Determines the statutory average-wage window
+   * length (89-92 days). Defaults to today ("if you quit today").
+   */
+  lastWorkedDay?: string;
 }
 
 export type SeverancePayResult = {
@@ -140,17 +145,52 @@ export type SeverancePayResult = {
   severancePay: number;
   /** 1일 평균임금 */
   dailyAvgWage: number;
+  /** 평균임금 산정 기간 총일수 (89~92일) */
+  windowDays: number;
   /** 총 근속일수 */
   totalDays: number;
   /** 수급 요건 충족 여부 (1년 이상) */
   isEligible: boolean;
-  /** 퇴직소득세 (간이 계산) */
+  /** 퇴직소득세 (국세) */
+  severanceIncomeTax: number;
+  /** 지방소득세 (퇴직소득세의 10%) */
+  severanceLocalTax: number;
+  /** 세금 합계 (퇴직소득세 + 지방소득세) */
   severanceTax: number;
   /** 실수령 퇴직금 */
   netSeverancePay: number;
   /** 근속연수별 비교 데이터 */
   comparisonData: { years: number; amount: number }[];
 };
+
+// Statutory average-wage window (근로기준법 제2조 제1항 제6호): total wages of
+// the 3 calendar months before the separation date, divided by the ACTUAL
+// number of days in that window. That is 89-92 days depending on the month --
+// a fixed 90 or 92 is only an approximation, not the statute. This mirrors the
+// MOEL severance calculator (its worked example divides by 92).
+// The separation date (사유 발생일) is the day AFTER the last worked day.
+export function averageWageWindowDays(lastWorkedDay: Date): number {
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const separation = new Date(
+    lastWorkedDay.getFullYear(),
+    lastWorkedDay.getMonth(),
+    lastWorkedDay.getDate() + 1
+  );
+  const windowStart = new Date(
+    separation.getFullYear(),
+    separation.getMonth() - 3,
+    separation.getDate()
+  );
+  // month-end overflow (e.g. 5/31 minus 3 months -> 2/31 spills into March):
+  // pull back to the last day of the intended month
+  if (windowStart.getDate() !== separation.getDate()) windowStart.setDate(0);
+  return Math.round((separation.getTime() - windowStart.getTime()) / DAY_MS);
+}
+
+export function calcAverageDailyWage(threeMonthTotalWage: number, windowDays: number): number {
+  if (windowDays <= 0) return 0;
+  return Math.floor(threeMonthTotalWage / windowDays);
+}
 
 /**
  * 퇴직소득세 간이 계산
@@ -163,10 +203,19 @@ export type SeverancePayResult = {
  * 6. 산출세액 = 환산산출세액 × 근속연수 / 12
  * 7. 지방소득세 = 산출세액 × 10%
  */
+export type SeveranceTaxParts = {
+  /** 퇴직소득세 (국세) */
+  incomeTax: number;
+  /** 지방소득세 (퇴직소득세의 10%) */
+  localTax: number;
+};
+
 // export인 이유: scripts/calc-engine.mjs가 프리렌더 본문에 같은 세액을 찍어야 해서 이 산식을
 // 미러링한다. 두 구현이 같은 답을 내는지 calcEngineParity.test.ts가 직접 비교한다.
-export function calculateSeveranceTax(severancePay: number, years: number): number {
-  if (years <= 0 || severancePay <= 0) return 0;
+// The two on-screen labels (퇴직소득세 / 지방소득세) must never be merged into a
+// single number labeled "퇴직소득세" -- that is what parts exist for.
+export function calculateSeveranceTaxParts(severancePay: number, years: number): SeveranceTaxParts {
+  if (years <= 0 || severancePay <= 0) return { incomeTax: 0, localTax: 0 };
 
   // 근속연수공제
   let serviceDeduction: number;
@@ -222,40 +271,58 @@ export function calculateSeveranceTax(severancePay: number, years: number): numb
   }
 
   // 산출세액 = 환산산출세액 × 근속연수 / 12
-  const calculatedTax = Math.round(convertedTax * years / 12);
+  const incomeTax = Math.round(convertedTax * years / 12);
 
   // 지방소득세 10%
-  const localTax = Math.round(calculatedTax * 0.1);
+  const localTax = Math.round(incomeTax * 0.1);
 
-  return calculatedTax + localTax;
+  return { incomeTax, localTax };
+}
+
+// Combined total (national + local), kept because the prerender mirror
+// (scripts/calc-engine.mjs severanceIncomeTax) prints this exact sum and
+// calcEngineParity.test.ts compares the two implementations number-for-number.
+export function calculateSeveranceTax(severancePay: number, years: number): number {
+  const { incomeTax, localTax } = calculateSeveranceTaxParts(severancePay, years);
+  return incomeTax + localTax;
 }
 
 export function calculateSeverancePay(input: SeverancePayInput): SeverancePayResult {
   const { yearsOfService, averageMonthlySalary } = input;
   const isEligible = yearsOfService >= 1;
 
-  // 1일 평균임금 = 3개월 평균월급 × 3 / 90
-  const dailyAvgWage = Math.round((averageMonthlySalary * 3) / 90);
+  // Daily average wage: 3-month wages / actual window days (89-92, statute),
+  // not the former fixed /90. Same core as useRetirementCalc so /severance-pay
+  // and /quit answer identically for the same scenario.
+  const lastWorkedDay = input.lastWorkedDay
+    ? new Date(`${input.lastWorkedDay}T00:00:00`)
+    : new Date();
+  const windowDays = averageWageWindowDays(lastWorkedDay);
+  const dailyAvgWage = calcAverageDailyWage(averageMonthlySalary * 3, windowDays);
   const totalDays = Math.round(yearsOfService * 365);
 
   // 퇴직금 = 1일 평균임금 × 30일 × (총 근속일수 / 365)
-  const severancePay = Math.round(dailyAvgWage * 30 * (totalDays / 365));
+  const severancePay = Math.floor(dailyAvgWage * 30 * (totalDays / 365));
 
-  const severanceTax = calculateSeveranceTax(severancePay, yearsOfService);
+  const { incomeTax, localTax } = calculateSeveranceTaxParts(severancePay, yearsOfService);
+  const severanceTax = incomeTax + localTax;
   const netSeverancePay = severancePay - severanceTax;
 
   // 비교 데이터 (1, 3, 5, 10, 15, 20년)
   const comparisonYears = [1, 3, 5, 10, 15, 20];
   const comparisonData = comparisonYears.map((y) => ({
     years: y,
-    amount: Math.round(dailyAvgWage * 30 * y),
+    amount: Math.floor(dailyAvgWage * 30 * y),
   }));
 
   return {
     severancePay,
     dailyAvgWage,
+    windowDays,
     totalDays,
     isEligible,
+    severanceIncomeTax: incomeTax,
+    severanceLocalTax: localTax,
     severanceTax,
     netSeverancePay,
     comparisonData,

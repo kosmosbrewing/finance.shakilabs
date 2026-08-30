@@ -1,5 +1,9 @@
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
-import { calcIncomeTax } from "@/utils/calculator";
+import {
+  averageWageWindowDays,
+  calcAverageDailyWage,
+  calculateSeveranceTaxParts,
+} from "@/utils/laborCalculator";
 
 export type RetirementInput = {
   startDate: string;
@@ -23,24 +27,24 @@ function formatPeriod(serviceDays: number): string {
   return `${years}년 ${months}개월 ${days}일`;
 }
 
-// 근속연수공제 (소득세법 제48조 제1항)
-function calcServiceDeduction(years: number): number {
-  if (years <= 5) return years * 1_000_000;
-  if (years <= 10) return 5_000_000 + (years - 5) * 2_000_000;
-  if (years <= 20) return 15_000_000 + (years - 10) * 2_500_000;
-  return 40_000_000 + (years - 20) * 3_000_000;
-}
+const EMPTY = {
+  serviceDays: 0,
+  serviceYears: 0,
+  averageDailyWage: 0,
+  windowDays: 0,
+  severanceGross: 0,
+  retirementIncomeTax: 0,
+  retirementLocalTax: 0,
+  retirementTax: 0,
+  severanceNet: 0,
+};
 
-// 환산급여공제 (소득세법 제48조 제3항)
-function calcConvertedSalaryDeduction(convertedSalary: number): number {
-  if (convertedSalary <= 8_000_000) return convertedSalary;
-  if (convertedSalary <= 70_000_000) return 8_000_000 + (convertedSalary - 8_000_000) * 0.6;
-  if (convertedSalary <= 100_000_000) return 45_200_000 + (convertedSalary - 70_000_000) * 0.55;
-  if (convertedSalary <= 300_000_000) return 61_700_000 + (convertedSalary - 100_000_000) * 0.45;
-  return 151_700_000 + (convertedSalary - 300_000_000) * 0.35;
-}
-
-// 퇴직금 + 퇴직소득세 계산
+// 퇴직금 + 퇴직소득세 계산.
+// Shares the statutory core with /severance-pay (laborCalculator): the daily
+// average wage divides the 3-month wages by the ACTUAL window days (89-92,
+// 근로기준법 제2조 제1항 제6호) -- the former fixed /92 was an approximation --
+// and the tax is the same 연분연승 formula, split into national income tax and
+// 10% local income tax so both screens show identical, honestly-labeled values.
 export function useRetirementCalc(input: MaybeRefOrGetter<RetirementInput>) {
   return computed(() => {
     const resolved = toValue(input);
@@ -48,15 +52,7 @@ export function useRetirementCalc(input: MaybeRefOrGetter<RetirementInput>) {
     const endDate = parseDate(resolved.endDate);
 
     if (!startDate || !endDate || endDate < startDate) {
-      return {
-        serviceDays: 0,
-        serviceYears: 0,
-        servicePeriodLabel: "0년 0개월 0일",
-        averageDailyWage: 0,
-        severanceGross: 0,
-        retirementTax: 0,
-        severanceNet: 0,
-      };
+      return { ...EMPTY, servicePeriodLabel: "0년 0개월 0일" };
     }
 
     const dayMs = 24 * 60 * 60 * 1000;
@@ -64,47 +60,33 @@ export function useRetirementCalc(input: MaybeRefOrGetter<RetirementInput>) {
 
     // 퇴직금 지급 요건: 계속근로 1년 이상 (근로기준법 제34조)
     if (serviceDays < 365) {
-      return {
-        serviceDays,
-        serviceYears: 0,
-        servicePeriodLabel: formatPeriod(serviceDays),
-        averageDailyWage: 0,
-        severanceGross: 0,
-        retirementTax: 0,
-        severanceNet: 0,
-      };
+      return { ...EMPTY, serviceDays, servicePeriodLabel: formatPeriod(serviceDays) };
     }
 
     const serviceYears = Math.floor(serviceDays / 365); // serviceDays >= 365이므로 항상 >= 1
 
-    // 평균임금: 최근 3개월 임금 + 상여 3/12를 92일로 나눈 간이 계산
+    // 평균임금: 최근 3개월 임금 + 상여 3/12를 실제 산정기간 총일수로 나눈다
     const threeMonthSalary = Math.max(0, resolved.monthlySalary) * 3;
     const threeMonthBonus = Math.max(0, resolved.annualBonus) * 0.25;
-    const averageDailyWage = Math.floor((threeMonthSalary + threeMonthBonus) / 92);
+    const windowDays = averageWageWindowDays(endDate);
+    const averageDailyWage = calcAverageDailyWage(threeMonthSalary + threeMonthBonus, windowDays);
 
-    const severanceGross = Math.floor(
-      averageDailyWage * 30 * (serviceDays / 365)
-    );
+    const severanceGross = Math.floor(averageDailyWage * 30 * (serviceDays / 365));
 
-    // 퇴직소득세: 근속연수공제 → 환산급여 → 환산급여공제 → 세율 적용 (소득세법 제48조)
-    const serviceDeduction = calcServiceDeduction(serviceYears);
-    const retirementTaxBase = Math.max(0, severanceGross - serviceDeduction);
-
-    // 환산급여 = (퇴직소득금액 - 근속연수공제) / 근속연수 × 12
-    const convertedSalary = Math.floor((retirementTaxBase / serviceYears) * 12);
-    const convertedDeduction = calcConvertedSalaryDeduction(convertedSalary);
-    const taxBase = Math.max(0, convertedSalary - convertedDeduction);
-
-    // 환산산출세액 → 최종 퇴직소득세
-    const convertedTax = calcIncomeTax(taxBase);
-    const retirementTax = Math.floor((convertedTax / 12) * serviceYears);
+    // 퇴직소득세: 근속연수공제 → 환산급여 → 환산급여공제 → 세율 (소득세법 제48조),
+    // 지방소득세 10% 분리 산출 -- laborCalculator와 동일 구현 공유
+    const { incomeTax, localTax } = calculateSeveranceTaxParts(severanceGross, serviceYears);
+    const retirementTax = incomeTax + localTax;
 
     return {
       serviceDays,
       serviceYears,
       servicePeriodLabel: formatPeriod(serviceDays),
       averageDailyWage,
+      windowDays,
       severanceGross,
+      retirementIncomeTax: incomeTax,
+      retirementLocalTax: localTax,
       retirementTax,
       severanceNet: Math.max(0, severanceGross - retirementTax),
     };

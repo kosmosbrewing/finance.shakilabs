@@ -32,7 +32,8 @@ const result = computed(() =>
 );
 const severanceSegments = computed(() => [
   { key: "net", label: "실수령", value: result.value.netSeverancePay, color: "hsl(var(--chart-net))" },
-  { key: "tax", label: "퇴직소득세", value: result.value.severanceTax, color: "hsl(var(--chart-tax))" },
+  { key: "incomeTax", label: "퇴직소득세", value: result.value.severanceIncomeTax, color: "hsl(var(--chart-tax))" },
+  { key: "localTax", label: "지방소득세", value: result.value.severanceLocalTax, color: "hsl(var(--chart-local))" },
 ]);
 
 const seoTitle = computed(() =>
@@ -127,7 +128,8 @@ watch(
             <ResultHero label="퇴직금" :value="formatWon(result.severancePay)" />
             <BenefitStatGrid
               :items="[
-                { label: '퇴직소득세', value: formatWon(result.severanceTax) },
+                { label: '퇴직소득세', value: formatWon(result.severanceIncomeTax) },
+                { label: '지방소득세', value: formatWon(result.severanceLocalTax) },
                 { label: '실수령 퇴직금', value: formatWon(result.netSeverancePay) },
                 { label: '1일 평균임금', value: formatWon(result.dailyAvgWage) },
               ]"
@@ -147,8 +149,13 @@ watch(
               </p>
               <template v-else>
                 <p>총 근속일수: {{ result.totalDays.toLocaleString() }}일</p>
+                <p>
+                  1일 평균임금은 퇴직 전 3개월 임금 총액을 그 기간의 실제 총일수
+                  {{ result.windowDays }}일로 나눈 금액입니다 (오늘 퇴직 가정, 근로기준법 제2조).
+                </p>
                 <p v-if="result.severanceTax > 0">
-                  퇴직소득세 {{ formatWon(result.severanceTax) }} 공제 후
+                  퇴직소득세 {{ formatWon(result.severanceIncomeTax) }} + 지방소득세
+                  {{ formatWon(result.severanceLocalTax) }} 공제 후
                   <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.netSeverancePay) }}</span>을 수령합니다.
                 </p>
               </template>

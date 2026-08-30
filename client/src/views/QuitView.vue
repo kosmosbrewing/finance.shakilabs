@@ -372,7 +372,8 @@ watch(
         <QuitReceivables
           :service-period-label="retirement.servicePeriodLabel"
           :retirement-gross="retirement.severanceGross"
-          :retirement-tax="retirement.retirementTax"
+          :retirement-income-tax="retirement.retirementIncomeTax"
+          :retirement-local-tax="retirement.retirementLocalTax"
           :retirement-net="retirement.severanceNet"
           :unemployment-eligible="unemployment.isEligible"
           :unemployment-daily-benefit="unemployment.dailyBenefit"
