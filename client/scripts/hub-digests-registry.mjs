@@ -24,6 +24,23 @@ import {
   withholdingRefundCeilingDigest,
   withholdingSensitivityDigest,
 } from "./hub-digests-payroll.mjs";
+import {
+  annualLeaveDenominatorDigest,
+  annualLeaveStaircaseDigest,
+  bonusInvariantsDigest,
+  bonusRetentionCurveDigest,
+  employerBudgetDigest,
+  employerCapCurveDigest,
+  freelanceRateFlipDigest,
+  freelanceRateVersusEmployeeDigest,
+  partTimeNetDigest,
+  pensionClaimAgeDigest,
+  pensionRedistributionDigest,
+  rentCreditCapDigest,
+  rentCreditCliffsDigest,
+  weeklyHolidayNetHourlyDigest,
+  weeklyHolidayThresholdDigest,
+} from "./hub-digests-tools.mjs";
 
 export const DIGEST_SOURCES = {
   "/insurance": [insuranceBracketDigest, insuranceCrossoverDigest],
@@ -34,6 +51,14 @@ export const DIGEST_SOURCES = {
   "/freelancer": [freelancerExpenseCliffDigest, freelancerPrepaidGapDigest],
   "/withholding": [withholdingSensitivityDigest, withholdingRefundCeilingDigest],
   "/severance-pay": [severanceTaxFreeLineDigest, severanceWindowDaysDigest],
+  "/weekly-holiday-pay": [weeklyHolidayThresholdDigest, weeklyHolidayNetHourlyDigest],
+  "/pension": [pensionRedistributionDigest, pensionClaimAgeDigest],
+  "/annual-leave": [annualLeaveStaircaseDigest, annualLeaveDenominatorDigest],
+  "/guide/part-time": [partTimeNetDigest],
+  "/freelance-rate": [freelanceRateFlipDigest, freelanceRateVersusEmployeeDigest],
+  "/bonus": [bonusRetentionCurveDigest, bonusInvariantsDigest],
+  "/monthly-rent-deduction": [rentCreditCliffsDigest, rentCreditCapDigest],
+  "/4-insurance-employer": [employerCapCurveDigest, employerBudgetDigest],
 };
 
 // Prose only — headings, paragraphs, table notes and callouts. Table cells are numbers and would

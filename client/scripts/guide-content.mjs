@@ -4,6 +4,7 @@
 // 엔진 출력만으로 수치·표 중심의 본문을 만들어 붙인다. 화면(SPA)은 기존 체인 UI를 유지하고,
 // 이 본문은 크롤러가 보는 정적 HTML에만 들어간다(다른 계산기 상세 페이지와 같은 패턴).
 import { calculateSalaryBreakdown, formatPercent, formatWon } from "./calc-engine.mjs";
+import { partTimeNetDigest, renderDigestHtml } from "./hub-digests-tools.mjs";
 
 const H2 = "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--highlight) / 0.3);color:hsl(var(--foreground));";
 const P = "margin:0 0 10px;";
@@ -214,7 +215,8 @@ function buildPartTimeDeepDive() {
         <a href="/finance/unpaid-wage">임금체불 지연이자 계산기</a>로 청구 금액을 정리한 뒤, 고용노동부
         노동포털에 진정을 제기할 수 있습니다. 표에서 계산한 "받아야 할 돈"과 실제 입금액의 차액이 그대로
         청구 근거가 됩니다.
-      </p>`;
+      </p>
+      ${renderDigestHtml(partTimeNetDigest())}`;
 }
 
 // --- 이직 준비 (/guide/job-change) ---
