@@ -51,6 +51,12 @@ import {
   quitFundingMixDigest,
   quitSeveranceTaxDigest,
 } from "./hub-digests.mjs";
+import {
+  severanceTaxFreeLineDigest,
+  severanceWindowDaysDigest,
+  withholdingRefundCeilingDigest,
+  withholdingSensitivityDigest,
+} from "./hub-digests-payroll.mjs";
 
 const STANDARD_SALARY_INPUT = {
   nonTaxableMonthly: 200_000,
@@ -347,8 +353,10 @@ function withholdingHub() {
           })),
         },
         tableNote:
-          "부양가족 1인·비과세 식대 월 20만원 가정입니다. 간이세액표를 근사식으로 역산한 값이므로 실제 연봉과 오차가 있을 수 있습니다.",
+          "부양가족 1인·비과세 식대 월 20만원 가정입니다. 연봉 실수령액 계산기와 같은 산식으로 월 소득세가 입력값과 같아지는 연봉을 찾은 값이라, 계산기 화면의 결과와 원 단위까지 같습니다. 회사가 간이세액표의 80%·120%를 적용하고 있다면 그만큼 어긋납니다.",
       },
+      withholdingSensitivityDigest(),
+      withholdingRefundCeilingDigest(),
       {
         h2: "역산이 크게 빗나가는 세 가지 경우",
         body: [
@@ -385,7 +393,7 @@ function withholdingHub() {
         note: `약 ${manWon(row.estimatedManWon)}`,
       })),
     },
-    note: "※ 간이세액표 근사 역산이며 참고용 추정치입니다. 확정 금액은 국세청 홈택스 지급명세서에서 확인하세요.",
+    note: "※ 2026년 4대보험 요율과 소득세율 기준으로 연봉 계산기 산식을 거꾸로 푼 추정치입니다. 확정 금액은 국세청 홈택스 지급명세서에서 확인하세요.",
   };
 }
 
@@ -587,6 +595,8 @@ function severancePayHub() {
         callout:
           "<strong>지급 기한</strong> — 퇴직금은 퇴직일로부터 14일 이내에 지급해야 합니다(근로기준법 제36조). 이를 넘기면 지연이자 연 20%가 발생하며, 임금체불 지연이자 계산기에서 금액을 확인할 수 있습니다.",
       },
+      severanceTaxFreeLineDigest(),
+      severanceWindowDaysDigest(),
     ],
     variants: {
       h2: "근속연수별 상세 계산",

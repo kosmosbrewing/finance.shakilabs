@@ -361,6 +361,25 @@ export function severanceIncomeTax(severancePay, years) {
   return calculatedTax + Math.round(calculatedTax * 0.1);
 }
 
+// 평균임금 산정기간 총일수 — src/utils/laborCalculator.ts averageWageWindowDays 미러.
+// 근로기준법 제2조 제1항 제6호: 퇴직일(마지막 근무일 다음날) 이전 3개월의 "실제 달력 일수"(89~92)로
+// 나눈다. 고정 90·92는 근사다. 월말 넘침(5/31 - 3개월 → 2/31)은 해당 월 말일로 당긴다.
+export function averageWageWindowDays(lastWorkedDay) {
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const separation = new Date(
+    lastWorkedDay.getFullYear(),
+    lastWorkedDay.getMonth(),
+    lastWorkedDay.getDate() + 1
+  );
+  const windowStart = new Date(
+    separation.getFullYear(),
+    separation.getMonth() - 3,
+    separation.getDate()
+  );
+  if (windowStart.getDate() !== separation.getDate()) windowStart.setDate(0);
+  return Math.round((separation.getTime() - windowStart.getTime()) / DAY_MS);
+}
+
 export function severancePayEstimate(years) {
   const avgWage = Math.floor(SEVERANCE_ASSUMED_MONTHLY * 1.1);
   const severance = Math.floor(avgWage * years);
@@ -421,10 +440,33 @@ export function regionalHealthEstimate(monthlyIncome) {
   };
 }
 
-// 월 원천징수액 → 추정 연봉 역산 (간이세액표 근사)
-export function withholdingReverse(monthlyTax) {
-  const estimatedAnnual = Math.round((monthlyTax * 12 + 1_000_000) / 0.05);
-  return { estimatedAnnual, estimatedManWon: Math.round(estimatedAnnual / 10_000) };
+// 월 원천징수 소득세 → 세전 연봉 역산. src/composables/useWithholdingReverse.ts 미러.
+//
+// 왜 이진탐색인가: 이전 구현은 (월세액 × 12 + 100만) ÷ 0.05 선형 근사였다. 소득세는 누진 구조에
+// 근로소득세액공제까지 얹혀 있어 선형으로 되돌릴 수 없고, 실제로 월 50만원에서 화면(7,613만)과
+// 1.8배 어긋난 값(1억 4,000만)을 허브·변종 8쪽에 찍고 있었다. 화면과 같은 방식으로 연봉을 좁혀
+// 월 소득세가 입력값과 같아지는 최소 연봉을 찾는다. 기본 가정(부양가족 1인·비과세 식대 20만원)은
+// 사이트 전역의 표준 시나리오와 같다.
+export function withholdingReverse(
+  monthlyTax,
+  { dependents = 1, children = 0, nonTaxableMonthly = 200_000 } = {}
+) {
+  if (monthlyTax <= 0) return { estimatedAnnual: 0, estimatedManWon: 0 };
+  let lo = 1_000_000;
+  let hi = 3_000_000_000;
+  for (let i = 0; i < 60; i += 1) {
+    const mid = Math.floor((lo + hi) / 2);
+    const { monthlyIncomeTax } = calculateSalaryBreakdown({
+      grossAnnual: mid,
+      nonTaxableMonthly,
+      dependents,
+      children,
+      retirementIncluded: false,
+    });
+    if (monthlyIncomeTax < monthlyTax) lo = mid + 1;
+    else hi = mid;
+  }
+  return { estimatedAnnual: lo, estimatedManWon: Math.round(lo / 10_000) };
 }
 
 // 임금체불 지연이자 — 적용 이율별 일할 계산

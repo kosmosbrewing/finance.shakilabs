@@ -2828,11 +2828,9 @@ function buildParentalLeaveContent(manWon) {
 // 원천세 역산 (/withholding/:amount)
 // =========================
 function buildWithholdingContent(amount) {
-  // 월 원천징수 소득세 → 연봉 추정 (단순화: 간이세액표 근사 역산)
-  // 실제는 간이세액표이지만 prerender에서는 대략적 추정으로
+  // 월 원천징수 소득세 → 연봉 추정. 화면(useWithholdingReverse)과 같은 이진탐색 역산(calc-engine 공용)
   const monthlyTax = amount;
   const annualTax = monthlyTax * 12;
-  // 간이세액표 근사 역산 (calc-engine 공용 산식)
   const { estimatedAnnual, estimatedManWon } = withholdingReverse(monthlyTax);
 
   return `
@@ -2863,7 +2861,7 @@ function buildWithholdingContent(amount) {
         실제 세액과 다를 수 있으므로 연말정산에서 최종 정산됩니다.
       </p>
       <div style="${CALLOUT_STYLE}">
-        <strong>역산 공식(근사)</strong>: 연봉 ≈ (월 원천징수액 × 12 + 누진공제) ÷ 실효 한계세율
+        <strong>역산 방법</strong>: 소득세는 누진 구조라 공식 하나로 되돌릴 수 없어, 연봉을 바꿔 가며 월 소득세가 ${formatWon(amount)}과 같아지는 연봉을 찾습니다 (부양가족 1인·비과세 식대 월 20만원)
       </div>
 
       <h2 style="${H2_STYLE}">2. 원천징수 vs 연말정산</h2>
