@@ -57,6 +57,10 @@ import {
   withholdingRefundCeilingDigest,
   withholdingSensitivityDigest,
 } from "./hub-digests-payroll.mjs";
+import {
+  weeklyHolidayNetHourlyDigest,
+  weeklyHolidayThresholdDigest,
+} from "./hub-digests-tools.mjs";
 
 const STANDARD_SALARY_INPUT = {
   nonTaxableMonthly: 200_000,
@@ -725,6 +729,8 @@ function weeklyHolidayPayHub() {
           "주 40시간을 넘겨 일한 경우에도 주휴수당은 8시간분으로 고정됩니다. 초과분은 주휴수당이 아니라 연장근로 가산수당(1.5배)으로 정산해야 합니다.",
         ],
       },
+      weeklyHolidayThresholdDigest(),
+      weeklyHolidayNetHourlyDigest(),
     ],
     variants: {
       h2: "시급별 상세 계산",

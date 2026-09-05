@@ -25,6 +25,21 @@ import {
   PENSION_AGE_FACTORS,
   RATES_2026,
 } from "./calc-engine.mjs";
+// 엔진을 현실적 입력 범위로 훑어 경계·감도·상쇄를 서술하는 절. renderSection 스키마 그대로.
+import {
+  annualLeaveDenominatorDigest,
+  annualLeaveStaircaseDigest,
+  bonusInvariantsDigest,
+  bonusRetentionCurveDigest,
+  employerBudgetDigest,
+  employerCapCurveDigest,
+  freelanceRateFlipDigest,
+  freelanceRateVersusEmployeeDigest,
+  pensionClaimAgeDigest,
+  pensionRedistributionDigest,
+  rentCreditCapDigest,
+  rentCreditCliffsDigest,
+} from "./hub-digests-tools.mjs";
 
 const won = (v) => formatWon(v);
 const pct = (v, d = 1) => formatPercent(v, d);
@@ -180,6 +195,8 @@ function bonusHub() {
           "국민연금은 조금 다릅니다. 기준소득월액이 매년 7월에 갱신되며 상한(월 659만원)이 있어, 이미 상한에 도달한 고소득자는 성과급이 늘어도 연금보험료가 더 오르지 않습니다.",
         ],
       },
+      bonusRetentionCurveDigest(),
+      bonusInvariantsDigest(),
     ],
     variants: {
       h2: "함께 확인할 계산기",
@@ -260,6 +277,8 @@ function annualLeaveHub() {
         callout:
           "<strong>5인 미만 사업장은 연차가 없다</strong> — 연차유급휴가는 상시 근로자 5인 이상 사업장에만 적용됩니다. 5인 미만이라면 연차도, 미사용 수당도 법적 의무가 아닙니다. 다만 주휴수당은 규모와 무관하게 적용됩니다.",
       },
+      annualLeaveStaircaseDigest(),
+      annualLeaveDenominatorDigest(),
     ],
     variants: {
       h2: "함께 확인할 계산기",
@@ -437,6 +456,8 @@ function pensionHub() {
         callout:
           "<strong>직장가입자와 지역가입자의 차이</strong> — 보험료율 9.5%는 같지만 직장가입자는 회사가 절반을 부담해 본인은 4.75%만 냅니다. 퇴사 후 지역가입자가 되면 9.5% 전액을 본인이 부담합니다.",
       },
+      pensionRedistributionDigest(),
+      pensionClaimAgeDigest(),
     ],
     variants: {
       h2: "함께 확인할 계산기",
@@ -517,6 +538,8 @@ function monthlyRentHub() {
         callout:
           "<strong>준비 서류</strong> — 임대차계약서 사본, 주민등록등본, 월세 이체 증빙(계좌이체 내역·무통장입금증) 세 가지면 됩니다. 현금으로 냈다면 증빙이 어려우니 계좌이체로 바꾸는 편이 안전합니다.",
       },
+      rentCreditCliffsDigest(),
+      rentCreditCapDigest(),
     ],
     variants: {
       h2: "함께 확인할 계산기",
@@ -694,6 +717,8 @@ function employerInsuranceHub() {
           "4대보험 신고는 근로복지공단·건강보험공단 EDI나 '4대사회보험 정보연계센터'에서 한 번에 처리할 수 있습니다. 퇴사 시 상실 신고도 같은 기한이 적용됩니다.",
         ],
       },
+      employerCapCurveDigest(),
+      employerBudgetDigest(),
     ],
     variants: {
       h2: "함께 확인할 계산기",
@@ -729,7 +754,11 @@ function freelanceRateHub() {
       {
         h2: "3.3%만 빼고 계산하면 부족해진다",
         body: [
-          `가장 흔한 실수는 목표 실수령을 0.967로 나누는 것입니다. 시나리오에서 그렇게 계산하면 월 ${won(naive)}이 나오지만, 실제 필요액은 ${won(f.monthlyGross)}으로 월 <strong>${won(f.monthlyGross - naive)}</strong>이 모자랍니다.`,
+          // 0.967 어림은 경비율 덕에 실효세율이 3.3% 아래인 구간(목표 월 400만원대 이하)에서는 오히려
+          // 과다하고, 그 위에서만 부족하다. 부호를 보고 서술해야 "-16,254원이 모자랍니다"가 안 나온다.
+          f.monthlyGross >= naive
+            ? `가장 흔한 실수는 목표 실수령을 0.967로 나누는 것입니다. 시나리오에서 그렇게 계산하면 월 ${won(naive)}이 나오지만, 실제 필요액은 ${won(f.monthlyGross)}으로 월 <strong>${won(f.monthlyGross - naive)}</strong>이 모자랍니다.`
+            : `가장 흔한 계산은 목표 실수령을 0.967로 나누는 것입니다. 시나리오에서 그렇게 계산하면 월 ${won(naive)}이 나오는데, 실제 필요액은 ${won(f.monthlyGross)}으로 오히려 월 <strong>${won(naive - f.monthlyGross)}</strong> 적습니다. 단순경비율이 인정되는 구간에서는 3.3%가 확정세액보다 많이 떼이기 때문이며, 목표가 더 커지면 방향이 뒤집힙니다.`,
           "3.3%는 확정 세금이 아니라 선납금이기 때문입니다. 종합소득세는 누진세율이라 수입이 커질수록 실효세율이 3.3%를 넘어서고, 그 차액은 5월에 추가로 납부해야 합니다.",
           `시나리오의 연 청구액 ${won(f.annualGross)}에 대한 확정세액은 ${won(f.tax.totalTax)}이고, 3.3% 기납부액은 ${won(f.tax.withholdingPrepaid)}입니다. 차액 ${won(Math.abs(f.tax.refund))}을 5월에 더 내야 합니다.`,
         ],
@@ -775,6 +804,8 @@ function freelanceRateHub() {
           "대금을 받지 못했다면 프리랜서도 구제 수단이 있습니다. 근로자로 인정되는 경우라면 고용노동부 진정이 가능하고, 사업자 간 거래라면 지급명령이나 소액사건 심판으로 비교적 빠르게 진행할 수 있습니다.",
         ],
       },
+      freelanceRateFlipDigest(),
+      freelanceRateVersusEmployeeDigest(),
     ],
     variants: {
       h2: "함께 확인할 계산기",

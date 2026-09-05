@@ -408,6 +408,30 @@ export function weeklyHolidayPay(hourly) {
   };
 }
 
+// 주 근무시간을 바꿔 가며 보는 주휴수당 — src/utils/laborCalculator.ts calculateWeeklyHolidayPay 미러.
+// 위 weeklyHolidayPay는 주 40시간 고정이라 15시간 경계와 시간대별 월급을 말할 수 없다. 반올림 방식까지
+// 화면과 같아야 허브가 말하는 월급과 계산기에 같은 시간을 넣었을 때의 월급이 원 단위로 일치한다.
+export function weeklyHolidayPayForHours(hourlyWage, weeklyHours) {
+  const isEligible = weeklyHours >= 15;
+  const weeklyHolidayPay = isEligible ? Math.round(hourlyWage * (weeklyHours / 40) * 8) : 0;
+  const weeklyWage = hourlyWage * weeklyHours;
+  const effectiveHourlyWage =
+    weeklyHours > 0 ? Math.round((weeklyWage + weeklyHolidayPay) / weeklyHours) : 0;
+  const WEEKS_PER_MONTH = 4.345;
+  const estimatedMonthlyPay = Math.round((weeklyWage + weeklyHolidayPay) * WEEKS_PER_MONTH);
+  const monthlyPayWithout = Math.round(weeklyWage * WEEKS_PER_MONTH);
+  return {
+    weeklyHours,
+    isEligible,
+    weeklyHolidayPay,
+    weeklyWage,
+    effectiveHourlyWage,
+    estimatedMonthlyPay,
+    monthlyPayWithout,
+    monthlyDifference: estimatedMonthlyPay - monthlyPayWithout,
+  };
+}
+
 // 시급 → 월급·연봉 환산 (월 평균 4.345주 = 365 ÷ 7 ÷ 12)
 export function wageConversion(hourly) {
   const weeklyBase = hourly * 40;
