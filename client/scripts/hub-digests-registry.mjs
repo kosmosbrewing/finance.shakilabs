@@ -33,9 +33,13 @@ import {
   employerCapCurveDigest,
   freelanceRateFlipDigest,
   freelanceRateVersusEmployeeDigest,
+  overtimeNetHourDigest,
+  overtimeStackingDigest,
   partTimeNetDigest,
   pensionClaimAgeDigest,
   pensionRedistributionDigest,
+  raiseRetentionBandsDigest,
+  raiseStructureDigest,
   rentCreditCapDigest,
   rentCreditCliffsDigest,
   weeklyHolidayNetHourlyDigest,
@@ -59,6 +63,8 @@ export const DIGEST_SOURCES = {
   "/bonus": [bonusRetentionCurveDigest, bonusInvariantsDigest],
   "/monthly-rent-deduction": [rentCreditCliffsDigest, rentCreditCapDigest],
   "/4-insurance-employer": [employerCapCurveDigest, employerBudgetDigest],
+  "/raise": [raiseRetentionBandsDigest, raiseStructureDigest],
+  "/overtime": [overtimeNetHourDigest, overtimeStackingDigest],
 };
 
 // Prose only — headings, paragraphs, table notes and callouts. Table cells are numbers and would

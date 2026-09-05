@@ -12,7 +12,9 @@ import {
   calcFreelanceRate,
   calcInsuranceDeduction,
   calcMonthlyRentDeduction,
+  calcOvertimeImpact,
   calcPensionEstimate,
+  calcRaiseImpact,
   calculateSalaryBreakdown,
   computeComprehensiveTax,
   EITC_BRACKET_TABLE,
@@ -840,5 +842,247 @@ export function employerBudgetDigest() {
     },
     tableNote: `월급 ${won(salary)}·고용보험 0.9% 기준입니다. 산재보험 요율은 근로복지공단이 매년 업종별로 고시하며, 같은 업종이라도 개별실적요율제로 사업장별 사고 이력에 따라 최대 ±50% 조정됩니다.`,
     callout: `<strong>예산 역산의 쓸모</strong> — 채용 공고에 적을 월급은 예산에서 ${pct(standard.employerRate, 2)}의 보험료와 ${pct(1 / 12, 1)}의 퇴직급여 적립을 미리 뺀 값이어야 합니다. 월 ${won(budget)} 예산으로 월급 ${won(budget)}을 약속하면 실제 비용은 ${won(budget + calcEmployerInsuranceBurden({ monthlySalary: budget, ...EMPLOYER_RATES }).totalMonthlyBurden + Math.floor(budget / 12))}이 됩니다.`,
+  };
+}
+
+// =========================
+// /raise — 인상률이 실수령 증가율로 바뀔 때 잃는 폭
+// =========================
+const RAISE_PERCENT = 8;
+const RAISE_SALARY_GRID = [24, 30, 40, 52, 60, 70, 75, 80, 90, 100, 120].map((v) => v * 1_000_000);
+
+function raiseBandRow(salary) {
+  const impact = calcRaiseImpact({ currentAnnual: salary, raisePercent: RAISE_PERCENT });
+  return {
+    salary,
+    impact,
+    keep: impact.annualNetDiff / impact.raiseAmount,
+    netGrowth: impact.next.annualNet / impact.current.annualNet - 1,
+    insuranceBite: impact.insuranceDelta * 12,
+    taxBite: impact.taxDelta * 12,
+    from: bracketOf(impact.current.taxableBase),
+    to: bracketOf(impact.next.taxableBase),
+    overCap: impact.current.taxableMonthly >= PENSION_CAP_TAXABLE,
+  };
+}
+
+// 세후 실수령이 목표 비율만큼 늘어나려면 세전 인상률이 몇 %여야 하는가
+function raiseNeededFor(salary, netTarget) {
+  for (let percent = 0; percent <= 40; percent += 0.1) {
+    const impact = calcRaiseImpact({ currentAnnual: salary, raisePercent: percent });
+    if (impact.next.annualNet / impact.current.annualNet - 1 >= netTarget) return percent;
+  }
+  return null;
+}
+
+export function raiseRetentionBandsDigest() {
+  const rows = RAISE_SALARY_GRID.map(raiseBandRow);
+  const belowCap = rows.filter((row) => !row.overCap);
+  const worst = belowCap.reduce((min, row) => (row.keep < min.keep ? row : min), belowCap[0]);
+  const rebound = rows[rows.indexOf(worst) + 1];
+  const lowest = rows[0];
+  const top = rows[rows.length - 1];
+  const crossing = rows.find((row) => row.from !== row.to);
+  const taxHeavy = rows.find((row) => row.taxBite > row.insuranceBite);
+  const needed = [30_000_000, 52_000_000, 75_000_000].map((salary) => ({
+    salary,
+    percent: raiseNeededFor(salary, RAISE_PERCENT / 100),
+  }));
+
+  return {
+    h2: `세전 ${RAISE_PERCENT}% 인상이 세후로는 몇 %인가 — 연봉대별 잔존율`,
+    body: [
+      `인상률은 세전 숫자이고, 통장에서 체감하는 것은 세후 증가율입니다. 같은 ${RAISE_PERCENT}% 인상을 열한 개 연봉대에 넣어 보면 세후 증가율은 연봉 ${manWon(lowest.salary)}에서 ${pct(lowest.netGrowth, 2)}, ${manWon(worst.salary)}에서 ${pct(worst.netGrowth, 2)}, ${manWon(top.salary)}에서 ${pct(top.netGrowth, 2)}로 갈립니다. 인상분 가운데 남는 몫(잔존율)은 ${pct(lowest.keep)}에서 출발해 <strong>${manWon(worst.salary)}에서 ${pct(worst.keep)}로 가장 낮아졌다가 ${manWon(rebound.salary)}에서 ${pct(rebound.keep)}로 되돌아옵니다</strong>. 보수월액이 국민연금 상한 ${won(PENSION_CAP_TAXABLE)}을 넘기면서 인상분에 붙던 연금 보험료가 사라지기 때문이고, 그래서 ${manWon(worst.salary)}은 ${pct(worst.from.rate, 0)} 세율을 내면서 연금은 전액 내는 가장 불리한 자리입니다.`,
+      `잔존율이 한 계단 내려가는 자리는 세율 구간 경계입니다. 연봉 ${manWon(crossing.salary)}은 인상 전 과세표준이 ${pct(crossing.from.rate, 0)} 구간인데 ${RAISE_PERCENT}% 인상분이 ${pct(crossing.to.rate, 0)} 구간에 걸쳐, 잔존율이 ${manWon(rows[rows.indexOf(crossing) - 1].salary)}의 ${pct(rows[rows.indexOf(crossing) - 1].keep)}에서 ${pct(crossing.keep)}로 떨어집니다. 인상분에서 빠지는 돈의 성격도 바뀌어, ${manWon(lowest.salary)}에서는 4대보험 ${won(lowest.insuranceBite)}이 세금 ${won(lowest.taxBite)}의 ${(lowest.insuranceBite / lowest.taxBite).toFixed(1)}배지만 ${manWon(taxHeavy.salary)}부터는 세금(${won(taxHeavy.taxBite)})이 보험료(${won(taxHeavy.insuranceBite)})를 앞지릅니다.`,
+      `거꾸로 읽으면 협상 목표가 나옵니다. 세후로 ${RAISE_PERCENT}%를 더 받으려면 세전 인상률이 연봉 ${needed.map((row) => `${manWon(row.salary)}에서 ${row.percent.toFixed(1)}%`).join(", ")}여야 합니다. 같은 세후 목표에 필요한 세전 인상률이 연봉대에 따라 ${(needed[needed.length - 1].percent - needed[0].percent).toFixed(1)}%p 벌어지므로, 인상률을 먼저 말하기 전에 본인 연봉대의 잔존율을 표에서 확인하는 편이 순서상 맞습니다.`,
+    ],
+    table: {
+      head: ["현재 연봉", `${RAISE_PERCENT}% 인상액`, "세후 연 증가", "잔존율", "세후 증가율", "세율 구간 (전→후)"],
+      rows: rows.map((row) => ({
+        highlight: row === worst,
+        cells: [
+          manWon(row.salary),
+          won(row.impact.raiseAmount),
+          won(row.impact.annualNetDiff),
+          `<strong>${pct(row.keep)}</strong>`,
+          pct(row.netGrowth, 2),
+          `${pct(row.from.rate, 0)} → ${pct(row.to.rate, 0)}${row.overCap ? " · 연금 상한" : ""}`,
+        ],
+      })),
+    },
+    tableNote: `부양가족 1인·비과세 식대 월 20만원 기준입니다. 반등은 상한을 건너는 자리에서만 나타나고, ${manWon(top.salary)}에서는 과세표준이 ${pct(top.from.rate, 0)} 구간에 있어 잔존율이 ${pct(top.keep)}로 다시 내려갑니다.`,
+  };
+}
+
+export function raiseStructureDigest() {
+  const salary = 52_000_000;
+  const base = salaryOf(salary);
+  const grid = [3, 10, 20, 30].map((percent) => ({
+    percent,
+    ...calcRaiseImpact({ currentAnnual: salary, raisePercent: percent }),
+  }));
+  const keepOf = (row) => row.annualNetDiff / row.raiseAmount;
+  // 인상분이 다음 세율 구간에 걸리기 시작하는 인상률
+  let bracketPercent = null;
+  for (let percent = 0.5; percent <= 100; percent += 0.5) {
+    const impact = calcRaiseImpact({ currentAnnual: salary, raisePercent: percent });
+    if (bracketOf(impact.next.taxableBase).rate > bracketOf(base.taxableBase).rate) {
+      bracketPercent = { percent, amount: impact.raiseAmount };
+      break;
+    }
+  }
+  // 비과세 식대를 월 20만원 더 얹는 것(연 240만)과 같은 실수령을 주는 과세 인상액
+  const nonTaxableGain =
+    calculateSalaryBreakdown({ grossAnnual: salary + 2_400_000, nonTaxableMonthly: 400_000, dependents: 1, children: 0, retirementIncluded: false }).annualNet -
+    base.annualNet;
+  let equivalentRaise = 0;
+  for (let gross = salary; gross <= salary + 20_000_000; gross += 10_000) {
+    if (salaryOf(gross).annualNet - base.annualNet >= nonTaxableGain) {
+      equivalentRaise = gross - salary;
+      break;
+    }
+  }
+  // 인상 다음 해 4월 건보 정산 — 인상분에 대한 건강보험·장기요양 1년치
+  const eight = calcRaiseImpact({ currentAnnual: salary, raisePercent: RAISE_PERCENT });
+  const healthSettle =
+    (eight.next.healthInsurance + eight.next.longTermCare - eight.current.healthInsurance - eight.current.longTermCare) * 12;
+  // 같은 연봉을 13분할(퇴직금 포함)로 바꾸면 월 실수령이 얼마나 줄어드는가
+  const thirteen = calculateSalaryBreakdown({ grossAnnual: salary, nonTaxableMonthly: 200_000, dependents: 1, children: 0, retirementIncluded: true });
+
+  return {
+    h2: "인상률보다 크게 움직이는 세 가지 구조",
+    body: [
+      `연봉 ${manWon(salary)}의 잔존율은 인상률이 ${grid[0].percent}%든 ${grid[grid.length - 1].percent}%든 <strong>${pct(keepOf(grid[0]))}</strong>로 같습니다. 과세표준 ${won(base.taxableBase)}이 ${pct(bracketOf(base.taxableBase).rate, 0)} 구간 상단까지 ${won(INCOME_TAX_BRACKETS[1].limit - base.taxableBase)} 남아 있어, 인상률 <strong>${bracketPercent.percent}%(${won(bracketPercent.amount)})</strong>가 되어야 인상분이 다음 구간에 걸리기 때문입니다. 현실적인 인상 폭 안에서는 "많이 올리면 세율이 뛴다"가 이 연봉대에 해당하지 않으며, 잔존율을 바꾸는 것은 인상률이 아니라 아래 세 가지 구조입니다.`,
+      `첫째, 비과세입니다. 식대 비과세를 월 ${won(200_000)} 더 인정받아 연 ${won(2_400_000)}이 과세 밖으로 나가면 실수령이 연 ${won(nonTaxableGain)} 늘어나는데, 같은 실수령을 과세 연봉 인상으로 얻으려면 <strong>${won(equivalentRaise)}(${pct(equivalentRaise / salary, 2)})</strong>이 필요합니다. 회사 인건비로는 ${won(equivalentRaise - 2_400_000)} 차이입니다. 둘째, 분할 방식입니다. 같은 ${manWon(salary)}을 퇴직금 포함 13분할로 지급하면 월 실수령이 ${won(base.monthlyNet)}에서 ${won(thirteen.monthlyNet)}으로 <strong>${won(base.monthlyNet - thirteen.monthlyNet)}</strong> 줄어, ${RAISE_PERCENT}% 인상의 월 증가분 ${won(eight.monthlyNetDiff)}과 맞먹는 금액이 분할 방식 하나로 사라집니다.`,
+      `셋째, 인상 다음 해 4월입니다. 건강보험료는 전년 보수로 부과되다가 4월 보수총액 정산에서 실제 소득에 맞춰지므로, ${RAISE_PERCENT}% 인상이 1월부터 적용됐다면 인상분에 대한 건강보험·장기요양 1년치 <strong>${won(healthSettle)}</strong>이 다음 해 4월 급여에서 한꺼번에 빠집니다. 그 달 실수령은 평소보다 이만큼 적고, 인상 첫해 열두 달의 실수령 증가 합계에서 이 금액을 빼야 첫해의 진짜 증가분이 됩니다.`,
+    ],
+    table: {
+      head: ["인상률", "세전 인상액", "월 실수령 증가", "잔존율", "인상 후 세율 구간"],
+      rows: grid.map((row) => ({
+        cells: [
+          `${row.percent}%`,
+          won(row.raiseAmount),
+          won(row.monthlyNetDiff),
+          `<strong>${pct(keepOf(row))}</strong>`,
+          pct(bracketOf(row.next.taxableBase).rate, 0),
+        ],
+      })),
+    },
+    tableNote: `현재 연봉 ${manWon(salary)}·부양가족 1인·비과세 식대 월 20만원 기준입니다. 인상률 ${grid[grid.length - 1].percent}%까지 잔존율이 같은 것은 인상분 전체가 같은 세율 구간 안에 머물고 보수월액이 연금 상한 아래이기 때문이며, 연봉이 다르면 이 구간의 폭도 달라집니다.`,
+    callout: `<strong>13분할 계약서를 받았다면</strong> — 월 실수령 ${won(thirteen.monthlyNet)}에 12를 곱한 ${won(thirteen.monthlyNet * 12)}이 12분할의 ${won(base.annualNet)}보다 ${won(base.annualNet - thirteen.monthlyNet * 12)} 적습니다. 그 차이가 퇴직 시 퇴직금으로 돌아오는지, 아니면 그냥 월급이 줄어든 것인지가 계약서에서 확인할 첫 항목입니다.`,
+  };
+}
+
+// =========================
+// /overtime — 가산 한 시간의 세후 값과 포괄임금의 역산
+// =========================
+const OVERTIME_BANDS = [2_156_880, 3_200_000, 4_500_000, 6_000_000, 7_000_000, 9_000_000];
+const OVERTIME_HOURS = 12;
+
+function overtimeBandRow(monthly) {
+  const impact = calcOvertimeImpact({
+    monthlySalary: monthly,
+    monthlyBaseHours: 209,
+    overtimeHours: OVERTIME_HOURS,
+    nightHours: 0,
+    holidayHours: 0,
+  });
+  const baseNetHourly = Math.floor(salaryOf(monthly * 12).monthlyNet / 209);
+  const overtimeNetHourly = Math.floor(impact.totalExtraNet / OVERTIME_HOURS);
+  return {
+    monthly,
+    impact,
+    keep: impact.totalExtraNet / impact.overtimePay,
+    baseNetHourly,
+    overtimeNetHourly,
+    netMultiple: overtimeNetHourly / baseNetHourly,
+  };
+}
+
+export function overtimeNetHourDigest() {
+  const rows = OVERTIME_BANDS.map(overtimeBandRow);
+  const minimum = rows[0];
+  const scenario = rows.find((row) => row.monthly === 3_200_000);
+  const worst = rows.reduce((min, row) => (row.keep < min.keep ? row : min), rows[0]);
+  const rebound = rows[rows.indexOf(worst) + 1];
+  const maxMonthly = calcOvertimeImpact({
+    monthlySalary: scenario.monthly,
+    monthlyBaseHours: 209,
+    overtimeHours: 52,
+    nightHours: 0,
+    holidayHours: 0,
+  });
+
+  return {
+    h2: "연장 한 시간은 세후로 1.5배가 아니다",
+    body: [
+      `가산율 1.5배는 세전 숫자입니다. 연장 ${OVERTIME_HOURS}시간을 여섯 개 월급대에 넣어 세후로 바꾸면, 연장수당에서 남는 몫은 최저임금 월급 ${won(minimum.monthly)}에서 ${pct(minimum.keep)}, ${won(scenario.monthly)}에서 ${pct(scenario.keep)}, <strong>${won(worst.monthly)}에서 ${pct(worst.keep)}</strong>까지 내려갑니다. 연장수당은 그 달 보수에 얹혀 4대보험과 소득세가 같이 붙는데, 소득세는 월급대의 한계세율로 붙기 때문입니다. ${won(rebound.monthly)}에서 ${pct(rebound.keep)}로 되돌아오는 것은 보수월액이 국민연금 상한을 넘어 연장수당에 연금 보험료가 더 붙지 않아서입니다.`,
+      `기본 근로 한 시간의 세후 값과 나란히 놓으면 배율이 보입니다. 월급 ${won(minimum.monthly)}은 기본시간 세후 ${won(minimum.baseNetHourly)}에 연장 한 시간 세후 ${won(minimum.overtimeNetHourly)}으로 <strong>${minimum.netMultiple.toFixed(2)}배</strong>지만, ${won(worst.monthly)}은 ${won(worst.baseNetHourly)} 대 ${won(worst.overtimeNetHourly)}으로 ${worst.netMultiple.toFixed(2)}배에 그칩니다. 법이 정한 1.5배가 통장에서는 ${worst.netMultiple.toFixed(2)}~${minimum.netMultiple.toFixed(2)}배로 좁혀지고, 월급이 높을수록 연장근로 한 시간의 상대적 값어치가 작아집니다.`,
+      `상한까지 채우면 규모가 드러납니다. 주 12시간 한도를 매주 채워 월 52시간을 연장하면 월급 ${won(scenario.monthly)} 근로자의 연장수당은 세전 ${won(maxMonthly.overtimePay)}으로 월급의 ${pct(maxMonthly.overtimePay / scenario.monthly, 0)}에 이르고, 세후로는 ${won(maxMonthly.totalExtraNet)}이 남습니다. 시나리오의 연장 ${OVERTIME_HOURS}시간·야간 6시간·휴일 8시간(세전 ${won(scenario.impact.totalExtraGross > 0 ? calcOvertimeImpact({ monthlySalary: scenario.monthly, monthlyBaseHours: 209, overtimeHours: 12, nightHours: 6, holidayHours: 8 }).totalExtraGross : 0)})과 비교하면 두 배가 넘는 초과근무인데도 세후 잔존율은 ${pct(maxMonthly.totalExtraNet / maxMonthly.overtimePay)}로 거의 그대로입니다. 이 월급대에서는 초과근무를 아무리 늘려도 세율 구간이 바뀌지 않기 때문입니다.`,
+    ],
+    table: {
+      head: ["월급", "통상시급", `연장 ${OVERTIME_HOURS}시간 세전`, "세후", "잔존율", "기본시간 세후 시급", "연장 1시간 세후", "세후 배율"],
+      rows: rows.map((row) => ({
+        highlight: row === worst,
+        cells: [
+          won(row.monthly),
+          won(row.impact.hourlyRate),
+          won(row.impact.overtimePay),
+          won(row.impact.totalExtraNet),
+          `<strong>${pct(row.keep)}</strong>`,
+          won(row.baseNetHourly),
+          won(row.overtimeNetHourly),
+          `${row.netMultiple.toFixed(2)}배`,
+        ],
+      })),
+    },
+    tableNote: `월 소정근로 209시간·부양가족 1인·비과세 식대 월 20만원 기준이며, 첫 행은 2026년 최저시급 ${won(MIN_WAGE_HOURLY_2026)}의 전일제 월급입니다. 세후 금액은 연장수당이 더해진 연봉으로 4대보험과 소득세를 다시 계산한 차액입니다.`,
+  };
+}
+
+export function overtimeStackingDigest() {
+  const monthly = 3_200_000;
+  const hourly = Math.floor(monthly / 209);
+  const one = (overtimeHours, nightHours, holidayHours) =>
+    calcOvertimeImpact({ monthlySalary: monthly, monthlyBaseHours: 209, overtimeHours, nightHours, holidayHours });
+  const overtimeHour = one(1, 0, 0).totalExtraGross;
+  const nightOnly = one(0, 1, 0).totalExtraGross;
+  const stacked = overtimeHour + nightOnly;
+  const sameHours = [
+    { label: "연장 24시간", value: one(24, 0, 0).totalExtraGross },
+    { label: "야간 24시간 (가산분만)", value: one(0, 24, 0).totalExtraGross },
+    { label: "휴일 24시간", value: one(0, 0, 24).totalExtraGross },
+  ];
+  // 포괄임금: 월급에 고정 연장 n시간이 "포함"돼 있다고 보면 통상시급은 209 + n × 1.5 로 나눈 값으로 내려간다
+  const inclusive = [0, 10, 20, 30, 52].map((hours) => {
+    const impliedHourly = Math.floor(monthly / (209 + hours * 1.5));
+    return { hours, impliedHourly, loss: hourly - impliedHourly, belowMinimum: impliedHourly < MIN_WAGE_HOURLY_2026 };
+  });
+  const twenty = inclusive.find((row) => row.hours === 20);
+  const fiftyTwo = inclusive.find((row) => row.hours === 52);
+  const withoutHoliday = Math.floor(monthly / 174);
+  const legacy = Math.floor(monthly / 226);
+
+  return {
+    h2: "겹칠 때의 배율과 포괄임금이 숨기는 통상시급",
+    body: [
+      `통상시급 ${won(hourly)}(월급 ${won(monthly)} ÷ 209)을 기준으로 연장 한 시간은 ${won(overtimeHour)}, 야간 가산만 붙는 한 시간은 ${won(nightOnly)}입니다. 밤 10시 이후의 연장근로처럼 둘이 겹치면 한 시간에 <strong>${won(stacked)}, 통상시급의 ${(stacked / hourly).toFixed(1)}배</strong>가 됩니다. 같은 24시간이라도 유형에 따라 연장 ${won(sameHours[0].value)}, 야간 가산분만 ${won(sameHours[1].value)}, 휴일 ${won(sameHours[2].value)}으로, 야간은 이미 지급된 기본급 위에 0.5배만 얹는 것이라 연장의 ${(sameHours[1].value / sameHours[0].value * 100).toFixed(0)}%에 그칩니다. 야간 가산이 작아 보인다면 그 시간이 연장이기도 한지, 즉 겹침이 계산됐는지를 먼저 봐야 합니다.`,
+      `포괄임금 계약은 이 통상시급 자체를 낮춥니다. 월급 ${won(monthly)}에 "연장 20시간 포함"이라고 적히면 그 월급은 209시간이 아니라 209시간에 연장 20시간 × 1.5를 더한 ${209 + 20 * 1.5}시간의 대가가 되어, 통상시급이 ${won(hourly)}에서 <strong>${won(twenty.impliedHourly)}</strong>으로 ${won(twenty.loss)}(${pct(twenty.loss / hourly)}) 내려갑니다. 포함 시간을 상한인 52시간으로 적으면 ${won(fiftyTwo.impliedHourly)}까지 떨어지고, 이 시급으로 다시 계산되는 연차수당·추가 연장수당·퇴직금이 전부 그만큼 작아집니다. 이 월급대에서는 ${fiftyTwo.belowMinimum ? "52시간을 포함해도 최저시급 아래로 내려가지 않지만" : "최저시급을 넘기지만"}, 월급이 낮을수록 포함 시간 몇 개로 최저임금 위반이 됩니다.`,
+      `분모가 209가 아닌 경우도 같은 방향입니다. 주휴를 빼고 174시간으로 나누면 시급이 ${won(withoutHoliday)}으로 올라가야 하지만, 주 44시간 시절의 226시간을 쓰면 ${won(legacy)}으로 내려갑니다. 명세서의 통상시급이 ${won(hourly)}과 다르면 분모가 어느 쪽인지 확인하고, 계약서에 "포함"된 시간이 있다면 실제 초과근무가 그 시간을 넘긴 달의 차액을 청구할 수 있습니다.`,
+    ],
+    table: {
+      head: ["계약서의 고정 연장시간", "월급이 대가로 삼는 시간", "역산된 통상시급", "209시간 기준과의 차이"],
+      rows: inclusive.map((row) => ({
+        highlight: row.hours === 20,
+        cells: [
+          row.hours === 0 ? "없음 (209시간)" : `연장 ${row.hours}시간 포함`,
+          `${209 + row.hours * 1.5}시간`,
+          `<strong>${won(row.impliedHourly)}</strong>`,
+          row.loss === 0 ? "—" : `−${won(row.loss)} (${pct(row.loss / hourly)})`,
+        ],
+      })),
+    },
+    tableNote: `월급 ${won(monthly)} 기준입니다. 포괄임금 약정이 유효하더라도 실제 연장근로가 포함 시간을 넘으면 초과분은 이 역산 시급이 아니라 법정 통상시급으로 다시 계산해 지급해야 하며, 약정 자체가 근로자에게 불리하면 무효입니다.`,
+    callout: `<strong>겹침 확인 순서</strong> — 밤 10시~새벽 6시에 일한 시간 중 주 40시간을 넘긴 부분은 연장(${won(overtimeHour)})과 야간(${won(nightOnly)})이 동시에 붙어 ${won(stacked)}입니다. 명세서에 야간수당만 ${won(nightOnly)}으로 찍혀 있고 연장이 빠져 있다면 시간당 ${won(overtimeHour)}이 누락된 것입니다.`,
   };
 }
