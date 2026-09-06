@@ -3354,7 +3354,7 @@ function buildAboutContent() {
         <li style="${LI_STYLE}"><strong>회원가입 불필요</strong> — 계정·이름·연락처를 받지 않고 즉시 사용 가능</li>
         <li style="${LI_STYLE}"><strong>클라이언트 연산</strong> — 입력한 급여·세금 정보는 서버로 전송되지 않음</li>
         <li style="${LI_STYLE}"><strong>법령 기반</strong> — 모든 계산은 국세청·건보공단·고용부 공식 고시에 기반</li>
-        <li style="${LI_STYLE}"><strong>정기 업데이트</strong> — 매년 1월 세법·요율 개정 즉시 반영 (최근: 2026년 1월)</li>
+        <li style="${LI_STYLE}"><strong>세율·요율 반영</strong> — 정해진 갱신 주기는 없고, 세법·요율 개정을 사람이 확인한 시점에 반영 (최근 반영: 2026년 1월 시행분)</li>
         <li style="${LI_STYLE}"><strong>오류 제보 환영</strong> — 이메일로 계산 오류 제보 시 빠른 수정 진행</li>
         <li style="${LI_STYLE}"><strong>무료 사용</strong> — 광고 수익을 통해 운영되며, 사용자 과금 없음</li>
       </ul>
