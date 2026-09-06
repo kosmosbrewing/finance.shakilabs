@@ -44,6 +44,7 @@ import {
   rentCreditCapDigest,
   rentCreditCliffsDigest,
 } from "./hub-digests-tools.mjs";
+import { irpBindingLimitDigest, irpBoundaryReversalDigest } from "./hub-digests-retirement.mjs";
 
 const won = (v) => formatWon(v);
 const pct = (v, d = 1) => formatPercent(v, d);
@@ -643,6 +644,8 @@ function irpHub() {
           "중도 인출도 IRP가 더 엄격합니다. 무주택자의 주택 구입, 6개월 이상 요양, 개인회생·파산 같은 법정 사유가 아니면 계좌를 해지해야만 돈을 꺼낼 수 있습니다.",
         ],
       },
+      irpBindingLimitDigest(),
+      irpBoundaryReversalDigest(),
     ],
     variants: {
       h2: "함께 확인할 계산기",

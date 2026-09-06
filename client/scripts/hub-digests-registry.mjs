@@ -71,6 +71,12 @@ import {
   eitcSingleMarginDigest,
   eitcSinglePartTimeDigest,
 } from "./hub-digests-eitc.mjs";
+import {
+  dependentCliffCostDigest,
+  dependentUnitConversionDigest,
+  irpBindingLimitDigest,
+  irpBoundaryReversalDigest,
+} from "./hub-digests-retirement.mjs";
 
 export const DIGEST_SOURCES = {
   "/insurance": [insuranceBracketDigest, insuranceCrossoverDigest],
@@ -103,6 +109,8 @@ export const DIGEST_SOURCES = {
   "/eitc/single": [eitcSinglePartTimeDigest, eitcSingleMarginDigest],
   "/eitc/single-income": [eitcSingleIncomeDoubleTaperDigest, eitcSingleIncomeBoundaryDigest],
   "/eitc/double-income": [eitcDoubleIncomeCombinedDigest, eitcDoubleIncomeJointTestDigest],
+  "/irp": [irpBindingLimitDigest, irpBoundaryReversalDigest],
+  "/dependent": [dependentCliffCostDigest, dependentUnitConversionDigest],
 };
 
 // Prose only - headings, paragraphs, table notes and callouts. Table cells are numbers and would

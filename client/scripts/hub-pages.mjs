@@ -79,6 +79,10 @@ import {
   yearEndTimingDigest,
 } from "./hub-digests-settlement.mjs";
 import { eitcCurveShapeDigest, eitcEffectiveRateDigest } from "./hub-digests-eitc.mjs";
+import {
+  dependentCliffCostDigest,
+  dependentUnitConversionDigest,
+} from "./hub-digests-retirement.mjs";
 
 const STANDARD_SALARY_INPUT = {
   nonTaxableMonthly: 200_000,
@@ -1177,6 +1181,8 @@ function dependentHub() {
         callout:
           "<strong>다음 단계</strong> — 탈락이 예상된다면 <a href=\"/finance/regional-health\">지역가입자 건강보험료 계산기</a>로 전환 후 보험료를 미리 확인하고, 직장 재취업이나 임의계속가입 가능성도 함께 검토하세요.",
       },
+      dependentCliffCostDigest(),
+      dependentUnitConversionDigest(),
     ],
     variants: null,
     note: "※ 소득·재산 요건 기준의 간이 판정이며 부양요건(가족관계)과 공단 보유 부과 자료는 반영하지 않습니다. 확정 판정은 국민건강보험공단(1577-1000)에서 확인하세요.",

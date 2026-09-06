@@ -75,3 +75,31 @@ export type EitcBracket = {
 };
 export const EITC_BRACKET_TABLE: Record<"single" | "single-income" | "double-income", EitcBracket>;
 export function eitcAmountFor(income: number, bracket: EitcBracket): number;
+
+// --- 연금계좌·국민연금 (digestFigures.test.ts / hub-digests-retirement.mjs) ---
+export function calcIrpTaxCredit(input: {
+  annualSalary: number;
+  pensionSavings: number;
+  irpContribution: number;
+}): {
+  taxCreditRate: number;
+  recognizedPensionSavings: number;
+  recognizedIrp: number;
+  recognizedContribution: number;
+  overflowAmount: number;
+  taxCredit: number;
+};
+export function calcPensionEstimate(input: {
+  averageMonthlyIncome: number;
+  insuredYears: number;
+  claimAge: number;
+}): {
+  ageFactor: number;
+  recognizedYears: number;
+  eligible: boolean;
+  estimatedMonthlyPension: number;
+  estimatedAnnualPension: number;
+  employeeContribution: number;
+};
+export const PENSION_AGE_FACTORS: Record<number, number>;
+export const SIMPLE_EXPENSE_RATE_BASE: number;
