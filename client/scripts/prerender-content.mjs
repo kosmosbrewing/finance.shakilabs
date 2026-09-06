@@ -24,6 +24,7 @@ import {
   wageConversion,
   weeklyHolidayPay,
   withholdingReverse,
+  yearEndStandardScenario,
 } from "./calc-engine.mjs";
 import {
   COMPARE_PAIRS,
@@ -33,7 +34,16 @@ import {
   SALARY_AMOUNTS,
   UNPAID_WAGE_AMOUNTS,
 } from "./seo-routes.mjs";
-import { buildHubContent } from "./hub-content.mjs";
+import { buildHubContent, renderDigestBody } from "./hub-content.mjs";
+// 가구 유형별 엔진 스캔 절 — 세 변종이 서로 다른 결론에 도달한다는 전제를 실제로 지탱하는 부분
+import {
+  eitcDoubleIncomeCombinedDigest,
+  eitcDoubleIncomeJointTestDigest,
+  eitcSingleIncomeBoundaryDigest,
+  eitcSingleIncomeDoubleTaperDigest,
+  eitcSingleMarginDigest,
+  eitcSinglePartTimeDigest,
+} from "./hub-digests-eitc.mjs";
 // 파생 상수·헬퍼는 hub-digests.mjs가 원천이다. 변종(이 파일)과 허브 다이제스트가 같은 값을 써야
 // 법령 개정 때 한쪽만 바뀌는 일이 없다.
 import {
@@ -610,6 +620,13 @@ const EITC_HOUSEHOLD_DETAIL = {
   },
 };
 
+// 가구 유형별 다이제스트 — hub-digests-registry.mjs가 이 표를 통해 유사도 게이트를 건다.
+export const EITC_HOUSEHOLD_DIGESTS = {
+  single: [eitcSinglePartTimeDigest, eitcSingleMarginDigest],
+  "single-income": [eitcSingleIncomeDoubleTaperDigest, eitcSingleIncomeBoundaryDigest],
+  "double-income": [eitcDoubleIncomeCombinedDigest, eitcDoubleIncomeJointTestDigest],
+};
+
 function buildEitcContent(householdSlug) {
   const bracket = EITC_BRACKETS[householdSlug];
   const detail = EITC_HOUSEHOLD_DETAIL[householdSlug];
@@ -636,6 +653,15 @@ function buildEitcContent(householdSlug) {
     .filter(([slug]) => slug !== householdSlug)
     .map(([slug, item]) => `<a href="/finance/eitc/${slug}">${item.label}</a>`)
     .join(" · ");
+
+  // 다이제스트는 표 바로 뒤(2·3번)에 온다 — 일반 설명 뒤로 밀면 읽는 사람이 도달하지 못한다는
+  // 09-05 적대적 QA 지적을 그대로 반영한 배치다. 번호는 기존 절과 이어지도록 앞에 붙인다.
+  const digests = EITC_HOUSEHOLD_DIGESTS[householdSlug]
+    .map((build, index) => {
+      const digest = build();
+      return renderDigestBody({ ...digest, h2: `${index + 2}. ${digest.h2}` });
+    })
+    .join("");
 
   return `
     <article data-seo-prerender="eitc" style="${ARTICLE_STYLE}">
@@ -675,18 +701,20 @@ function buildEitcContent(householdSlug) {
 
       <div style="${CALLOUT_STYLE}">${detail.callout}</div>
 
-      <h2 style="${H2_STYLE}">2. ${detail.definitionH2}</h2>
+      ${digests}
+
+      <h2 style="${H2_STYLE}">4. ${detail.definitionH2}</h2>
       ${detail.definition.map((text) => `<p style="${P_STYLE}">${text}</p>`).join("")}
 
-      <h2 style="${H2_STYLE}">3. ${detail.pitfallH2}</h2>
+      <h2 style="${H2_STYLE}">5. ${detail.pitfallH2}</h2>
       <ul style="${UL_STYLE}">
         ${detail.pitfalls.map((text) => `<li style="${LI_STYLE}">${text}</li>`).join("")}
       </ul>
 
-      <h2 style="${H2_STYLE}">4. ${detail.exampleH2}</h2>
+      <h2 style="${H2_STYLE}">6. ${detail.exampleH2}</h2>
       ${detail.example.map((text) => `<p style="${P_STYLE}">${text}</p>`).join("")}
 
-      <h2 style="${H2_STYLE}">5. 자주 묻는 질문 (FAQ)</h2>
+      <h2 style="${H2_STYLE}">7. 자주 묻는 질문 (FAQ)</h2>
       ${detail.faq
         .map(
           (item, index) => `
@@ -695,7 +723,7 @@ function buildEitcContent(householdSlug) {
         )
         .join("")}
 
-      <h2 style="${H2_STYLE}">6. 관련 계산기</h2>
+      <h2 style="${H2_STYLE}">8. 관련 계산기</h2>
       <ul style="${UL_STYLE}">
         <li style="${LI_STYLE}"><a href="/finance/eitc">근로장려금 계산기</a> - 조건 직접 입력</li>
         ${detail.relatedLinks
@@ -2599,16 +2627,11 @@ function buildSeverancePayContent(years) {
 // =========================
 function buildYearEndContent(manWon) {
   const gross = manWon * 10_000;
-  const result = calculateSalaryBreakdown({
-    grossAnnual: gross,
-    nonTaxableMonthly: 200_000,
-    dependents: 1,
-    children: 0,
-    retirementIncluded: false,
-  });
-  // 표준 공제 시나리오 가정
-  const extraDeduction = Math.min(3_000_000, Math.floor(gross * 0.05));
-  const refundEstimate = Math.floor(extraDeduction * 0.15);
+  // 표준 공제 시나리오 — 환급액은 한계세율 × 1.1이며 결정세액을 넘지 못한다 (calc-engine 단일 출처)
+  const scenario = yearEndStandardScenario(gross);
+  const result = scenario.breakdown;
+  const extraDeduction = scenario.extraDeduction;
+  const refundEstimate = scenario.refund;
   const label = formatManWonValue(manWon);
 
   return `

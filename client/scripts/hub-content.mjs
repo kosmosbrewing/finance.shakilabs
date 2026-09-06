@@ -21,6 +21,7 @@ import {
   CALLOUT_STYLE,
   H1_STYLE,
   H2_STYLE,
+  H3_STYLE,
   LI_STYLE,
   NOTE_STYLE,
   P_STYLE,
@@ -52,11 +53,26 @@ function renderTable(table) {
   return `<table style="${TABLE_STYLE}">${head}<tbody>${rows}</tbody></table>`;
 }
 
+// A block is one finding: a conclusion-shaped h3 followed by the paragraphs that argue it, and
+// optionally its own table. Why the heading: an adversarial read of the card app found the same
+// prose read as "a list of numbers" purely because nine paragraphs ran on with no heading between
+// them, so a finding that cannot be named in one clause does not belong in a digest.
+function renderBlock(block) {
+  const parts = [`<h3 style="${H3_STYLE}">${block.h3}</h3>`];
+  for (const body of [block.body].flat().filter(Boolean)) {
+    parts.push(`<p style="${P_STYLE}">${body}</p>`);
+  }
+  if (block.table) parts.push(renderTable(block.table));
+  if (block.tableNote) parts.push(`<p style="${P_STYLE}">${block.tableNote}</p>`);
+  return parts.join("");
+}
+
 function renderSection(section) {
   const parts = [`<h2 style="${H2_STYLE}">${section.h2}</h2>`];
   for (const body of [section.body].flat().filter(Boolean)) {
     parts.push(`<p style="${P_STYLE}">${body}</p>`);
   }
+  for (const block of section.blocks ?? []) parts.push(renderBlock(block));
   if (section.table) parts.push(renderTable(section.table));
   if (section.tableNote) parts.push(`<p style="${P_STYLE}">${section.tableNote}</p>`);
   if (section.callout) parts.push(`<div style="${CALLOUT_STYLE}">${section.callout}</div>`);
@@ -110,6 +126,15 @@ export function buildHubContent(route) {
       ${renderVariants(definition.variants)}
       <p style="${NOTE_STYLE}">${definition.note}</p>
     </article>`;
+}
+
+/**
+ * Renders one digest (the renderSection schema) as standalone HTML. The EITC household variants are
+ * built by prerender-content.mjs rather than by a hub definition, so they need the same markup
+ * without going through buildHubContent.
+ */
+export function renderDigestBody(digest) {
+  return renderSection(digest);
 }
 
 export const HUB_ROUTES = Object.freeze(Object.keys(HUB_PAGES));
