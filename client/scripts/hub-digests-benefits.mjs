@@ -24,6 +24,7 @@ import {
   PARENTAL_LEAVE_FLOOR,
   RATES_2026,
   regionalHealthEstimate,
+  REGIONAL_HEALTH_MIN_MONTHLY,
   unemploymentDailyAllowance,
   UNEMPLOYMENT_DAILY_MAX,
   UNEMPLOYMENT_DAILY_MIN,
@@ -369,12 +370,13 @@ export function regionalHealthRatioDigest() {
     };
   });
   const mid = rows[1];
-  const floorIncome = Math.ceil(20_000 / RATES_2026.healthInsurance.total);
+  const floorIncome = Math.ceil(REGIONAL_HEALTH_MIN_MONTHLY / RATES_2026.healthInsurance.total);
 
   return {
     h2: "두 선택지의 금액은 항상 정확히 두 배 차이가 난다",
     body: [
-      `아래 금액은 <strong>재산·자동차 점수를 뺀 소득분만</strong>의 최소 추정치이고, 임의계속가입은 직장가입자 시절 <strong>본인부담분</strong>을 그대로 낸다는 전제입니다. 두 금액의 요율이 각각 ${pct(RATES_2026.healthInsurance.total, 2)}와 ${pct(RATES_2026.healthInsurance.employee, 3)}이므로, 월급을 어떻게 바꿔도 비율이 움직이지 않습니다.`,
+      `아래 금액은 <strong>재산·자동차 점수를 뺀 소득분만</strong>의 최소 추정치입니다. 지역 소득분 열은 퇴사 전 월급과 같은 크기의 소득이 <strong>퇴사 뒤에도 이어질 때</strong>의 상한선이며, 소득이 실제로 끊기면 네 번째 항목의 하한까지 내려갑니다.`,
+      `임의계속가입 열이 정확히 절반인 데에는 조문 두 개가 겹쳐 있습니다. 보수월액보험료는 <strong>전액을 본인이 부담</strong>하지만(국민건강보험법 제110조 제5항), 같은 조 제4항이 위임한 보험료 경감고시 제9조가 <strong>그 100분의 50을 경감</strong>합니다. 두 규정을 함께 적용하면 부담률이 ${pct(RATES_2026.healthInsurance.total, 2)}에서 ${pct(RATES_2026.healthInsurance.employee, 3)}으로 내려앉고, 지역 소득분은 경감 없이 ${pct(RATES_2026.healthInsurance.total, 2)} 그대로이므로 월급을 어떻게 바꿔도 비율이 움직이지 않습니다.`,
     ],
     blocks: [
       {
@@ -382,7 +384,7 @@ export function regionalHealthRatioDigest() {
         body: [
           `${rows
             .map((row) => `월급 ${won(row.monthly)}이면 지역 소득분 ${won(row.regionalIncomeOnly)} 대 임의계속 ${won(row.formerEmployed)}`)
-            .join(", ")}입니다. 세 경우 모두 배수가 ${rows[0].ratio.toFixed(3)}입니다. 직장가입자는 회사와 절반씩 나눠 내고 지역가입자는 전액을 혼자 내기 때문이며, 그래서 <strong>월 차액은 언제나 임의계속가입료와 같은 금액</strong>입니다. 표의 차액 열을 임의계속 열과 비교하면 두 숫자가 겹칩니다.`,
+            .join(", ")}입니다. 세 경우 모두 배수가 ${rows[0].ratio.toFixed(3)}입니다. 지역가입자는 소득분을 경감 없이 전액 부담하는 반면 임의계속가입자는 같은 전액에서 절반을 경감받기 때문이며, 그래서 <strong>월 차액은 언제나 임의계속가입료와 같은 금액</strong>입니다. 표의 차액 열을 임의계속 열과 비교하면 두 숫자가 겹칩니다.`,
         ],
       },
       {
@@ -396,18 +398,19 @@ export function regionalHealthRatioDigest() {
       {
         h3: "임의계속가입료는 재직 중 명세서의 건강보험 공제액과 원 단위까지 같다",
         body: [
-          `월급 ${won(mid.monthly)}인 재직자의 급여명세서에 찍히는 건강보험 본인부담은 ${won(mid.employed.healthInsurance)}이고, 이 계산기의 임의계속가입 금액도 ${won(mid.formerEmployed)}으로 같은 값입니다. 그래서 "퇴사 후 보험료가 얼마나 오르나"라는 질문의 답은 명세서를 꺼내는 것으로 끝납니다 — 임의계속가입을 하면 그대로, 하지 않으면 그 두 배입니다. 두 금액 모두 장기요양보험료가 별도로 ${pct(RATES_2026.longTermCare.rateOfHealth, 2)}씩 더 붙어, 월급 ${won(mid.monthly)} 기준으로 임의계속에 ${won(mid.ltcOnVoluntary)}, 지역 소득분에 ${won(mid.ltcOnRegional)}이 추가됩니다.`,
+          `월급 ${won(mid.monthly)}인 재직자의 급여명세서에 찍히는 건강보험 본인부담은 ${won(mid.employed.healthInsurance)}이고, 이 계산기의 임의계속가입 금액도 ${won(mid.formerEmployed)}으로 같은 값입니다. 그래서 "퇴사 후 보험료가 얼마나 오르나"라는 질문의 답은 명세서를 꺼내는 것으로 끝납니다 — 임의계속가입을 하면 그대로, 하지 않으면 그 두 배입니다. 두 금액 모두 장기요양보험료가 별도로 ${pct(RATES_2026.longTermCare.rateOfHealth, 2)}씩 더 붙어, 월급 ${won(mid.monthly)} 기준으로 임의계속에 ${won(mid.ltcOnVoluntary)}, 지역 소득분에 ${won(mid.ltcOnRegional)}이 추가됩니다. 경감 전 금액은 월급 ${won(mid.monthly)} 기준 ${won(mid.voluntaryGross)}이고, 고지서에 찍히는 것은 여기서 절반을 뺀 ${won(mid.formerEmployed)}입니다.`,
         ],
       },
       {
-        h3: `소득이 사라지면 소득분은 월 ${won(20_000)}까지 내려간다`,
+        h3: `소득이 사라지면 소득분은 월 ${won(REGIONAL_HEALTH_MIN_MONTHLY)}까지 내려간다`,
         body: [
-          `이 계산기는 소득분 보험료에 월 ${won(20_000)}의 하한을 두고 있어, 월 소득이 ${won(floorIncome)}보다 낮아지면 그 아래로는 내려가지 않습니다. 실업급여는 비과세 소득이라 건강보험료 부과 대상이 아니므로, 구직급여 월 상한 ${won(UNEMPLOYMENT_DAILY_MAX * 30)}을 받는 동안에도 소득분은 이 하한에 붙습니다. 그래서 퇴직·폐업 사실을 증빙해 <strong>보험료 조정 신청</strong>을 하면 월급 ${won(mid.monthly)}이던 사람의 소득분이 ${won(mid.regionalIncomeOnly)}에서 ${won(20_000)}으로, 연 ${won((mid.regionalIncomeOnly - 20_000) * 12)}만큼 줄어듭니다.`,
+          `이 계산기는 소득분 보험료에 월 ${won(REGIONAL_HEALTH_MIN_MONTHLY)}의 하한을 두고 있어, 월 소득이 ${won(floorIncome)}보다 낮아지면 그 아래로는 내려가지 않습니다. 실업급여는 비과세 소득이라 건강보험료 부과 대상이 아니므로, 구직급여 월 상한 ${won(UNEMPLOYMENT_DAILY_MAX * 30)}을 받는 동안에도 소득분은 이 하한에 붙습니다. 그래서 퇴직·폐업 사실을 증빙해 <strong>보험료 조정 신청</strong>을 하면 월급 ${won(mid.monthly)}이던 사람의 소득분이 ${won(mid.regionalIncomeOnly)}에서 ${won(REGIONAL_HEALTH_MIN_MONTHLY)}으로, 연 ${won((mid.regionalIncomeOnly - REGIONAL_HEALTH_MIN_MONTHLY) * 12)}만큼 줄어듭니다.`,
+          `위 화면의 계산기가 이 하한을 그대로 씁니다. 금융소득 입력을 0원으로 두면 지역가입자 추정이 곧바로 월 ${won(REGIONAL_HEALTH_MIN_MONTHLY)}에 붙고, 표의 지역 소득분 ${won(mid.regionalIncomeOnly)}은 나타나지 않습니다. <strong>표는 소득이 이어질 때, 화면 기본값은 소득이 끊겼을 때</strong>의 답이라 서로 다른 질문에 답하고 있습니다.`,
         ],
       },
     ],
     table: {
-      head: ["퇴사 전 월급", "지역 소득분", "임의계속(본인부담)", "월 차액", "배수", "36개월 누적 차액"],
+      head: ["퇴사 전 월급", "지역 소득분", "임의계속(경감 후)", "월 차액", "배수", "36개월 누적 차액"],
       rows: rows.map((row) => ({
         highlight: row.monthly === mid.monthly,
         cells: [
@@ -420,7 +423,7 @@ export function regionalHealthRatioDigest() {
         ],
       })),
     },
-    tableNote: `건강보험료만의 금액이며 장기요양보험료 ${pct(RATES_2026.longTermCare.rateOfHealth, 2)}는 양쪽 모두에 별도로 붙습니다. 지역가입자의 재산·자동차 점수는 편차가 커서 제외했으므로, 재산이 있으면 실제 고지액은 표보다 높습니다.`,
+    tableNote: `건강보험료만의 금액이며 장기요양보험료 ${pct(RATES_2026.longTermCare.rateOfHealth, 2)}는 양쪽 모두에 별도로 붙습니다. 임의계속 열은 경감고시 제9조를 적용한 뒤의 금액이고, 경감 전 전액은 그 두 배인 지역 소득분 열과 같은 값입니다. 지역가입자의 재산·자동차 점수는 편차가 커서 제외했으므로, 재산이 있으면 실제 고지액은 표보다 높습니다.`,
   };
 }
 
