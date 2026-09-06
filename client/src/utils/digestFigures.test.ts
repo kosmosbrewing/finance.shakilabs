@@ -7,6 +7,7 @@
 import { describe, expect, it } from "vitest";
 import * as engine from "../../scripts/calc-engine.mjs";
 import { calculateWageConversion } from "./laborCalculator";
+import { calculateSalaryBreakdown } from "./calculator";
 import {
   parentalStaircaseDigest,
   parentalVariantFlatDigest,
@@ -22,6 +23,12 @@ import {
   eitcCurveShapeDigest,
   eitcEffectiveRateDigest,
 } from "../../scripts/hub-digests-eitc.mjs";
+import {
+  dependentCliffCostDigest,
+  dependentUnitConversionDigest,
+  irpBindingLimitDigest,
+  irpBoundaryReversalDigest,
+} from "../../scripts/hub-digests-retirement.mjs";
 import { digestProse } from "../../scripts/hub-digests-registry.mjs";
 import type { Digest } from "../../scripts/hub-digest-types.d.mts";
 
@@ -164,5 +171,113 @@ describe("승격 산문의 수치 재계산", () => {
     );
     expect(prose(eitcCurveShapeDigest())).toContain("41.25%");
     expect(prose(eitcEffectiveRateDigest())).toContain(won(asDoubleIncome));
+  });
+
+  it("IRP: 환급 상한은 한도가 아니라 결정세액이고, 그 교차 연봉을 다시 찾아도 같다", () => {
+    // 한도를 꽉 채웠을 때의 공제 대상 금액 = 900만 × 16.5%
+    const full = engine.calcIrpTaxCredit({
+      annualSalary: 50_000_000,
+      pensionSavings: 6_000_000,
+      irpContribution: 3_000_000,
+    });
+    expect(full.recognizedContribution).toBe(9_000_000);
+    const credit = Math.floor(9_000_000 * 0.15 * 1.1);
+    expect(credit).toBe(1_485_000);
+    // 결정세액이 그 금액을 처음 덮는 연봉
+    let crossing = 0;
+    for (let manWonValue = 2_000; manWonValue <= 9_000; manWonValue += 10) {
+      const determined = calculateSalaryBreakdown({
+        grossAnnual: manWonValue * 10_000,
+        nonTaxableMonthly: 200_000,
+        dependents: 1,
+        children: 0,
+        retirementIncluded: false,
+      }).determinedTax;
+      if (determined >= credit) {
+        crossing = manWonValue;
+        break;
+      }
+    }
+    expect(crossing).toBe(4_290);
+    const text = prose(irpBindingLimitDigest());
+    expect(text).toContain("4,290만원");
+    // 연금저축 한 계좌에 900만을 넣으면 600만만 인정된다
+    const lopsided = engine.calcIrpTaxCredit({
+      annualSalary: 50_000_000,
+      pensionSavings: 9_000_000,
+      irpContribution: 0,
+    });
+    expect(lopsided.recognizedContribution).toBe(6_000_000);
+    expect(lopsided.overflowAmount).toBe(3_000_000);
+    expect(text).toContain(won(credit - Math.floor(6_000_000 * 0.15 * 1.1)));
+  });
+
+  it("IRP: 5,500만 경계의 손실과 세후 회복폭을 손계산으로 확인한다", () => {
+    const under = Math.floor(9_000_000 * 0.15 * 1.1);
+    const over = Math.floor(9_000_000 * 0.12 * 1.1);
+    expect(under - over).toBe(297_000);
+    const net = (gross: number) =>
+      calculateSalaryBreakdown({
+        grossAnnual: gross,
+        nonTaxableMonthly: 200_000,
+        dependents: 1,
+        children: 0,
+        retirementIncluded: false,
+      }).annualNet;
+    const step = net(55_010_000) - net(55_000_000);
+    expect(step).toBe(7_632);
+    let recover = 0;
+    for (let gross = 55_010_000; gross <= 58_000_000; gross += 10_000) {
+      if (net(gross) - net(55_000_000) >= under - over) {
+        recover = gross;
+        break;
+      }
+    }
+    expect(recover).toBe(55_390_000);
+    const text = prose(irpBoundaryReversalDigest());
+    expect(text).toContain(won(recover));
+    expect(text).toContain(won(under - over - step));
+  });
+
+  it("피부양자: 소득 상한 1원 초과의 연 비용과 역전 구간을 다시 계산한다", () => {
+    const ceiling = 20_000_000;
+    const monthly = Math.floor((ceiling / 12) * engine.RATES_2026.healthInsurance.total);
+    expect(engine.regionalHealthEstimate(ceiling / 12).regionalIncomeOnly).toBe(monthly);
+    expect(monthly * 12).toBe(1_437_996);
+    const text = prose(dependentCliffCostDigest());
+    expect(text).toContain(won(monthly * 12));
+    expect(text).toContain(won(ceiling + monthly * 12));
+  });
+
+  it("피부양자: 요건 단위 환산(사업소득·재산과표·연금)을 다시 계산한다", () => {
+    // 사업소득금액 500만 → 단순경비율 64.1% 기준 수입
+    const revenue = Math.round(5_000_000 / (1 - 0.641));
+    expect(revenue).toBe(13_927_577);
+    // 재산세 과세표준 → 공정시장가액비율 60% 역산
+    expect(Math.round(540_000_000 / 0.6)).toBe(900_000_000);
+    expect(Math.round(900_000_000 / 0.6)).toBe(1_500_000_000);
+    // 국민연금 단독으로는 가입 30년·상한 소득이어도 2,000만원에 못 미친다
+    const thirty = engine.calcPensionEstimate({
+      averageMonthlyIncome: engine.RATES_2026.nationalPension.maxMonthlyIncome,
+      insuredYears: 30,
+      claimAge: 65,
+    });
+    expect(thirty.estimatedAnnualPension).toBeLessThan(20_000_000);
+    // 연기수령 계수가 자격을 깨는 나이
+    const at65 = engine.calcPensionEstimate({
+      averageMonthlyIncome: 5_000_000,
+      insuredYears: 40,
+      claimAge: 65,
+    });
+    const at67 = engine.calcPensionEstimate({
+      averageMonthlyIncome: 5_000_000,
+      insuredYears: 40,
+      claimAge: 67,
+    });
+    expect(at65.estimatedAnnualPension).toBeLessThan(20_000_000);
+    expect(at67.estimatedAnnualPension).toBeGreaterThan(20_000_000);
+    const text = prose(dependentUnitConversionDigest());
+    expect(text).toContain(won(revenue));
+    expect(text).toContain(won(at67.estimatedAnnualPension));
   });
 });
