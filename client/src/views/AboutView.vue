@@ -193,7 +193,7 @@ const RATE_REFERENCES = [
           </li>
           <li class="flex gap-2">
             <span class="text-primary shrink-0">▸</span>
-            <span><strong class="text-foreground">정기 업데이트</strong> — 매년 1월 세법·요율 개정 즉시 반영 (최근: 2026년 1월)</span>
+            <span><strong class="text-foreground">세율·요율 반영</strong> — 정해진 갱신 주기는 없고, 세법·요율 개정을 사람이 확인한 시점에 반영합니다 (최근 반영: 2026년 1월 시행분).</span>
           </li>
           <li class="flex gap-2">
             <span class="text-primary shrink-0">▸</span>
