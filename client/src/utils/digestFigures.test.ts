@@ -80,15 +80,42 @@ describe("승격 산문의 수치 재계산", () => {
     expect(prose(parentalStaircaseDigest())).toContain("90.0%");
   });
 
-  it("지역가입자: 두 금액의 비율은 요율비와 같은 2.000이다", () => {
+  it("지역가입자: 두 금액의 비율은 경감고시 제9조의 50%에서 곧장 나온다", () => {
     const ratio =
       engine.RATES_2026.healthInsurance.total / engine.RATES_2026.healthInsurance.employee;
     expect(ratio).toBeCloseTo(2, 10);
+    // 배수 2.000은 요율 두 개가 우연히 2배인 것이 아니라, 같은 보수월액보험료에 경감을
+    // 적용했느냐 아니냐의 차이다. 경감률을 손으로 다시 적용해도 같은 값이 나와야 한다.
     for (const monthly of [2_500_000, 3_500_000, 5_000_000]) {
       const estimate = engine.regionalHealthEstimate(monthly);
+      const gross = Math.floor(monthly * engine.RATES_2026.healthInsurance.total);
+      expect(estimate.voluntaryGross).toBe(gross);
+      expect(estimate.formerEmployed).toBe(
+        Math.floor(gross * (1 - engine.VOLUNTARY_CONTINUATION_REDUCTION)),
+      );
       expect(estimate.regionalIncomeOnly).toBe(estimate.formerEmployed * 2);
     }
-    expect(prose(regionalHealthRatioDigest())).toContain("2.000");
+    const text = prose(regionalHealthRatioDigest());
+    expect(text).toContain("2.000");
+    expect(text).toContain("100분의 50을 경감");
+    // 경감 전 전액이 산문에 이름을 달고 함께 나온다 — 한쪽만 적으면 나머지가 거짓이 된다
+    expect(text).toContain(won(engine.regionalHealthEstimate(3_500_000).voluntaryGross));
+  });
+
+  it("지역가입자: 소득분 하한과 그 하한이 걸리는 월 소득을 손계산해도 같다", () => {
+    const floor = engine.REGIONAL_HEALTH_MIN_MONTHLY;
+    const floorIncome = Math.ceil(floor / engine.RATES_2026.healthInsurance.total);
+    expect(floorIncome).toBe(275_105);
+    expect(engine.regionalHealthEstimate(floorIncome).regionalIncomeOnly).toBe(
+      Math.floor(floorIncome * engine.RATES_2026.healthInsurance.total),
+    );
+    expect(engine.regionalHealthEstimate(floorIncome - 1_000).regionalIncomeOnly).toBe(floor);
+    const text = prose(regionalHealthRatioDigest());
+    expect(text).toContain(won(floor));
+    expect(text).toContain(won(floorIncome));
+    // 시나리오 라벨: 표와 화면 기본값이 서로 다른 질문에 답한다는 사실이 본문에 남아 있어야 한다
+    expect(text).toContain("퇴사 뒤에도 이어질 때");
+    expect(text).toContain("금융소득 입력을 0원으로 두면");
   });
 
   it("임금체불: 20%와 5%의 등가 일수, 3년 시효 상한을 손계산으로 확인한다", () => {

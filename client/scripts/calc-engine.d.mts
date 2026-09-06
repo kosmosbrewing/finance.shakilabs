@@ -45,8 +45,11 @@ export function parentalLeavePay(monthlyWage: number): {
   pay7_12: number;
   total: number;
 };
+export const VOLUNTARY_CONTINUATION_REDUCTION: number;
+export const REGIONAL_HEALTH_MIN_MONTHLY: number;
 export function regionalHealthEstimate(monthlyIncome: number): {
   regionalIncomeOnly: number;
+  voluntaryGross: number;
   formerEmployed: number;
 };
 export function unpaidWageInterest(amount: number, rate: number, days: number): number;

@@ -136,6 +136,24 @@ export type RegionalHealthInput = {
   carTaxBase: number;
 };
 
+/**
+ * 임의계속가입자 보험료 경감률.
+ *
+ * 왜 상수로 빼는가: 이 값을 빼먹으면 임의계속가입료가 정확히 2배로 부풀고, 그 상태로
+ * "퇴사하면 보험료가 2배가 된다"는 결론까지 뒤집힌다(실제로는 임의계속을 신청하면 재직
+ * 중과 같은 금액이다). 근거는 보험료 경감고시 제9조(임의계속가입자 경감) — "법 제110조에
+ * 따른 임의계속가입자에 대하여는 그 가입자 보수월액보험료의 100분의 50을 경감한다".
+ * 출처: 보험료 경감고시 [시행 2026. 1. 1.] [보건복지부고시 제2025-221호, 2025. 12. 24.]
+ */
+export const VOLUNTARY_CONTINUATION_REDUCTION = 0.5;
+
+/**
+ * 이 계산기가 지역가입자 월 보험료(소득·재산·자동차 합산분)에 두는 하한.
+ * scripts/calc-engine.mjs의 REGIONAL_HEALTH_MIN_MONTHLY와 같은 값이어야 한다 —
+ * 다르면 같은 페이지의 프리렌더 산문과 화면 계산 결과가 갈린다.
+ */
+export const REGIONAL_HEALTH_MIN_MONTHLY = 19_780;
+
 export function calculateRegionalHealth(input: RegionalHealthInput) {
   const r = RATES_2026;
 
@@ -144,14 +162,25 @@ export function calculateRegionalHealth(input: RegionalHealthInput) {
   const employeeLongTerm = Math.floor(employeeHealth * r.longTermCare.rateOfHealth);
   const currentMonthly = employeeHealth + employeeLongTerm;
 
-  // 임의계속가입: 직장가입 보험료 전액 (사업주+근로자 합계)
-  const voluntaryHealth = Math.floor(input.monthlySalary * r.healthInsurance.total);
+  // 임의계속가입: 보수월액보험료 "전액"을 본인이 부담하되(국민건강보험법 제110조 제5항),
+  // 그 100분의 50을 경감받는다(같은 조 제4항 위임 → 보험료 경감고시 제9조). 두 규정을 함께
+  // 적용한 뒤의 금액이 실제 고지액이고, 그 값은 재직 중 급여명세서의 건강보험 본인부담분과
+  // 원 단위까지 같아진다. 경감 전 전액(voluntaryGrossMonthly)은 "왜 절반만 내는가"를 보여
+  // 주기 위해 함께 반환한다 — 둘 중 하나만 쓰면 나머지 하나가 거짓이 된다.
+  const voluntaryGrossHealth = Math.floor(input.monthlySalary * r.healthInsurance.total);
+  const voluntaryGrossLongTerm = Math.floor(voluntaryGrossHealth * r.longTermCare.rateOfHealth);
+  const voluntaryGrossMonthly = voluntaryGrossHealth + voluntaryGrossLongTerm;
+  const voluntaryHealth = Math.floor(voluntaryGrossHealth * (1 - VOLUNTARY_CONTINUATION_REDUCTION));
   const voluntaryLongTerm = Math.floor(voluntaryHealth * r.longTermCare.rateOfHealth);
   const voluntaryMonthly = voluntaryHealth + voluntaryLongTerm;
 
   // 지역가입자 추정 (간이): 소득 + 재산 점수 기반
   // 소득보험료: (연 소득 × 건보율) / 12
   // 재산보험료: 재산 과세표준 × 소정 요율
+  //
+  // 시나리오 주의: 여기서 소득은 "퇴사 후"의 금융소득이다. 퇴사 전 월급은 임의계속가입료의
+  // 기준(보수월액)일 뿐 지역가입자 소득분에는 들어가지 않는다. 두 값을 같은 소득으로 섞으면
+  // 재직 중 월급이 퇴사 후에도 계속 나온다는 다른 시나리오를 계산하게 된다.
   const annualIncome = input.financialIncome; // 퇴사 후 근로소득 없으므로 금융소득만
   const incomeComponent = Math.floor((annualIncome * r.healthInsurance.total) / 12);
 
@@ -159,7 +188,10 @@ export function calculateRegionalHealth(input: RegionalHealthInput) {
   const propertyComponent = Math.floor(input.propertyTaxBase * 0.0018 / 12);
   const carComponent = Math.floor(input.carTaxBase * 0.0018 / 12);
 
-  const regionalBase = Math.max(incomeComponent + propertyComponent + carComponent, 19_780); // 최저 보험료
+  const regionalBase = Math.max(
+    incomeComponent + propertyComponent + carComponent,
+    REGIONAL_HEALTH_MIN_MONTHLY,
+  );
   const regionalLongTerm = Math.floor(regionalBase * r.longTermCare.rateOfHealth);
   const regionalMonthly = regionalBase + regionalLongTerm;
 
@@ -176,7 +208,11 @@ export function calculateRegionalHealth(input: RegionalHealthInput) {
   return {
     currentMonthly,
     voluntaryMonthly,
+    voluntaryGrossMonthly,
+    voluntaryHealth,
+    voluntaryLongTerm,
     regionalMonthly,
+    regionalBase,
     dependentEligible,
     cheapestOption,
     cheapestMonthly: cheapestOption === "dependent" ? 0

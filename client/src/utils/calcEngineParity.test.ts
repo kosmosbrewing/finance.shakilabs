@@ -13,6 +13,12 @@ import {
   calculateSalaryBreakdown,
 } from "./calculator";
 import { calculateSeveranceTax } from "./laborCalculator";
+import {
+  calculateRegionalHealth,
+  REGIONAL_HEALTH_MIN_MONTHLY,
+  VOLUNTARY_CONTINUATION_REDUCTION,
+} from "./benefitCalculators";
+import { RATES_2026 } from "@/data/taxRates2026";
 import * as engine from "../../scripts/calc-engine.mjs";
 
 const SEVERANCE_CASES: Array<[number, number]> = [
@@ -85,5 +91,53 @@ describe("calc-engine ↔ 인터랙티브 계산기 동일성", () => {
         ).toEqual({ key, value: (fromApp as Record<string, unknown>)[key] });
       }
     }
+  });
+
+  // 왜 이 게이트가 생겼나: /regional-health가 임의계속가입료를 화면에서는 보수월액의 7.19%
+  // (경감 전 전액), 프리렌더 산문에서는 3.595%(경감 후)로 찍어 같은 라우트에서 2.3배 어긋난
+  // 두 값을 동시에 보여주고 있었다. 경감 규정(보험료 경감고시 제9조)을 양쪽 모두에 명시해
+  // 넣었으니, 한쪽만 다시 바뀌면 여기서 먼저 깨진다.
+  it("지역가입자 건보료: 프리렌더 엔진과 화면 계산기가 원 단위까지 같다", () => {
+    const ltc = (health: number) => Math.floor(health * RATES_2026.longTermCare.rateOfHealth);
+    for (const monthly of [1_000_000, 2_500_000, 3_500_000, 5_000_000, 9_000_000]) {
+      const fromEngine = engine.regionalHealthEstimate(monthly);
+      // 화면 계산기에 "퇴사 후에도 같은 소득이 이어진다"는 엔진의 시나리오를 그대로 준다
+      const fromApp = calculateRegionalHealth({
+        monthlySalary: monthly,
+        financialIncome: monthly * 12,
+        propertyTaxBase: 0,
+        carTaxBase: 0,
+      });
+      expect(fromApp.voluntaryHealth).toBe(fromEngine.formerEmployed);
+      expect(fromApp.voluntaryGrossMonthly).toBe(
+        fromEngine.voluntaryGross + ltc(fromEngine.voluntaryGross),
+      );
+      expect(fromApp.voluntaryMonthly).toBe(
+        fromEngine.formerEmployed + ltc(fromEngine.formerEmployed),
+      );
+      expect(fromApp.regionalBase).toBe(fromEngine.regionalIncomeOnly);
+      expect(fromApp.regionalMonthly).toBe(
+        fromEngine.regionalIncomeOnly + ltc(fromEngine.regionalIncomeOnly),
+      );
+      // 임의계속가입은 경감 후 금액이므로 재직 중 본인부담분과 같아야 한다
+      expect(fromApp.voluntaryMonthly).toBe(fromApp.currentMonthly);
+    }
+  });
+
+  it("지역가입자 건보료: 경감률과 소득분 하한 상수가 양쪽에서 같다", () => {
+    expect(engine.VOLUNTARY_CONTINUATION_REDUCTION).toBe(VOLUNTARY_CONTINUATION_REDUCTION);
+    expect(engine.REGIONAL_HEALTH_MIN_MONTHLY).toBe(REGIONAL_HEALTH_MIN_MONTHLY);
+    // 보험료 경감고시 제9조: 보수월액보험료의 100분의 50 경감
+    expect(VOLUNTARY_CONTINUATION_REDUCTION).toBe(0.5);
+    // 소득이 0원이면 양쪽 모두 하한에 붙는다
+    expect(engine.regionalHealthEstimate(0).regionalIncomeOnly).toBe(REGIONAL_HEALTH_MIN_MONTHLY);
+    expect(
+      calculateRegionalHealth({
+        monthlySalary: 3_500_000,
+        financialIncome: 0,
+        propertyTaxBase: 0,
+        carTaxBase: 0,
+      }).regionalBase,
+    ).toBe(REGIONAL_HEALTH_MIN_MONTHLY);
   });
 });

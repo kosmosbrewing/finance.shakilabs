@@ -501,11 +501,29 @@ export function yearEndStandardScenario(grossAnnual) {
   };
 }
 
+// Voluntary continuation (임의계속가입) premium reduction. The member pays the WHOLE 보수월액보험료
+// (National Health Insurance Act art. 110 (5)) and is then granted a 50% reduction under the MOHW
+// notice the same article (4) delegates to - 보험료 경감고시 art. 9, in force 2026-01-01
+// (보건복지부고시 제2025-221호). Net of both, the bill equals the employee's own share while employed,
+// which is why formerEmployed below is exactly half of the gross premium.
+export const VOLUNTARY_CONTINUATION_REDUCTION = 0.5;
+
+// Floor this calculator puts under the regional monthly premium. Must stay equal to
+// REGIONAL_HEALTH_MIN_MONTHLY in src/utils/benefitCalculators.ts - a mismatch makes the prerendered
+// prose and the on-screen calculator disagree on the same route.
+export const REGIONAL_HEALTH_MIN_MONTHLY = 19_780;
+
 // 퇴사 후 건강보험 — 소득분만 반영한 최소 추정 (재산·자동차 점수는 편차가 커서 제외)
+//
+// Scenario note: monthlyIncome here is the income the household is assumed to keep AFTER leaving.
+// Callers that pass the pre-resignation salary are asking "what if the same income continued",
+// which is an upper bound, not the default the screen shows (financial income only, often zero).
 export function regionalHealthEstimate(monthlyIncome) {
+  const grossHealth = Math.floor(monthlyIncome * RATES_2026.healthInsurance.total);
   return {
-    regionalIncomeOnly: Math.max(20_000, Math.floor(monthlyIncome * 0.0719)),
-    formerEmployed: Math.floor(monthlyIncome * RATES_2026.healthInsurance.employee),
+    regionalIncomeOnly: Math.max(REGIONAL_HEALTH_MIN_MONTHLY, grossHealth),
+    voluntaryGross: grossHealth,
+    formerEmployed: Math.floor(grossHealth * (1 - VOLUNTARY_CONTINUATION_REDUCTION)),
   };
 }
 
