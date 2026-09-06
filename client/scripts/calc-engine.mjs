@@ -433,10 +433,19 @@ export function weeklyHolidayPayForHours(hourlyWage, weeklyHours) {
 }
 
 // 시급 → 월급·연봉 환산 (월 평균 4.345주 = 365 ÷ 7 ÷ 12)
+//
+// WHY THE ROUNDING MATTERS: src/utils/laborCalculator.ts convertWage() rounds the monthly hour
+// count to one decimal first (48 × 4.345 = 208.56 → 208.6) and then multiplies. This mirror used
+// to multiply by the unrounded 208.56 and floor the product, so the hub table and the interactive
+// calculator on the same route disagreed by 413~801원 on the four hourly rates the site ships.
+// Mirror the view: same hour count, same rounding, same result.
+export const WEEKS_PER_MONTH = 4.345;
+export const MONTHLY_HOURS_WITH_HOLIDAY = Math.round(48 * WEEKS_PER_MONTH * 10) / 10;
+
 export function wageConversion(hourly) {
   const weeklyBase = hourly * 40;
   const weeklyTotal = weeklyBase + hourly * 8;
-  const monthlyTotal = Math.floor(weeklyTotal * 4.345);
+  const monthlyTotal = Math.round(hourly * MONTHLY_HOURS_WITH_HOLIDAY);
   return {
     dailyWage: hourly * 8,
     weeklyBase,
@@ -454,6 +463,42 @@ export function parentalLeavePay(monthlyWage) {
   const pay4_6 = Math.min(2_000_000, Math.max(PARENTAL_LEAVE_FLOOR, Math.floor(monthlyWage * 1.0)));
   const pay7_12 = Math.min(1_600_000, Math.max(PARENTAL_LEAVE_FLOOR, Math.floor(monthlyWage * 0.8)));
   return { pay1_3, pay4_6, pay7_12, total: pay1_3 * 3 + pay4_6 * 3 + pay7_12 * 6 };
+}
+
+// 연말정산 표준 시나리오 — 연봉의 5%(최대 300만원)를 추가 소득공제로 가정했을 때의 환급액.
+//
+// WHY THIS IS NOT A FLAT RATE: the hub and the amount variants both applied 15% to the assumed
+// deduction, while the prose on the same page explained that a deduction is worth the taxpayer's
+// marginal rate. At 연봉 7,500만원 that gap is 450,000원 published against 792,000원 computed, a
+// factor of 1.76. A 소득공제 reduces the tax base, so its value is the marginal bracket rate plus
+// the 10% local surtax, and it can never return more than the tax actually assessed.
+export const YEAR_END_ASSUMED_DEDUCTION_RATE = 0.05;
+export const YEAR_END_ASSUMED_DEDUCTION_CAP = 3_000_000;
+
+export function yearEndStandardScenario(grossAnnual) {
+  const breakdown = calculateSalaryBreakdown({
+    grossAnnual,
+    nonTaxableMonthly: 200_000,
+    dependents: 1,
+    children: 0,
+    retirementIncluded: false,
+  });
+  const extraDeduction = Math.min(
+    YEAR_END_ASSUMED_DEDUCTION_CAP,
+    Math.floor(grossAnnual * YEAR_END_ASSUMED_DEDUCTION_RATE)
+  );
+  const bracket = INCOME_TAX_BRACKETS.find((entry) => breakdown.taxableBase <= entry.limit);
+  const marginalRate = bracket.rate * (1 + LOCAL_INCOME_TAX_RATE);
+  const uncappedRefund = Math.floor(extraDeduction * marginalRate);
+  return {
+    breakdown,
+    determinedTax: breakdown.determinedTax,
+    extraDeduction,
+    bracket,
+    marginalRate,
+    uncappedRefund,
+    refund: Math.min(breakdown.determinedTax, uncappedRefund),
+  };
 }
 
 // 퇴사 후 건강보험 — 소득분만 반영한 최소 추정 (재산·자동차 점수는 편차가 커서 제외)

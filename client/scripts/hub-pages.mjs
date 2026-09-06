@@ -24,6 +24,7 @@ import {
   wageConversion,
   weeklyHolidayPay,
   withholdingReverse,
+  yearEndStandardScenario,
 } from "./calc-engine.mjs";
 import {
   COMPARE_PAIRS,
@@ -61,6 +62,23 @@ import {
   weeklyHolidayNetHourlyDigest,
   weeklyHolidayThresholdDigest,
 } from "./hub-digests-tools.mjs";
+import {
+  parentalStaircaseDigest,
+  parentalVariantFlatDigest,
+  regionalHealthDependentCliffDigest,
+  regionalHealthRatioDigest,
+  unemploymentDaysDigest,
+  unemploymentFlatBandDigest,
+  unpaidWageEquivalenceDigest,
+  unpaidWageStartDateDigest,
+} from "./hub-digests-benefits.mjs";
+import {
+  wageNetHourlyDigest,
+  wageRoundTripDigest,
+  yearEndDeductionValueDigest,
+  yearEndTimingDigest,
+} from "./hub-digests-settlement.mjs";
+import { eitcCurveShapeDigest, eitcEffectiveRateDigest } from "./hub-digests-eitc.mjs";
 
 const STANDARD_SALARY_INPUT = {
   nonTaxableMonthly: 200_000,
@@ -537,6 +555,8 @@ function wageConverterHub() {
           "3.3%를 떼고 받는다면 근로자가 아니라 <strong>사업소득자</strong>로 신고되고 있다는 뜻입니다. 실질이 근로자라면 주휴수당·연차·퇴직금이 모두 발생하므로, 계약 형태가 실제 근무 방식과 맞는지 확인해 볼 필요가 있습니다.",
         ],
       },
+      wageRoundTripDigest(),
+      wageNetHourlyDigest(),
     ],
     variants: {
       h2: "시급별 환산 결과 보기",
@@ -667,6 +687,8 @@ function parentalLeaveHub() {
         callout:
           "<strong>신청 기한</strong> — 육아휴직 급여는 휴직 시작일 이후 1개월부터 종료일 이후 12개월 이내에 신청해야 합니다. 기한을 넘기면 지급받을 수 없습니다.",
       },
+      parentalStaircaseDigest(),
+      parentalVariantFlatDigest(),
     ],
     variants: {
       h2: "통상임금별 상세 계산",
@@ -805,6 +827,8 @@ function regionalHealthHub() {
           "소득이 크게 줄었다면 <strong>조정 신청</strong>을 할 수 있습니다. 퇴직·폐업으로 소득이 없어진 사실을 증빙하면 그 소득분을 보험료 산정에서 빼 줍니다. 신청하지 않으면 전년도 소득 기준으로 계속 부과되므로 반드시 챙겨야 합니다.",
         ],
       },
+      regionalHealthRatioDigest(),
+      regionalHealthDependentCliffDigest(),
     ],
     variants: {
       h2: "월급별 상세 비교",
@@ -891,6 +915,8 @@ function unemploymentHub() {
           "수급 중에는 1~4주마다 실업인정을 받아야 하며, 재취업 활동을 증명하지 못하면 그 회차분이 지급되지 않습니다. 조기에 재취업하면 남은 급여의 절반을 조기재취업수당으로 받을 수 있습니다.",
         ],
       },
+      unemploymentFlatBandDigest(),
+      unemploymentDaysDigest(),
     ],
     variants: {
       h2: "월급별 상세 계산",
@@ -910,13 +936,13 @@ function unemploymentHub() {
 // =========================
 function yearEndHub() {
   const rows = YEAR_END_AMOUNTS.map((amount) => {
-    const result = salaryOf(amount);
-    const extraDeduction = Math.min(3_000_000, Math.floor(amount * 10_000 * 0.05));
+    const scenario = yearEndStandardScenario(amount * 10_000);
     return {
       amount,
-      determinedTax: result.determinedTax,
-      extraDeduction,
-      refund: Math.floor(extraDeduction * 0.15),
+      determinedTax: scenario.determinedTax,
+      extraDeduction: scenario.extraDeduction,
+      marginalRate: scenario.marginalRate,
+      refund: scenario.refund,
     };
   });
 
@@ -938,18 +964,19 @@ function yearEndHub() {
       {
         h2: "연봉별 결정세액과 공제 효과",
         table: {
-          head: ["연봉", "연간 결정세액", "추가 공제 가정", "예상 환급액"],
+          head: ["연봉", "연간 결정세액", "추가 공제 가정", "한계세율(지방세 포함)", "예상 환급액"],
           rows: rows.map((row) => ({
             cells: [
               manWon(row.amount),
               won(row.determinedTax),
               won(row.extraDeduction),
+              formatPercent(row.marginalRate, 1),
               `<strong style="color:hsl(var(--primary));">약 ${won(row.refund)}</strong>`,
             ],
           })),
         },
         tableNote:
-          "부양가족 1인·비과세 식대 월 20만원 기준이며, 추가 공제는 연봉의 5%(최대 300만원)를 표준 시나리오로 가정했습니다. 실제 환급액은 신용카드 사용액·의료비·교육비·월세·연금저축 납입액에 따라 크게 달라집니다.",
+          "부양가족 1인·비과세 식대 월 20만원 기준이며, 추가 공제는 연봉의 5%(최대 300만원)를 소득공제로 넣은 표준 시나리오입니다. 소득공제는 과세표준을 줄이므로 환급액은 그 연봉의 한계세율에 지방소득세 10%를 더한 비율만큼이며, 결정세액을 넘을 수는 없습니다. 실제 환급액은 신용카드 사용액·의료비·교육비·월세·연금저축 납입액에 따라 크게 달라집니다.",
       },
       {
         h2: "같은 공제액이 연봉에 따라 다른 환급을 만드는 이유",
@@ -962,6 +989,8 @@ function yearEndHub() {
         callout:
           "<strong>일정</strong> — 간소화 자료 조회는 1월 15일부터, 회사 제출은 대체로 2월 초까지, 환급금은 2월 급여에 반영되는 것이 일반적입니다. 누락분은 5월 종합소득세 기간에 경정청구할 수 있습니다.",
       },
+      yearEndDeductionValueDigest(),
+      yearEndTimingDigest(),
     ],
     variants: {
       h2: "연봉별 상세 시뮬레이션",
@@ -1043,6 +1072,8 @@ function unpaidWageHub() {
         callout:
           "<strong>상담 창구</strong> — 고용노동부 고객상담센터 1350, 또는 대한법률구조공단 132에서 무료 상담을 받을 수 있습니다. 임금체불 사건은 법률구조공단의 무료 소송대리 대상입니다.",
       },
+      unpaidWageEquivalenceDigest(),
+      unpaidWageStartDateDigest(),
     ],
     variants: {
       h2: "체불 금액별 상세 계산",
@@ -1208,6 +1239,8 @@ function eitcHub() {
           "자녀세액공제와도 중복됩니다. 다만 자녀장려금을 받으면 자녀세액공제액에서 차감 조정이 있으므로, 연말정산 결과와 함께 보아야 정확합니다.",
         ],
       },
+      eitcCurveShapeDigest(),
+      eitcEffectiveRateDigest(),
     ],
     variants: {
       h2: "우리 가구 유형으로 바로 확인",

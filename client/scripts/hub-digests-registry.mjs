@@ -45,6 +45,32 @@ import {
   weeklyHolidayNetHourlyDigest,
   weeklyHolidayThresholdDigest,
 } from "./hub-digests-tools.mjs";
+import {
+  parentalStaircaseDigest,
+  parentalVariantFlatDigest,
+  regionalHealthDependentCliffDigest,
+  regionalHealthRatioDigest,
+  unemploymentDaysDigest,
+  unemploymentFlatBandDigest,
+  unpaidWageEquivalenceDigest,
+  unpaidWageStartDateDigest,
+} from "./hub-digests-benefits.mjs";
+import {
+  wageNetHourlyDigest,
+  wageRoundTripDigest,
+  yearEndDeductionValueDigest,
+  yearEndTimingDigest,
+} from "./hub-digests-settlement.mjs";
+import {
+  eitcCurveShapeDigest,
+  eitcDoubleIncomeCombinedDigest,
+  eitcDoubleIncomeJointTestDigest,
+  eitcEffectiveRateDigest,
+  eitcSingleIncomeBoundaryDigest,
+  eitcSingleIncomeDoubleTaperDigest,
+  eitcSingleMarginDigest,
+  eitcSinglePartTimeDigest,
+} from "./hub-digests-eitc.mjs";
 
 export const DIGEST_SOURCES = {
   "/insurance": [insuranceBracketDigest, insuranceCrossoverDigest],
@@ -65,12 +91,30 @@ export const DIGEST_SOURCES = {
   "/4-insurance-employer": [employerCapCurveDigest, employerBudgetDigest],
   "/raise": [raiseRetentionBandsDigest, raiseStructureDigest],
   "/overtime": [overtimeNetHourDigest, overtimeStackingDigest],
+  "/unemployment": [unemploymentFlatBandDigest, unemploymentDaysDigest],
+  "/parental-leave": [parentalStaircaseDigest, parentalVariantFlatDigest],
+  "/regional-health": [regionalHealthRatioDigest, regionalHealthDependentCliffDigest],
+  "/unpaid-wage": [unpaidWageEquivalenceDigest, unpaidWageStartDateDigest],
+  "/year-end-settlement": [yearEndDeductionValueDigest, yearEndTimingDigest],
+  "/wage-converter": [wageRoundTripDigest, wageNetHourlyDigest],
+  "/eitc": [eitcCurveShapeDigest, eitcEffectiveRateDigest],
+  // 가구 유형 변종은 사이트맵에 남아 있는 유일한 변종 가족이라, 세 페이지가 서로 다른 결론에
+  // 도달하는지를 이 게이트가 직접 검사한다.
+  "/eitc/single": [eitcSinglePartTimeDigest, eitcSingleMarginDigest],
+  "/eitc/single-income": [eitcSingleIncomeDoubleTaperDigest, eitcSingleIncomeBoundaryDigest],
+  "/eitc/double-income": [eitcDoubleIncomeCombinedDigest, eitcDoubleIncomeJointTestDigest],
 };
 
-// Prose only — headings, paragraphs, table notes and callouts. Table cells are numbers and would
-// only add noise to a similarity score either way.
+// Prose only - headings, paragraphs, table notes and callouts. Table cells are numbers and would
+// only add noise to a similarity score either way. Blocks (an h3 finding plus its paragraphs) count
+// too: a templated digest would template its headings first, so leaving them out would blind the gate.
 export function digestProse(digest) {
-  return [digest.h2, ...digest.body, digest.tableNote, digest.callout]
+  const blockProse = (digest.blocks ?? []).flatMap((block) => [
+    block.h3,
+    ...[block.body].flat(),
+    block.tableNote,
+  ]);
+  return [digest.h2, ...digest.body, ...blockProse, digest.tableNote, digest.callout]
     .filter(Boolean)
     .join(" ");
 }

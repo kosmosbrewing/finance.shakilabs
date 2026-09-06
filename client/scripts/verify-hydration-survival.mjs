@@ -64,10 +64,12 @@ const MIN_SENTENCE_CHARS = 30;
 // it reaches the floor - at which point the line must be deleted. So the list can
 // only shrink, and it cannot quietly absorb a new regression.
 const KNOWN_BELOW_FLOOR = {
-  // Prerender narrates the household rules for this variant; EitcView renders the
-  // same rules as a table + result, so the sentences themselves are not redrawn.
-  "/eitc/single-income": 0.79,
-  "/eitc/double-income": 0.82,
+  // /eitc/single-income and /eitc/double-income used to live here at 0.79 and 0.82: the
+  // prerender narrated household rules that EitcView redraws as a table, so those sentences
+  // had nowhere to survive. The engine-scan sections added in the Tier 4 promotion are prose
+  // the view never redraws, so both routes now clear the floor on their own and the ledger
+  // no longer needs an exception for them.
+  //
   // AboutView writes shorter versions of the prerendered "limits" and "operating
   // principles" sections under identical headings, so dedupe drops the longer ones.
   "/about": 0.71,
