@@ -66,19 +66,43 @@ const pensionAgeFactors: Record<number, number> = {
   70: 1.36,
 };
 
+/**
+ * 기준소득월액 상한 위의 소득은 보험료에도 연금액에도 반영되지 않는다.
+ * 근거를 순서대로 두면:
+ *  - 국민연금법 제3조제1항제5호 - "기준소득월액"이란 연금보험료와 급여를 산정하기 위하여
+ *    국민연금가입자의 소득월액을 기준으로 하여 정하는 금액. 보험료와 급여가 같은 값을 쓴다.
+ *  - 국민연금법 제3조제4항 - 기준소득월액의 결정 방법은 대통령령으로 정한다.
+ *  - 국민연금법 시행령 제5조제5항 - 신고한 소득월액이 고시된 "상한액보다 많으면 그 상한액을
+ *    기준소득월액으로 한다". 상한 위 소득은 여기서 잘려 나가고 다시 등장하지 않는다.
+ *  - 국민연금법 제51조제1항제2호 - 기본연금액의 B값은 가입기간 중 매년 기준소득월액을
+ *    재평가해 합산한 뒤 총 가입기간으로 나눈 금액. 잘린 뒤의 값이 들어가므로 연금액 산정에서도
+ *    제외된다.
+ *
+ * 하한(410,000원)은 일부러 적용하지 않는다. 이 인자는 한 달의 기준소득월액이 아니라 가입기간
+ * 전체의 평균이고, 하한액은 해마다 올라왔으므로 과거가 섞인 평균은 올해 하한보다 낮을 수 있다.
+ * 반대로 과거 상한은 모두 올해 상한보다 낮으므로 올해 상한은 어떤 평균에도 유효한 상계다.
+ *
+ * scripts/calc-engine.mjs의 calcPensionEstimate와 같은 값을 내야 한다. 어긋나면 프리렌더된
+ * 산문과 화면 계산기가 같은 입력에서 다른 숫자를 찍는다.
+ */
 export function calculatePensionEstimate(input: PensionInput) {
   const recognizedYears = clamp(input.insuredYears, 1, 40);
   const ageFactor = pensionAgeFactors[input.claimAge] ?? 1;
-  const baseMonthlyPension =
-    (360_000 + input.averageMonthlyIncome * 0.22) * (recognizedYears / 40);
+  const contributionBase = Math.min(
+    Math.max(0, input.averageMonthlyIncome),
+    RATES_2026.nationalPension.maxMonthlyIncome
+  );
+  const baseMonthlyPension = (360_000 + contributionBase * 0.22) * (recognizedYears / 40);
   const estimatedMonthlyPension = Math.floor(baseMonthlyPension * ageFactor);
   const estimatedAnnualPension = estimatedMonthlyPension * 12;
-  const employeeContribution = Math.floor(input.averageMonthlyIncome * RATES_2026.nationalPension.total);
+  const employeeContribution = Math.floor(contributionBase * RATES_2026.nationalPension.total);
 
   return {
     ageFactor,
     recognizedYears,
     eligible: input.insuredYears >= 10,
+    contributionBase,
+    cappedByStandardIncomeLimit: contributionBase < Math.max(0, input.averageMonthlyIncome),
     estimatedMonthlyPension,
     estimatedAnnualPension,
     employeeContribution,

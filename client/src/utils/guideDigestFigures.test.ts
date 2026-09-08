@@ -269,6 +269,34 @@ describe("/guide/job-change", () => {
     expect(stepText).toContain("81,480,000원");
   });
 
+  // 산문이 새로 주장하는 것: 상한 위에서는 보험료뿐 아니라 예상 연금액도 멈춘다.
+  // 근거는 기준소득월액이 보험료와 급여를 함께 산정하는 하나의 값이라는 데 있다.
+  //   국민연금법 제3조제1항제5호 - "연금보험료와 급여를 산정하기 위하여" 정하는 금액
+  //   같은 법 시행령 제5조제5항 - 상한액보다 많으면 그 상한액을 기준소득월액으로 한다
+  //   같은 법 제51조제1항제2호 - 기본연금액의 소득비례분은 그 기준소득월액을 평균한 값
+  it("상한 위에서는 예상 연금액도 멈춘다 - 다만 상한 아래에서는 계속 움직인다", () => {
+    const pensionAt = (gross: number) =>
+      engine.calcPensionEstimate({
+        averageMonthlyIncome: net(gross).taxableMonthly,
+        insuredYears: 30,
+        claimAge: 65,
+      }).estimatedMonthlyPension;
+    // 손으로 적은 앵커. 세 연봉 모두 기준소득월액 상한을 넘긴다.
+    expect(pensionAt(90_000_000)).toBe(1_357_350);
+    expect(pensionAt(100_000_000)).toBe(1_357_350);
+    expect(pensionAt(120_000_000)).toBe(1_357_350);
+    expect(stepText).toContain("1,357,350원");
+    // "언제나 멈춘다"가 아님을 확인한다. 상한 아래에서는 연봉이 오를 때마다 연금도 오른다.
+    let previous = 0;
+    for (let gross = 20_000_000; gross <= 80_000_000; gross += 5_000_000) {
+      const value = pensionAt(gross);
+      expect(value, `pension @ ${gross}`).toBeGreaterThan(previous);
+      previous = value;
+    }
+    // 상한 도달 직전과 직후: 반드시 도달 전이 더 작아야 상한이 실제로 걸린 것이다
+    expect(pensionAt(80_000_000)).toBeLessThan(pensionAt(90_000_000));
+  });
+
   it("세 단계의 비율이 같은 수라는 주장은 소수점 넷째 자리까지 성립한다", () => {
     const band = bandRetention(50_000_000);
     const raise = engine.calcRaiseImpact({ currentAnnual: 50_000_000, raisePercent: 5 });
