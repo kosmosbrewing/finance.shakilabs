@@ -500,7 +500,7 @@ function monthlyRentHub() {
     h1: "2026 월세 세액공제 계산기",
     lead: [
       "1년간 낸 월세 중 <strong>연말정산에서 세금으로 돌려받는 금액</strong>을 계산합니다. 월세액 세액공제는 무주택 세대주가 국민주택규모 이하 주택에 살면서 월세를 냈을 때 적용됩니다.",
-      `기본 시나리오는 총급여 ${won(salary)}·월세 ${won(rent)}·12개월 납부입니다. 연간 월세 ${won(m.yearlyRent)} 전액이 공제 대상이 되고 공제율 ${pct(m.deductionRate)}를 적용해 <strong>${won(m.taxCredit)}</strong>을 돌려받습니다.`,
+      `기본 시나리오는 총급여 ${won(salary)}·월세 ${won(rent)}·12개월 납부입니다. 연간 월세 ${won(m.yearlyRent)} 전액이 공제 대상이 되고 공제율 ${pct(m.deductionRate)}를 적용하면 소득세에서 빼는 <strong>세액공제액이 ${won(m.taxCredit)}</strong>, 개인지방소득세 감소분까지 더한 <strong>실제 절세 총액은 ${won(m.taxCreditWithLocalTax)}</strong>입니다.`,
     ],
     sections: [
       {
@@ -514,18 +514,19 @@ function monthlyRentHub() {
       {
         h2: "총급여 구간별 공제율과 한도",
         table: {
-          head: ["총급여", "공제율", "연 월세 " + won(rent * 12) + " 기준 환급액"],
+          head: ["총급여", "공제율 (소득세)", `세액공제 (소득세)`, "지방소득세 포함 절세액"],
           rows: grid.map((g) => ({
             highlight: g.s === salary,
             cells: [
               `${won(g.s)} 이하`,
               g.eligible ? pct(g.deductionRate) : "대상 아님",
-              g.eligible ? `<strong style="color:hsl(var(--primary));">${won(g.taxCredit)}</strong>` : "0원",
+              g.eligible ? `${won(g.taxCredit)}` : "0원",
+              g.eligible ? `<strong style="color:hsl(var(--primary));">${won(g.taxCreditWithLocalTax)}</strong>` : "0원",
             ],
           })),
         },
         tableNote:
-          "공제 대상 월세액 한도는 연 1,000만원입니다. 월세가 84만원을 넘으면 초과분은 공제되지 않습니다. 총급여 8,000만원을 넘으면 공제 대상에서 제외됩니다.",
+          `연 월세 ${won(rent * 12)}·12개월 납부 기준입니다. 세액공제액은 소득세에서 빼는 금액이고, 지방소득세 포함 절세액은 그 공제로 개인지방소득세까지 줄어든 뒤의 실제 절감액입니다. 공제 대상 월세액 한도는 연 ${won(10_000_000)}이라 월세가 ${won(Math.floor(10_000_000 / 12))}을 넘으면 초과분은 공제되지 않고, 총급여 ${won(80_000_000)}을 넘으면 공제 대상에서 제외됩니다.`,
       },
       {
         h2: "네 가지 요건을 모두 채워야 한다",
@@ -579,7 +580,7 @@ function irpHub() {
     h1: "2026 IRP 세액공제 계산기",
     lead: [
       "연금저축과 IRP에 넣은 돈으로 <strong>연말정산에서 얼마를 돌려받는지</strong> 계산합니다. 연금계좌 세액공제는 노후 대비를 유도하기 위한 제도로, 근로자가 연말에 가장 확실하게 늘릴 수 있는 환급 항목입니다.",
-      `기본 시나리오는 총급여 ${won(salary)}·연금저축 ${won(4_000_000)}·IRP ${won(3_000_000)}입니다. 인정 납입액 ${won(i.recognizedContribution)}에 공제율 ${pct(i.taxCreditRate)}를 적용해 <strong>${won(i.taxCredit)}</strong>을 돌려받습니다.`,
+      `기본 시나리오는 총급여 ${won(salary)}·연금저축 ${won(4_000_000)}·IRP ${won(3_000_000)}입니다. 인정 납입액 ${won(i.recognizedContribution)}에 공제율 ${pct(i.taxCreditRate)}를 적용하면 소득세에서 빼는 <strong>세액공제액이 ${won(i.taxCredit)}</strong>이고, 이 공제 때문에 개인지방소득세도 그 10%만큼 함께 줄어 <strong>실제 절세 총액은 ${won(i.taxCreditWithLocalTax)}</strong>입니다.`,
     ],
     sections: [
       {
@@ -593,19 +594,29 @@ function irpHub() {
       {
         h2: "총급여 5,500만원에서 공제율이 갈린다",
         table: {
-          head: ["총급여", "공제율(지방소득세 포함)", "900만원 최대 납입 시 환급액"],
+          head: ["총급여", "공제율 (소득세)", "세액공제 (소득세)", "지방소득세 포함 절세액"],
           rows: [
             {
               highlight: true,
-              cells: [`${won(55_000_000)} 이하`, `${pct(maxLow.taxCreditRate)} (16.5%)`, `<strong style="color:hsl(var(--primary));">${won(maxLow.taxCredit)}</strong>`],
+              cells: [
+                `${won(55_000_000)} 이하`,
+                pct(maxLow.taxCreditRate),
+                `${won(maxLow.taxCredit)}`,
+                `<strong style="color:hsl(var(--primary));">${won(maxLow.taxCreditWithLocalTax)}</strong>`,
+              ],
             },
             {
-              cells: [`${won(55_000_000)} 초과`, `${pct(maxHigh.taxCreditRate)} (13.2%)`, `<strong>${won(maxHigh.taxCredit)}</strong>`],
+              cells: [
+                `${won(55_000_000)} 초과`,
+                pct(maxHigh.taxCreditRate),
+                `${won(maxHigh.taxCredit)}`,
+                `<strong>${won(maxHigh.taxCreditWithLocalTax)}</strong>`,
+              ],
             },
           ],
         },
         tableNote:
-          "표의 공제율은 소득세분 기준이며 괄호는 지방소득세 10%를 더한 실제 체감 환급률입니다. 총급여 5,500만원을 경계로 같은 900만원을 넣어도 환급액이 달라집니다.",
+          `세액공제액은 소득세 산출세액에서 빼는 금액이고(소득세법 제59조의3), 지방소득세 포함 절세액은 그 공제 때문에 개인지방소득세도 공제액의 10%만큼 줄어든 뒤의 실제 절감액입니다(지방세특례제한법 제167조의2제1항). 그래서 흔히 말하는 "16.5%"는 공제율 ${pct(maxLow.taxCreditRate)}에 지방소득세를 더한 체감률이지 표의 공제율 칸과 같은 값이 아닙니다. 총급여 5,500만원을 경계로 같은 ${won(9_000_000)}을 넣어도 절세액이 ${won(maxLow.taxCreditWithLocalTax - maxHigh.taxCreditWithLocalTax)} 갈립니다.`,
       },
       {
         h2: "한도를 넘겨 넣으면 어떻게 되나",

@@ -137,9 +137,10 @@ export function yearEndTimingDigest() {
     pensionSavings: 6_000_000,
     irpContribution: 3_000_000,
   });
-  const pensionCreditWithLocal = Math.floor(
-    pensionCredit.recognizedContribution * pensionCredit.taxCreditRate * 1.1,
-  );
+  // The credit itself (taxCredit) is what leaves the income tax bill; taxCreditWithLocalTax adds
+  // the local income tax that falls with it. Say which one the sentence means - the amount
+  // ELIGIBLE for the credit is the 900만원 contribution, not either of these.
+  const pensionCreditWithLocal = pensionCredit.taxCreditWithLocalTax;
 
   return {
     h2: "연말정산이 바꾸는 것은 총액이 아니라 시점이다",
@@ -168,7 +169,7 @@ export function yearEndTimingDigest() {
       {
         h3: `결정세액이 작으면 세액공제부터 버려진다 — 연봉 ${manWon(lowSalary)}에서 ${won(pensionCreditWithLocal - lowScenario.determinedTax)}`,
         body: [
-          `연봉 ${manWon(lowSalary)}인 근로자가 연금저축과 IRP에 한도인 ${won(9_000_000)}을 넣으면 세액공제 대상 금액은 ${won(pensionCreditWithLocal)}입니다. 그런데 이 연봉의 결정세액은 ${won(lowScenario.determinedTax)}뿐이라 ${won(pensionCreditWithLocal - lowScenario.determinedTax)}은 돌려받지 못하고 사라집니다. 세액공제는 소득공제와 달리 남는 금액을 이월해 주지 않으므로, 결정세액이 작은 해에는 <strong>납입 자체를 미루는 편</strong>이 유리할 수 있습니다.`,
+          `연봉 ${manWon(lowSalary)}인 근로자가 연금저축과 IRP에 한도인 ${won(9_000_000)}을 넣으면 소득세 세액공제가 ${won(pensionCredit.taxCredit)}, 지방소득세 감소분까지 더한 절세 총액이 ${won(pensionCreditWithLocal)}입니다. 그런데 이 연봉의 결정세액은 ${won(lowScenario.determinedTax)}뿐이라 ${won(pensionCreditWithLocal - lowScenario.determinedTax)}은 돌려받지 못하고 사라집니다. 세액공제는 소득공제와 달리 남는 금액을 이월해 주지 않으므로, 결정세액이 작은 해에는 <strong>납입 자체를 미루는 편</strong>이 유리할 수 있습니다.`,
         ],
       },
     ],

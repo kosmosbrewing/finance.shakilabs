@@ -54,7 +54,6 @@ const payroll = (grossAnnual, overrides = {}) =>
 const hourlyPayroll = (annual) => payroll(annual, { nonTaxableMonthly: 0 });
 
 export const MIN_WAGE_HOURLY = 10_320;
-const LOCAL_SURTAX = 1.1;
 
 // =========================================================================
 // /guide/job-change
@@ -558,10 +557,12 @@ export function yearEndStepValueDigest() {
   const highMarginal = yearEndStandardScenario(80_000_000).marginalRate;
   const deductionValueLow = Math.floor(PENSION_ACCOUNT_LIMIT * lowMarginal);
   const deductionValueHigh = Math.floor(PENSION_ACCOUNT_LIMIT * highMarginal);
-  const creditValueLow = Math.floor(reference.irp.taxCredit * LOCAL_SURTAX);
-  const creditValueHigh = Math.floor(highBand.irp.taxCredit * LOCAL_SURTAX);
+  // Local-tax-inclusive savings come from the engine, not from a local multiplication: the same
+  // figure is printed on /irp and /monthly-rent-deduction, and two derivations drift apart.
+  const creditValueLow = reference.irp.taxCreditWithLocalTax;
+  const creditValueHigh = highBand.irp.taxCreditWithLocalTax;
 
-  const rentValue = Math.floor(reference.rent.taxCredit * LOCAL_SURTAX);
+  const rentValue = reference.rent.taxCreditWithLocalTax;
   const stepAmounts = [
     ["2단계 · 부양가족 1인 추가", won(reference.dependentValue)],
     ["3단계 · 월세 세액공제", won(rentValue)],

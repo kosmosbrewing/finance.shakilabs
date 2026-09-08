@@ -29,7 +29,8 @@ const input = computed(() =>
 const result = computed(() => calculateIrpTaxCredit(input.value));
 const seoTitle = computed(() => "2026 IRP 세액공제 계산기 | 개인형 퇴직연금 절세 효과");
 const seoDescription = computed(
-  () => `연금저축과 IRP 납입액 기준 예상 세액공제는 ${formatWon(result.value.taxCredit)}입니다.`
+  () =>
+    `연금저축과 IRP 납입액 기준 소득세 세액공제는 ${formatWon(result.value.taxCredit)}, 지방소득세까지 포함한 절세 총액은 ${formatWon(result.value.taxCreditWithLocalTax)}입니다.`
 );
 </script>
 
@@ -55,9 +56,13 @@ const seoDescription = computed(
             </div>
 
             <div class="space-y-4">
-              <ResultHero label="예상 세액공제" :value="formatWon(result.taxCredit)" />
+              <ResultHero label="세액공제 (소득세)" :value="formatWon(result.taxCredit)">
+                <template #secondary>
+                  지방소득세 포함 절세액 {{ formatWon(result.taxCreditWithLocalTax) }}
+                </template>
+              </ResultHero>
               <BenefitStatGrid :items="[
-                { label: '적용 공제율', value: formatPercent(result.taxCreditRate, 0) },
+                { label: '적용 공제율 (소득세)', value: formatPercent(result.taxCreditRate, 0) },
                 { label: '인정 납입액', value: formatWon(result.recognizedContribution) },
                 { label: '한도 초과분', value: formatWon(result.overflowAmount) },
               ]" />
@@ -65,6 +70,7 @@ const seoDescription = computed(
               <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
                 <p>연금저축은 최대 600만원까지만 우선 반영하고, IRP는 합산 900만원 한도 안에서만 추가 인정합니다.</p>
                 <p>세액공제율은 총급여 구간에 따라 15% 또는 12%를 적용했습니다.</p>
+                <p>세액공제액은 소득세 산출세액에서 빼는 금액이고, 절세액은 이 공제로 개인지방소득세까지 줄어든 뒤의 실제 절감액입니다. 두 값의 차이가 지방소득세 감소분입니다.</p>
               </div>
             </div>
           </div>

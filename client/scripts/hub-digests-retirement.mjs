@@ -47,12 +47,14 @@ const LOW_RATE = 0.165;
 const HIGH_RATE = 0.132;
 const CLAWBACK_RATE = 0.165;
 
+// withLocal is the engine's taxCreditWithLocalTax under a shorter local name. It is NOT the
+// statutory credit: taxCredit is the amount subtracted from income tax, withLocal is what the
+// taxpayer actually stops paying once the local income tax falls with it. Prose here must say
+// which one it means every time - "공제 대상 금액" for this figure was wrong, because the amount
+// eligible for the credit is the 900만원 contribution, not the resulting saving.
 const creditOf = (annualSalary, pensionSavings, irpContribution) => {
   const result = calcIrpTaxCredit({ annualSalary, pensionSavings, irpContribution });
-  return {
-    ...result,
-    withLocal: Math.floor(result.recognizedContribution * result.taxCreditRate * 1.1),
-  };
+  return { ...result, withLocal: result.taxCreditWithLocalTax };
 };
 
 // The salary at which the assessed tax finally covers the full credit. Below it the statutory
@@ -78,6 +80,7 @@ export function irpBindingLimitDigest() {
     return {
       amount,
       determined,
+      incomeTaxCredit: scenario.taxCredit,
       credit: scenario.withLocal,
       actual: Math.min(determined, scenario.withLocal),
       wasted: Math.max(0, scenario.withLocal - determined),
@@ -94,19 +97,19 @@ export function irpBindingLimitDigest() {
       {
         h3: `연봉 ${manWon(worst.amount)}이면 ${won(worst.wasted)}이 그냥 사라진다`,
         body: [
-          `한도를 다 채우면 공제 대상 금액은 ${won(worst.credit)}이지만, 연봉 ${manWon(worst.amount)}의 결정세액은 ${won(worst.determined)}뿐입니다. 그래서 실제 환급은 ${won(worst.actual)}에서 멈추고 ${won(worst.wasted)}은 돌려받지 못합니다. 세액공제는 소득공제와 달리 <strong>남는 금액을 다음 해로 넘겨주지 않으므로</strong>, 이 돈은 그해에 그대로 없어집니다.`,
+          `한도를 다 채우면 지방소득세를 포함한 절세 총액은 ${won(worst.credit)}(소득세 세액공제 ${won(worst.incomeTaxCredit)} + 지방소득세 감소분 ${won(worst.credit - worst.incomeTaxCredit)})이지만, 연봉 ${manWon(worst.amount)}의 결정세액은 ${won(worst.determined)}뿐입니다. 그래서 실제 환급은 ${won(worst.actual)}에서 멈추고 ${won(worst.wasted)}은 돌려받지 못합니다. 세액공제는 소득공제와 달리 <strong>남는 금액을 다음 해로 넘겨주지 않으므로</strong>, 이 돈은 그해에 그대로 없어집니다.`,
         ],
       },
       {
         h3: `그 손실이 0이 되는 지점은 연봉 ${manWon(absorbLow)}이다`,
         body: [
-          `연봉을 10만원 단위로 훑으면 결정세액이 ${won(maxCredit)}을 처음 넘어서는 지점이 ${manWon(absorbLow)}입니다. 공제율이 ${pct(HIGH_RATE, 1)}로 내려가는 총급여 ${won(55_000_000)} 초과 구간에서는 필요한 결정세액이 ${won(highCredit)}으로 줄어 ${manWon(absorbHigh)}부터 전액을 흡수합니다. 즉 연봉 ${manWon(absorbLow)} 미만인 사람에게 "한도까지 채우라"는 조언은 <strong>그 사람에게는 틀린 조언</strong>이고, 결정세액을 먼저 확인한 뒤 그만큼만 넣는 편이 낫습니다.`,
+          `연봉을 10만원 단위로 훑으면 결정세액이 지방소득세 포함 절세액 ${won(maxCredit)}을 처음 넘어서는 지점이 ${manWon(absorbLow)}입니다. 공제율이 ${pct(HIGH_RATE, 1)}로 내려가는 총급여 ${won(55_000_000)} 초과 구간에서는 필요한 결정세액이 ${won(highCredit)}으로 줄어 ${manWon(absorbHigh)}부터 전액을 흡수합니다. 즉 연봉 ${manWon(absorbLow)} 미만인 사람에게 "한도까지 채우라"는 조언은 <strong>그 사람에게는 틀린 조언</strong>이고, 결정세액을 먼저 확인한 뒤 그만큼만 넣는 편이 낫습니다.`,
         ],
       },
       {
         h3: `같은 ${won(COMBINED_CAP)}이라도 배분에 따라 환급이 ${won(maxCredit - creditOf(50_000_000, COMBINED_CAP, 0).withLocal)} 갈린다`,
         body: [
-          `연금저축은 연 ${won(PENSION_SAVINGS_CAP)}까지만 인정되므로, ${won(COMBINED_CAP)}을 연금저축 한 계좌에 넣으면 ${won(creditOf(50_000_000, COMBINED_CAP, 0).recognizedContribution)}만 인정되어 환급이 ${won(creditOf(50_000_000, COMBINED_CAP, 0).withLocal)}에 그치고 ${won(3_000_000)}이 공제 대상에서 빠집니다. 반대로 IRP 한 계좌에 ${won(COMBINED_CAP)}을 넣으면 전액 인정되어 ${won(maxCredit)}입니다. 넣은 돈이 같아도 계좌를 어디에 열었느냐가 ${won(maxCredit - creditOf(50_000_000, COMBINED_CAP, 0).withLocal)}을 만듭니다.`,
+          `연금저축은 연 ${won(PENSION_SAVINGS_CAP)}까지만 인정되므로, ${won(COMBINED_CAP)}을 연금저축 한 계좌에 넣으면 ${won(creditOf(50_000_000, COMBINED_CAP, 0).recognizedContribution)}만 인정되어 지방소득세 포함 절세액이 ${won(creditOf(50_000_000, COMBINED_CAP, 0).withLocal)}에 그치고 ${won(3_000_000)}이 공제 대상에서 빠집니다. 반대로 IRP 한 계좌에 ${won(COMBINED_CAP)}을 넣으면 전액 인정되어 지방소득세 포함 ${won(maxCredit)}입니다. 넣은 돈이 같아도 계좌를 어디에 열었느냐가 ${won(maxCredit - creditOf(50_000_000, COMBINED_CAP, 0).withLocal)}을 만듭니다.`,
         ],
       },
       {
@@ -117,7 +120,7 @@ export function irpBindingLimitDigest() {
       },
     ],
     table: {
-      head: ["연봉", "연간 결정세액", "한도 납입 시 공제 대상", "실제 환급", "사라지는 금액"],
+      head: ["연봉", "연간 결정세액 (소득세)", "한도 납입 시 절세 총액 (지방소득세 포함)", "실제 환급", "사라지는 금액"],
       rows: rows.map((row) => ({
         highlight: row.wasted === 0 && rows.find((item) => item.wasted > 0 && item.amount < row.amount) !== undefined && row.amount <= 5_000,
         cells: [
@@ -129,7 +132,7 @@ export function irpBindingLimitDigest() {
         ],
       })),
     },
-    tableNote: `연금저축 ${won(PENSION_SAVINGS_CAP)}·IRP ${won(3_000_000)}으로 합산 한도 ${won(COMBINED_CAP)}을 채운 경우이며, 다른 세액공제 항목(의료비·교육비·기부금)이 있으면 결정세액을 그쪽이 먼저 쓰므로 사라지는 금액이 더 커집니다. 공제율은 총급여 ${won(55_000_000)} 이하 ${pct(LOW_RATE, 1)}, 초과 ${pct(HIGH_RATE, 1)}(지방소득세 포함) 기준으로 2026년 조세특례제한법 규정을 확인한 값입니다.`,
+    tableNote: `연금저축 ${won(PENSION_SAVINGS_CAP)}·IRP ${won(3_000_000)}으로 합산 한도 ${won(COMBINED_CAP)}을 채운 경우이며, 다른 세액공제 항목(의료비·교육비·기부금)이 있으면 결정세액을 그쪽이 먼저 쓰므로 사라지는 금액이 더 커집니다. 마지막 두 열은 지방소득세를 포함한 절세액을 소득세 결정세액과 견준 값이라 실제보다 조금 크게 잡힙니다 — 지방소득세 결정세액까지 넣으면 그만큼 여유가 생깁니다. 공제율은 총급여 ${won(55_000_000)} 이하 ${pct(LOW_RATE, 1)}, 초과 ${pct(HIGH_RATE, 1)}(지방소득세 포함) 기준으로 2026년 조세특례제한법 규정을 확인한 값입니다.`,
   };
 }
 
@@ -164,7 +167,7 @@ export function irpBoundaryReversalDigest() {
       {
         h3: `경계를 1만원 넘기면 환급이 ${won(loss)} 줄어드는데 세후 소득은 ${won(netPerStep)}만 는다`,
         body: [
-          `총급여 ${won(55_000_000)}에서 한도를 채우면 환급이 ${won(under)}, ${won(55_010_000)}이면 ${won(over)}으로 ${won(loss)} 줄어듭니다. 반면 총급여 1만원이 늘어 실제로 늘어나는 세후 소득은 ${won(netPerStep)}뿐입니다. 그래서 이 지점에서 순손실이 <strong>${won(worstLoss)}</strong>이 됩니다.`,
+          `총급여 ${won(55_000_000)}에서 한도를 채우면 지방소득세 포함 절세액이 ${won(under)}, ${won(55_010_000)}이면 ${won(over)}으로 ${won(loss)} 줄어듭니다. 반면 총급여 1만원이 늘어 실제로 늘어나는 세후 소득은 ${won(netPerStep)}뿐입니다. 그래서 이 지점에서 순손실이 <strong>${won(worstLoss)}</strong>이 됩니다.`,
         ],
       },
       {
@@ -176,7 +179,7 @@ export function irpBoundaryReversalDigest() {
       {
         h3: `그래서 중도해지의 손익도 이 경계에서 뒤집힌다`,
         body: [
-          `연금계좌를 중도에 해지하면 공제받은 납입액에 기타소득세 ${pct(CLAWBACK_RATE, 1)}가 부과됩니다. 총급여 ${won(50_000_000)}인 사람은 ${won(creditOf(50_000_000, PENSION_SAVINGS_CAP, 3_000_000).withLocal)}을 받고 ${won(clawbackLow)}을 토해내 정확히 본전이지만, 총급여 ${won(60_000_000)}인 사람은 ${won(creditOf(60_000_000, PENSION_SAVINGS_CAP, 3_000_000).withLocal)}만 받고 ${won(clawbackHigh)}을 토해내 <strong>${won(clawbackHigh - creditOf(60_000_000, PENSION_SAVINGS_CAP, 3_000_000).withLocal)} 순손실</strong>입니다. 공제율은 총급여에 따라 갈리는데 회수 세율은 ${pct(CLAWBACK_RATE, 1)} 단일이기 때문이며, 고소득자일수록 해지 손해가 큽니다.`,
+          `연금계좌를 중도에 해지하면 공제받은 납입액에 기타소득세 ${pct(CLAWBACK_RATE, 1)}가 부과됩니다. 이 회수 세율도 지방소득세를 포함한 값이라 받은 쪽과 같은 기준으로 견줄 수 있습니다. 총급여 ${won(50_000_000)}인 사람은 지방소득세 포함 ${won(creditOf(50_000_000, PENSION_SAVINGS_CAP, 3_000_000).withLocal)}을 받고 ${won(clawbackLow)}을 토해내 정확히 본전이지만, 총급여 ${won(60_000_000)}인 사람은 지방소득세 포함 ${won(creditOf(60_000_000, PENSION_SAVINGS_CAP, 3_000_000).withLocal)}만 받고 ${won(clawbackHigh)}을 토해내 <strong>${won(clawbackHigh - creditOf(60_000_000, PENSION_SAVINGS_CAP, 3_000_000).withLocal)} 순손실</strong>입니다. 공제율은 총급여에 따라 갈리는데 회수 세율은 ${pct(CLAWBACK_RATE, 1)} 단일이기 때문이며, 고소득자일수록 해지 손해가 큽니다.`,
         ],
       },
       {
