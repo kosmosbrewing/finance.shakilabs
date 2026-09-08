@@ -106,3 +106,71 @@ export function calcPensionEstimate(input: {
 };
 export const PENSION_AGE_FACTORS: Record<number, number>;
 export const SIMPLE_EXPENSE_RATE_BASE: number;
+
+// --- 가이드/비교 승격 산문이 인용하는 나머지 표면 (src/utils/guideDigestFigures.test.ts) ---
+export function calcIncomeTaxBundle(input: {
+  annualTaxableIncome: number;
+  dependents: number;
+  children: number;
+  monthlyInsuranceTotal: number;
+}): Record<string, number>;
+export function unemploymentDailyAllowance(monthlyWage: number): {
+  avgDailyWage: number;
+  rawDaily: number;
+  dailyAmount: number;
+};
+export function weeklyHolidayPayForHours(
+  hourlyWage: number,
+  weeklyHours: number,
+): {
+  weeklyHours: number;
+  isEligible: boolean;
+  weeklyHolidayPay: number;
+  weeklyWage: number;
+  effectiveHourlyWage: number;
+  estimatedMonthlyPay: number;
+  monthlyPayWithout: number;
+  monthlyDifference: number;
+};
+export function getAnnualLeaveDays(monthsWorked: number): number;
+export function calcAnnualLeavePay(input: {
+  monthlySalary: number;
+  fixedAllowance: number;
+  monthsWorked: number;
+  unusedLeaveDays: number;
+}): {
+  ordinaryMonthly: number;
+  dailyOrdinaryWage: number;
+  accruedLeaveDays: number;
+  payableDays: number;
+  totalAllowance: number;
+};
+export function calcMonthlyRentDeduction(input: {
+  annualSalary: number;
+  monthlyRent: number;
+  paidMonths: number;
+}): {
+  deductionRate: number;
+  yearlyRent: number;
+  recognizedRent: number;
+  taxCredit: number;
+  monthlyRefundEffect: number;
+  eligible: boolean;
+};
+export function calcRaiseImpact(input: { currentAnnual: number; raisePercent: number }): {
+  current: Record<string, number>;
+  next: Record<string, number>;
+  raiseAmount: number;
+  monthlyNetDiff: number;
+  annualNetDiff: number;
+  insuranceDelta: number;
+  taxDelta: number;
+};
+export function calcBonusImpact(input: { annualSalary: number; bonusAmount: number }): {
+  base: Record<string, number>;
+  withBonus: Record<string, number>;
+  netBonus: number;
+  effectiveBonusRate: number;
+  bonusTax: number;
+};
+export function formatPercent(value: number, digits?: number): string;

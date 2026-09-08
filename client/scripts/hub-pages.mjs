@@ -80,6 +80,10 @@ import {
 } from "./hub-digests-settlement.mjs";
 import { eitcCurveShapeDigest, eitcEffectiveRateDigest } from "./hub-digests-eitc.mjs";
 import {
+  compareContractShapeDigest,
+  compareTimeCostDigest,
+} from "./hub-digests-compare.mjs";
+import {
   dependentCliffCostDigest,
   dependentUnitConversionDigest,
 } from "./hub-digests-retirement.mjs";
@@ -243,6 +247,8 @@ function compareHub() {
           "<strong>협상 팁</strong> — 같은 인건비라면 과세 연봉을 올리는 것보다 비과세 항목(식대 월 20만원, 자가운전보조금 월 20만원)을 늘리는 쪽이 4대보험과 소득세를 함께 줄여 실수령이 더 늘어납니다.",
       },
       compareRetentionDigest(),
+      compareContractShapeDigest(),
+      compareTimeCostDigest(),
     ],
     variants: {
       h2: "연봉 조합별 상세 비교",
