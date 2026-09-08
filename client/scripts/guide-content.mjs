@@ -5,6 +5,18 @@
 // 이 본문은 크롤러가 보는 정적 HTML에만 들어간다(다른 계산기 상세 페이지와 같은 패턴).
 import { calculateSalaryBreakdown, formatPercent, formatWon } from "./calc-engine.mjs";
 import { partTimeNetDigest, renderDigestHtml } from "./hub-digests-tools.mjs";
+// renderDigestHtml은 blocks(h3 단위 발견)를 그리지 못한다. 허브와 같은 렌더러를 쓰면
+// 가이드 심화 본문과 계산기 허브의 마크업이 한 곳에서만 정의된다.
+import { renderDigestBody } from "./hub-content.mjs";
+import {
+  jobChangeStepFindingsDigest,
+  jobChangeTimingDigest,
+  partTimeThresholdDigest,
+  resignationSettlementDigest,
+  resignationStepAmountsDigest,
+  yearEndCeilingDigest,
+  yearEndStepValueDigest,
+} from "./hub-digests-guides.mjs";
 
 const H2 = "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--highlight) / 0.3);color:hsl(var(--foreground));";
 const P = "margin:0 0 10px;";
@@ -399,6 +411,15 @@ function buildResignationDeepDive() {
       </p>`;
 }
 
+// 단계별 근거 수치와 체인 발견은 다이제스트 스키마로 쓰고, 기존 심화 본문 뒤에 이어 붙인다.
+// hub-digests-registry.mjs에 같은 함수들이 등록돼 있어 유사도 게이트가 자동으로 검사한다.
+const GUIDE_DIGESTS = {
+  "/guide/year-end": [yearEndStepValueDigest, yearEndCeilingDigest],
+  "/guide/part-time": [partTimeThresholdDigest],
+  "/guide/job-change": [jobChangeStepFindingsDigest, jobChangeTimingDigest],
+  "/guide/resignation": [resignationStepAmountsDigest, resignationSettlementDigest],
+};
+
 const GUIDE_DEEP_DIVES = {
   "/guide/year-end": buildYearEndDeepDive,
   "/guide/part-time": buildPartTimeDeepDive,
@@ -414,5 +435,6 @@ export function appendGuideDeepDive(html, route) {
   if (!html.includes(marker)) {
     throw new Error(`[guide-content] Missing insertion marker for ${route}`);
   }
-  return html.replace(marker, `${builder()}\n      ${marker}`);
+  const digests = (GUIDE_DIGESTS[route] ?? []).map((digest) => renderDigestBody(digest())).join("\n      ");
+  return html.replace(marker, `${builder()}\n      ${digests}\n      ${marker}`);
 }

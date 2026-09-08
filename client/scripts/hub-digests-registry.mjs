@@ -6,6 +6,19 @@
 // that is wired into a hub but missing here fails the build.
 
 import {
+  compareContractShapeDigest,
+  compareTimeCostDigest,
+} from "./hub-digests-compare.mjs";
+import {
+  jobChangeStepFindingsDigest,
+  jobChangeTimingDigest,
+  partTimeThresholdDigest,
+  resignationSettlementDigest,
+  resignationStepAmountsDigest,
+  yearEndCeilingDigest,
+  yearEndStepValueDigest,
+} from "./hub-digests-guides.mjs";
+import {
   compareRetentionDigest,
   comprehensiveTaxGapDigest,
   comprehensiveTaxSeparateDigest,
@@ -82,7 +95,7 @@ export const DIGEST_SOURCES = {
   "/insurance": [insuranceBracketDigest, insuranceCrossoverDigest],
   "/salary": [salaryDependentDigest, salaryPensionCapDigest],
   "/comprehensive-tax": [comprehensiveTaxGapDigest, comprehensiveTaxSeparateDigest],
-  "/compare": [compareRetentionDigest],
+  "/compare": [compareRetentionDigest, compareContractShapeDigest, compareTimeCostDigest],
   "/quit": [quitSeveranceTaxDigest, quitFundingMixDigest],
   "/freelancer": [freelancerExpenseCliffDigest, freelancerPrepaidGapDigest],
   "/withholding": [withholdingSensitivityDigest, withholdingRefundCeilingDigest],
@@ -90,7 +103,12 @@ export const DIGEST_SOURCES = {
   "/weekly-holiday-pay": [weeklyHolidayThresholdDigest, weeklyHolidayNetHourlyDigest],
   "/pension": [pensionRedistributionDigest, pensionClaimAgeDigest],
   "/annual-leave": [annualLeaveStaircaseDigest, annualLeaveDenominatorDigest],
-  "/guide/part-time": [partTimeNetDigest],
+  // 상황별 가이드도 다이제스트 게이트 안에 둔다 — 네 가이드가 서로, 그리고 각자가 인용하는
+  // 계산기 페이지와 닮아지는 것이 이 승격에서 가장 큰 위험이라 자동 검사가 필요하다.
+  "/guide/part-time": [partTimeNetDigest, partTimeThresholdDigest],
+  "/guide/job-change": [jobChangeStepFindingsDigest, jobChangeTimingDigest],
+  "/guide/resignation": [resignationStepAmountsDigest, resignationSettlementDigest],
+  "/guide/year-end": [yearEndStepValueDigest, yearEndCeilingDigest],
   "/freelance-rate": [freelanceRateFlipDigest, freelanceRateVersusEmployeeDigest],
   "/bonus": [bonusRetentionCurveDigest, bonusInvariantsDigest],
   "/monthly-rent-deduction": [rentCreditCliffsDigest, rentCreditCapDigest],
