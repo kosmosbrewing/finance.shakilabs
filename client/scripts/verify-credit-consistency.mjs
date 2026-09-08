@@ -1,4 +1,10 @@
-// Tax-credit vocabulary gate.
+// Paired-figure vocabulary gate.
+//
+// This repo has now shipped the same defect three times - 세액공제, 월세, 국민연금. In each case
+// one quantity had TWO true values a fixed ratio apart, the page printed both, and no label said
+// which was which. Part one below is the tax-credit family (the original). Part two is a generic
+// PAIR family: register the two field names, the two literals, the ratio and the words that
+// disambiguate them, and any un-labelled appearance on the page or in the view turns red.
 //
 // NOTE: comments here are intentionally ASCII-only. scripts/ is scanned by
 // font-subset-config.mjs, so a non-ASCII character would change the shipped font
@@ -48,7 +54,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { calcIrpTaxCredit, calcMonthlyRentDeduction } from "./calc-engine.mjs";
+import { calcIrpTaxCredit, calcMonthlyRentDeduction, calcPensionEstimate } from "./calc-engine.mjs";
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = resolve(projectRoot, "dist");
@@ -237,11 +243,148 @@ for (const anchor of ANCHORS) {
   );
 }
 
+// ===========================================================================
+// PART TWO - generic paired-figure anchors
+// ---------------------------------------------------------------------------
+// /pension returned the 9.5% premium under the field name employeeContribution. The Vue view
+// printed it as "월 납부 보험료 추정" (304,000원) while the prerendered prose two screens down
+// printed the 4.75% figure as "재직 중 본인 부담 보험료" (152,000원). One page, one scenario,
+// two numbers, and the field name agreed with neither reading.
+//
+// Statutory basis for the pair:
+//   국민연금법 제88조제3항 - the 기여금 is the insured person's, the 부담금 is the employer's,
+//     "각각 기준소득월액의 1천분의 65"
+//   국민연금법 제88조제4항 - 지역가입자/임의가입자/임의계속가입자 pay "기준소득월액의 1천분의 130"
+//   부칙(법률 제20903호, 2025.4.2) 제4조 - for 2026 those become 1만분의 475 each (4.75%) and
+//     1천분의 95 (9.5%) respectively. The literals below are hand-typed from those rates.
+//
+// The window rule is "nearest disambiguator wins": whichever vocabulary appears LAST before the
+// number is the one the reader will attach to it, so that one has to be the right one.
+const PAIR_WINDOW = 60;
+
+const PAIR_ANCHORS = [
+  {
+    route: "/pension",
+    label: "국민연금 보험료",
+    view: "src/views/PensionView.vue",
+    scenario: { averageMonthlyIncome: 3_200_000, insuredYears: 20, claimAge: 65 },
+    engine: (input) => calcPensionEstimate(input),
+    ratio: 2,
+    narrow: { field: "employeeContribution", literal: "152,000원", words: ["본인부담", "본인 부담"] },
+    broad: { field: "totalContribution", literal: "304,000원", words: ["노사 합산", "합산"] },
+  },
+];
+
+// index of the last occurrence of any of `words` in `text`, or -1
+function lastWordIndex(text, words) {
+  let best = -1;
+  for (const word of words) {
+    const index = text.lastIndexOf(word);
+    if (index > best) best = index;
+  }
+  return best;
+}
+
+function checkSideOccurrences(anchor, text, side, other) {
+  for (const index of occurrences(text, side.literal)) {
+    const lead = text.slice(Math.max(0, index - PAIR_WINDOW), index);
+    const mine = lastWordIndex(lead, side.words);
+    const theirs = lastWordIndex(lead, other.words);
+    assert(
+      mine !== -1 && mine > theirs,
+      `${anchor.route}: "${side.literal}" (${side.field}) appears without ` +
+        `${mine === -1 ? "any" : "the nearest"} label saying it is ${side.words[0]}` +
+        `${theirs > mine ? ` - the nearest label is "${other.words[0]}", which belongs to ${other.literal}` : ""}` +
+        `. Context: ...${lead.trim()}[${side.literal}]`,
+    );
+  }
+}
+
+for (const anchor of PAIR_ANCHORS) {
+  const { narrow, broad } = anchor;
+  const file = resolve(distRoot, anchor.route.slice(1), "index.html");
+  if (!existsSync(file)) {
+    failures.push(`${anchor.route}: no static output - run the build first`);
+    continue;
+  }
+  const text = textOf(prerenderedBody(readFileSync(file, "utf8")));
+
+  // 1. both literals are on the page - printing one alone hides the other reading
+  for (const side of [narrow, broad]) {
+    assert(
+      text.includes(side.literal),
+      `${anchor.route}: ${side.field} ${side.literal} is missing from the page` +
+        ` - a page that prints only one of the pair makes the other unfindable`,
+    );
+  }
+
+  // 2. the two literals agree with each other, re-derived from their own digits
+  const narrowDigits = digitsOf(narrow.literal);
+  const broadDigits = digitsOf(broad.literal);
+  assert(
+    broadDigits === narrowDigits * anchor.ratio,
+    `${anchor.route}: anchors disagree - ${narrow.literal} x ${anchor.ratio} is` +
+      ` ${(narrowDigits * anchor.ratio).toLocaleString("en-US")} but the anchor says ${broad.literal}`,
+  );
+
+  // 3. each engine field still holds its own rate, so the two cannot swap silently
+  const engineResult = anchor.engine(anchor.scenario);
+  for (const [side, digits] of [
+    [narrow, narrowDigits],
+    [broad, broadDigits],
+  ]) {
+    assert(
+      engineResult[side.field] === digits,
+      `${anchor.route}: engine now returns ${side.field}` +
+        ` ${String(engineResult[side.field])} but the anchor is ${side.literal}` +
+        ` - update ${anchor.label} anchors deliberately`,
+    );
+  }
+
+  // 4. prose: every appearance of either number carries the matching vocabulary
+  checkSideOccurrences(anchor, text, narrow, broad);
+  checkSideOccurrences(anchor, text, broad, narrow);
+
+  // 5. the on-screen labels are not in the prerendered HTML (the Vue app hydrates over it), so
+  //    read the view source: the label a stat cell shows must match the field it renders.
+  const viewPath = resolve(projectRoot, anchor.view);
+  if (!existsSync(viewPath)) {
+    failures.push(`${anchor.route}: view ${anchor.view} not found`);
+    continue;
+  }
+  const view = readFileSync(viewPath, "utf8");
+  const seen = new Set();
+  for (const [, viewLabel, field] of view.matchAll(
+    /\{\s*label:\s*'([^']*)'\s*,\s*value:\s*formatWon\(result\.(\w+)\)/g,
+  )) {
+    const side = [narrow, broad].find((candidate) => candidate.field === field);
+    if (!side) continue;
+    seen.add(field);
+    const other = side === narrow ? broad : narrow;
+    assert(
+      side.words.some((word) => viewLabel.includes(word)),
+      `${anchor.route}: the on-screen label "${viewLabel}" renders ${field}` +
+        ` (${side.literal} in the anchored scenario) but never says ${side.words[0]}` +
+        `, so the reader cannot tell it apart from ${other.field} (${other.literal})`,
+    );
+  }
+  for (const side of [narrow, broad]) {
+    assert(
+      seen.has(side.field),
+      `${anchor.route}: ${anchor.view} never renders ${side.field}` +
+        ` - showing only one side of the pair is how the two numbers drifted apart`,
+    );
+  }
+}
+
 if (failures.length > 0) {
-  console.error(`\nTax-credit vocabulary gate: ${failures.length} failure(s)\n`);
+  console.error(`\nPaired-figure vocabulary gate: ${failures.length} failure(s)\n`);
   for (const failure of failures) console.error(`  - ${failure}`);
   console.error("");
   process.exit(1);
 }
 
-console.log(`Tax-credit vocabulary gate: ${ANCHORS.length} anchored routes OK`);
+console.log(
+  `Paired-figure vocabulary gate: ${ANCHORS.length} tax-credit routes` +
+    ` + ${PAIR_ANCHORS.length} paired-figure route(s) OK`,
+);

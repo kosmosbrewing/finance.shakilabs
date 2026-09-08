@@ -652,6 +652,24 @@ export const PENSION_AGE_FACTORS = {
 // 전체의 평균이고, 하한액은 해마다 올라왔으므로 과거가 섞인 평균은 올해 하한보다 낮을 수 있다.
 // 반대로 상한액도 해마다 올라왔으므로 과거 상한은 모두 올해 상한보다 낮고, 따라서 올해 상한은
 // 어떤 평균에도 유효한 상계다. 자를 근거가 있는 쪽만 자른다.
+//
+// 보험료는 하나의 기준소득월액에서 서로 다른 두 개의 참인 금액을 만든다. 정확히 두 배 차이다.
+// 이름을 갈라 두는 것은 취향이 아니다. 이 함수는 9.5%로 계산한 값을 employeeContribution이라는
+// 이름으로 돌려주고 있었고, /pension 화면은 그것을 "월 납부 보험료 추정"으로, 프리렌더 산문은
+// 4.75%로 계산한 값을 "재직 중 본인 부담 보험료"로 찍었다. 같은 페이지 같은 시나리오에서
+// 304,000원과 152,000원이 함께 뜨는데 어느 쪽이 무엇인지 말해 주는 라벨이 없었다.
+//   employeeContribution - 사업장가입자의 기여금. 직장가입자 급여에서 공제되는 본인 부담분.
+//   totalContribution    - 기여금 + 사용자 부담금의 합. 지역가입자는 이 금액 전부를 혼자 낸다.
+// 근거를 순서대로 두면:
+//   국민연금법 제88조제3항 - 사업장가입자의 연금보험료 중 기여금은 본인이, 부담금은 사용자가
+//     각각 부담하되 "그 금액은 각각 기준소득월액의 1천분의 65에 해당하는 금액으로 한다"
+//   국민연금법 제88조제4항 - 지역가입자, 임의가입자 및 임의계속가입자의 연금보험료는 본인이
+//     부담하되 "그 금액은 기준소득월액의 1천분의 130으로 한다"
+//   같은 법 부칙(법률 제20903호, 2025.4.2) 제4조 - 위 두 항에도 불구하고 2026년은 기여금과
+//     부담금이 "각각 1만분의 475"(4.75%씩), 지역가입자 등은 "1천분의 95"(9.5%). 13%까지 가는
+//     단계 인상의 첫 해다.
+// 즉 RATES_2026의 employee 0.0475 / employer 0.0475 / total 0.095는 2026년 특례 수치이고,
+// 제88조 본문의 6.5%, 13%가 아니다. 연도가 바뀌면 부칙 제4조의 해당 연도 비율로 옮겨야 한다.
 export function calcPensionEstimate({ averageMonthlyIncome, insuredYears, claimAge }) {
   const recognizedYears = clamp(insuredYears, 1, 40);
   const ageFactor = PENSION_AGE_FACTORS[claimAge] ?? 1;
@@ -669,7 +687,8 @@ export function calcPensionEstimate({ averageMonthlyIncome, insuredYears, claimA
     cappedByStandardIncomeLimit: contributionBase < Math.max(0, averageMonthlyIncome),
     estimatedMonthlyPension,
     estimatedAnnualPension: estimatedMonthlyPension * 12,
-    employeeContribution: Math.floor(contributionBase * RATES_2026.nationalPension.total),
+    employeeContribution: Math.floor(contributionBase * RATES_2026.nationalPension.employee),
+    totalContribution: Math.floor(contributionBase * RATES_2026.nationalPension.total),
   };
 }
 

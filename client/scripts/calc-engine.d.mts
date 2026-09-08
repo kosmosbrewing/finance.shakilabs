@@ -105,7 +105,10 @@ export function calcPensionEstimate(input: {
   cappedByStandardIncomeLimit: boolean;
   estimatedMonthlyPension: number;
   estimatedAnnualPension: number;
+  /** 사업장가입자 기여금(본인 부담, 2026년 4.75%) */
   employeeContribution: number;
+  /** 기여금 + 사용자 부담금(2026년 9.5%). 지역가입자는 이 금액 전부를 본인이 부담한다. */
+  totalContribution: number;
 };
 export function withLocalIncomeTax(incomeTaxCredit: number): number;
 export const PENSION_AGE_FACTORS: Record<number, number>;
