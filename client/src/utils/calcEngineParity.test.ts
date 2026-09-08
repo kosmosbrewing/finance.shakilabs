@@ -171,20 +171,50 @@ describe("calc-engine ↔ 인터랙티브 계산기 동일성", () => {
     const at = (averageMonthlyIncome: number) =>
       engine.calcPensionEstimate({ averageMonthlyIncome, insuredYears: 30, claimAge: 65 });
 
-    // 상한 그 자체 (6,590,000 x 9.5% = 626,050)
+    // 상한 그 자체 (6,590,000 x 4.75% = 313,025 / x 9.5% = 626,050)
     expect(at(6_590_000).estimatedMonthlyPension).toBe(1_357_350);
-    expect(at(6_590_000).employeeContribution).toBe(626_050);
-    // 상한 위: 같은 값에서 멈춘다. 고치기 전에는 각각 1,522,350원과 721,050원이었다.
+    expect(at(6_590_000).employeeContribution).toBe(313_025);
+    expect(at(6_590_000).totalContribution).toBe(626_050);
+    // 상한 위: 같은 값에서 멈춘다. 고치기 전에는 1,522,350원과 721,050원(합산)이었다.
     expect(at(7_590_000).estimatedMonthlyPension).toBe(1_357_350);
-    expect(at(7_590_000).employeeContribution).toBe(626_050);
-    // 두 배 가까이 넣어도 마찬가지. 고치기 전에는 2,250,000원과 1,140,000원이었다.
+    expect(at(7_590_000).employeeContribution).toBe(313_025);
+    expect(at(7_590_000).totalContribution).toBe(626_050);
+    // 두 배 가까이 넣어도 마찬가지. 고치기 전에는 2,250,000원과 1,140,000원(합산)이었다.
     expect(at(12_000_000).estimatedMonthlyPension).toBe(1_357_350);
-    expect(at(12_000_000).employeeContribution).toBe(626_050);
+    expect(at(12_000_000).employeeContribution).toBe(313_025);
+    expect(at(12_000_000).totalContribution).toBe(626_050);
     expect(at(12_000_000).cappedByStandardIncomeLimit).toBe(true);
     // 상한 아래는 그대로 소득에 반응해야 한다 - 상한을 잘못 낮춰 잡으면 여기서 깨진다.
     expect(at(5_000_000).estimatedMonthlyPension).toBe(1_095_000);
-    expect(at(5_000_000).employeeContribution).toBe(475_000);
+    expect(at(5_000_000).employeeContribution).toBe(237_500);
+    expect(at(5_000_000).totalContribution).toBe(475_000);
     expect(at(5_000_000).cappedByStandardIncomeLimit).toBe(false);
+  });
+
+  // 이름과 값이 어긋나면 화면이 조용히 거짓말을 한다. employeeContribution은 9.5%로 계산된 값을
+  // 담고 있었고, /pension은 그것을 "월 납부 보험료 추정"으로 찍으면서 같은 페이지 산문에는
+  // 4.75%로 만든 152,000원을 "본인 부담 보험료"로 적었다. 두 필드가 각자의 요율을 지키는지
+  // 손으로 적은 숫자로 붙들어 둔다.
+  //   국민연금법 제88조제3항 / 부칙(2025.4.2.) 제4조제1항 - 2026년 기여금·부담금 각각 4.75%
+  //   국민연금법 제88조제4항 / 부칙(2025.4.2.) 제4조제2항 - 2026년 지역가입자 등 9.5% 전액
+  it("국민연금 보험료: 본인부담과 노사 합산이 서로 다른 필드에 정확히 두 배로 들어간다", () => {
+    const at320 = engine.calcPensionEstimate({
+      averageMonthlyIncome: 3_200_000,
+      insuredYears: 20,
+      claimAge: 65,
+    });
+    // 3,200,000 x 4.75% = 152,000 / x 9.5% = 304,000
+    expect(at320.employeeContribution).toBe(152_000);
+    expect(at320.totalContribution).toBe(304_000);
+    expect(at320.totalContribution).toBe(at320.employeeContribution * 2);
+    // 화면(benefitCalculators)도 같은 두 값을 내야 한다
+    const mirror = calculatePensionEstimate({
+      averageMonthlyIncome: 3_200_000,
+      insuredYears: 20,
+      claimAge: 65,
+    });
+    expect(mirror.employeeContribution).toBe(152_000);
+    expect(mirror.totalContribution).toBe(304_000);
   });
 
   // 슬라이더는 어포던스일 뿐 보증이 아니다. 저장된 상태·URL 쿼리는 슬라이더를 거치지 않으므로

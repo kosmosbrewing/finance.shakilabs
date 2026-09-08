@@ -143,7 +143,9 @@ const PENSION_FIXED_TERM = 360_000;
 
 function pensionIncomeRow(income) {
   const estimate = calcPensionEstimate({ averageMonthlyIncome: income, insuredYears: PENSION_YEARS, claimAge: 65 });
-  const paidEmployee = Math.floor(income * RATES_2026.nationalPension.employee) * PENSION_YEARS * 12;
+  // 엔진의 employeeContribution은 기준소득월액 상한을 이미 적용한 4.75% 본인부담분이다.
+  // 여기서 요율을 다시 곱하면 상한 위 소득에서 산문과 계산기가 갈라진다.
+  const paidEmployee = estimate.employeeContribution * PENSION_YEARS * 12;
   return {
     income,
     pension: estimate.estimatedMonthlyPension,
@@ -177,18 +179,19 @@ export function pensionRedistributionDigest() {
   });
   const capIsBinding =
     overCap.estimatedMonthlyPension === atCap.estimatedMonthlyPension &&
-    overCap.employeeContribution === atCap.employeeContribution;
+    overCap.employeeContribution === atCap.employeeContribution &&
+    overCap.totalContribution === atCap.totalContribution;
 
   return {
     h2: "소득이 두 배여도 연금은 두 배가 되지 않는다",
     body: [
       `국민연금 산식에는 본인 소득과 상관없는 균등 부분이 들어 있어, 연금액은 소득에 비례하지 않습니다. 가입 ${PENSION_YEARS}년·65세 청구로 놓고 평균 기준소득월액만 바꿔 보면, ${won(double.income)}의 연금은 월 ${won(double.pension)}인데 소득이 두 배인 ${won(quadruple.income)}의 연금은 ${won(quadruple.pension)}으로 <strong>${pct(quadruple.pension / double.pension - 1, 0)}만 늘어납니다</strong>. 소득대체율로 보면 ${won(low.income)}에서 ${pct(low.replacement)}, 상한인 ${won(cap.income)}에서 ${pct(cap.replacement)}로, 소득이 낮을수록 낸 것에 비해 많이 받는 구조입니다.`,
       `균등 부분의 무게가 그 이유입니다. 연금 가운데 소득과 무관하게 붙는 몫이 ${won(low.income)}에서는 전체의 ${pct(low.fixedShare, 0)}이지만 ${won(cap.income)}에서는 ${pct(cap.fixedShare, 0)}로 줄어듭니다. 저소득 가입자의 연금은 절반 넘게 이 균등 부분에서 나오고, 상한 소득자의 연금은 대부분 본인 소득 비례분입니다.`,
-      `낸 돈을 돌려받는 기간도 그래서 갈립니다. 본인 부담 ${pct(RATES_2026.nationalPension.employee, 2)}로 ${PENSION_YEARS}년 낸 보험료를 연금으로 회수하는 데 ${won(low.income)} 가입자는 <strong>${low.recoveryMonths}개월</strong>, ${won(cap.income)} 가입자는 <strong>${cap.recoveryMonths}개월</strong>이 걸립니다. 회사 부담분까지 합친 전체 보험료로 따지면 두 배가 걸리지만, 그래도 상한 소득자가 ${Math.round(cap.recoveryMonths * 2 / 12)}년 안에 원금을 회수하는 셈이라 어느 구간이든 기대여명 안에 돌아옵니다.`,
-      `상한 위로는 표에 새 행이 생기지 ${capIsBinding ? "않습니다" : "않는지 확인이 필요합니다"}. 평균 기준소득월액을 ${won(overCapProbe)}으로, 상한의 두 배로 넣어도 예상 연금은 ${won(overCap.estimatedMonthlyPension)}, 보험료는 ${won(overCap.employeeContribution)}으로 ${won(PENSION_CAP_TAXABLE)}을 넣었을 때와 <strong>1원도 다르지 않습니다</strong>. 시행령 제5조제5항이 신고한 소득월액이 상한액보다 많으면 그 상한액을 기준소득월액으로 한다고 정해 두었고, 기본연금액의 소득비례분도 그렇게 잘린 기준소득월액을 평균해서 만들기 때문입니다(국민연금법 제51조제1항제2호). 상한 위 소득으로 노후를 키우려면 국민연금 바깥의 계좌가 필요하다는 뜻입니다. 다만 상한액은 해마다 고시로 조정되므로 이 선 자체는 고정된 값이 아닙니다.`,
+      `낸 돈을 돌려받는 기간도 그래서 갈립니다. 아래 회수 기간은 모두 <strong>직장가입자 본인부담 ${pct(RATES_2026.nationalPension.employee, 2)} 기준</strong>입니다. 그 요율로 ${PENSION_YEARS}년 낸 보험료를 연금으로 회수하는 데 ${won(low.income)} 가입자는 <strong>${low.recoveryMonths}개월</strong>, ${won(cap.income)} 가입자는 <strong>${cap.recoveryMonths}개월</strong>이 걸립니다. 회사 부담금까지 더한 노사 합산 ${pct(RATES_2026.nationalPension.total, 1)} 기준으로 따지면 낸 돈이 두 배라 회수 기간도 두 배가 되고, 지역가입자는 그 합산액을 혼자 내므로 같은 두 배 기간이 그대로 본인 몫입니다. 그래도 상한 소득자가 ${Math.round(cap.recoveryMonths * 2 / 12)}년 안에 원금을 회수하는 셈이라 어느 구간이든 기대여명 안에 돌아옵니다.`,
+      `상한 위로는 표에 새 행이 생기지 ${capIsBinding ? "않습니다" : "않는지 확인이 필요합니다"}. 평균 기준소득월액을 ${won(overCapProbe)}으로, 상한의 두 배로 넣어도 예상 연금은 ${won(overCap.estimatedMonthlyPension)}, 본인부담 보험료는 ${won(overCap.employeeContribution)}, 노사 합산 보험료는 ${won(overCap.totalContribution)}으로 ${won(PENSION_CAP_TAXABLE)}을 넣었을 때와 <strong>1원도 다르지 않습니다</strong>. 시행령 제5조제5항이 신고한 소득월액이 상한액보다 많으면 그 상한액을 기준소득월액으로 한다고 정해 두었고, 기본연금액의 소득비례분도 그렇게 잘린 기준소득월액을 평균해서 만들기 때문입니다(국민연금법 제51조제1항제2호). 상한 위 소득으로 노후를 키우려면 국민연금 바깥의 계좌가 필요하다는 뜻입니다. 다만 상한액은 해마다 고시로 조정되므로 이 선 자체는 고정된 값이 아닙니다.`,
     ],
     table: {
-      head: ["평균 기준소득월액", "월 예상 연금 (20년·65세)", "소득대체율", "균등 부분 비중", "본인 부담 보험료 총액", "회수 기간"],
+      head: ["평균 기준소득월액", "월 예상 연금 (20년·65세)", "소득대체율", "균등 부분 비중", "본인부담 보험료 총액 (20년)", "회수 기간 (본인부담 기준)"],
       rows: rows.map((row) => ({
         highlight: row.income === PENSION_CAP_TAXABLE,
         cells: [
@@ -224,14 +227,14 @@ export function pensionClaimAgeDigest() {
   const incomeGain = moreIncome.estimatedMonthlyPension - base.estimatedMonthlyPension;
   const nine = calcPensionEstimate({ averageMonthlyIncome: income, insuredYears: 9, claimAge: 65 });
   const ten = calcPensionEstimate({ averageMonthlyIncome: income, insuredYears: 10, claimAge: 65 });
-  const tenPaid = Math.floor(income * RATES_2026.nationalPension.employee) * 120;
+  const tenPaid = ten.employeeContribution * 120;
 
   return {
     h2: "조기 수령과 연기 수령의 손익분기 나이",
     body: [
       `연금을 60세에 당겨 받으면 매달 ${pct(1 - earliest.factor, 0)}를 덜 받고, 70세로 늦추면 ${pct(latest.factor - 1, 0)}를 더 받습니다. 평균 기준소득월액 ${won(income)}·가입 ${PENSION_YEARS}년이면 월 ${won(earliest.pension)}과 ${won(latest.pension)}, 65세 기준 ${won(base.estimatedMonthlyPension)}과의 차이는 각각 ${won(base.estimatedMonthlyPension - earliest.pension)}과 ${won(latest.pension - base.estimatedMonthlyPension)}입니다. 그런데 어느 쪽이 유리한지는 금액이 아니라 <strong>몇 살까지 사느냐</strong>로 결정됩니다.`,
       `누적 수령액을 나란히 세우면 교차점이 나옵니다. 60세 조기 수령은 5년을 먼저 받는 대신 매달 적게 받아, <strong>${earliest.breakEven.toFixed(1)}세</strong>를 넘기면 65세 정상 수령보다 총액이 적어집니다. 70세 연기 수령은 5년을 비우는 대신 매달 많이 받아, <strong>${latest.breakEven.toFixed(1)}세</strong>를 넘겨야 정상 수령을 앞지릅니다. 62세와 68세의 교차점은 ${ages.find((row) => row.age === 62).breakEven.toFixed(1)}세와 ${ages.find((row) => row.age === 68).breakEven.toFixed(1)}세로, 조정 폭이 클수록 교차점도 뒤로 밀립니다.`,
-      `청구 나이를 고르기 전에 가입기간부터 채우는 편이 확실합니다. 같은 시나리오에서 가입기간 1년은 월 ${won(yearGain)}의 값어치이고, 평균 소득을 ${won(100_000)} 올리는 것은 월 ${won(incomeGain)}의 값어치입니다. 즉 1년을 더 채우는 것은 ${PENSION_YEARS}년 내내 소득을 약 ${won(Math.round((yearGain / incomeGain) * 100_000 / 10_000) * 10_000)} 더 신고한 것과 같습니다. 가입 9년은 월 ${won(nine.estimatedMonthlyPension)}에 해당하는 연금이 아니라 반환일시금으로 끝나고, 10년을 채우면 월 ${won(ten.estimatedMonthlyPension)}이 평생 나옵니다. 10년치 본인 보험료 ${won(tenPaid)}은 ${Math.round(tenPaid / ten.estimatedMonthlyPension)}개월이면 돌아옵니다.`,
+      `청구 나이를 고르기 전에 가입기간부터 채우는 편이 확실합니다. 같은 시나리오에서 가입기간 1년은 월 ${won(yearGain)}의 값어치이고, 평균 소득을 ${won(100_000)} 올리는 것은 월 ${won(incomeGain)}의 값어치입니다. 즉 1년을 더 채우는 것은 ${PENSION_YEARS}년 내내 소득을 약 ${won(Math.round((yearGain / incomeGain) * 100_000 / 10_000) * 10_000)} 더 신고한 것과 같습니다. 가입 9년은 월 ${won(nine.estimatedMonthlyPension)}에 해당하는 연금이 아니라 반환일시금으로 끝나고, 10년을 채우면 월 ${won(ten.estimatedMonthlyPension)}이 평생 나옵니다. 10년치 본인부담 보험료 ${won(tenPaid)}은 ${Math.round(tenPaid / ten.estimatedMonthlyPension)}개월이면 돌아옵니다.`,
     ],
     table: {
       head: ["청구 나이", "조정 계수", "월 예상 연금", "65세 청구와 누적액이 같아지는 나이"],

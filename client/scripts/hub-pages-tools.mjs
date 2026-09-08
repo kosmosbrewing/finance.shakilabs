@@ -414,7 +414,7 @@ function pensionHub() {
     h1: "2026 국민연금 예상 수령액 계산기",
     lead: [
       "평균 기준소득월액과 가입기간, 청구 나이를 넣으면 <strong>매달 받을 연금액</strong>을 추정합니다. 국민연금은 가입기간이 길수록, 청구를 늦출수록 많아지는 구조라 이 세 변수의 조합이 결과를 좌우합니다.",
-      `기본 시나리오는 평균 기준소득월액 ${won(income)}·가입 ${years}년·65세 청구입니다. 예상 연금은 월 <strong>${won(p.estimatedMonthlyPension)}</strong>, 연 ${won(p.estimatedAnnualPension)}이며 재직 중 본인 부담 보험료는 월 ${won(Math.floor(income * RATES_2026.nationalPension.employee))}입니다.`,
+      `기본 시나리오는 평균 기준소득월액 ${won(income)}·가입 ${years}년·65세 청구입니다. 예상 연금은 월 <strong>${won(p.estimatedMonthlyPension)}</strong>, 연 ${won(p.estimatedAnnualPension)}입니다. 재직 중 보험료는 직장가입자 본인부담 월 ${won(p.employeeContribution)}, 회사 몫을 더한 노사 합산 월 ${won(p.totalContribution)}이고, 지역가입자는 그 합산액 전부를 혼자 냅니다.`,
     ],
     sections: [
       {

@@ -84,6 +84,21 @@ const pensionAgeFactors: Record<number, number> = {
  *
  * scripts/calc-engine.mjs의 calcPensionEstimate와 같은 값을 내야 한다. 어긋나면 프리렌더된
  * 산문과 화면 계산기가 같은 입력에서 다른 숫자를 찍는다.
+ *
+ * 보험료를 두 값으로 나눠 돌려주는 이유:
+ *  - employeeContribution = 사업장가입자의 기여금. 직장가입자 급여에서 빠지는 본인 부담분.
+ *  - totalContribution    = 기여금 + 사용자 부담금. 지역가입자는 이 금액 전부를 혼자 낸다.
+ * 둘 다 맞는 값이고 정확히 두 배 차이라, 한 화면에서 라벨 없이 섞으면 어느 쪽이 답인지 알 수
+ * 없다. 실제로 화면은 9.5% 값을 "월 납부 보험료 추정"으로, 산문은 4.75% 값을 "본인 부담
+ * 보험료"로 찍고 있었다. 그래서 계산기가 두 값을 각각 반환하고 화면은 라벨로 어느 쪽인지 밝힌다.
+ *
+ * 요율 근거:
+ *  - 국민연금법 제88조제3항 - 사업장가입자의 기여금은 본인이, 부담금은 사용자가 각각 부담하되
+ *    "그 금액은 각각 기준소득월액의 1천분의 65에 해당하는 금액으로 한다"
+ *  - 국민연금법 제88조제4항 - 지역가입자, 임의가입자 및 임의계속가입자의 연금보험료는 본인이
+ *    부담하되 "그 금액은 기준소득월액의 1천분의 130으로 한다"
+ *  - 같은 법 부칙(법률 제20903호, 2025.4.2) 제4조 - 위 두 항에도 불구하고 2026년은 기여금과
+ *    부담금이 각각 1만분의 475(4.75%씩), 지역가입자 등은 1천분의 95(9.5%)다.
  */
 export function calculatePensionEstimate(input: PensionInput) {
   const recognizedYears = clamp(input.insuredYears, 1, 40);
@@ -95,7 +110,10 @@ export function calculatePensionEstimate(input: PensionInput) {
   const baseMonthlyPension = (360_000 + contributionBase * 0.22) * (recognizedYears / 40);
   const estimatedMonthlyPension = Math.floor(baseMonthlyPension * ageFactor);
   const estimatedAnnualPension = estimatedMonthlyPension * 12;
-  const employeeContribution = Math.floor(contributionBase * RATES_2026.nationalPension.total);
+  const employeeContribution = Math.floor(
+    contributionBase * RATES_2026.nationalPension.employee
+  );
+  const totalContribution = Math.floor(contributionBase * RATES_2026.nationalPension.total);
 
   return {
     ageFactor,
@@ -106,6 +124,7 @@ export function calculatePensionEstimate(input: PensionInput) {
     estimatedMonthlyPension,
     estimatedAnnualPension,
     employeeContribution,
+    totalContribution,
   };
 }
 

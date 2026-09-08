@@ -74,12 +74,14 @@ const seoDescription = computed(
               <BenefitStatGrid :items="[
                 { label: '예상 연수령액', value: formatWon(result.estimatedAnnualPension) },
                 { label: '나이 보정률', value: formatPercent(result.ageFactor, 1) },
-                { label: '월 납부 보험료 추정', value: formatWon(result.employeeContribution) },
+                { label: '월 보험료 (직장 본인부담)', value: formatWon(result.employeeContribution) },
+                { label: '월 보험료 (노사 합산)', value: formatWon(result.totalContribution) },
               ]" />
 
               <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
                 <p>가입기간이 10년 이상이면 일반적인 노령연금 수급 가능 대상으로 보고, 10년 미만이면 참고용 추정치로 표시합니다.</p>
                 <p>조기 청구는 감액, 연기 청구는 가산 구조를 반영했습니다. 정확한 확정액은 국민연금공단 조회가 필요합니다.</p>
+                <p>보험료율 9.5% 가운데 직장가입자(사업장가입자)는 회사가 절반을 내므로 본인부담은 4.75%입니다. 위 두 칸은 같은 보험료를 다른 관점에서 본 값이고, 지역가입자·임의가입자는 노사 합산과 같은 9.5% 전액을 본인이 냅니다. 근거는 국민연금법 제88조제3항·제4항과 같은 법 부칙(2025.4.2.) 제4조입니다.</p>
                 <p v-if="!result.eligible" class="font-semibold text-status-danger">현재 입력은 일반 노령연금 10년 요건에 미달합니다.</p>
               </div>
             </div>
