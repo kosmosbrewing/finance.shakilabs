@@ -1,4 +1,4 @@
-import { RATES_2026 } from "@/data/taxRates2026";
+import { LOCAL_INCOME_TAX_RATE, RATES_2026 } from "@/data/taxRates2026";
 
 export type AnnualLeaveInput = {
   monthlySalary: number;
@@ -85,6 +85,31 @@ export function calculatePensionEstimate(input: PensionInput) {
   };
 }
 
+/**
+ * 소득세 세액공제액에 개인지방소득세 감소분을 더한 "실제 절세 총액".
+ *
+ * 왜 두 값을 따로 두는가: 두 숫자는 서로 다른 것을 가리키고 둘 다 맞다.
+ *  - 세액공제액(taxCredit)      = 소득세 산출세액에서 빼는 금액. 법령상 정의된 값.
+ *  - 절세 총액(WithLocalTax)    = 그 공제 때문에 실제로 덜 내는 돈(소득세 + 지방소득세).
+ * 한 화면에서 이 둘을 같은 라벨("환급액")로 쓰면 900만원 납입 시 1,350,000원과
+ * 1,485,000원이 동시에 나와서 어느 쪽이 참인지 알 수 없게 된다. 그래서 계산기가
+ * 두 값을 각각 반환하고, 화면·산문은 라벨로 어느 쪽인지 항상 밝힌다.
+ *
+ * 왜 1.1배인가 (근거):
+ *  - 지방세법 제91조제1항 — "거주자의 종합소득에 대한 개인지방소득세 과세표준은
+ *    소득세법 제14조제2항부터 제5항까지에 따라 계산한 소득세의 과세표준과 동일한 금액으로 한다."
+ *  - 지방세법 제93조제1항제2호 — 산출세액에 "제94조에 따른 세액공제 및 세액감면을 적용하여"
+ *    결정세액을 계산한다. 제94조는 그 내용을 지방세특례제한법에 위임한다.
+ *  - 지방세특례제한법 제167조의2제1항 — "소득세법 또는 조세특례제한법에 따라 소득세가
+ *    세액공제·감면이 되는 경우에는 ... 그 공제·감면되는 금액의 100분의 10에 해당하는
+ *    개인지방소득세를 공제·감면한다."
+ * 즉 지방소득세는 과세표준 단계가 아니라 세액공제 단계에서 소득세 공제액의 10%만큼 함께 줄어든다.
+ * 그래서 곱셈이 아니라 "정수 세액공제액 + 그 10%"로 계산한다 — 조문 문언 그대로이고 원 단위 오차가 없다.
+ */
+export function withLocalIncomeTax(incomeTaxCredit: number): number {
+  return incomeTaxCredit + Math.floor(incomeTaxCredit * LOCAL_INCOME_TAX_RATE);
+}
+
 export function calculateMonthlyRentDeduction(input: MonthlyRentDeductionInput) {
   const deductionRate = input.annualSalary <= 55_000_000 ? 0.17 : input.annualSalary <= 80_000_000 ? 0.15 : 0;
   const yearlyRent = input.monthlyRent * input.paidMonths;
@@ -95,7 +120,11 @@ export function calculateMonthlyRentDeduction(input: MonthlyRentDeductionInput) 
     deductionRate,
     yearlyRent,
     recognizedRent,
+    // 소득세 산출세액에서 빼는 금액 (조세특례제한법 제95조의2제1항: 총급여 5,500만원 이하 17%, 8,000만원 이하 15%)
     taxCredit,
+    // 지방소득세까지 줄어든 뒤의 실제 절세 총액 (지방세특례제한법 제167조의2제1항)
+    taxCreditWithLocalTax: withLocalIncomeTax(taxCredit),
+    // 월 환산은 소득세분 기준 — 화면 라벨도 "소득세 기준"이라고 밝힌다
     monthlyRefundEffect: Math.floor(taxCredit / 12),
     eligible: deductionRate > 0,
   };
@@ -112,6 +141,7 @@ export function calculateIrpTaxCredit(input: IrpInput) {
   const overflowAmount =
     Math.max(0, input.pensionSavings - recognizedPensionSavings) +
     Math.max(0, input.irpContribution - recognizedIrp);
+  const taxCredit = Math.floor(recognizedContribution * taxCreditRate);
 
   return {
     taxCreditRate,
@@ -119,7 +149,10 @@ export function calculateIrpTaxCredit(input: IrpInput) {
     recognizedIrp,
     recognizedContribution,
     overflowAmount,
-    taxCredit: Math.floor(recognizedContribution * taxCreditRate),
+    // 소득세 산출세액에서 빼는 금액 (소득세법 제59조의3제1항: 총급여 5,500만원 이하 15%, 초과 12%)
+    taxCredit,
+    // 지방소득세까지 줄어든 뒤의 실제 절세 총액 (지방세특례제한법 제167조의2제1항)
+    taxCreditWithLocalTax: withLocalIncomeTax(taxCredit),
   };
 }
 

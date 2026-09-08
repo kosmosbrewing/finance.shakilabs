@@ -29,7 +29,8 @@ const input = computed(() =>
 const result = computed(() => calculateMonthlyRentDeduction(input.value));
 const seoTitle = computed(() => "2026 월세 세액공제 계산기 | 연말정산 월세 환급액");
 const seoDescription = computed(
-  () => `연 월세 ${formatWon(result.value.yearlyRent)} 기준 예상 세액공제 환급액은 ${formatWon(result.value.taxCredit)}입니다.`
+  () =>
+    `연 월세 ${formatWon(result.value.yearlyRent)} 기준 소득세 세액공제는 ${formatWon(result.value.taxCredit)}, 지방소득세까지 포함한 절세 총액은 ${formatWon(result.value.taxCreditWithLocalTax)}입니다.`
 );
 </script>
 
@@ -55,16 +56,21 @@ const seoDescription = computed(
             </div>
 
             <div class="space-y-4">
-              <ResultHero label="예상 세액공제" :value="formatWon(result.taxCredit)" />
+              <ResultHero label="세액공제 (소득세)" :value="formatWon(result.taxCredit)">
+                <template #secondary>
+                  지방소득세 포함 절세액 {{ formatWon(result.taxCreditWithLocalTax) }}
+                </template>
+              </ResultHero>
               <BenefitStatGrid :items="[
-                { label: '공제율', value: formatPercent(result.deductionRate, 0) },
+                { label: '공제율 (소득세)', value: formatPercent(result.deductionRate, 0) },
                 { label: '공제 인정 월세', value: formatWon(result.recognizedRent) },
-                { label: '월 환급 체감', value: formatWon(result.monthlyRefundEffect) },
+                { label: '월 환산 (소득세)', value: formatWon(result.monthlyRefundEffect) },
               ]" />
 
               <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
                 <p>이 계산기는 무주택 세대주, 주민등록 주소 일치, 국민주택규모 또는 기준시가 요건 충족을 가정합니다.</p>
                 <p>총급여가 8,000만원을 넘으면 현재 입력 기준에서는 월세 세액공제 환급액을 0원으로 계산합니다.</p>
+                <p>세액공제액은 소득세 산출세액에서 빼는 금액이고, 절세액은 이 공제로 개인지방소득세까지 줄어든 뒤의 실제 절감액입니다. 두 값의 차이가 지방소득세 감소분입니다.</p>
               </div>
             </div>
           </div>

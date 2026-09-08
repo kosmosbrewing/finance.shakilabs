@@ -201,14 +201,19 @@ describe("승격 산문의 수치 재계산", () => {
   });
 
   it("IRP: 환급 상한은 한도가 아니라 결정세액이고, 그 교차 연봉을 다시 찾아도 같다", () => {
-    // 한도를 꽉 채웠을 때의 공제 대상 금액 = 900만 × 16.5%
+    // 공제 "대상" 금액은 납입액 900만원이다. 아래 두 값은 그 결과로,
+    //   소득세 세액공제 = 900만 × 15% = 1,350,000원
+    //   지방소득세 포함 절세 총액 = 그 금액 + 10% = 1,485,000원
+    // 두 값을 같은 라벨로 쓰면 한 화면에 서로 다른 숫자가 나온다.
     const full = engine.calcIrpTaxCredit({
       annualSalary: 50_000_000,
       pensionSavings: 6_000_000,
       irpContribution: 3_000_000,
     });
     expect(full.recognizedContribution).toBe(9_000_000);
-    const credit = Math.floor(9_000_000 * 0.15 * 1.1);
+    expect(full.taxCredit).toBe(1_350_000);
+    expect(full.taxCreditWithLocalTax).toBe(1_485_000);
+    const credit = full.taxCreditWithLocalTax;
     expect(credit).toBe(1_485_000);
     // 결정세액이 그 금액을 처음 덮는 연봉
     let crossing = 0;

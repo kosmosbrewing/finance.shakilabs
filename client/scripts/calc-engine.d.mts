@@ -91,6 +91,7 @@ export function calcIrpTaxCredit(input: {
   recognizedContribution: number;
   overflowAmount: number;
   taxCredit: number;
+  taxCreditWithLocalTax: number;
 };
 export function calcPensionEstimate(input: {
   averageMonthlyIncome: number;
@@ -104,6 +105,7 @@ export function calcPensionEstimate(input: {
   estimatedAnnualPension: number;
   employeeContribution: number;
 };
+export function withLocalIncomeTax(incomeTaxCredit: number): number;
 export const PENSION_AGE_FACTORS: Record<number, number>;
 export const SIMPLE_EXPENSE_RATE_BASE: number;
 
@@ -154,6 +156,7 @@ export function calcMonthlyRentDeduction(input: {
   yearlyRent: number;
   recognizedRent: number;
   taxCredit: number;
+  taxCreditWithLocalTax: number;
   monthlyRefundEffect: number;
   eligible: boolean;
 };

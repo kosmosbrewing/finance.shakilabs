@@ -137,8 +137,9 @@ function refundRow(tax) {
     pensionSavings: 6_000_000,
     irpContribution: 3_000_000,
   });
-  // 세액공제는 결정세액을 줄이고 지방소득세도 그만큼 따라 줄어 체감 효과는 1.1배
-  const creditEffect = Math.floor(credit.taxCredit * 1.1);
+  // 세액공제는 결정세액을 줄이고 지방소득세도 그만큼 따라 줄어(지방세특례제한법 제167조의2제1항)
+  // 체감 효과는 1.1배. 엔진이 계산한 값을 그대로 쓴다 — 여기서 다시 곱하면 화면·산문과 갈릴 수 있다.
+  const creditEffect = credit.taxCreditWithLocalTax;
   const usable = Math.min(prepaid, creditEffect);
   // 기납부를 전부 돌려받는 데 필요한 최소 납입액 — 그 위로는 넣어도 올해 세금은 더 줄지 않는다
   const contributionToZero = Math.min(
@@ -159,7 +160,7 @@ export function withholdingRefundCeilingDigest() {
     h2: "명세서의 소득세가 연말정산 환급의 천장이다",
     body: [
       `연말정산 환급은 낸 세금을 돌려받는 절차이므로, 아무리 공제를 모아도 <strong>한 해 동안 원천징수된 금액 이상은 돌아오지 않습니다</strong>. 그래서 월 소득세 한 줄은 연봉을 알려 주는 단서이면서 동시에 올해 환급의 상한선입니다. 월 ${formatWon(bottom.tax)}이면 지방소득세를 합쳐 연 ${formatWon(bottom.prepaid)}이 천장이고, 월 ${formatWon(top.tax)}이면 ${formatWon(top.prepaid)}입니다.`,
-      `이 천장은 공제를 얼마나 채울지도 결정합니다. 연금저축 600만원과 IRP 300만원을 합쳐 한도 ${formatWon(PENSION_ACCOUNT_MAX)}을 채우면 총급여 5,500만원 이하에서 세액공제 15%, 지방소득세까지 ${formatWon(rows[0].creditEffect)}이 줄어듭니다. 그런데 월 소득세 ${formatWon(lastPartial.tax)}(연 기납부 ${formatWon(lastPartial.prepaid)})까지는 이 금액을 다 쓸 수 없습니다. 기납부가 공제 효과보다 작아 ${formatPercent(lastPartial.usable / lastPartial.creditEffect, 0)}만 실제 환급으로 이어지고, 나머지는 결정세액이 이미 0원이라 사라집니다.`,
+      `이 천장은 공제를 얼마나 채울지도 결정합니다. 연금저축 600만원과 IRP 300만원을 합쳐 한도 ${formatWon(PENSION_ACCOUNT_MAX)}을 채우면 총급여 5,500만원 이하에서 소득세 세액공제가 ${formatWon(rows[0].credit.taxCredit)}이고, 지방소득세 감소분까지 더하면 ${formatWon(rows[0].creditEffect)}이 줄어듭니다. 그런데 월 소득세 ${formatWon(lastPartial.tax)}(연 기납부 ${formatWon(lastPartial.prepaid)})까지는 이 금액을 다 쓸 수 없습니다. 기납부가 공제 효과보다 작아 ${formatPercent(lastPartial.usable / lastPartial.creditEffect, 0)}만 실제 환급으로 이어지고, 나머지는 결정세액이 이미 0원이라 사라집니다.`,
       `뒤집어 읽으면 필요한 납입액이 나옵니다. 월 소득세 ${formatWon(bottom.tax)}인 사람은 연금계좌에 ${formatWon(bottom.contributionToZero)}만 넣어도 그해 소득세가 전부 돌아오므로, 한도 ${formatWon(PENSION_ACCOUNT_MAX)}을 채우는 것은 노후 저축으로는 의미가 있어도 올해 세금 면에서는 ${formatWon(PENSION_ACCOUNT_MAX - bottom.contributionToZero)}이 공제를 만들지 못합니다. 반면 월 ${formatWon(firstFull.tax)}부터는 한도를 다 채워도 ${formatWon(firstFull.prepaid - firstFull.creditEffect)}이 남아, 월세·의료비·기부금 같은 다른 세액공제를 얹을 여지가 생깁니다.`,
     ],
     table: {

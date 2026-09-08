@@ -650,7 +650,28 @@ export function calcPensionEstimate({ averageMonthlyIncome, insuredYears, claimA
   };
 }
 
+// A tax credit reduces income tax, and the local income tax that rides on it falls by the same
+// proportion. Both numbers are true and they are NOT interchangeable, so every caller has to say
+// which one it is showing:
+//   taxCredit             - the amount subtracted from income tax (the statutory credit)
+//   taxCreditWithLocalTax - what the taxpayer actually stops paying (income tax + local income tax)
+// Statutory basis, in order:
+//   지방세법 제91조제1항  - the local tax base equals the income tax base
+//   지방세법 제93조제1항제2호 - credits under 제94조 are applied to the local computed tax
+//   지방세법 제94조       - delegates those credits to 지방세특례제한법
+//   지방세특례제한법 제167조의2제1항 - "그 공제·감면되는 금액의 100분의 10에 해당하는
+//                          개인지방소득세를 공제·감면한다"
+// So the local reduction is 10% OF THE CREDIT, applied at the credit step - not a rate on the base.
+// Integer arithmetic, not a 1.1 multiplier, because that is what the wording says and it cannot
+// drift by a won.
+// Mirrors withLocalIncomeTax() in src/utils/benefitCalculators.ts - the two must stay identical or
+// the prerendered prose and the on-screen calculator will print different numbers.
+export function withLocalIncomeTax(incomeTaxCredit) {
+  return incomeTaxCredit + Math.floor(incomeTaxCredit * LOCAL_INCOME_TAX_RATE);
+}
+
 // 월세 세액공제 — 총급여 5,500만 이하 17%, 8,000만 이하 15%, 초과 대상 제외. 한도 연 1,000만원
+// 근거: 조세특례제한법 제95조의2제1항
 export function calcMonthlyRentDeduction({ annualSalary, monthlyRent, paidMonths }) {
   const deductionRate = annualSalary <= 55_000_000 ? 0.17 : annualSalary <= 80_000_000 ? 0.15 : 0;
   const yearlyRent = monthlyRent * paidMonths;
@@ -661,17 +682,20 @@ export function calcMonthlyRentDeduction({ annualSalary, monthlyRent, paidMonths
     yearlyRent,
     recognizedRent,
     taxCredit,
+    taxCreditWithLocalTax: withLocalIncomeTax(taxCredit),
     monthlyRefundEffect: Math.floor(taxCredit / 12),
     eligible: deductionRate > 0,
   };
 }
 
 // 연금계좌 세액공제 — 연금저축 600만 한도, IRP 합산 900만 한도
+// 근거: 소득세법 제59조의3제1항
 export function calcIrpTaxCredit({ annualSalary, pensionSavings, irpContribution }) {
   const taxCreditRate = annualSalary <= 55_000_000 ? 0.15 : 0.12;
   const recognizedPensionSavings = Math.min(6_000_000, pensionSavings);
   const recognizedIrp = Math.min(Math.max(0, 9_000_000 - recognizedPensionSavings), irpContribution);
   const recognizedContribution = recognizedPensionSavings + recognizedIrp;
+  const taxCredit = Math.floor(recognizedContribution * taxCreditRate);
   return {
     taxCreditRate,
     recognizedPensionSavings,
@@ -680,7 +704,8 @@ export function calcIrpTaxCredit({ annualSalary, pensionSavings, irpContribution
     overflowAmount:
       Math.max(0, pensionSavings - recognizedPensionSavings) +
       Math.max(0, irpContribution - recognizedIrp),
-    taxCredit: Math.floor(recognizedContribution * taxCreditRate),
+    taxCredit,
+    taxCreditWithLocalTax: withLocalIncomeTax(taxCredit),
   };
 }
 

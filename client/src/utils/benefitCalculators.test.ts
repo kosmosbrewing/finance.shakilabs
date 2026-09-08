@@ -4,6 +4,7 @@ import {
   calculateEmployerInsuranceBurden,
   calculateIrpTaxCredit,
   calculateMonthlyRentDeduction,
+  withLocalIncomeTax,
   calculatePensionEstimate,
   getAnnualLeaveDays,
 } from "@/utils/benefitCalculators";
@@ -79,6 +80,33 @@ describe("benefitCalculators", () => {
     });
     expect(result.recognizedPensionSavings).toBe(6_000_000);
     expect(result.recognizedContribution).toBe(9_000_000);
+  });
+
+  it("세액공제액과 지방소득세 포함 절세액을 각각 반환한다", () => {
+    // 지방세특례제한법 제167조의2제1항 — 소득세 세액공제액의 100분의 10만큼 개인지방소득세도 공제된다.
+    // 리터럴로 못 박는다: 두 값을 같은 상수에서 파생시키면 함께 움직여 아무것도 잡지 못한다.
+    const irp = calculateIrpTaxCredit({
+      annualSalary: 50_000_000,
+      pensionSavings: 6_000_000,
+      irpContribution: 3_000_000,
+    });
+    expect(irp.taxCredit).toBe(1_350_000);
+    expect(irp.taxCreditWithLocalTax).toBe(1_485_000);
+
+    const rent = calculateMonthlyRentDeduction({
+      annualSalary: 48_000_000,
+      monthlyRent: 700_000,
+      paidMonths: 12,
+    });
+    expect(rent.taxCredit).toBe(1_428_000);
+    expect(rent.taxCreditWithLocalTax).toBe(1_570_800);
+  });
+
+  it("지방소득세 포함 절세액은 곱셈이 아니라 정수 연산이라 원 단위로 어긋나지 않는다", () => {
+    // 조문 문언은 "공제되는 금액의 100분의 10"이므로 소득세 공제액(정수)에서 파생해야 한다.
+    for (const credit of [1_350_000, 1_428_000, 1_224_000, 1_080_000, 999_999, 7]) {
+      expect(withLocalIncomeTax(credit)).toBe(credit + Math.floor(credit / 10));
+    }
   });
 
   it("IRP 세액공제는 한도 초과분을 따로 집계한다", () => {
