@@ -215,24 +215,56 @@ describe("승격 산문의 수치 재계산", () => {
     expect(full.taxCreditWithLocalTax).toBe(1_485_000);
     const credit = full.taxCreditWithLocalTax;
     expect(credit).toBe(1_485_000);
-    // 결정세액이 그 금액을 처음 덮는 연봉
+    // 천장은 둘이다. 소득세 세액공제는 소득세 결정세액에서, 그에 딸린 지방소득세 감소분은
+    // 개인지방소득세 결정세액에서 각각 잘린다.
+    //   지방세법 제94조 - 개인지방소득세의 공제세액이 산출세액을 초과하면 그 초과금액은 없는 것으로 한다
+    //   지방세특례제한법 제167조의2제1항 - 소득세 공제액의 100분의 10을 개인지방소득세에서 공제한다
+    // 그래서 교차 연봉은 지방소득세 포함 절세액(1,485,000원)이 아니라 소득세 세액공제
+    // (1,350,000원)를 소득세 결정세액이 처음 덮는 지점이다.
+    const localCredit = credit - full.taxCredit;
+    expect(localCredit).toBe(135_000);
     let crossing = 0;
     for (let manWonValue = 2_000; manWonValue <= 9_000; manWonValue += 10) {
-      const determined = calculateSalaryBreakdown({
+      const breakdown = calculateSalaryBreakdown({
         grossAnnual: manWonValue * 10_000,
         nonTaxableMonthly: 200_000,
         dependents: 1,
         children: 0,
         retirementIncluded: false,
-      }).determinedTax;
-      if (determined >= credit) {
+      });
+      const absorbed =
+        Math.min(breakdown.determinedTax, full.taxCredit) +
+        Math.min(breakdown.annualLocalTax, localCredit);
+      if (absorbed >= credit) {
         crossing = manWonValue;
         break;
       }
     }
-    expect(crossing).toBe(4_290);
+    expect(crossing).toBe(4_180);
     const text = prose(irpBindingLimitDigest());
-    expect(text).toContain("4,290만원");
+    expect(text).toContain("4,180만원");
+    // 손으로 적은 앵커. 엔진에서 다시 계산하면 페이지와 기대값이 같은 상수를 따라 함께
+    // 움직여 절대 깨지지 않으므로, 아래 네 숫자는 타이핑해 둔다. 연봉 2,000만원 기준이다.
+    const worst = calculateSalaryBreakdown({
+      grossAnnual: 20_000_000,
+      nonTaxableMonthly: 200_000,
+      dependents: 1,
+      children: 0,
+      retirementIncluded: false,
+    });
+    expect(worst.determinedTax).toBe(45_494);
+    expect(worst.annualLocalTax).toBe(4_549);
+    expect(45_494 + 4_549).toBe(50_043);
+    expect(1_485_000 - 50_043).toBe(1_434_957);
+    expect(text).toContain(won(45_494));
+    expect(text).toContain(won(4_549));
+    expect(text).toContain(won(50_043));
+    expect(text).toContain(won(1_434_957));
+    // 역앵커: 두 천장을 하나로 합쳐 소득세 결정세액에만 대면 1,439,506원이 나온다. 그 값이
+    // 다시 페이지에 나타나면 지방소득세 쪽 여력을 통째로 버린 것이다.
+    expect(1_485_000 - 45_494).toBe(1_439_506);
+    expect(text).not.toContain(won(1_439_506));
+    expect(text).not.toContain("4,290만원");
     // 연금저축 한 계좌에 900만을 넣으면 600만만 인정된다
     const lopsided = engine.calcIrpTaxCredit({
       annualSalary: 50_000_000,

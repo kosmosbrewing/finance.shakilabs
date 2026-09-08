@@ -46,6 +46,11 @@ const COMBINED_CAP = 9_000_000;
 const LOW_RATE = 0.165;
 const HIGH_RATE = 0.132;
 const CLAWBACK_RATE = 0.165;
+// Income-tax-only twins of the two rates above. A sentence that pairs a rate with an amount has to
+// put both on the same basis: quoting 13.2% beside 1,080,000 is the exact mix the vocabulary gate
+// exists to stop.
+const LOW_RATE_INCOME_TAX = 0.15;
+const HIGH_RATE_INCOME_TAX = 0.12;
 
 // withLocal is the engine's taxCreditWithLocalTax under a shorter local name. It is NOT the
 // statutory credit: taxCredit is the amount subtracted from income tax, withLocal is what the
@@ -57,11 +62,36 @@ const creditOf = (annualSalary, pensionSavings, irpContribution) => {
   return { ...result, withLocal: result.taxCreditWithLocalTax };
 };
 
+// There are TWO ceilings, not one, and the credit is cut off at each of them separately.
+//   지방세법 제94조 - "종합소득 또는 퇴직소득에 대한 개인지방소득세의 공제세액 또는 감면세액이
+//     산출세액을 초과하는 경우에는 그 초과금액은 없는 것으로 한다"
+//   지방세특례제한법 제167조의2제1항 - when income tax is credited, "그 공제 감면되는 금액의
+//     100분의 10에 해당하는 개인지방소득세를 공제 감면한다"
+// So the income-tax credit is capped by the income tax bill and the local reduction that rides on
+// it is capped by the LOCAL tax bill, which exists on its own. This digest used to hold the whole
+// local-inclusive saving against the income tax bill alone, which throws away the entire local
+// allowance and overstates the loss - at 연봉 2,000만원 it read 1,439,506원 instead of 1,434,957원.
+// calcIncomeTaxBundle sets annualLocalTax = floor(determinedTax x 10%), so the local ceiling is
+// exactly a tenth of the income-tax ceiling here; the code reads it off the engine rather than
+// assuming that, so a change to the local tax path cannot pass through unnoticed.
+function refundCeilings(gross) {
+  const breakdown = salaryOf(gross);
+  return { incomeTax: breakdown.determinedTax, localTax: breakdown.annualLocalTax };
+}
+
+function absorbedRefund(gross, incomeTaxCredit, localTaxCredit) {
+  const ceiling = refundCeilings(gross);
+  return Math.min(ceiling.incomeTax, incomeTaxCredit) + Math.min(ceiling.localTax, localTaxCredit);
+}
+
 // The salary at which the assessed tax finally covers the full credit. Below it the statutory
 // 900만원 limit is not what caps the refund - the taxpayer's own tax bill is.
-function salaryAbsorbing(creditAmount) {
+function salaryAbsorbing(incomeTaxCredit, localTaxCredit) {
+  const full = incomeTaxCredit + localTaxCredit;
   for (let manWonValue = 2_000; manWonValue <= 9_000; manWonValue += 10) {
-    if (salaryOf(manWonValue * 10_000).determinedTax >= creditAmount) return manWonValue;
+    if (absorbedRefund(manWonValue * 10_000, incomeTaxCredit, localTaxCredit) >= full) {
+      return manWonValue;
+    }
   }
   return null;
 }
@@ -69,21 +99,30 @@ function salaryAbsorbing(creditAmount) {
 const IRP_SALARY_GRID = [2_000, 2_500, 3_000, 3_500, 4_000, 5_000, 7_000];
 
 export function irpBindingLimitDigest() {
-  const maxCredit = creditOf(50_000_000, PENSION_SAVINGS_CAP, 3_000_000).withLocal;
-  const highCredit = creditOf(60_000_000, PENSION_SAVINGS_CAP, 3_000_000).withLocal;
-  const absorbLow = salaryAbsorbing(maxCredit);
-  const absorbHigh = salaryAbsorbing(highCredit);
+  const lowBand = creditOf(50_000_000, PENSION_SAVINGS_CAP, 3_000_000);
+  const highBand = creditOf(60_000_000, PENSION_SAVINGS_CAP, 3_000_000);
+  const maxCredit = lowBand.withLocal;
+  const highCredit = highBand.withLocal;
+  const localOf = (scenario) => scenario.withLocal - scenario.taxCredit;
+  const absorbLow = salaryAbsorbing(lowBand.taxCredit, localOf(lowBand));
+  const absorbHigh = salaryAbsorbing(highBand.taxCredit, localOf(highBand));
   const rows = IRP_SALARY_GRID.map((amount) => {
     const gross = amount * 10_000;
     const scenario = creditOf(gross, PENSION_SAVINGS_CAP, 3_000_000);
-    const determined = salaryOf(gross).determinedTax;
+    const localTaxCredit = localOf(scenario);
+    const ceiling = refundCeilings(gross);
+    const actual =
+      Math.min(ceiling.incomeTax, scenario.taxCredit) + Math.min(ceiling.localTax, localTaxCredit);
     return {
       amount,
-      determined,
+      determined: ceiling.incomeTax,
+      determinedLocal: ceiling.localTax,
+      determinedTotal: ceiling.incomeTax + ceiling.localTax,
       incomeTaxCredit: scenario.taxCredit,
+      localTaxCredit,
       credit: scenario.withLocal,
-      actual: Math.min(determined, scenario.withLocal),
-      wasted: Math.max(0, scenario.withLocal - determined),
+      actual,
+      wasted: scenario.withLocal - actual,
     };
   });
   const worst = rows[0];
@@ -91,19 +130,19 @@ export function irpBindingLimitDigest() {
   return {
     h2: `한도 ${won(COMBINED_CAP)}을 다 채워도 연봉 ${manWon(absorbLow)} 아래에서는 전액을 돌려받지 못한다`,
     body: [
-      `연금계좌 세액공제는 산출세액에서 직접 빼는 방식이라 <strong>결정세액을 넘을 수 없습니다</strong>. 그래서 실제로 돌려받는 금액을 정하는 것은 한도 ${won(COMBINED_CAP)}이 아니라 그 사람이 그해 낸 세금입니다. 아래는 연금저축 ${won(PENSION_SAVINGS_CAP)}·IRP ${won(3_000_000)}을 넣어 한도를 꽉 채운 상태에서 부양가족 1인·비과세 식대 월 ${won(200_000)} 기준으로 연봉만 바꿔 본 결과입니다.`,
+      `연금계좌 세액공제는 산출세액에서 직접 빼는 방식이라 <strong>결정세액을 넘을 수 없습니다</strong>. 넘을 수 없는 천장은 하나가 아니라 둘입니다. 소득세 세액공제는 소득세 결정세액에서, 거기에 딸려 줄어드는 지방소득세는 개인지방소득세 결정세액에서 각각 잘립니다(지방세법 제94조). 그래서 실제로 돌려받는 금액을 정하는 것은 한도 ${won(COMBINED_CAP)}이 아니라 그 사람이 그해 낸 두 세금의 합입니다. 아래는 연금저축 ${won(PENSION_SAVINGS_CAP)}·IRP ${won(3_000_000)}을 넣어 한도를 꽉 채운 상태에서 부양가족 1인·비과세 식대 월 ${won(200_000)} 기준으로 연봉만 바꿔 본 결과입니다.`,
     ],
     blocks: [
       {
         h3: `연봉 ${manWon(worst.amount)}이면 ${won(worst.wasted)}이 그냥 사라진다`,
         body: [
-          `한도를 다 채우면 지방소득세를 포함한 절세 총액은 ${won(worst.credit)}(소득세 세액공제 ${won(worst.incomeTaxCredit)} + 지방소득세 감소분 ${won(worst.credit - worst.incomeTaxCredit)})이지만, 연봉 ${manWon(worst.amount)}의 결정세액은 ${won(worst.determined)}뿐입니다. 그래서 실제 환급은 ${won(worst.actual)}에서 멈추고 ${won(worst.wasted)}은 돌려받지 못합니다. 세액공제는 소득공제와 달리 <strong>남는 금액을 다음 해로 넘겨주지 않으므로</strong>, 이 돈은 그해에 그대로 없어집니다.`,
+          `한도를 다 채우면 지방소득세를 포함한 절세 총액은 ${won(worst.credit)}(소득세 세액공제 ${won(worst.incomeTaxCredit)} + 지방소득세 감소분 ${won(worst.localTaxCredit)})입니다. 그런데 연봉 ${manWon(worst.amount)}인 사람이 그해 낸 세금은 소득세 ${won(worst.determined)}과 지방소득세 ${won(worst.determinedLocal)}, 합쳐 ${won(worst.determinedTotal)}뿐입니다. 세액공제는 낸 세금을 돌려주는 것이지 내지 않은 세금을 만들어 주지는 않으므로 실제 환급은 ${won(worst.actual)}에서 멈추고 ${won(worst.wasted)}은 돌려받지 못합니다. 세액공제는 소득공제와 달리 <strong>남는 금액을 다음 해로 넘겨주지 않으므로</strong>, 이 돈은 그해에 그대로 없어집니다.`,
         ],
       },
       {
         h3: `그 손실이 0이 되는 지점은 연봉 ${manWon(absorbLow)}이다`,
         body: [
-          `연봉을 10만원 단위로 훑으면 결정세액이 지방소득세 포함 절세액 ${won(maxCredit)}을 처음 넘어서는 지점이 ${manWon(absorbLow)}입니다. 공제율이 ${pct(HIGH_RATE, 1)}로 내려가는 총급여 ${won(55_000_000)} 초과 구간에서는 필요한 결정세액이 ${won(highCredit)}으로 줄어 ${manWon(absorbHigh)}부터 전액을 흡수합니다. 즉 연봉 ${manWon(absorbLow)} 미만인 사람에게 "한도까지 채우라"는 조언은 <strong>그 사람에게는 틀린 조언</strong>이고, 결정세액을 먼저 확인한 뒤 그만큼만 넣는 편이 낫습니다.`,
+          `연봉을 10만원 단위로 훑으면 소득세 결정세액이 소득세 세액공제 ${won(lowBand.taxCredit)}을 처음 덮는 지점이 ${manWon(absorbLow)}입니다. 지방소득세 쪽은 따로 찾을 필요가 없습니다. 개인지방소득세 결정세액이 소득세 결정세액의 10%이고 지방소득세 감소분도 세액공제의 10%라, 소득세 쪽이 덮이는 순간 지방소득세 쪽도 같이 덮이기 때문입니다. 공제율이 소득세분 ${pct(HIGH_RATE_INCOME_TAX, 0)}로 내려가는 총급여 ${won(55_000_000)} 초과 구간에서는 필요한 소득세 결정세액이 ${won(highBand.taxCredit)}으로 줄어 ${manWon(absorbHigh)}부터 전액을 흡수합니다. 즉 연봉 ${manWon(absorbLow)} 미만인 사람에게 "한도까지 채우라"는 조언은 <strong>그 사람에게는 틀린 조언</strong>이고, 결정세액을 먼저 확인한 뒤 그만큼만 넣는 편이 낫습니다.`,
         ],
       },
       {
@@ -120,19 +159,27 @@ export function irpBindingLimitDigest() {
       },
     ],
     table: {
-      head: ["연봉", "연간 결정세액 (소득세)", "한도 납입 시 절세 총액 (지방소득세 포함)", "실제 환급", "사라지는 금액"],
+      head: [
+        "연봉",
+        "연간 결정세액 (소득세)",
+        "연간 결정세액 (개인지방소득세)",
+        "한도 납입 시 절세 총액 (지방소득세 포함)",
+        "실제 환급",
+        "사라지는 금액",
+      ],
       rows: rows.map((row) => ({
         highlight: row.wasted === 0 && rows.find((item) => item.wasted > 0 && item.amount < row.amount) !== undefined && row.amount <= 5_000,
         cells: [
           manWon(row.amount),
           won(row.determined),
+          won(row.determinedLocal),
           won(row.credit),
           `<strong>${won(row.actual)}</strong>`,
           row.wasted > 0 ? `<strong style="color:hsl(var(--destructive));">${won(row.wasted)}</strong>` : "없음",
         ],
       })),
     },
-    tableNote: `연금저축 ${won(PENSION_SAVINGS_CAP)}·IRP ${won(3_000_000)}으로 합산 한도 ${won(COMBINED_CAP)}을 채운 경우이며, 다른 세액공제 항목(의료비·교육비·기부금)이 있으면 결정세액을 그쪽이 먼저 쓰므로 사라지는 금액이 더 커집니다. 마지막 두 열은 지방소득세를 포함한 절세액을 소득세 결정세액과 견준 값이라 실제보다 조금 크게 잡힙니다 — 지방소득세 결정세액까지 넣으면 그만큼 여유가 생깁니다. 공제율은 총급여 ${won(55_000_000)} 이하 ${pct(LOW_RATE, 1)}, 초과 ${pct(HIGH_RATE, 1)}(지방소득세 포함) 기준으로 2026년 조세특례제한법 규정을 확인한 값입니다.`,
+    tableNote: `연금저축 ${won(PENSION_SAVINGS_CAP)}·IRP ${won(3_000_000)}으로 합산 한도 ${won(COMBINED_CAP)}을 채운 경우이며, 다른 세액공제 항목(의료비·교육비·기부금)이 있으면 결정세액을 그쪽이 먼저 쓰므로 사라지는 금액이 더 커집니다. 실제 환급 열은 소득세 세액공제를 소득세 결정세액에서, 지방소득세 감소분을 개인지방소득세 결정세액에서 따로 자른 뒤 더한 값입니다. 두 세금은 각각 부과되고 각각의 산출세액에서만 공제되기 때문입니다(지방세법 제94조). 공제율은 총급여 ${won(55_000_000)} 이하 소득세분 ${pct(LOW_RATE_INCOME_TAX, 0)}·지방소득세 포함 ${pct(LOW_RATE, 1)}, 초과 소득세분 ${pct(HIGH_RATE_INCOME_TAX, 0)}·지방소득세 포함 ${pct(HIGH_RATE, 1)} 기준으로 2026년 조세특례제한법 규정을 확인한 값입니다.`,
   };
 }
 

@@ -11,7 +11,11 @@ import ResultHero from "@/components/common/ResultHero.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import { pensionFaqs } from "@/data/benefitFaqs";
 import { buildFaqJsonLd } from "@/lib/faqSeo";
-import { normalizePensionInput } from "@/lib/benefitValidators";
+import {
+  normalizePensionInput,
+  PENSION_INCOME_MAX,
+  PENSION_INCOME_MIN,
+} from "@/lib/benefitValidators";
 import { formatPercent, formatWon } from "@/lib/utils";
 import { calculatePensionEstimate } from "@/utils/benefitCalculators";
 
@@ -27,6 +31,14 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculatePensionEstimate(input.value));
+
+// 입력이 범위 밖이어서 잘렸다면 그 사실을 말해 준다. 조용히 자르면 화면의 입력값과 결과가
+// 서로 다른 소득을 가리키게 되고, 어느 쪽이 답인지 알 수 없다.
+const clampedIncome = computed(() =>
+  input.value.averageMonthlyIncome !== averageMonthlyIncome.value
+    ? input.value.averageMonthlyIncome
+    : null
+);
 const seoTitle = computed(() => "2026 국민연금 수령액 계산기 | 예상 연금액·납부액 조회");
 const seoDescription = computed(
   () => `가입 ${input.value.insuredYears}년 기준 예상 국민연금 월수령액은 ${formatWon(result.value.estimatedMonthlyPension)}입니다.`
@@ -49,7 +61,10 @@ const seoDescription = computed(
           </div>
           <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
             <div class="space-y-4">
-              <ScenarioField v-model="averageMonthlyIncome" label="평균 기준소득월액" unit="원" :min="410_000" :max="6_590_000" :step="10_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '320만원', value: 3_200_000 }, { label: '500만원', value: 5_000_000 }]" />
+              <ScenarioField v-model="averageMonthlyIncome" label="평균 기준소득월액" unit="원" :min="PENSION_INCOME_MIN" :max="PENSION_INCOME_MAX" :step="10_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '320만원', value: 3_200_000 }, { label: '500만원', value: 5_000_000 }]" />
+              <p v-if="clampedIncome !== null" class="text-caption leading-6 text-status-warning">
+                입력한 금액이 기준소득월액 범위를 벗어나 {{ formatWon(clampedIncome) }}으로 계산했습니다. 국민연금법 시행령 제5조에 따라 상한액을 넘는 소득은 보험료와 연금액 어느 쪽에도 반영되지 않습니다.
+              </p>
               <ScenarioField v-model="insuredYears" label="가입 기간" unit="년" :min="1" :max="40" :presets="[{ label: '10년', value: 10 }, { label: '20년', value: 20 }, { label: '30년', value: 30 }]" />
               <ScenarioField v-model="claimAge" label="청구 나이" unit="세" :min="60" :max="70" :presets="[{ label: '63세', value: 63 }, { label: '65세', value: 65 }, { label: '68세', value: 68 }]" />
             </div>

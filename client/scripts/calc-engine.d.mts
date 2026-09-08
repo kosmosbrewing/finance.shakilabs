@@ -101,6 +101,8 @@ export function calcPensionEstimate(input: {
   ageFactor: number;
   recognizedYears: number;
   eligible: boolean;
+  contributionBase: number;
+  cappedByStandardIncomeLimit: boolean;
   estimatedMonthlyPension: number;
   estimatedAnnualPension: number;
   employeeContribution: number;

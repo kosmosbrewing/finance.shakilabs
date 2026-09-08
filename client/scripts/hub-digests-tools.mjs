@@ -161,6 +161,23 @@ export function pensionRedistributionDigest() {
   const double = rows.find((row) => row.income === 2_000_000);
   const quadruple = rows.find((row) => row.income === 4_000_000);
   const cap = rows[rows.length - 1];
+  // The table stops at the ceiling, so the reader cannot see what happens past it. Probe two
+  // incomes above the ceiling and show that neither the benefit nor the premium moves - the claim
+  // in the table note is then something the engine demonstrates, not something the prose asserts.
+  const overCapProbe = PENSION_CAP_TAXABLE * 2;
+  const overCap = calcPensionEstimate({
+    averageMonthlyIncome: overCapProbe,
+    insuredYears: PENSION_YEARS,
+    claimAge: 65,
+  });
+  const atCap = calcPensionEstimate({
+    averageMonthlyIncome: PENSION_CAP_TAXABLE,
+    insuredYears: PENSION_YEARS,
+    claimAge: 65,
+  });
+  const capIsBinding =
+    overCap.estimatedMonthlyPension === atCap.estimatedMonthlyPension &&
+    overCap.employeeContribution === atCap.employeeContribution;
 
   return {
     h2: "소득이 두 배여도 연금은 두 배가 되지 않는다",
@@ -168,6 +185,7 @@ export function pensionRedistributionDigest() {
       `국민연금 산식에는 본인 소득과 상관없는 균등 부분이 들어 있어, 연금액은 소득에 비례하지 않습니다. 가입 ${PENSION_YEARS}년·65세 청구로 놓고 평균 기준소득월액만 바꿔 보면, ${won(double.income)}의 연금은 월 ${won(double.pension)}인데 소득이 두 배인 ${won(quadruple.income)}의 연금은 ${won(quadruple.pension)}으로 <strong>${pct(quadruple.pension / double.pension - 1, 0)}만 늘어납니다</strong>. 소득대체율로 보면 ${won(low.income)}에서 ${pct(low.replacement)}, 상한인 ${won(cap.income)}에서 ${pct(cap.replacement)}로, 소득이 낮을수록 낸 것에 비해 많이 받는 구조입니다.`,
       `균등 부분의 무게가 그 이유입니다. 연금 가운데 소득과 무관하게 붙는 몫이 ${won(low.income)}에서는 전체의 ${pct(low.fixedShare, 0)}이지만 ${won(cap.income)}에서는 ${pct(cap.fixedShare, 0)}로 줄어듭니다. 저소득 가입자의 연금은 절반 넘게 이 균등 부분에서 나오고, 상한 소득자의 연금은 대부분 본인 소득 비례분입니다.`,
       `낸 돈을 돌려받는 기간도 그래서 갈립니다. 본인 부담 ${pct(RATES_2026.nationalPension.employee, 2)}로 ${PENSION_YEARS}년 낸 보험료를 연금으로 회수하는 데 ${won(low.income)} 가입자는 <strong>${low.recoveryMonths}개월</strong>, ${won(cap.income)} 가입자는 <strong>${cap.recoveryMonths}개월</strong>이 걸립니다. 회사 부담분까지 합친 전체 보험료로 따지면 두 배가 걸리지만, 그래도 상한 소득자가 ${Math.round(cap.recoveryMonths * 2 / 12)}년 안에 원금을 회수하는 셈이라 어느 구간이든 기대여명 안에 돌아옵니다.`,
+      `상한 위로는 표에 새 행이 생기지 ${capIsBinding ? "않습니다" : "않는지 확인이 필요합니다"}. 평균 기준소득월액을 ${won(overCapProbe)}으로, 상한의 두 배로 넣어도 예상 연금은 ${won(overCap.estimatedMonthlyPension)}, 보험료는 ${won(overCap.employeeContribution)}으로 ${won(PENSION_CAP_TAXABLE)}을 넣었을 때와 <strong>1원도 다르지 않습니다</strong>. 시행령 제5조제5항이 신고한 소득월액이 상한액보다 많으면 그 상한액을 기준소득월액으로 한다고 정해 두었고, 기본연금액의 소득비례분도 그렇게 잘린 기준소득월액을 평균해서 만들기 때문입니다(국민연금법 제51조제1항제2호). 상한 위 소득으로 노후를 키우려면 국민연금 바깥의 계좌가 필요하다는 뜻입니다. 다만 상한액은 해마다 고시로 조정되므로 이 선 자체는 고정된 값이 아닙니다.`,
     ],
     table: {
       head: ["평균 기준소득월액", "월 예상 연금 (20년·65세)", "소득대체율", "균등 부분 비중", "본인 부담 보험료 총액", "회수 기간"],

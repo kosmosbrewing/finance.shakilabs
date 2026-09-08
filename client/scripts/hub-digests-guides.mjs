@@ -18,6 +18,7 @@ import {
   calcIncomeTaxBundle,
   calcIrpTaxCredit,
   calcMonthlyRentDeduction,
+  calcPensionEstimate,
   calcRaiseImpact,
   calculateSalaryBreakdown,
   eitcAmountFor,
@@ -99,6 +100,23 @@ export function jobChangeStepFindingsDigest() {
   const crossing = stepRetention(80_000_000);
   const fullyAbove = stepRetention(90_000_000);
   const taxWinsAgain = stepRetention(110_000_000);
+  // The cap is one number doing two jobs. 기준소득월액 is defined as the base for BOTH the premium
+  // and the benefit (국민연금법 제3조제1항제5호), it is cut at the ceiling before either is computed
+  // (시행령 제5조제5항), and the earnings-related half of the benefit averages those cut values
+  // (법 제51조제1항제2호). So three salaries that all clear the ceiling must return the same pension -
+  // which is what makes this checkable rather than assertable.
+  const PENSION_YEARS_AT_CAP = 30;
+  const aboveCapSalaries = [90_000_000, 100_000_000, 120_000_000];
+  const aboveCapPensions = aboveCapSalaries.map(
+    (gross) =>
+      calcPensionEstimate({
+        averageMonthlyIncome: payroll(gross).taxableMonthly,
+        insuredYears: PENSION_YEARS_AT_CAP,
+        claimAge: 65,
+      }).estimatedMonthlyPension,
+  );
+  const cappedPension = aboveCapPensions[0];
+  const pensionFlatAboveCap = aboveCapPensions.every((value) => value === cappedPension);
 
   const raises = [30_000_000, 50_000_000, 80_000_000].map((gross) => {
     const impact = calcRaiseImpact({ currentAnnual: gross, raisePercent: 5 });
@@ -135,7 +153,8 @@ export function jobChangeStepFindingsDigest() {
         h3: `3단계 — 연봉 ${manWon(capReach)}을 완전히 넘긴 인상분에는 국민연금이 1원도 붙지 않는다`,
         body: [
           `4대보험 중 상한이 있는 것은 국민연금뿐입니다. 기준소득월액 상한 ${won(RATES_2026.nationalPension.maxMonthlyIncome)}은 비과세 식대 월 ${won(200_000)} 기준으로 연봉 ${won(capReach)}에서 닿습니다. 그 아래인 ${manWon(70_000_000)} → ${manWon(80_000_000)} 구간에서는 국민연금 공제가 ${won(pensionStepBelow)} 늘지만, 상한을 건너는 ${manWon(80_000_000)} → ${manWon(90_000_000)} 구간에서는 ${won(pensionStepAbove)}밖에 늘지 않고, 상한을 완전히 넘긴 ${manWon(90_000_000)} → ${manWon(100_000_000)} 구간에서는 ${won(fullyAbove.pensionStep)}입니다. 정률이었다면 세 구간 모두 ${won(proportional)} 안팎이 늘었어야 하는 자리입니다.`,
-          `효과는 잔존율에서 그대로 보이지만 <strong>두 칸에서만</strong> 보입니다. ${manWon(70_000_000)} → ${manWon(80_000_000)}의 ${pct(highBand.retention)}에서 ${manWon(80_000_000)} → ${manWon(90_000_000)} ${pct(crossing.retention)}, ${manWon(90_000_000)} → ${manWon(100_000_000)} ${pct(fullyAbove.retention)}으로 되올라갔다가, ${manWon(110_000_000)} → ${manWon(120_000_000)}에서는 소득세 구간이 다시 올라가 ${pct(taxWinsAgain.retention)}로 내려갑니다. 상한 통과가 만드는 반등은 그 위의 누진을 이기지 못합니다. 또 보험료가 줄어드는 것은 그해의 현금 이야기이므로, 노후 연금액은 <a href="/finance/pension">국민연금 예상 수령액 계산기</a>에서 따로 확인해야 합니다.`,
+          `효과는 잔존율에서 그대로 보이지만 <strong>두 칸에서만</strong> 보입니다. ${manWon(70_000_000)} → ${manWon(80_000_000)}의 ${pct(highBand.retention)}에서 ${manWon(80_000_000)} → ${manWon(90_000_000)} ${pct(crossing.retention)}, ${manWon(90_000_000)} → ${manWon(100_000_000)} ${pct(fullyAbove.retention)}으로 되올라갔다가, ${manWon(110_000_000)} → ${manWon(120_000_000)}에서는 소득세 구간이 다시 올라가 ${pct(taxWinsAgain.retention)}로 내려갑니다. 상한 통과가 만드는 반등은 그 위의 누진을 이기지 못합니다.`,
+          `보험료가 덜 나가는 만큼 노후 연금이 줄지 않을까 싶지만, ${pensionFlatAboveCap ? "줄어들지도 늘어나지도 않습니다" : "확인이 필요합니다"}. 기준소득월액은 보험료와 연금액을 <strong>함께</strong> 산정하는 하나의 값이고(국민연금법 제3조제1항제5호), 상한액을 넘는 소득은 그 값이 만들어지는 단계에서 잘려 나가므로(같은 법 시행령 제5조제5항) 보험료에도 연금액에도 남지 않습니다. 가입 ${PENSION_YEARS_AT_CAP}년·65세 청구로 놓고 계산하면 연봉 ${manWon(aboveCapSalaries[0])}·${manWon(aboveCapSalaries[1])}·${manWon(aboveCapSalaries[2])}의 예상 월연금이 모두 ${won(cappedPension)}으로 같습니다. 상한 위에서 오르는 연봉은 그해 현금만 늘리고 노후 연금은 늘리지 않으므로, 그 구간의 노후 대비는 <a href="/finance/irp">연금계좌 세액공제 계산기</a> 쪽에서 따로 만들어야 합니다. 다만 상한액 자체는 해마다 조정되므로 올해 잘린 소득이 내년 기준으로는 반영될 수 있고, 본인 가입 이력에 맞춘 값은 <a href="/finance/pension">국민연금 예상 수령액 계산기</a>에서 확인해야 합니다.`,
         ],
       },
       {
