@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed } from "vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -61,48 +62,50 @@ const deductionItems = computed(() => [
             <h2 id="year-end-input-title" class="retro-title">연말정산 조건 입력</h2>
           </div>
 
-          <div class="retro-panel-content space-y-6">
-            <div class="space-y-1">
-              <h2 class="text-body font-semibold">기본 정보</h2>
-              <div class="grid gap-4 sm:grid-cols-2">
-                <ScenarioField v-model="calc.annualSalary.value" label="총급여(연봉)" unit="원" :min="12_000_000" :max="300_000_000" :step="1_000_000" format="currency" :presets="YEAR_END_SALARY_PRESETS" />
-                <ScenarioField v-model="calc.dependents.value" label="부양가족 수 (본인 포함)" unit="명" :min="1" :max="10" :step="1" />
-                <ScenarioField v-model="calc.children.value" label="8세 이상 자녀 수" unit="명" :min="0" :max="5" :step="1" />
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content space-y-6">
+              <div class="space-y-1">
+                <h2 class="text-body font-semibold">기본 정보</h2>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <ScenarioField v-model="calc.annualSalary.value" label="총급여(연봉)" unit="원" :min="12_000_000" :max="300_000_000" :step="1_000_000" format="currency" :presets="YEAR_END_SALARY_PRESETS" />
+                  <ScenarioField v-model="calc.dependents.value" label="부양가족 수 (본인 포함)" unit="명" :min="1" :max="10" :step="1" />
+                  <ScenarioField v-model="calc.children.value" label="8세 이상 자녀 수" unit="명" :min="0" :max="5" :step="1" />
+                </div>
               </div>
-            </div>
-
-            <!-- 신용카드 -->
-            <div class="space-y-1">
-              <h2 class="text-body font-semibold">신용카드 등 소득공제</h2>
-              <div class="grid gap-4 sm:grid-cols-2">
-                <ScenarioField v-model="calc.creditCardSpend.value" label="신용카드 사용액" unit="원" :min="0" :max="100_000_000" :step="500_000" format="currency" :presets="[{ label: '500만원', value: 5_000_000 }, { label: '1,000만원', value: 10_000_000 }, { label: '2,000만원', value: 20_000_000 }]" />
-                <ScenarioField v-model="calc.debitCardSpend.value" label="체크카드·현금영수증" unit="원" :min="0" :max="50_000_000" :step="500_000" format="currency" :presets="[{ label: '300만원', value: 3_000_000 }, { label: '500만원', value: 5_000_000 }, { label: '1,000만원', value: 10_000_000 }]" />
+  
+              <!-- 신용카드 -->
+              <div class="space-y-1">
+                <h2 class="text-body font-semibold">신용카드 등 소득공제</h2>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <ScenarioField v-model="calc.creditCardSpend.value" label="신용카드 사용액" unit="원" :min="0" :max="100_000_000" :step="500_000" format="currency" :presets="[{ label: '500만원', value: 5_000_000 }, { label: '1,000만원', value: 10_000_000 }, { label: '2,000만원', value: 20_000_000 }]" />
+                  <ScenarioField v-model="calc.debitCardSpend.value" label="체크카드·현금영수증" unit="원" :min="0" :max="50_000_000" :step="500_000" format="currency" :presets="[{ label: '300만원', value: 3_000_000 }, { label: '500만원', value: 5_000_000 }, { label: '1,000만원', value: 10_000_000 }]" />
+                </div>
               </div>
-            </div>
-
-            <!-- 세액공제 항목 -->
-            <div class="space-y-1">
-              <h2 class="text-body font-semibold">세액공제 항목</h2>
-              <div class="grid gap-4 sm:grid-cols-2">
-                <ScenarioField v-model="calc.insurancePremium.value" label="보장성보험료" unit="원" :min="0" :max="3_000_000" :step="100_000" format="currency" :presets="[{ label: '50만원', value: 500_000 }, { label: '100만원', value: 1_000_000 }]" />
-                <ScenarioField v-model="calc.medicalExpense.value" label="의료비 지출" unit="원" :min="0" :max="50_000_000" :step="100_000" format="currency" :presets="[{ label: '100만원', value: 1_000_000 }, { label: '300만원', value: 3_000_000 }, { label: '500만원', value: 5_000_000 }]" />
-                <ScenarioField v-model="calc.educationExpense.value" label="교육비" unit="원" :min="0" :max="20_000_000" :step="100_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '500만원', value: 5_000_000 }]" />
-                <ScenarioField v-model="calc.donationAmount.value" label="기부금" unit="원" :min="0" :max="50_000_000" :step="100_000" format="currency" :presets="[{ label: '100만원', value: 1_000_000 }, { label: '500만원', value: 5_000_000 }]" />
+  
+              <!-- 세액공제 항목 -->
+              <div class="space-y-1">
+                <h2 class="text-body font-semibold">세액공제 항목</h2>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <ScenarioField v-model="calc.insurancePremium.value" label="보장성보험료" unit="원" :min="0" :max="3_000_000" :step="100_000" format="currency" :presets="[{ label: '50만원', value: 500_000 }, { label: '100만원', value: 1_000_000 }]" />
+                  <ScenarioField v-model="calc.medicalExpense.value" label="의료비 지출" unit="원" :min="0" :max="50_000_000" :step="100_000" format="currency" :presets="[{ label: '100만원', value: 1_000_000 }, { label: '300만원', value: 3_000_000 }, { label: '500만원', value: 5_000_000 }]" />
+                  <ScenarioField v-model="calc.educationExpense.value" label="교육비" unit="원" :min="0" :max="20_000_000" :step="100_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '500만원', value: 5_000_000 }]" />
+                  <ScenarioField v-model="calc.donationAmount.value" label="기부금" unit="원" :min="0" :max="50_000_000" :step="100_000" format="currency" :presets="[{ label: '100만원', value: 1_000_000 }, { label: '500만원', value: 5_000_000 }]" />
+                </div>
               </div>
-            </div>
-
-            <!-- 연금·월세 -->
-            <div class="space-y-1">
-              <h2 class="text-body font-semibold">연금 · 월세</h2>
-              <div class="grid gap-4 sm:grid-cols-2">
-                <ScenarioField v-model="calc.pensionSavings.value" label="연금저축 납입액" unit="원" :min="0" :max="10_000_000" :step="100_000" format="currency" :presets="[{ label: '400만원', value: 4_000_000 }, { label: '600만원', value: 6_000_000 }]" />
-                <ScenarioField v-model="calc.irpContribution.value" label="IRP 납입액" unit="원" :min="0" :max="10_000_000" :step="100_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '300만원', value: 3_000_000 }]" />
-                <ScenarioField v-model="calc.monthlyRent.value" label="월세" unit="원" :min="0" :max="2_000_000" :step="50_000" format="currency" :presets="[{ label: '50만원', value: 500_000 }, { label: '70만원', value: 700_000 }]" />
-                <ScenarioField v-model="calc.rentMonths.value" label="월세 납부 개월" unit="개월" :min="0" :max="12" :step="1" />
+  
+              <!-- 연금·월세 -->
+              <div class="space-y-1">
+                <h2 class="text-body font-semibold">연금 · 월세</h2>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <ScenarioField v-model="calc.pensionSavings.value" label="연금저축 납입액" unit="원" :min="0" :max="10_000_000" :step="100_000" format="currency" :presets="[{ label: '400만원', value: 4_000_000 }, { label: '600만원', value: 6_000_000 }]" />
+                  <ScenarioField v-model="calc.irpContribution.value" label="IRP 납입액" unit="원" :min="0" :max="10_000_000" :step="100_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '300만원', value: 3_000_000 }]" />
+                  <ScenarioField v-model="calc.monthlyRent.value" label="월세" unit="원" :min="0" :max="2_000_000" :step="50_000" format="currency" :presets="[{ label: '50만원', value: 500_000 }, { label: '70만원', value: 700_000 }]" />
+                  <ScenarioField v-model="calc.rentMonths.value" label="월세 납부 개월" unit="개월" :min="0" :max="12" :step="1" />
+                </div>
               </div>
+  
             </div>
-
-          </div>
+          </CalculatorInteractionTracker>
         </section>
 
         <section class="retro-panel overflow-hidden" aria-labelledby="year-end-result-title">

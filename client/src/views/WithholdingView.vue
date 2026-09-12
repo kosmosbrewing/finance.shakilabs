@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -198,12 +199,14 @@ watch(
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
-        <WithholdingInput
-          v-model:monthly-income-tax="monthlyIncomeTax"
-          v-model:dependents="dependents"
-          v-model:children-under20="childrenUnder20"
-          v-model:non-taxable-monthly="nonTaxableMonthly"
-        />
+        <CalculatorInteractionTracker>
+          <WithholdingInput
+            v-model:monthly-income-tax="monthlyIncomeTax"
+            v-model:dependents="dependents"
+            v-model:children-under20="childrenUnder20"
+            v-model:non-taxable-monthly="nonTaxableMonthly"
+          />
+        </CalculatorInteractionTracker>
 
         <WithholdingResult
           :monthly-income-tax="monthlyIncomeTax"

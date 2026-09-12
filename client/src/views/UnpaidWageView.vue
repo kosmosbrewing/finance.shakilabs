@@ -84,10 +84,7 @@ const statItems = computed(() => [
             <h2 id="unpaid-wage-input-title" class="retro-title">체불 조건 입력</h2>
           </div>
           <div class="retro-panel-content min-w-0 space-y-5">
-            <CalculatorInteractionTracker
-              calculator-id="unpaid_wage_interest"
-              page-path="/finance/unpaid-wage"
-            >
+            <CalculatorInteractionTracker>
               <div class="space-y-5">
                 <ScenarioField
                   v-model="unpaidAmount"

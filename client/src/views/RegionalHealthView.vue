@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import FreshBadge from "@/components/common/FreshBadge.vue";
@@ -68,124 +69,126 @@ const cheapestLabel = computed(() => {
             </div>
             <FreshBadge message="2026년 건보율 7.19% 반영" />
           </div>
-          <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div class="space-y-4">
-              <ScenarioField
-                v-model="monthlySalary"
-                label="퇴직 전 월급 (세전)"
-                unit="원"
-                :min="1_000_000"
-                :max="20_000_000"
-                :step="100_000"
-                format="currency"
-                :presets="[
-                  { label: '250만', value: 2_500_000 },
-                  { label: '350만', value: 3_500_000 },
-                  { label: '500만', value: 5_000_000 },
-                ]"
-              />
-              <ScenarioField
-                v-model="financialIncome"
-                label="퇴사 후 연간 금융소득 (이자·배당)"
-                unit="원"
-                :min="0"
-                :max="100_000_000"
-                :step="1_000_000"
-                format="currency"
-                :presets="[
-                  { label: '없음', value: 0 },
-                  { label: '500만', value: 5_000_000 },
-                  { label: '2000만', value: 20_000_000 },
-                ]"
-              />
-              <ScenarioField
-                v-model="propertyTaxBase"
-                label="부동산 과세표준 (공시가격)"
-                unit="원"
-                :min="0"
-                :max="5_000_000_000"
-                :step="10_000_000"
-                format="currency"
-                :presets="[
-                  { label: '없음', value: 0 },
-                  { label: '2억', value: 200_000_000 },
-                  { label: '5억', value: 500_000_000 },
-                ]"
-              />
-              <ScenarioField
-                v-model="carTaxBase"
-                label="자동차 과세표준"
-                unit="원"
-                :min="0"
-                :max="200_000_000"
-                :step="5_000_000"
-                format="currency"
-                :presets="[
-                  { label: '없음', value: 0 },
-                  { label: '2000만', value: 20_000_000 },
-                  { label: '5000만', value: 50_000_000 },
-                ]"
-              />
-            </div>
-
-            <div class="space-y-4">
-              <ResultHero label="지역가입자 추정" :value="formatWon(result.regionalMonthly)" />
-              <BenefitStatGrid
-                :items="[
-                  { label: '현재 근로자 부담', value: formatWon(result.currentMonthly) },
-                  { label: '임의계속가입 (경감 후)', value: formatWon(result.voluntaryMonthly) },
-                  { label: '추천', value: cheapestLabel },
-                ]"
-              />
-
-              <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
-                <p v-if="result.dependentEligible" class="font-semibold text-primary">
-                  피부양자 등록 요건을 충족할 수 있습니다. 배우자 등 직장가입자가 있다면 보험료 0원이 가능합니다.
-                </p>
-                <p>지역가입자 보험료는 소득·재산·자동차를 기반으로 한 간이 추정입니다. 실제 보험료는 건강보험공단 고지 기준으로 달라질 수 있습니다.</p>
-                <p>
-                  <strong class="text-foreground">소득 기준이 다릅니다.</strong>
-                  임의계속가입료는 <strong class="text-foreground">퇴직 전 월급</strong>(보수월액)으로 계산하고,
-                  지역가입자 소득분은 퇴사 후에 남는 <strong class="text-foreground">금융소득</strong>만 봅니다.
-                  퇴사 후에도 근로소득이 이어진다면 지역가입자 금액은 이 추정보다 높아집니다.
-                </p>
-                <p>
-                  임의계속가입자는 보수월액보험료 <strong class="text-foreground">전액</strong>을 본인이 부담하지만(국민건강보험법 제110조 제5항),
-                  같은 조 제4항이 위임한 보험료 경감고시 제9조가 <strong class="text-foreground">그 100분의 50을 경감</strong>합니다.
-                  그래서 실제 고지액은 재직 중 본인부담분과 같은 금액이 됩니다.
-                </p>
-                <p>임의계속가입은 퇴사 후 2개월 이내 신청해야 하며, 최대 36개월간 유지 가능합니다.</p>
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+              <div class="space-y-4">
+                <ScenarioField
+                  v-model="monthlySalary"
+                  label="퇴직 전 월급 (세전)"
+                  unit="원"
+                  :min="1_000_000"
+                  :max="20_000_000"
+                  :step="100_000"
+                  format="currency"
+                  :presets="[
+                    { label: '250만', value: 2_500_000 },
+                    { label: '350만', value: 3_500_000 },
+                    { label: '500만', value: 5_000_000 },
+                  ]"
+                />
+                <ScenarioField
+                  v-model="financialIncome"
+                  label="퇴사 후 연간 금융소득 (이자·배당)"
+                  unit="원"
+                  :min="0"
+                  :max="100_000_000"
+                  :step="1_000_000"
+                  format="currency"
+                  :presets="[
+                    { label: '없음', value: 0 },
+                    { label: '500만', value: 5_000_000 },
+                    { label: '2000만', value: 20_000_000 },
+                  ]"
+                />
+                <ScenarioField
+                  v-model="propertyTaxBase"
+                  label="부동산 과세표준 (공시가격)"
+                  unit="원"
+                  :min="0"
+                  :max="5_000_000_000"
+                  :step="10_000_000"
+                  format="currency"
+                  :presets="[
+                    { label: '없음', value: 0 },
+                    { label: '2억', value: 200_000_000 },
+                    { label: '5억', value: 500_000_000 },
+                  ]"
+                />
+                <ScenarioField
+                  v-model="carTaxBase"
+                  label="자동차 과세표준"
+                  unit="원"
+                  :min="0"
+                  :max="200_000_000"
+                  :step="5_000_000"
+                  format="currency"
+                  :presets="[
+                    { label: '없음', value: 0 },
+                    { label: '2000만', value: 20_000_000 },
+                    { label: '5000만', value: 50_000_000 },
+                  ]"
+                />
               </div>
-
-              <!-- 비교표 -->
-              <div class="retro-panel-muted p-3">
-                <p class="text-caption font-semibold text-foreground mb-2">월 보험료 비교</p>
-                <p class="text-tiny text-muted-foreground mb-2">모두 장기요양보험료를 포함한 합계입니다. 건강보험료만 적힌 자료와 비교할 때는 아래 분해 금액을 보세요.</p>
-                <ul class="space-y-2 text-caption text-muted-foreground">
-                  <li class="flex justify-between">
-                    <span>현재 (근로자 부담)</span>
-                    <span class="font-medium text-foreground tabular-nums">{{ formatWon(result.currentMonthly) }}</span>
-                  </li>
-                  <li class="flex justify-between" :class="{ 'text-primary font-semibold': result.cheapestOption === 'voluntary' }">
-                    <span>임의계속가입 (경감 후)</span>
-                    <span class="tabular-nums">{{ formatWon(result.voluntaryMonthly) }}</span>
-                  </li>
-                  <li class="flex justify-between text-tiny">
-                    <span>└ 건강보험 {{ formatWon(result.voluntaryHealth) }} + 장기요양 {{ formatWon(result.voluntaryLongTerm) }}</span>
-                    <span class="tabular-nums">경감 전 전액 {{ formatWon(result.voluntaryGrossMonthly) }}</span>
-                  </li>
-                  <li class="flex justify-between" :class="{ 'text-primary font-semibold': result.cheapestOption === 'regional' }">
-                    <span>지역가입자</span>
-                    <span class="tabular-nums">{{ formatWon(result.regionalMonthly) }}</span>
-                  </li>
-                  <li v-if="result.dependentEligible" class="flex justify-between text-primary font-semibold">
-                    <span>피부양자 등록</span>
-                    <span class="tabular-nums">0원</span>
-                  </li>
-                </ul>
+  
+              <div class="space-y-4">
+                <ResultHero label="지역가입자 추정" :value="formatWon(result.regionalMonthly)" />
+                <BenefitStatGrid
+                  :items="[
+                    { label: '현재 근로자 부담', value: formatWon(result.currentMonthly) },
+                    { label: '임의계속가입 (경감 후)', value: formatWon(result.voluntaryMonthly) },
+                    { label: '추천', value: cheapestLabel },
+                  ]"
+                />
+  
+                <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
+                  <p v-if="result.dependentEligible" class="font-semibold text-primary">
+                    피부양자 등록 요건을 충족할 수 있습니다. 배우자 등 직장가입자가 있다면 보험료 0원이 가능합니다.
+                  </p>
+                  <p>지역가입자 보험료는 소득·재산·자동차를 기반으로 한 간이 추정입니다. 실제 보험료는 건강보험공단 고지 기준으로 달라질 수 있습니다.</p>
+                  <p>
+                    <strong class="text-foreground">소득 기준이 다릅니다.</strong>
+                    임의계속가입료는 <strong class="text-foreground">퇴직 전 월급</strong>(보수월액)으로 계산하고,
+                    지역가입자 소득분은 퇴사 후에 남는 <strong class="text-foreground">금융소득</strong>만 봅니다.
+                    퇴사 후에도 근로소득이 이어진다면 지역가입자 금액은 이 추정보다 높아집니다.
+                  </p>
+                  <p>
+                    임의계속가입자는 보수월액보험료 <strong class="text-foreground">전액</strong>을 본인이 부담하지만(국민건강보험법 제110조 제5항),
+                    같은 조 제4항이 위임한 보험료 경감고시 제9조가 <strong class="text-foreground">그 100분의 50을 경감</strong>합니다.
+                    그래서 실제 고지액은 재직 중 본인부담분과 같은 금액이 됩니다.
+                  </p>
+                  <p>임의계속가입은 퇴사 후 2개월 이내 신청해야 하며, 최대 36개월간 유지 가능합니다.</p>
+                </div>
+  
+                <!-- 비교표 -->
+                <div class="retro-panel-muted p-3">
+                  <p class="text-caption font-semibold text-foreground mb-2">월 보험료 비교</p>
+                  <p class="text-tiny text-muted-foreground mb-2">모두 장기요양보험료를 포함한 합계입니다. 건강보험료만 적힌 자료와 비교할 때는 아래 분해 금액을 보세요.</p>
+                  <ul class="space-y-2 text-caption text-muted-foreground">
+                    <li class="flex justify-between">
+                      <span>현재 (근로자 부담)</span>
+                      <span class="font-medium text-foreground tabular-nums">{{ formatWon(result.currentMonthly) }}</span>
+                    </li>
+                    <li class="flex justify-between" :class="{ 'text-primary font-semibold': result.cheapestOption === 'voluntary' }">
+                      <span>임의계속가입 (경감 후)</span>
+                      <span class="tabular-nums">{{ formatWon(result.voluntaryMonthly) }}</span>
+                    </li>
+                    <li class="flex justify-between text-tiny">
+                      <span>└ 건강보험 {{ formatWon(result.voluntaryHealth) }} + 장기요양 {{ formatWon(result.voluntaryLongTerm) }}</span>
+                      <span class="tabular-nums">경감 전 전액 {{ formatWon(result.voluntaryGrossMonthly) }}</span>
+                    </li>
+                    <li class="flex justify-between" :class="{ 'text-primary font-semibold': result.cheapestOption === 'regional' }">
+                      <span>지역가입자</span>
+                      <span class="tabular-nums">{{ formatWon(result.regionalMonthly) }}</span>
+                    </li>
+                    <li v-if="result.dependentEligible" class="flex justify-between text-primary font-semibold">
+                      <span>피부양자 등록</span>
+                      <span class="tabular-nums">0원</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
+          </CalculatorInteractionTracker>
         </div>
 
         <BenefitFaqPanel :items="regionalHealthFaqs" />

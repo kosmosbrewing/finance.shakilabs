@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed } from "vue";
 import { ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
@@ -66,22 +67,24 @@ const summaryItems = computed(() => [
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="parental-leave-input-title" class="retro-title">육아휴직 조건 입력</h2>
           </div>
-          <div class="retro-panel-content space-y-5">
-            <div class="grid gap-4 sm:grid-cols-2">
-              <ScenarioField v-model="calc.monthlyWage.value" label="통상임금 (월)" unit="원" :min="700_000" :max="10_000_000" :step="100_000" format="currency" :presets="PARENTAL_LEAVE_SALARY_PRESETS" />
-              <ScenarioField v-model="calc.months.value" label="휴직 기간" unit="개월" :min="1" :max="12" :step="1" />
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content space-y-5">
+              <div class="grid gap-4 sm:grid-cols-2">
+                <ScenarioField v-model="calc.monthlyWage.value" label="통상임금 (월)" unit="원" :min="700_000" :max="10_000_000" :step="100_000" format="currency" :presets="PARENTAL_LEAVE_SALARY_PRESETS" />
+                <ScenarioField v-model="calc.months.value" label="휴직 기간" unit="개월" :min="1" :max="12" :step="1" />
+              </div>
+  
+              <div class="space-y-1">
+                <p class="text-caption font-medium text-muted-foreground">적용 제도</p>
+                <ShPresetGroup
+                  :model-value="calc.leaveType.value"
+                  :options="typeOptions"
+                  label="육아휴직 적용 제도"
+                  @update:model-value="updateLeaveType"
+                />
+              </div>
             </div>
-
-            <div class="space-y-1">
-              <p class="text-caption font-medium text-muted-foreground">적용 제도</p>
-              <ShPresetGroup
-                :model-value="calc.leaveType.value"
-                :options="typeOptions"
-                label="육아휴직 적용 제도"
-                @update:model-value="updateLeaveType"
-              />
-            </div>
-          </div>
+          </CalculatorInteractionTracker>
         </section>
 
         <section class="retro-panel overflow-hidden" aria-labelledby="parental-leave-result-title">

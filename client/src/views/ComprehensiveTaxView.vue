@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -368,78 +369,80 @@ watch(
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
-        <IncomeSourceInput
-          source-type="business"
-          :enabled="business.enabled"
-          :revenue="business.revenue"
-          :industry-key="business.industryKey"
-          :custom-expense-rate="business.customExpenseRate"
-          @update:enabled="business.enabled = $event"
-          @update:revenue="business.revenue = $event"
-          @update:industry-key="business.industryKey = $event"
-          @update:custom-expense-rate="business.customExpenseRate = $event"
-        />
-
-        <IncomeSourceInput
-          source-type="rental"
-          :enabled="rental.enabled"
-          :revenue="rental.revenue"
-          :registered="rental.registered"
-          :custom-expense-rate="rental.customExpenseRate"
-          :prefer-separate="rental.preferSeparate"
-          @update:enabled="rental.enabled = $event"
-          @update:revenue="rental.revenue = $event"
-          @update:registered="rental.registered = $event"
-          @update:custom-expense-rate="rental.customExpenseRate = $event"
-          @update:prefer-separate="rental.preferSeparate = $event"
-        />
-
-        <IncomeSourceInput
-          source-type="other"
-          :enabled="other.enabled"
-          :revenue="other.revenue"
-          :custom-expense-rate="other.customExpenseRate"
-          :prefer-separate="other.preferSeparate"
-          @update:enabled="other.enabled = $event"
-          @update:revenue="other.revenue = $event"
-          @update:custom-expense-rate="other.customExpenseRate = $event"
-          @update:prefer-separate="other.preferSeparate = $event"
-        />
-
-        <section class="retro-panel overflow-hidden">
-          <div class="retro-titlebar">
-            <h2 class="retro-title">공제 설정</h2>
-          </div>
-
-          <div class="retro-panel-content grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <label class="space-y-1" for="comprehensive-dependents">
-              <span class="text-caption text-muted-foreground">부양가족 수 (본인 포함)</span>
-              <input
-                id="comprehensive-dependents"
-                :value="dependents"
-                type="number"
-                min="1"
-                max="20"
-                inputmode="numeric"
-                class="retro-input"
-                @input="onDependentsInput"
-              />
-            </label>
-
-            <div class="space-y-1">
-              <span class="text-caption text-muted-foreground">연금보험료 공제</span>
-              <label class="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 text-caption font-semibold">
-                <input
-                  type="checkbox"
-                  class="retro-checkbox"
-                  :checked="includePension"
-                  @change="includePension = ($event.target as HTMLInputElement).checked"
-                />
-                사업소득 기준 연금공제 반영
-              </label>
+        <CalculatorInteractionTracker class="space-y-4">
+          <IncomeSourceInput
+            source-type="business"
+            :enabled="business.enabled"
+            :revenue="business.revenue"
+            :industry-key="business.industryKey"
+            :custom-expense-rate="business.customExpenseRate"
+            @update:enabled="business.enabled = $event"
+            @update:revenue="business.revenue = $event"
+            @update:industry-key="business.industryKey = $event"
+            @update:custom-expense-rate="business.customExpenseRate = $event"
+          />
+  
+          <IncomeSourceInput
+            source-type="rental"
+            :enabled="rental.enabled"
+            :revenue="rental.revenue"
+            :registered="rental.registered"
+            :custom-expense-rate="rental.customExpenseRate"
+            :prefer-separate="rental.preferSeparate"
+            @update:enabled="rental.enabled = $event"
+            @update:revenue="rental.revenue = $event"
+            @update:registered="rental.registered = $event"
+            @update:custom-expense-rate="rental.customExpenseRate = $event"
+            @update:prefer-separate="rental.preferSeparate = $event"
+          />
+  
+          <IncomeSourceInput
+            source-type="other"
+            :enabled="other.enabled"
+            :revenue="other.revenue"
+            :custom-expense-rate="other.customExpenseRate"
+            :prefer-separate="other.preferSeparate"
+            @update:enabled="other.enabled = $event"
+            @update:revenue="other.revenue = $event"
+            @update:custom-expense-rate="other.customExpenseRate = $event"
+            @update:prefer-separate="other.preferSeparate = $event"
+          />
+  
+          <section class="retro-panel overflow-hidden">
+            <div class="retro-titlebar">
+              <h2 class="retro-title">공제 설정</h2>
             </div>
-          </div>
-        </section>
+  
+            <div class="retro-panel-content grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label class="space-y-1" for="comprehensive-dependents">
+                <span class="text-caption text-muted-foreground">부양가족 수 (본인 포함)</span>
+                <input
+                  id="comprehensive-dependents"
+                  :value="dependents"
+                  type="number"
+                  min="1"
+                  max="20"
+                  inputmode="numeric"
+                  class="retro-input"
+                  @input="onDependentsInput"
+                />
+              </label>
+  
+              <div class="space-y-1">
+                <span class="text-caption text-muted-foreground">연금보험료 공제</span>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5 text-caption font-semibold">
+                  <input
+                    type="checkbox"
+                    class="retro-checkbox"
+                    :checked="includePension"
+                    @change="includePension = ($event.target as HTMLInputElement).checked"
+                  />
+                  사업소득 기준 연금공제 반영
+                </label>
+              </div>
+            </div>
+          </section>
+        </CalculatorInteractionTracker>
 
         <ComprehensiveTaxResult :result="result" @share-request="openShare" />
 

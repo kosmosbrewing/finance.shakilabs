@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref } from "vue";
 import {
   ShButton,
@@ -81,52 +82,54 @@ const quitReasonOptions = [
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="unemployment-input-title" class="retro-title">수급 조건 입력</h2>
           </div>
-          <div class="retro-panel-content min-w-0 space-y-5">
-              <ScenarioField
-                v-model="monthlySalary"
-                label="퇴직 전 월급 (세전)"
-                unit="원"
-                :min="1_000_000"
-                :max="20_000_000"
-                :step="100_000"
-                format="currency"
-                :presets="[
-                  { label: '250만', value: 2_500_000 },
-                  { label: '350만', value: 3_500_000 },
-                  { label: '500만', value: 5_000_000 },
-                ]"
-              />
-              <ScenarioField
-                v-model="insuranceYears"
-                label="고용보험 가입기간"
-                unit="년"
-                :min="0"
-                :max="30"
-                :presets="[
-                  { label: '1년', value: 1 },
-                  { label: '3년', value: 3 },
-                  { label: '5년', value: 5 },
-                  { label: '10년', value: 10 },
-                ]"
-              />
-              <ScenarioField v-model="age" label="나이" unit="세" :min="20" :max="70" :presets="[{ label: '30세', value: 30 }, { label: '45세', value: 45 }, { label: '55세', value: 55 }]" />
-
-              <div class="space-y-1.5">
-                <label class="text-caption font-semibold text-foreground">퇴사 사유</label>
-                <div class="flex flex-wrap gap-2">
-                  <ShButton
-                    v-for="opt in quitReasonOptions"
-                    :key="opt.value"
-                    :variant="quitReason === opt.value ? 'primary' : 'secondary'"
-                    size="sm"
-                    type="button"
-                    @click="quitReason = opt.value"
-                  >
-                    {{ opt.label }}
-                  </ShButton>
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content min-w-0 space-y-5">
+                <ScenarioField
+                  v-model="monthlySalary"
+                  label="퇴직 전 월급 (세전)"
+                  unit="원"
+                  :min="1_000_000"
+                  :max="20_000_000"
+                  :step="100_000"
+                  format="currency"
+                  :presets="[
+                    { label: '250만', value: 2_500_000 },
+                    { label: '350만', value: 3_500_000 },
+                    { label: '500만', value: 5_000_000 },
+                  ]"
+                />
+                <ScenarioField
+                  v-model="insuranceYears"
+                  label="고용보험 가입기간"
+                  unit="년"
+                  :min="0"
+                  :max="30"
+                  :presets="[
+                    { label: '1년', value: 1 },
+                    { label: '3년', value: 3 },
+                    { label: '5년', value: 5 },
+                    { label: '10년', value: 10 },
+                  ]"
+                />
+                <ScenarioField v-model="age" label="나이" unit="세" :min="20" :max="70" :presets="[{ label: '30세', value: 30 }, { label: '45세', value: 45 }, { label: '55세', value: 55 }]" />
+  
+                <div class="space-y-1.5">
+                  <label class="text-caption font-semibold text-foreground">퇴사 사유</label>
+                  <div class="flex flex-wrap gap-2">
+                    <ShButton
+                      v-for="opt in quitReasonOptions"
+                      :key="opt.value"
+                      :variant="quitReason === opt.value ? 'primary' : 'secondary'"
+                      size="sm"
+                      type="button"
+                      @click="quitReason = opt.value"
+                    >
+                      {{ opt.label }}
+                    </ShButton>
+                  </div>
                 </div>
-              </div>
-          </div>
+            </div>
+          </CalculatorInteractionTracker>
         </section>
 
         <section class="retro-panel overflow-hidden" aria-labelledby="unemployment-result-title">

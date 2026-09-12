@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
@@ -101,46 +102,48 @@ watch(
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="wage-converter-input-title" class="retro-title">환산 조건 입력</h2>
           </div>
-          <div class="retro-panel-content space-y-5">
-            <div class="space-y-1.5">
-              <label class="text-caption font-semibold text-foreground">입력 기준</label>
-              <ShPresetGroup
-                :model-value="base"
-                :options="baseOptions"
-                label="입력 기준 선택"
-                @update:model-value="updateBasePreset"
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content space-y-5">
+              <div class="space-y-1.5">
+                <label class="text-caption font-semibold text-foreground">입력 기준</label>
+                <ShPresetGroup
+                  :model-value="base"
+                  :options="baseOptions"
+                  label="입력 기준 선택"
+                  @update:model-value="updateBasePreset"
+                />
+              </div>
+  
+              <ScenarioField
+                v-model="amount"
+                :label="base === 'hourly' ? '시급' : base === 'monthly' ? '월급' : '연봉'"
+                unit="원"
+                :min="base === 'hourly' ? 1_000 : base === 'monthly' ? 500_000 : 10_000_000"
+                :max="base === 'hourly' ? 200_000 : base === 'monthly' ? 50_000_000 : 600_000_000"
+                :step="base === 'hourly' ? 100 : base === 'monthly' ? 100_000 : 1_000_000"
+                format="currency"
+                :presets="
+                  base === 'hourly'
+                    ? [{ label: '최저 10,320', value: 10_320 }, { label: '15,000', value: 15_000 }, { label: '20,000', value: 20_000 }]
+                    : base === 'monthly'
+                      ? [{ label: '250만', value: 2_500_000 }, { label: '300만', value: 3_000_000 }, { label: '400만', value: 4_000_000 }]
+                      : [{ label: '3000만', value: 30_000_000 }, { label: '3600만', value: 36_000_000 }, { label: '5000만', value: 50_000_000 }]
+                "
               />
+  
+              <ScenarioField v-model="weeklyWorkHours" label="주 근무시간" unit="시간" :min="15" :max="52" :presets="[{ label: '20시간', value: 20 }, { label: '35시간', value: 35 }, { label: '40시간', value: 40 }]" />
+  
+              <div class="space-y-1.5">
+                <label class="text-caption font-semibold text-foreground">주휴수당 포함</label>
+                <ShPresetGroup
+                  :model-value="includeWeeklyHoliday"
+                  :options="[{ label: '포함', value: true }, { label: '미포함', value: false }]"
+                  label="주휴수당 포함 여부"
+                  @update:model-value="updateWeeklyHolidayPreset"
+                />
+              </div>
             </div>
-
-            <ScenarioField
-              v-model="amount"
-              :label="base === 'hourly' ? '시급' : base === 'monthly' ? '월급' : '연봉'"
-              unit="원"
-              :min="base === 'hourly' ? 1_000 : base === 'monthly' ? 500_000 : 10_000_000"
-              :max="base === 'hourly' ? 200_000 : base === 'monthly' ? 50_000_000 : 600_000_000"
-              :step="base === 'hourly' ? 100 : base === 'monthly' ? 100_000 : 1_000_000"
-              format="currency"
-              :presets="
-                base === 'hourly'
-                  ? [{ label: '최저 10,320', value: 10_320 }, { label: '15,000', value: 15_000 }, { label: '20,000', value: 20_000 }]
-                  : base === 'monthly'
-                    ? [{ label: '250만', value: 2_500_000 }, { label: '300만', value: 3_000_000 }, { label: '400만', value: 4_000_000 }]
-                    : [{ label: '3000만', value: 30_000_000 }, { label: '3600만', value: 36_000_000 }, { label: '5000만', value: 50_000_000 }]
-              "
-            />
-
-            <ScenarioField v-model="weeklyWorkHours" label="주 근무시간" unit="시간" :min="15" :max="52" :presets="[{ label: '20시간', value: 20 }, { label: '35시간', value: 35 }, { label: '40시간', value: 40 }]" />
-
-            <div class="space-y-1.5">
-              <label class="text-caption font-semibold text-foreground">주휴수당 포함</label>
-              <ShPresetGroup
-                :model-value="includeWeeklyHoliday"
-                :options="[{ label: '포함', value: true }, { label: '미포함', value: false }]"
-                label="주휴수당 포함 여부"
-                @update:model-value="updateWeeklyHolidayPreset"
-              />
-            </div>
-          </div>
+          </CalculatorInteractionTracker>
         </section>
 
         <section class="retro-panel overflow-hidden" aria-labelledby="wage-converter-result-title">

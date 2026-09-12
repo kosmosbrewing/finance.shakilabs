@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import FreshBadge from "@/components/common/FreshBadge.vue";
@@ -48,32 +49,34 @@ const seoDescription = computed(
             </div>
             <FreshBadge message="총급여 5,500만원·8,000만원 구간 반영" />
           </div>
-          <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div class="space-y-4">
-              <ScenarioField v-model="annualSalary" label="총급여" unit="원" :min="10_000_000" :max="100_000_000" :step="100_000" format="currency" :presets="[{ label: '4,000만원', value: 40_000_000 }, { label: '4,800만원', value: 48_000_000 }, { label: '7,000만원', value: 70_000_000 }]" />
-              <ScenarioField v-model="monthlyRent" label="월세" unit="원" :min="100_000" :max="2_000_000" :step="10_000" format="currency" :presets="[{ label: '50만원', value: 500_000 }, { label: '70만원', value: 700_000 }, { label: '100만원', value: 1_000_000 }]" />
-              <ScenarioField v-model="paidMonths" label="납부 개월 수" unit="개월" :min="1" :max="12" :presets="[{ label: '6개월', value: 6 }, { label: '10개월', value: 10 }, { label: '12개월', value: 12 }]" />
-            </div>
-
-            <div class="space-y-4">
-              <ResultHero label="세액공제 (소득세)" :value="formatWon(result.taxCredit)">
-                <template #secondary>
-                  지방소득세 포함 절세액 {{ formatWon(result.taxCreditWithLocalTax) }}
-                </template>
-              </ResultHero>
-              <BenefitStatGrid :items="[
-                { label: '공제율 (소득세)', value: formatPercent(result.deductionRate, 0) },
-                { label: '공제 인정 월세', value: formatWon(result.recognizedRent) },
-                { label: '월 환산 (소득세)', value: formatWon(result.monthlyRefundEffect) },
-              ]" />
-
-              <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
-                <p>이 계산기는 무주택 세대주, 주민등록 주소 일치, 국민주택규모 또는 기준시가 요건 충족을 가정합니다.</p>
-                <p>총급여가 8,000만원을 넘으면 현재 입력 기준에서는 월세 세액공제 환급액을 0원으로 계산합니다.</p>
-                <p>세액공제액은 소득세 산출세액에서 빼는 금액이고, 절세액은 이 공제로 개인지방소득세까지 줄어든 뒤의 실제 절감액입니다. 두 값의 차이가 지방소득세 감소분입니다.</p>
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+              <div class="space-y-4">
+                <ScenarioField v-model="annualSalary" label="총급여" unit="원" :min="10_000_000" :max="100_000_000" :step="100_000" format="currency" :presets="[{ label: '4,000만원', value: 40_000_000 }, { label: '4,800만원', value: 48_000_000 }, { label: '7,000만원', value: 70_000_000 }]" />
+                <ScenarioField v-model="monthlyRent" label="월세" unit="원" :min="100_000" :max="2_000_000" :step="10_000" format="currency" :presets="[{ label: '50만원', value: 500_000 }, { label: '70만원', value: 700_000 }, { label: '100만원', value: 1_000_000 }]" />
+                <ScenarioField v-model="paidMonths" label="납부 개월 수" unit="개월" :min="1" :max="12" :presets="[{ label: '6개월', value: 6 }, { label: '10개월', value: 10 }, { label: '12개월', value: 12 }]" />
+              </div>
+  
+              <div class="space-y-4">
+                <ResultHero label="세액공제 (소득세)" :value="formatWon(result.taxCredit)">
+                  <template #secondary>
+                    지방소득세 포함 절세액 {{ formatWon(result.taxCreditWithLocalTax) }}
+                  </template>
+                </ResultHero>
+                <BenefitStatGrid :items="[
+                  { label: '공제율 (소득세)', value: formatPercent(result.deductionRate, 0) },
+                  { label: '공제 인정 월세', value: formatWon(result.recognizedRent) },
+                  { label: '월 환산 (소득세)', value: formatWon(result.monthlyRefundEffect) },
+                ]" />
+  
+                <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
+                  <p>이 계산기는 무주택 세대주, 주민등록 주소 일치, 국민주택규모 또는 기준시가 요건 충족을 가정합니다.</p>
+                  <p>총급여가 8,000만원을 넘으면 현재 입력 기준에서는 월세 세액공제 환급액을 0원으로 계산합니다.</p>
+                  <p>세액공제액은 소득세 산출세액에서 빼는 금액이고, 절세액은 이 공제로 개인지방소득세까지 줄어든 뒤의 실제 절감액입니다. 두 값의 차이가 지방소득세 감소분입니다.</p>
+                </div>
               </div>
             </div>
-          </div>
+          </CalculatorInteractionTracker>
         </div>
 
         <BenefitFaqPanel :items="monthlyRentFaqs" />

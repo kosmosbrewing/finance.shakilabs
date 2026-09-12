@@ -35,6 +35,13 @@ import {
   UNPAID_WAGE_AMOUNTS,
 } from "./seo-routes.mjs";
 import { buildHubContent, renderDigestBody } from "./hub-content.mjs";
+import {
+  INSURANCE_DEFAULT_STATE,
+  NEXT_CALCULATOR_CARDS,
+  NEXT_CALCULATORS_HEADING,
+  NEXT_CALCULATORS_INTRO,
+  pickNextCalculators,
+} from "./next-calculators.mjs";
 // 가구 유형별 엔진 스캔 절 — 세 변종이 서로 다른 결론에 도달한다는 전제를 실제로 지탱하는 부분
 import {
   eitcDoubleIncomeCombinedDigest,
@@ -3730,6 +3737,34 @@ function buildInsuranceBandTable() {
     <p style="${P_STYLE}">비과세 식대 월 20만원을 더해 연봉으로 환산한 값입니다. 건보료를 클릭하면 해당 금액의 상세 역산 페이지로 이동합니다.</p>`;
 }
 
+// "Next calculation" cards, prerendered for /insurance only.
+//
+// The cards the crawler gets are the DEFAULT-state branch, which is exactly what a reader sees
+// on first paint at /insurance. Only the static half is prerendered: title and the question the
+// calculator answers. The preview amount is deliberately NOT here - it depends on inputs the
+// reader can change, so a number baked into static HTML would be a claim about a state that no
+// longer holds. The view adds it client-side with the assumption spelled out beside it.
+//
+// Copy comes from next-calculators.mjs, the same module FinanceNextActions.vue reads, so the
+// hydration survival gate measures one set of sentences rather than two drifting sets.
+function buildNextCalculatorsSection() {
+  const cards = pickNextCalculators(INSURANCE_DEFAULT_STATE)
+    .map((key) => {
+      const card = NEXT_CALCULATOR_CARDS[key];
+      return (
+        `<h3 style="${H3_STYLE}"><a href="/finance${card.route}">${card.title}</a></h3>` +
+        `<p style="${P_STYLE}">${card.question}</p>`
+      );
+    })
+    .join("");
+
+  return {
+    h2: NEXT_CALCULATORS_HEADING,
+    body: NEXT_CALCULATORS_INTRO,
+    extra: cards,
+  };
+}
+
 const LANDING_CONTENT = {
   // App home. Copy lives in home-content.mjs because src/views/HomeView.vue renders the exact
   // same H1, H2 order and body text — the home no longer redirects to /salary, so a crawler and
@@ -3830,6 +3865,7 @@ const LANDING_CONTENT = {
       // 쪽인지는 전 구간을 한 번에 봐야 나오는 답이라 대표 페이지에만 둔다.
       toLandingSection(insuranceBracketDigest()),
       toLandingSection(insuranceCrossoverDigest()),
+      buildNextCalculatorsSection(),
     ],
     links: [
       { path: "/finance/insurance/100000", label: "건보료 10만원 연봉 계산" },

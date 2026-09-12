@@ -74,10 +74,7 @@ const registrationOptions = [
             <h2 id="dependent-input-title" class="retro-title">소득·재산 조건 입력</h2>
           </div>
           <div class="retro-panel-content min-w-0 space-y-5">
-            <CalculatorInteractionTracker
-              calculator-id="dependent_eligibility"
-              page-path="/finance/dependent"
-            >
+            <CalculatorInteractionTracker>
               <div class="space-y-5">
                 <ScenarioField
                   v-model="annualIncome"

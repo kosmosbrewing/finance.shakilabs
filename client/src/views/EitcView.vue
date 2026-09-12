@@ -95,10 +95,7 @@ const statItems = computed(() => [
             <h2 id="eitc-input-title" class="retro-title">가구·소득 조건 입력</h2>
           </div>
           <div class="retro-panel-content min-w-0 space-y-5">
-            <CalculatorInteractionTracker
-              calculator-id="eitc"
-              page-path="/finance/eitc"
-            >
+            <CalculatorInteractionTracker>
               <div class="space-y-5">
                 <div class="space-y-1.5">
                   <label class="text-caption font-semibold text-foreground">가구 유형</label>

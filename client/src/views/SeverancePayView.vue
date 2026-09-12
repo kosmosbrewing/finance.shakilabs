@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { ShBreakdownBar } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
@@ -87,37 +88,39 @@ watch(
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="severance-input-title" class="retro-title">퇴직 조건 입력</h2>
           </div>
-          <div class="retro-panel-content space-y-5">
-            <ScenarioField
-              v-model="averageMonthlySalary"
-              label="최근 3개월 평균 월급"
-              unit="원"
-              :min="1_000_000"
-              :max="30_000_000"
-              :step="100_000"
-              format="currency"
-              :presets="[
-                { label: '250만', value: 2_500_000 },
-                { label: '350만', value: 3_500_000 },
-                { label: '500만', value: 5_000_000 },
-                { label: '800만', value: 8_000_000 },
-              ]"
-            />
-            <ScenarioField
-              v-model="yearsOfService"
-              label="근속연수"
-              unit="년"
-              :min="0"
-              :max="40"
-              :presets="[
-                { label: '1년', value: 1 },
-                { label: '3년', value: 3 },
-                { label: '5년', value: 5 },
-                { label: '10년', value: 10 },
-                { label: '20년', value: 20 },
-              ]"
-            />
-          </div>
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content space-y-5">
+              <ScenarioField
+                v-model="averageMonthlySalary"
+                label="최근 3개월 평균 월급"
+                unit="원"
+                :min="1_000_000"
+                :max="30_000_000"
+                :step="100_000"
+                format="currency"
+                :presets="[
+                  { label: '250만', value: 2_500_000 },
+                  { label: '350만', value: 3_500_000 },
+                  { label: '500만', value: 5_000_000 },
+                  { label: '800만', value: 8_000_000 },
+                ]"
+              />
+              <ScenarioField
+                v-model="yearsOfService"
+                label="근속연수"
+                unit="년"
+                :min="0"
+                :max="40"
+                :presets="[
+                  { label: '1년', value: 1 },
+                  { label: '3년', value: 3 },
+                  { label: '5년', value: 5 },
+                  { label: '10년', value: 10 },
+                  { label: '20년', value: 20 },
+                ]"
+              />
+            </div>
+          </CalculatorInteractionTracker>
         </section>
 
         <section class="retro-panel overflow-hidden" aria-labelledby="severance-result-title">
