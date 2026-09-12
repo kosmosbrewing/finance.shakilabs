@@ -411,7 +411,7 @@ watch(
 
         <HealthInsuranceRank :calc="activeCalc" :mode="isForwardMode ? 'salary' : 'insurance'" />
 
-        <AdSlot slot="110001" label="광고 · top" />
+        <AdSlot unit="insurance-top" label="광고 · top" />
 
         <template v-if="isForwardMode">
           <InsuranceDetail :calc="forwardCalc" />
@@ -421,13 +421,13 @@ watch(
         </template>
         <InsuranceTable v-else />
 
-        <AdSlot slot="110002" label="광고 · middle" />
+        <AdSlot unit="insurance-middle" label="광고 · middle" />
 
         <CalcSourceBox />
         <InternalLink :current="internalLinkCurrent" />
         <RelatedServices />
 
-        <AdSlot slot="110003" label="광고 · bottom" />
+        <AdSlot unit="insurance-bottom" label="광고 · bottom" />
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">

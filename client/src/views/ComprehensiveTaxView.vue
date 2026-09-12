@@ -454,11 +454,11 @@ watch(
 
         <CalcSourceBox />
 
-        <AdSlot slot="150001" label="광고 · top" />
+        <AdSlot unit="comprehensive-top" label="광고 · top" />
 
         <InternalLink :current="internalLinkKey" />
 
-        <AdSlot slot="150002" label="광고 · middle" />
+        <AdSlot unit="comprehensive-middle" label="광고 · middle" />
 
         <VisitorCounter />
       </div>

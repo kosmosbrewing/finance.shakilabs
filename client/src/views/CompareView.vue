@@ -312,13 +312,13 @@ watch(
           </CompareInput>
         </CalculatorInteractionTracker>
 
-        <AdSlot slot="130001" label="광고 · top" />
+        <AdSlot unit="compare-top" label="광고 · top" />
 
-        <AdSlot slot="130002" label="광고 · middle" />
+        <AdSlot unit="compare-middle" label="광고 · middle" />
 
         <InternalLink current="compare" />
 
-        <AdSlot slot="130003" label="광고 · bottom" />
+        <AdSlot unit="compare-bottom" label="광고 · bottom" />
 
       </div>
 

@@ -1,127 +1,62 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
+// 앱 로컬 광고 슬롯 — 유닛 원장(src/config/adUnits.ts)과 공용 ShAdSlot 사이의
+// 얇은 래퍼.
+//
+// 왜 래퍼를 남기는가: 뷰 21곳의 호출부가 `<AdSlot unit="salary-top" />` 한
+// 형태를 유지하면, provider가 바뀌든 태그 모양이 바뀌든 호출부는 손대지 않는다.
+// 0.3.10 차트 승격 때 "얇은 크롬 래퍼"로 호출부 0건을 고친 것과 같은 패턴이다.
+//
+// 개발 모드 자리표시자도 여기 남는다 — 한글이 들어가므로 패키지로 올릴 수 없다
+// (일부 앱의 폰트 서브셋 스캐너가 node_modules를 보지 않는다).
+import { computed } from "vue";
+import { ShAdSlot } from "@shakilabs/ui";
 
-declare global {
-  interface Window {
-    adsbygoogle?: unknown[];
-  }
-}
+import {
+  adProvider,
+  adUnits,
+  adsensePublisherId,
+  unitIdFor,
+  type AdUnitKey,
+} from "@/config/adUnits";
 
-defineProps<{
-  slot: string;
+const props = defineProps<{
+  unit: AdUnitKey;
   label?: string;
 }>();
 
-const publisherId = (import.meta.env.VITE_ADSENSE_PUBLISHER_ID || "").trim();
 const isDev = import.meta.env.DEV;
-const slotRef = ref<HTMLElement | null>(null);
-const isActivated = ref(false);
-let observer: IntersectionObserver | null = null;
+const unitId = computed(() => unitIdFor(props.unit));
+const size = computed(() => adUnits[props.unit].adfitSize);
 
-function ensureAdsenseScript(): void {
-  if (!publisherId) return;
-
-  // index.html이 정적 스니펫을 이미 싣고 있으므로(애드센스 심사용) src 기준으로도 중복을 막는다
-  const existing = document.querySelector(
-    'script[data-adsense="true"], script[src^="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
-  );
-  if (existing) return;
-
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
-  script.crossOrigin = "anonymous";
-  script.dataset.adsense = "true";
-  document.head.appendChild(script);
-}
-
-const reserveHeightClass = computed(() =>
-  publisherId
-    ? "min-h-[250px] sm:min-h-[180px] lg:min-h-[160px]"
-    : "min-h-[96px]"
+// 슬롯이 실제로 그려지는지 — provider가 none이거나 이 슬롯의 유닛 ID가 아직
+// 비어 있으면 ShAdSlot이 아무것도 렌더하지 않는다. 개발 모드 자리표시자는
+// 그때만 나온다.
+const willRender = computed(
+  () =>
+    Boolean(unitId.value) &&
+    (adProvider === "adfit" || (adProvider === "adsense" && Boolean(adsensePublisherId))),
 );
-
-async function activateSlot(): Promise<void> {
-  if (isActivated.value) return;
-  isActivated.value = true;
-
-  ensureAdsenseScript();
-  if (!publisherId) return;
-
-  await nextTick();
-  try {
-    (window.adsbygoogle = window.adsbygoogle || []).push({});
-  } catch {
-    // no-op
-  }
-}
-
-onMounted(() => {
-  if (!publisherId) return;
-
-  if (typeof window.IntersectionObserver !== "function" || !slotRef.value) {
-    void activateSlot();
-    return;
-  }
-
-  observer = new IntersectionObserver(
-    (entries) => {
-      const [entry] = entries;
-      if (!entry?.isIntersecting) return;
-      void activateSlot();
-      observer?.disconnect();
-      observer = null;
-    },
-    { rootMargin: "300px 0px" }
-  );
-
-  observer.observe(slotRef.value);
-});
-
-onUnmounted(() => {
-  observer?.disconnect();
-  observer = null;
-});
 </script>
 
 <template>
+  <ShAdSlot
+    v-if="willRender"
+    :provider="adProvider"
+    :unit-id="unitId"
+    :client-id="adsensePublisherId"
+    :width="size[0]"
+    :height="size[1]"
+    :label="label"
+  />
   <section
-    v-if="publisherId || isDev"
-    ref="slotRef"
+    v-else-if="isDev"
     class="retro-panel p-3"
   >
-    <p class="mb-2 text-caption text-muted-foreground">
-      {{ label || "광고 영역" }}
-    </p>
-
+    <p class="mb-2 text-caption text-muted-foreground">{{ label || "광고 영역" }}</p>
     <div
-      v-if="publisherId"
-      class="overflow-hidden rounded-lg border border-border/50 bg-muted/20"
-      :class="reserveHeightClass"
+      class="flex min-h-[96px] items-center justify-center rounded-lg border border-dashed border-border/60 text-caption text-muted-foreground"
     >
-      <ins
-        v-if="isActivated"
-        class="adsbygoogle"
-        style="display:block"
-        :data-ad-client="publisherId"
-        :data-ad-slot="slot"
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      ></ins>
-      <div
-        v-else
-        class="flex h-full w-full items-center justify-center text-caption text-muted-foreground"
-      >
-        광고 로딩 준비 중
-      </div>
-    </div>
-
-    <div
-      v-else-if="isDev"
-      class="flex items-center justify-center border border-dashed border-border/60 rounded-lg text-caption text-muted-foreground"
-      :class="reserveHeightClass"
-    >
-      광고 영역 (개발 모드)
+      광고 영역 (개발 모드 · provider={{ adProvider }})
     </div>
   </section>
 </template>

@@ -370,7 +370,7 @@ watch(
           />
         </CalculatorInteractionTracker>
 
-        <AdSlot slot="140001" label="광고 · top" />
+        <AdSlot unit="retirement-top" label="광고 · top" />
 
         <QuitReceivables
           :service-period-label="retirement.servicePeriodLabel"
@@ -390,7 +390,7 @@ watch(
           @share-request="openShare"
         />
 
-        <AdSlot slot="140002" label="광고 · middle" />
+        <AdSlot unit="retirement-middle" label="광고 · middle" />
 
         <QuitExpenses
           :regional-health-monthly="regionalHealthMonthly"
@@ -410,7 +410,7 @@ watch(
 
         <InternalLink current="quit" />
 
-        <AdSlot slot="140003" label="광고 · bottom" />
+        <AdSlot unit="retirement-bottom" label="광고 · bottom" />
 
       </div>
 

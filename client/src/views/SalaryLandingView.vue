@@ -174,12 +174,12 @@ watch(
 
         <HealthInsuranceRank :calc="calc" />
 
-        <AdSlot slot="120101" label="광고 · top" />
+        <AdSlot unit="salary-landing-top" label="광고 · top" />
 
         <InsuranceDetail :calc="calc" />
         <DeductionTable :calc="calc" />
 
-        <AdSlot slot="120102" label="광고 · middle" />
+        <AdSlot unit="salary-landing-middle" label="광고 · middle" />
 
         <DeductionChart :calc="calc" />
         <SalaryCompareTable />
@@ -187,7 +187,7 @@ watch(
         <CalcSourceBox />
         <InternalLink current="salary" />
 
-        <AdSlot slot="120103" label="광고 · bottom" />
+        <AdSlot unit="salary-landing-bottom" label="광고 · bottom" />
 
       </div>
 

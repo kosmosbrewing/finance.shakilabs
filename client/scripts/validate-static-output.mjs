@@ -384,6 +384,62 @@ function validateNotFound() {
     !/adsbygoogle|googlesyndication/i.test(html),
     "404.html must not load the AdSense script (Valuable Inventory policy)",
   );
+  assert(
+    !/kakaocdn\.net\/kas|kakao_ad_area/i.test(html),
+    "404.html must not load the AdFit script either (same policy, other network)",
+  );
+}
+
+// One provider at a time, and the page has to say which one.
+//
+// Two ways this drifts, both of them shipped-and-silent:
+//   1. Both loaders end up on the page. AdFit policy 5.2 forbids another
+//      network's script running alongside it; AdSense judges ad-to-content
+//      ratio. Nothing in the browser complains - the page just breaks a rule.
+//   2. The provider flips to AdFit and /privacy still tells readers that Google
+//      AdSense is the only third party receiving their cookie identifiers.
+//      That is a false statement about personal data, not a stale sentence.
+function validateAdProvider() {
+  const provider = (process.env.VITE_AD_PROVIDER ?? "adsense").trim().toLowerCase();
+  const shell = readFileSync(resolve(distRoot, "index.html"), "utf8");
+  const hasAdsense = /googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/i.test(shell);
+  const hasAdfit = /kakaocdn\.net\/kas\/static\/ba\.min\.js/i.test(shell);
+
+  assert(
+    !(hasAdsense && hasAdfit),
+    "index.html carries both ad loaders; only one network may run at a time",
+  );
+
+  if (provider === "adsense") {
+    assert(hasAdsense, "VITE_AD_PROVIDER=adsense but index.html has no AdSense loader");
+    assert(!hasAdfit, "VITE_AD_PROVIDER=adsense but index.html carries the AdFit loader");
+  } else if (provider === "adfit") {
+    assert(hasAdfit, "VITE_AD_PROVIDER=adfit but index.html has no AdFit loader");
+    assert(!hasAdsense, "VITE_AD_PROVIDER=adfit but index.html still carries the AdSense loader");
+  } else {
+    assert(!hasAdsense && !hasAdfit, `VITE_AD_PROVIDER=${provider} but an ad loader is still shipped`);
+  }
+
+  // The disclosure has to name the network that is actually running.
+  const privacyPath = resolve(distRoot, "privacy", "index.html");
+  if (!existsSync(privacyPath)) return;
+  const privacy = readFileSync(privacyPath, "utf8");
+
+  if (provider === "adfit") {
+    assert(
+      /애드핏|AdFit|카카오/.test(privacy),
+      "/privacy names no Kakao/AdFit third party while AdFit is the active network",
+    );
+  }
+  if (provider === "none") {
+    return;
+  }
+  if (provider === "adsense") {
+    assert(
+      /AdSense|애드센스/.test(privacy),
+      "/privacy must keep naming Google AdSense while AdSense is the active network",
+    );
+  }
 }
 
 validateVercelConfig();
@@ -392,6 +448,7 @@ validateRouterSitemapParity(validateSitemap());
 validateLlmsTxt();
 validateOpacityUtilitiesAreGenerated();
 validateNotFound();
+validateAdProvider();
 
 if (failures.length > 0) {
   // 첫 실패에서 던지지 않고 모아서 보고한다 — 게이트를 새로 켤 때 결함이 몇 종인지 한 번에 봐야 한다.
