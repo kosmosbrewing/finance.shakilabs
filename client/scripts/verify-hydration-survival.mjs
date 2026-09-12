@@ -275,7 +275,18 @@ async function measure(context, origin, route) {
 const server = await startServer();
 const origin = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch();
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+// Service workers are blocked here on purpose. This gate asks one question -
+// does the prerendered prose survive into the hydrated DOM - and the answer must
+// not depend on a cache layer. One context serves all 158 routes, so the first
+// route that mounted would register the worker and every later navigation would
+// race its install/activate (skipWaiting + clientsClaim swap the controller
+// mid-load). That showed up exactly once in CI as "/unpaid-wage/500: app never
+// mounted" while the same commit passed three other runs. The worker has its own
+// gate - scripts/verify-sw-scope.mjs - where it IS the subject.
+const context = await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  serviceWorkers: "block",
+});
 
 // Analytics, AdSense and Kakao are third parties whose availability must not
 // decide whether this gate passes.

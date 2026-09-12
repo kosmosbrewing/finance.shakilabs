@@ -6,6 +6,7 @@ import "./assets/css/main.css";
 import "@shakilabs/ui/styles.css";
 import "./assets/css/responsive-accessibility.css";
 import { initAnalytics } from "./lib/analytics";
+import { registerServiceWorker } from "./lib/pwa";
 import { captureSentryException, initSentry } from "./lib/sentry";
 import { reportRuntimeError } from "./lib/runtimeError";
 import {
@@ -56,6 +57,9 @@ async function bootstrap(): Promise<void> {
   app.mount("#app");
   adoptPrerenderArticle(prerenderedArticle);
   installPrerenderArticleCleanup(router, entryPath);
+
+  // 워커 등록도 LCP 이후로 — 첫 화면 페인트와 경쟁시키지 않는다.
+  registerServiceWorker();
 
   // GA 초기화를 LCP 이후로 미룸
   if (typeof requestIdleCallback === "function") {

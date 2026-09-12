@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import FinanceNextActions from "@/components/finance/FinanceNextActions.vue";
+import InstallHint from "@/components/common/InstallHint.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import { useRoute, useRouter } from "vue-router";
 import InsuranceInput from "@/components/insurance/InsuranceInput.vue";
@@ -407,6 +408,8 @@ watch(
             :health-insurance-fee="healthInsuranceFee"
             :annual-gross="activeCalc.annualGross.value"
           />
+
+          <InstallHint />
         </div>
 
         <HealthInsuranceRank :calc="activeCalc" :mode="isForwardMode ? 'salary' : 'insurance'" />
