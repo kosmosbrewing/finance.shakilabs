@@ -376,10 +376,7 @@ watch(
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
         <div class="space-y-4">
-          <CalculatorInteractionTracker
-            :calculator-id="isForwardMode ? 'salary_net' : 'health_insurance_reverse'"
-            :page-path="isForwardMode ? '/finance/salary' : '/finance/insurance'"
-          >
+          <CalculatorInteractionTracker>
             <InsuranceInput
               :mode="mode"
               v-model:health-insurance-fee="healthInsuranceFee"
@@ -400,7 +397,16 @@ watch(
             @share-request="handleSidebarShare"
           />
 
-          <FinanceNextActions :mode="isForwardMode ? 'salary' : 'insurance'" />
+          <FinanceNextActions
+            :mode="isForwardMode ? 'salary' : 'insurance'"
+            :taxable-monthly="activeCalc.taxableMonthly.value"
+            :monthly-net="activeCalc.monthlyNet.value"
+            :monthly-health-insurance="activeCalc.healthInsurance.value"
+            :non-taxable-monthly="nonTaxableMonthly"
+            :dependents="dependents"
+            :health-insurance-fee="healthInsuranceFee"
+            :annual-gross="activeCalc.annualGross.value"
+          />
         </div>
 
         <HealthInsuranceRank :calc="activeCalc" :mode="isForwardMode ? 'salary' : 'insurance'" />

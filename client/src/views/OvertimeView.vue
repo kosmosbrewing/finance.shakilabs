@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -131,57 +132,59 @@ watch(
             </div>
             <FreshBadge message="2026 세율 반영" />
           </div>
-          <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div class="space-y-4">
-              <ScenarioField v-model="monthlySalary" label="월 기본급" unit="원" :min="2_000_000" :max="10_000_000" :step="10_000" format="currency" :presets="[{ label: '280만원', value: 2_800_000 }, { label: '320만원', value: 3_200_000 }, { label: '450만원', value: 4_500_000 }]" />
-              <ScenarioField v-model="overtimeHours" label="연장근로 시간" unit="시간" :min="0" :max="60" :presets="[{ label: '8시간', value: 8 }, { label: '12시간', value: 12 }, { label: '20시간', value: 20 }]" />
-              <ScenarioField v-model="nightHours" label="야간 가산 시간" unit="시간" :min="0" :max="40" :presets="[{ label: '0시간', value: 0 }, { label: '6시간', value: 6 }, { label: '12시간', value: 12 }]" />
-              <ScenarioField v-model="holidayHours" label="휴일근로 시간" unit="시간" :min="0" :max="40" :presets="[{ label: '0시간', value: 0 }, { label: '8시간', value: 8 }, { label: '16시간', value: 16 }]" />
-              <ScenarioField v-model="monthlyBaseHours" label="월 통상근로시간" unit="시간" description="기본값 209시간을 사용합니다." :min="180" :max="240" :presets="[{ label: '209시간', value: 209 }, { label: '226시간', value: 226 }]" />
-            </div>
-
-            <div class="space-y-4">
-              <ResultHero label="추가 세전 수당" :value="formatWon(result.totalExtraGross)" />
-              <div class="retro-stat-grid">
-                <div class="retro-stat">
-                  <p class="retro-stat-label">월 실수령 증가</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">+{{ formatWon(result.totalExtraNet) }}</p>
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+              <div class="space-y-4">
+                <ScenarioField v-model="monthlySalary" label="월 기본급" unit="원" :min="2_000_000" :max="10_000_000" :step="10_000" format="currency" :presets="[{ label: '280만원', value: 2_800_000 }, { label: '320만원', value: 3_200_000 }, { label: '450만원', value: 4_500_000 }]" />
+                <ScenarioField v-model="overtimeHours" label="연장근로 시간" unit="시간" :min="0" :max="60" :presets="[{ label: '8시간', value: 8 }, { label: '12시간', value: 12 }, { label: '20시간', value: 20 }]" />
+                <ScenarioField v-model="nightHours" label="야간 가산 시간" unit="시간" :min="0" :max="40" :presets="[{ label: '0시간', value: 0 }, { label: '6시간', value: 6 }, { label: '12시간', value: 12 }]" />
+                <ScenarioField v-model="holidayHours" label="휴일근로 시간" unit="시간" :min="0" :max="40" :presets="[{ label: '0시간', value: 0 }, { label: '8시간', value: 8 }, { label: '16시간', value: 16 }]" />
+                <ScenarioField v-model="monthlyBaseHours" label="월 통상근로시간" unit="시간" description="기본값 209시간을 사용합니다." :min="180" :max="240" :presets="[{ label: '209시간', value: 209 }, { label: '226시간', value: 226 }]" />
+              </div>
+  
+              <div class="space-y-4">
+                <ResultHero label="추가 세전 수당" :value="formatWon(result.totalExtraGross)" />
+                <div class="retro-stat-grid">
+                  <div class="retro-stat">
+                    <p class="retro-stat-label">월 실수령 증가</p>
+                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">+{{ formatWon(result.totalExtraNet) }}</p>
+                  </div>
+                  <div class="retro-stat">
+                    <p class="retro-stat-label">통상 시급</p>
+                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.hourlyRate) }}</p>
+                  </div>
+                  <div class="retro-stat">
+                    <p class="retro-stat-label"><span class="sm:hidden">수당 반영</span><span class="hidden sm:inline">추가 수당 반영 월급</span></p>
+                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.after.monthlyGross) }}</p>
+                  </div>
                 </div>
-                <div class="retro-stat">
-                  <p class="retro-stat-label">통상 시급</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.hourlyRate) }}</p>
-                </div>
-                <div class="retro-stat">
-                  <p class="retro-stat-label"><span class="sm:hidden">수당 반영</span><span class="hidden sm:inline">추가 수당 반영 월급</span></p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.after.monthlyGross) }}</p>
+  
+                <div class="retro-panel-muted retro-panel-content space-y-3">
+                  <OvertimeBreakdown :result="result" />
+                  <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                    <div>
+                      <p class="text-tiny uppercase tracking-wide text-muted-foreground">연장</p>
+                      <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.overtimePay) }}</p>
+                    </div>
+                    <div>
+                      <p class="text-tiny uppercase tracking-wide text-muted-foreground">야간 가산</p>
+                      <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.nightPay) }}</p>
+                    </div>
+                    <div>
+                      <p class="text-tiny uppercase tracking-wide text-muted-foreground">휴일</p>
+                      <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.holidayPay) }}</p>
+                    </div>
+                  </div>
+                  <p class="text-caption leading-6 text-muted-foreground">
+                    기본 월 실수령 <span class="tabular-nums">{{ formatWon(result.before.monthlyNet) }}</span>에서
+                    <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.after.monthlyNet) }}</span>
+                    으로 올라갑니다.
+                  </p>
+                  <Button class="w-full" @click="openShare">결과 공유</Button>
                 </div>
               </div>
-
-              <div class="retro-panel-muted retro-panel-content space-y-3">
-                <OvertimeBreakdown :result="result" />
-                <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <div>
-                    <p class="text-tiny uppercase tracking-wide text-muted-foreground">연장</p>
-                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.overtimePay) }}</p>
-                  </div>
-                  <div>
-                    <p class="text-tiny uppercase tracking-wide text-muted-foreground">야간 가산</p>
-                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.nightPay) }}</p>
-                  </div>
-                  <div>
-                    <p class="text-tiny uppercase tracking-wide text-muted-foreground">휴일</p>
-                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.holidayPay) }}</p>
-                  </div>
-                </div>
-                <p class="text-caption leading-6 text-muted-foreground">
-                  기본 월 실수령 <span class="tabular-nums">{{ formatWon(result.before.monthlyNet) }}</span>에서
-                  <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.after.monthlyNet) }}</span>
-                  으로 올라갑니다.
-                </p>
-                <Button class="w-full" @click="openShare">결과 공유</Button>
-              </div>
             </div>
-          </div>
+          </CalculatorInteractionTracker>
         </div>
         <InternalLink current="overtime" />
       </div>

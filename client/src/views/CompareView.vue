@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -293,21 +294,23 @@ watch(
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
-        <CompareInput
-          v-model:company-a="companyA"
-          v-model:company-b="companyB"
-          v-model:dependents="dependents"
-          v-model:children-under20="childrenUnder20"
-        >
-          <template #result>
-            <CompareResult
-              embedded
-              :calc-a="calcA"
-              :calc-b="calcB"
-              @share-request="openShare"
-            />
-          </template>
-        </CompareInput>
+        <CalculatorInteractionTracker>
+          <CompareInput
+            v-model:company-a="companyA"
+            v-model:company-b="companyB"
+            v-model:dependents="dependents"
+            v-model:children-under20="childrenUnder20"
+          >
+            <template #result>
+              <CompareResult
+                embedded
+                :calc-a="calcA"
+                :calc-b="calcB"
+                @share-request="openShare"
+              />
+            </template>
+          </CompareInput>
+        </CalculatorInteractionTracker>
 
         <AdSlot slot="130001" label="광고 · top" />
 

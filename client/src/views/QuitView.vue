@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, onUnmounted, ref, watch, watchEffect } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 
@@ -352,20 +353,22 @@ watch(
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
-        <QuitInput
-          v-model:start-date="startDate"
-          v-model:end-date="endDate"
-          v-model:monthly-salary="monthlySalary"
-          v-model:non-taxable-monthly="nonTaxableMonthly"
-          v-model:age="age"
-          v-model:quit-reason="quitReason"
-          v-model:dependents="dependents"
-          v-model:children-under20="childrenUnder20"
-          v-model:unused-leave-days="unusedLeaveDays"
-          v-model:annual-bonus="annualBonus"
-          v-model:monthly-living-cost="monthlyLivingCost"
-          @range-apply="handleRangeApply"
-        />
+        <CalculatorInteractionTracker>
+          <QuitInput
+            v-model:start-date="startDate"
+            v-model:end-date="endDate"
+            v-model:monthly-salary="monthlySalary"
+            v-model:non-taxable-monthly="nonTaxableMonthly"
+            v-model:age="age"
+            v-model:quit-reason="quitReason"
+            v-model:dependents="dependents"
+            v-model:children-under20="childrenUnder20"
+            v-model:unused-leave-days="unusedLeaveDays"
+            v-model:annual-bonus="annualBonus"
+            v-model:monthly-living-cost="monthlyLivingCost"
+            @range-apply="handleRangeApply"
+          />
+        </CalculatorInteractionTracker>
 
         <AdSlot slot="140001" label="광고 · top" />
 

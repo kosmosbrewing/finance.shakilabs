@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -84,48 +85,50 @@ watch(
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="weekly-pay-input-title" class="retro-title">근무 조건 입력</h2>
           </div>
-          <div class="retro-panel-content space-y-5">
-              <ScenarioField
-                v-model="hourlyWage"
-                label="시급"
-                unit="원"
-                :min="10_320"
-                :max="100_000"
-                :step="100"
-                format="currency"
-                :presets="[
-                  { label: '최저 10,320', value: 10_320 },
-                  { label: '12,000', value: 12_000 },
-                  { label: '15,000', value: 15_000 },
-                  { label: '20,000', value: 20_000 },
-                ]"
-              />
-              <ScenarioField
-                v-model="workDaysPerWeek"
-                label="주 근무일수"
-                unit="일"
-                :min="1"
-                :max="6"
-                :presets="[
-                  { label: '3일', value: 3 },
-                  { label: '4일', value: 4 },
-                  { label: '5일', value: 5 },
-                  { label: '6일', value: 6 },
-                ]"
-              />
-              <ScenarioField
-                v-model="hoursPerDay"
-                label="일 근무시간"
-                unit="시간"
-                :min="1"
-                :max="12"
-                :presets="[
-                  { label: '4시간', value: 4 },
-                  { label: '6시간', value: 6 },
-                  { label: '8시간', value: 8 },
-                ]"
-              />
-          </div>
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content space-y-5">
+                <ScenarioField
+                  v-model="hourlyWage"
+                  label="시급"
+                  unit="원"
+                  :min="10_320"
+                  :max="100_000"
+                  :step="100"
+                  format="currency"
+                  :presets="[
+                    { label: '최저 10,320', value: 10_320 },
+                    { label: '12,000', value: 12_000 },
+                    { label: '15,000', value: 15_000 },
+                    { label: '20,000', value: 20_000 },
+                  ]"
+                />
+                <ScenarioField
+                  v-model="workDaysPerWeek"
+                  label="주 근무일수"
+                  unit="일"
+                  :min="1"
+                  :max="6"
+                  :presets="[
+                    { label: '3일', value: 3 },
+                    { label: '4일', value: 4 },
+                    { label: '5일', value: 5 },
+                    { label: '6일', value: 6 },
+                  ]"
+                />
+                <ScenarioField
+                  v-model="hoursPerDay"
+                  label="일 근무시간"
+                  unit="시간"
+                  :min="1"
+                  :max="12"
+                  :presets="[
+                    { label: '4시간', value: 4 },
+                    { label: '6시간', value: 6 },
+                    { label: '8시간', value: 8 },
+                  ]"
+                />
+            </div>
+          </CalculatorInteractionTracker>
         </section>
 
         <section class="retro-panel overflow-hidden" aria-labelledby="weekly-pay-result-title">

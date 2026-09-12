@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { ShBreakdownBar } from "@shakilabs/ui";
@@ -123,58 +124,60 @@ watch(
             </div>
             <FreshBadge message="2026 세율 반영" />
           </div>
-          <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div class="space-y-4">
-              <ScenarioField v-model="annualSalary" label="기본 연봉" unit="원" :min="12_000_000" :max="300_000_000" :step="100_000" format="currency" :presets="[{ label: '4,000만원', value: 40_000_000 }, { label: '5,200만원', value: 52_000_000 }, { label: '8,000만원', value: 80_000_000 }]" />
-              <ScenarioField v-model="bonusAmount" label="성과급 금액" unit="원" :min="0" :max="20_000_000" :step="100_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '500만원', value: 5_000_000 }, { label: '1,000만원', value: 10_000_000 }]" />
-              <ScenarioField v-model="dependents" label="부양가족 수" unit="명" :min="1" :max="6" :presets="[{ label: '1명', value: 1 }, { label: '2명', value: 2 }, { label: '4명', value: 4 }]" />
-              <ScenarioField v-model="children" label="20세 이하 자녀" unit="명" :min="0" :max="4" :presets="[{ label: '0명', value: 0 }, { label: '1명', value: 1 }, { label: '2명', value: 2 }]" />
-              <ScenarioField v-model="nonTaxableMonthly" label="비과세 월급" unit="원" :min="0" :max="1_000_000" :step="10_000" format="currency" :presets="[{ label: '0원', value: 0 }, { label: '20만원', value: 200_000 }, { label: '30만원', value: 300_000 }]" />
-            </div>
-
-            <div class="space-y-4">
-              <ResultHero label="성과급 실수령" :value="formatWon(result.netBonus)" />
-              <div class="retro-stat-grid">
-                <div class="retro-stat">
-                  <p class="retro-stat-label">실효 수령률</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatPercent(result.effectiveBonusRate, 1) }}</p>
-                </div>
-                <div class="retro-stat">
-                  <p class="retro-stat-label"><span class="sm:hidden">반영 월 실수령</span><span class="hidden sm:inline">성과급 반영 월 실수령</span></p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.withBonus.monthlyNet) }}</p>
-                </div>
-                <div class="retro-stat">
-                  <p class="retro-stat-label">추가 공제 추정</p>
-                  <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.bonusTax) }}</p>
-                </div>
+          <CalculatorInteractionTracker>
+            <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+              <div class="space-y-4">
+                <ScenarioField v-model="annualSalary" label="기본 연봉" unit="원" :min="12_000_000" :max="300_000_000" :step="100_000" format="currency" :presets="[{ label: '4,000만원', value: 40_000_000 }, { label: '5,200만원', value: 52_000_000 }, { label: '8,000만원', value: 80_000_000 }]" />
+                <ScenarioField v-model="bonusAmount" label="성과급 금액" unit="원" :min="0" :max="20_000_000" :step="100_000" format="currency" :presets="[{ label: '200만원', value: 2_000_000 }, { label: '500만원', value: 5_000_000 }, { label: '1,000만원', value: 10_000_000 }]" />
+                <ScenarioField v-model="dependents" label="부양가족 수" unit="명" :min="1" :max="6" :presets="[{ label: '1명', value: 1 }, { label: '2명', value: 2 }, { label: '4명', value: 4 }]" />
+                <ScenarioField v-model="children" label="20세 이하 자녀" unit="명" :min="0" :max="4" :presets="[{ label: '0명', value: 0 }, { label: '1명', value: 1 }, { label: '2명', value: 2 }]" />
+                <ScenarioField v-model="nonTaxableMonthly" label="비과세 월급" unit="원" :min="0" :max="1_000_000" :step="10_000" format="currency" :presets="[{ label: '0원', value: 0 }, { label: '20만원', value: 200_000 }, { label: '30만원', value: 300_000 }]" />
               </div>
-
-              <div class="retro-panel-muted retro-panel-content space-y-3">
-                <ShBreakdownBar
-                  :segments="bonusSegments"
-                  label="성과급 실수령과 추가 공제 구성"
-                  :format-value="formatWon"
-                />
-                <p class="text-body font-semibold text-foreground">핵심 해석</p>
-                <p class="text-caption leading-6 text-muted-foreground">
-                  보너스 <span class="tabular-nums">{{ formatWon(input.bonusAmount) }}</span> 중 실제 손에 남는 금액은
-                  <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.netBonus) }}</span>
-                  입니다.
-                </p>
-                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                  <div>
-                    <p class="text-tiny uppercase tracking-wide text-muted-foreground">기본 월 실수령</p>
-                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.base.monthlyNet) }}</p>
+  
+              <div class="space-y-4">
+                <ResultHero label="성과급 실수령" :value="formatWon(result.netBonus)" />
+                <div class="retro-stat-grid">
+                  <div class="retro-stat">
+                    <p class="retro-stat-label">실효 수령률</p>
+                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatPercent(result.effectiveBonusRate, 1) }}</p>
                   </div>
-                  <div>
-                    <p class="text-tiny uppercase tracking-wide text-muted-foreground">보너스 반영 후</p>
-                    <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.withBonus.monthlyNet) }}</p>
+                  <div class="retro-stat">
+                    <p class="retro-stat-label"><span class="sm:hidden">반영 월 실수령</span><span class="hidden sm:inline">성과급 반영 월 실수령</span></p>
+                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.withBonus.monthlyNet) }}</p>
+                  </div>
+                  <div class="retro-stat">
+                    <p class="retro-stat-label">추가 공제 추정</p>
+                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.bonusTax) }}</p>
                   </div>
                 </div>
-                <Button class="w-full" @click="openShare">결과 공유</Button>
+  
+                <div class="retro-panel-muted retro-panel-content space-y-3">
+                  <ShBreakdownBar
+                    :segments="bonusSegments"
+                    label="성과급 실수령과 추가 공제 구성"
+                    :format-value="formatWon"
+                  />
+                  <p class="text-body font-semibold text-foreground">핵심 해석</p>
+                  <p class="text-caption leading-6 text-muted-foreground">
+                    보너스 <span class="tabular-nums">{{ formatWon(input.bonusAmount) }}</span> 중 실제 손에 남는 금액은
+                    <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.netBonus) }}</span>
+                    입니다.
+                  </p>
+                  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    <div>
+                      <p class="text-tiny uppercase tracking-wide text-muted-foreground">기본 월 실수령</p>
+                      <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.base.monthlyNet) }}</p>
+                    </div>
+                    <div>
+                      <p class="text-tiny uppercase tracking-wide text-muted-foreground">보너스 반영 후</p>
+                      <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.withBonus.monthlyNet) }}</p>
+                    </div>
+                  </div>
+                  <Button class="w-full" @click="openShare">결과 공유</Button>
+                </div>
               </div>
             </div>
-          </div>
+          </CalculatorInteractionTracker>
         </div>
         <InternalLink current="bonus" />
       </div>
