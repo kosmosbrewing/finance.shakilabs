@@ -48,6 +48,12 @@ jobs:
       - name: Verify hydration survival
         run: npm run verify:hydration
 
+      # 워커 스코프는 선언이 아니라 브라우저에 물어봐야 안다. 같은 오리진에 앱이 열 개 넘게
+      # 붙어 있어서, 스코프가 넓어지면 내 워커가 남의 앱 요청에 캐시로 답한다. 이 게이트는
+      # /house/를 흉내 낸 형제 앱을 옆에 띄워 놓고 경계를 실측한다.
+      - name: Verify service worker scope
+        run: npm run verify:sw-scope
+
       - name: Generate production SBOM
         run: npm run sbom:prod
 

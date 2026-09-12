@@ -2,20 +2,50 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    { "source": "/favicon.ico", "destination": "/favicon.png", "permanent": true },
-    { "source": "/freelance/:amount(\\d+)", "destination": "/comprehensive-tax?biz=:amount", "permanent": true },
-    { "source": "/freelance", "destination": "/comprehensive-tax", "permanent": true }
+    {
+      "source": "/favicon.ico",
+      "destination": "/favicon.png",
+      "permanent": true
+    },
+    {
+      "source": "/freelance/:amount(\\d+)",
+      "destination": "/comprehensive-tax?biz=:amount",
+      "permanent": true
+    },
+    {
+      "source": "/freelance",
+      "destination": "/comprehensive-tax",
+      "permanent": true
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Content-Language", "value": "ko" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+        {
+          "key": "Content-Language",
+          "value": "ko"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        },
         {
           "key": "Content-Security-Policy-Report-Only",
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://t1.kakaocdn.net https://www.google.com https://adservice.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.shakilabs.com https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.kakao.com https://kapi.kakao.com https://developers.kakao.com https://adservice.google.com https://googleads.g.doubleclick.net; frame-src https://tpc.googlesyndication.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'"
@@ -23,21 +53,57 @@
       ]
     },
     {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/workbox-:hash.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/assets/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/fonts/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/((?:index\\.html)?|[^.]*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     }
   ]

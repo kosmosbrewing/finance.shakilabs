@@ -7,7 +7,7 @@
     "dev": "vite",
     "fonts:subset": "node scripts/subset-fonts.mjs",
     "prebuild": "node scripts/generate-sitemap.mjs && node scripts/generate-llms-txt.mjs",
-    "build": "vite build && node scripts/prerender.mjs && node scripts/validate-static-output.mjs && node scripts/verify-credit-consistency.mjs && node scripts/verify-digest-similarity.mjs && node scripts/verify-fonts.mjs && node scripts/verify-calculator-analytics.mjs",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/validate-static-output.mjs && node scripts/verify-credit-consistency.mjs && node scripts/verify-digest-similarity.mjs && node scripts/verify-fonts.mjs && node scripts/verify-calculator-analytics.mjs && node scripts/verify-pwa.mjs",
     "verify:credits": "node scripts/verify-credit-consistency.mjs",
     "verify:digests": "node scripts/verify-digest-similarity.mjs",
     "verify:hydration": "node scripts/verify-hydration-survival.mjs",
@@ -19,7 +19,10 @@
     "test": "vitest run",
     "check": "npm run typecheck && npm run test && npm run build",
     "preview": "vite preview",
-    "verify:analytics": "node scripts/verify-calculator-analytics.mjs"
+    "verify:analytics": "node scripts/verify-calculator-analytics.mjs",
+    "icons:pwa": "node scripts/generate-pwa-icons.mjs",
+    "verify:pwa": "node scripts/verify-pwa.mjs",
+    "verify:sw-scope": "node scripts/verify-sw-scope.mjs"
   },
   "dependencies": {
     "@sentry/vue": "^10.43.0",
@@ -50,6 +53,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.7.3",
     "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.0.18",
     "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^2.2.0"
