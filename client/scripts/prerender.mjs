@@ -1809,11 +1809,17 @@ const notFoundHtml = applyMeta(template, "/404", notFoundMeta)
     '    <meta name="robots" content="noindex,nofollow" />\n  </head>'
   )
   // Google "Valuable Inventory": a screen with no content must not carry an ad loader. The 404
-  // is built from the same shell as every route, so it inherits the shell's AdSense snippet —
-  // noindex keeps it out of the index but the policy judges whether the loader is present at
-  // all. NotFoundView renders no AdSlot, so stripping the shell tag removes the last one.
+  // is built from the same shell as every route, so it inherits whichever loader the shell
+  // carries — noindex keeps it out of the index but the policy judges whether the loader is
+  // present at all. NotFoundView renders no AdSlot, so stripping the shell tag removes the last
+  // one. Both networks are stripped: the shell's loader now follows VITE_AD_PROVIDER, and a
+  // strip that only knew AdSense would silently stop working the day the provider flips.
   .replace(
     /\n?\s*<script[^>]*pagead2\.googlesyndication\.com[^>]*><\/script>/i,
+    ""
+  )
+  .replace(
+    /\n?\s*<script[^>]*kakaocdn\.net\/kas\/static\/ba\.min\.js[^>]*><\/script>/i,
     ""
   )
   .replace(

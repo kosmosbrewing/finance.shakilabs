@@ -61,7 +61,7 @@ const noteSections = computed(() =>
       :links-heading="HOME_LINKS_H2"
     />
 
-    <AdSlot slot="110001" label="광고 · top" />
+    <AdSlot unit="home-top" label="광고 · top" />
 
     <section class="retro-panel">
       <div class="retro-panel-content space-y-5">
@@ -74,6 +74,6 @@ const noteSections = computed(() =>
 
     <RelatedServices />
 
-    <AdSlot slot="110003" label="광고 · bottom" />
+    <AdSlot unit="home-bottom" label="광고 · bottom" />
   </div>
 </template>

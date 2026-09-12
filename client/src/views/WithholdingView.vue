@@ -215,12 +215,12 @@ watch(
           @share-request="openShare"
         />
 
-        <AdSlot slot="160001" label="광고 · top" />
+        <AdSlot unit="withholding-top" label="광고 · top" />
 
         <CalcSourceBox />
         <InternalLink current="withholding" />
 
-        <AdSlot slot="160002" label="광고 · bottom" />
+        <AdSlot unit="withholding-bottom" label="광고 · bottom" />
       </div>
 
       <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
