@@ -150,17 +150,17 @@ useSEO({
           </p>
           <ul class="space-y-2 text-caption text-muted-foreground">
             <li class="flex gap-2">
-              <span class="text-primary shrink-0">▸</span>
+              <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
               <span>Google을 포함한 제3자 광고 사업자는 쿠키를 사용해 이용자의 본 서비스 및 다른
               웹사이트 방문 기록을 기반으로 광고를 게재합니다.</span>
             </li>
             <li class="flex gap-2">
-              <span class="text-primary shrink-0">▸</span>
+              <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
               <span>Google은 광고 쿠키를 통해 이용자의 이전 방문 기록에 따라 관심사 기반
               맞춤 광고를 표시할 수 있습니다.</span>
             </li>
             <li class="flex gap-2">
-              <span class="text-primary shrink-0">▸</span>
+              <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
               <span>이용자는
               <a
                 href="https://adssettings.google.com"
@@ -170,7 +170,7 @@ useSEO({
               >Google 광고 설정</a>에서 맞춤 광고를 언제든지 해제할 수 있습니다.</span>
             </li>
             <li class="flex gap-2">
-              <span class="text-primary shrink-0">▸</span>
+              <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
               <span>Google 외 제3자 광고 사업자의 맞춤 광고 쿠키는
               <a
                 href="https://www.aboutads.info/choices"

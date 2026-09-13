@@ -22,7 +22,7 @@ defineProps<{
       <div class="overflow-x-auto">
         <table aria-label="4대보험 항목별 상세" class="w-full text-caption border-collapse">
           <thead>
-            <tr class="border-b-2 border-primary/20 bg-muted/40">
+            <tr class="border-b-2 border-border bg-muted/40">
               <th scope="col" class="px-2 py-2 text-left font-semibold md:px-3 md:py-2.5">항목</th>
               <th scope="col" class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">근로자 요율</th>
               <th scope="col" class="px-2 py-2 text-right font-semibold md:px-3 md:py-2.5">근로자(월)</th>
@@ -31,28 +31,28 @@ defineProps<{
             </tr>
           </thead>
           <tbody>
-            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-muted/40 transition-colors">
               <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">국민연금</td>
               <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatPercent(RATES_2026.nationalPension.employee, 3) }}</td>
               <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5">{{ formatWon(calc.nationalPension.value) }}</td>
               <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatPercent(RATES_2026.nationalPension.employer, 3) }}</td>
               <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5">{{ formatWon(calc.employerCost.value.nationalPension) }}</td>
             </tr>
-            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-muted/40 transition-colors">
               <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">건강보험</td>
               <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatPercent(RATES_2026.healthInsurance.employee, 3) }}</td>
               <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5">{{ formatWon(calc.healthInsurance.value) }}</td>
               <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatPercent(RATES_2026.healthInsurance.employer, 3) }}</td>
               <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5">{{ formatWon(calc.employerCost.value.healthInsurance) }}</td>
             </tr>
-            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-muted/40 transition-colors">
               <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">장기요양</td>
               <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">건보의 {{ formatPercent(RATES_2026.longTermCare.rateOfHealth, 2) }}</td>
               <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5">{{ formatWon(calc.longTermCare.value) }}</td>
               <td class="hidden px-3 py-2.5 text-right tabular-nums md:table-cell">-</td>
               <td class="px-2 py-2 text-right tabular-nums md:px-3 md:py-2.5">-</td>
             </tr>
-            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors">
+            <tr class="border-t border-border/40 even:bg-muted/10 hover:bg-muted/40 transition-colors">
               <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">고용보험</td>
               <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatPercent(RATES_2026.employmentInsurance.employee, 2) }}</td>
               <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap md:px-3 md:py-2.5">{{ formatWon(calc.employmentInsurance.value) }}</td>
@@ -61,7 +61,7 @@ defineProps<{
             </tr>
           </tbody>
           <tfoot>
-            <tr class="border-t-2 border-primary/20 bg-primary/5 font-semibold">
+            <tr class="border-t-2 border-border bg-muted/60 font-semibold">
               <td class="px-2 py-2 md:px-3 md:py-2.5">합계</td>
               <td class="hidden px-3 py-2.5 text-right md:table-cell">-</td>
               <td class="px-2 py-2 text-right tabular-nums md:px-3 md:py-2.5">{{ formatWon(calc.totalInsurance.value) }}</td>

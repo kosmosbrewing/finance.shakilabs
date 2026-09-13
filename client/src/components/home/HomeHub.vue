@@ -26,9 +26,9 @@ const props = defineProps<{
           v-for="chain in scenarioChains"
           :key="chain.slug"
           :to="chain.route"
-          class="group block rounded-lg border border-border/40 bg-background p-3 transition-colors hover:border-primary/40 hover:bg-primary/5"
+          class="group block rounded-lg border border-border/40 bg-background p-3 transition-colors hover:border-foreground/30 hover:bg-muted/40"
         >
-          <p class="text-caption font-semibold text-foreground transition-colors group-hover:text-primary">
+          <p class="text-caption font-semibold text-foreground">
             {{ chain.name }}
           </p>
           <p class="text-tiny text-muted-foreground mt-0.5">
@@ -53,9 +53,9 @@ const props = defineProps<{
             <li v-for="item in group.items" :key="item.to">
               <RouterLink
                 :to="item.to"
-                class="group block rounded-lg border border-border/40 bg-background p-2.5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                class="group block rounded-lg border border-border/40 bg-background p-2.5 transition-colors hover:border-foreground/30 hover:bg-muted/40"
               >
-                <p class="text-caption font-semibold text-foreground transition-colors group-hover:text-primary">
+                <p class="text-caption font-semibold text-foreground">
                   {{ item.label }}
                 </p>
                 <p class="text-tiny text-muted-foreground mt-0.5">{{ item.desc }}</p>
@@ -67,7 +67,7 @@ const props = defineProps<{
 
       <RouterLink
         :to="HOME_ALL_LINK.to"
-        class="inline-flex items-center gap-1 text-caption font-semibold text-primary hover:underline"
+        class="pill-link sh-pill"
       >
         {{ HOME_ALL_LINK.label }}
         <ArrowRight class="h-4 w-4" aria-hidden="true" />

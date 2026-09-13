@@ -51,9 +51,9 @@ const showDiffWarning = computed(() => taxDiff.value >= 5_000 && props.monthlyIn
 
       <!-- 공제 내역 통합 섹션 -->
       <div class="retro-board-list text-caption">
-        <div class="retro-board-item bg-primary/5 text-body font-bold text-foreground">
+        <div class="retro-board-item bg-muted/60 text-body font-bold text-foreground">
           <span>공제 내역</span>
-          <strong class="tabular-nums text-primary">{{ formatWon(calc.totalDeduction.value) }}</strong>
+          <strong class="tabular-nums text-foreground">{{ formatWon(calc.totalDeduction.value) }}</strong>
         </div>
         <div class="px-3 py-1.5">
           <SalaryDeductionBar :calc="calc" />

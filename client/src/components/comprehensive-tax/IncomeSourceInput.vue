@@ -185,7 +185,7 @@ const separateHint = computed(() => {
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
             :aria-label="`${rangeConfig.step * 10_000}원 감소`"
             @click="updateRevenue(revenue - rangeConfig.step)"
           >
@@ -201,7 +201,7 @@ const separateHint = computed(() => {
           />
           <button
             type="button"
-            class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
             :aria-label="`${rangeConfig.step * 10_000}원 증가`"
             @click="updateRevenue(revenue + rangeConfig.step)"
           >

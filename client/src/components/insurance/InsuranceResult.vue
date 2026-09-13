@@ -72,7 +72,7 @@ const title = computed(() => {
       <!-- 공제 내역 통합 섹션 -->
       <div class="retro-board-list text-caption">
         <!-- 총공제 헤더 -->
-        <div class="retro-board-item bg-primary/5 text-body font-bold text-foreground">
+        <div class="retro-board-item bg-muted/60 text-body font-bold text-foreground">
           <span>공제 내역</span>
           <strong class="tabular-nums">{{ formatWon(displayedTotalDeduction) }}</strong>
         </div>

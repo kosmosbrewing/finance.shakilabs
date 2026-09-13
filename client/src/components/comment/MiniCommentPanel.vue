@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { Loader2, ThumbsUp } from "lucide-vue-next";
-import { apiFetch } from "@/api/helpers";
+import { Loader2, RotateCcw, ThumbsUp } from "lucide-vue-next";
+import { ApiRequestError, apiFetch } from "@/api/helpers";
 import type { Comment } from "@/api/types";
 
 const props = withDefaults(
@@ -24,6 +24,10 @@ const activeTab = ref<Tab>("recent");
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const error = ref("");
+// 목록을 "불러오려고 시도했는가"와 "불러오다 실패했는가"를 분리한다.
+// 이 둘이 없으면 실패와 "글이 0개"가 같은 화면으로 보인다 — 실제로 500 응답에서
+// "댓글을 불러올 수 없습니다"와 "첫 댓글을 남겨보세요"가 동시에 떴다.
+const loadError = ref("");
 const commentsEnabled = import.meta.env.PROD || import.meta.env.VITE_ENABLE_COMMENTS === "true";
 
 // 좋아요한 댓글 ID 세트 (중복 방지)
@@ -46,6 +50,12 @@ const PAGE_LABELS: Record<string, string> = {
 function getPageLabel(key: string): string {
   if (key.startsWith("salary-")) return "연봉계산";
   return PAGE_LABELS[key] ?? key;
+}
+
+// 화면에 내보낼 메시지는 우리가 쓴 것만 쓴다. 그 외(파서·런타임 예외)는 문구가
+// 사용자에게 의미 없고 내부 구현을 노출한다.
+function userMessage(error: unknown, fallback: string): string {
+  return error instanceof ApiRequestError ? error.message : fallback;
 }
 
 function loadLikedIds(): Set<string> {
@@ -73,13 +83,13 @@ async function fetchRecent(force = false): Promise<void> {
   if (!force && recentFetchedAt && now - recentFetchedAt < 30_000) return;
 
   isLoading.value = true;
-  error.value = "";
+  loadError.value = "";
   try {
     const data = await apiFetch<{ comments: Comment[] }>(`/comments?limit=20`);
     recentComments.value = data.comments;
     recentFetchedAt = now;
-  } catch {
-    error.value = "댓글을 불러올 수 없습니다.";
+  } catch (e) {
+    loadError.value = userMessage(e, "댓글을 불러올 수 없습니다.");
   } finally {
     isLoading.value = false;
   }
@@ -92,13 +102,13 @@ async function fetchPopular(force = false): Promise<void> {
   if (!force && popularFetchedAt && now - popularFetchedAt < 30_000) return;
 
   isLoading.value = true;
-  error.value = "";
+  loadError.value = "";
   try {
     const data = await apiFetch<{ comments: Comment[] }>(`/comments?sort=popular&limit=20`);
     popularComments.value = data.comments;
     popularFetchedAt = now;
-  } catch {
-    error.value = "댓글을 불러올 수 없습니다.";
+  } catch (e) {
+    loadError.value = userMessage(e, "댓글을 불러올 수 없습니다.");
   } finally {
     isLoading.value = false;
   }
@@ -109,6 +119,13 @@ function switchTab(tab: Tab): void {
   if (!commentsEnabled) return;
   if (tab === "recent") fetchRecent();
   else fetchPopular();
+}
+
+// 재시도는 캐시를 건너뛴다. force 없이 부르면 30초 캐시 가드에 걸려
+// 버튼을 눌러도 아무 요청이 나가지 않는다.
+function retryLoad(): void {
+  if (activeTab.value === "recent") void fetchRecent(true);
+  else void fetchPopular(true);
 }
 
 async function addComment(): Promise<void> {
@@ -126,7 +143,7 @@ async function addComment(): Promise<void> {
     recentComments.value = [created, ...recentComments.value];
     inputText.value = "";
   } catch (e) {
-    error.value = e instanceof Error ? e.message : "댓글 등록에 실패했습니다.";
+    error.value = userMessage(e, "댓글 등록에 실패했습니다.");
   } finally {
     isSubmitting.value = false;
   }
@@ -168,8 +185,16 @@ const commentsCountLabel = computed(() => {
   if (isLoading.value && activeComments.value.length === 0) {
     return `${label} 불러오는 중`;
   }
+  if (loadError.value && activeComments.value.length === 0) {
+    return `${label} 불러오지 못함`;
+  }
   return `${label} ${activeComments.value.length}개`;
 });
+// 실패했을 때 "첫 댓글을 남겨보세요"를 띄우면 거짓말이 된다 — 글이 없는 게 아니라 못 읽은 것이다.
+const showEmptyState = computed(
+  () => commentsEnabled && !isLoading.value && !loadError.value && activeComments.value.length === 0
+);
+const showLoadError = computed(() => Boolean(loadError.value) && activeComments.value.length === 0);
 
 // pageKey 변경 시 캐시 무효화 (다른 도메인 이동 시 최신 데이터 보장)
 watch(() => props.pageKey, () => {
@@ -199,7 +224,7 @@ onMounted(() => {
         class="flex-1 py-2 text-caption font-semibold transition-colors"
         :class="
           activeTab === 'recent'
-            ? 'text-primary border-b-2 border-primary -mb-px bg-primary/5'
+            ? 'text-foreground border-b-2 border-primary -mb-px'
             : 'text-muted-foreground hover:text-foreground'
         "
         @click="switchTab('recent')"
@@ -211,7 +236,7 @@ onMounted(() => {
         class="flex-1 py-2 text-caption font-semibold transition-colors"
         :class="
           activeTab === 'popular'
-            ? 'text-primary border-b-2 border-primary -mb-px bg-primary/5'
+            ? 'text-foreground border-b-2 border-primary -mb-px'
             : 'text-muted-foreground hover:text-foreground'
         "
         @click="switchTab('popular')"
@@ -247,7 +272,7 @@ onMounted(() => {
             <button
               type="submit"
               :disabled="!inputText.trim() || isSubmitting"
-              class="text-tiny font-semibold text-primary hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+              class="text-tiny font-semibold text-foreground hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
             >
               <Loader2 v-if="isSubmitting" class="inline h-3 w-3 animate-spin" />
               <span v-else>등록</span>
@@ -258,8 +283,25 @@ onMounted(() => {
       </form>
 
       <!-- 로딩 -->
-      <div v-if="isLoading" class="flex items-center justify-center py-6">
+      <div v-if="isLoading" class="flex items-center justify-center gap-2 py-6">
         <Loader2 class="h-5 w-5 animate-spin text-muted-foreground" />
+        <span class="text-tiny text-muted-foreground">불러오는 중</span>
+      </div>
+
+      <!-- 불러오기 실패 — 스피너를 계속 돌리지 않고 원인과 재시도를 준다 -->
+      <div
+        v-else-if="showLoadError"
+        class="rounded-lg border border-border bg-muted/40 px-3 py-3 text-caption text-foreground"
+      >
+        <p>{{ loadError }}</p>
+        <button
+          type="button"
+          class="mt-2 inline-flex items-center gap-1.5 text-tiny font-semibold text-foreground underline decoration-foreground/50 underline-offset-2 hover:decoration-foreground"
+          @click="retryLoad"
+        >
+          <RotateCcw class="h-3 w-3" aria-hidden="true" />
+          다시 시도
+        </button>
       </div>
 
       <!-- 댓글 목록 -->
@@ -278,7 +320,7 @@ onMounted(() => {
               <span>&middot;</span>
               <span>{{ formatTime(comment.createdAt) }}</span>
               <span>&middot;</span>
-              <span class="rounded-full bg-primary/10 px-1.5 py-px text-primary font-medium">
+              <span class="rounded-full bg-muted px-1.5 py-px text-muted-foreground font-medium">
                 {{ getPageLabel(comment.pageKey) }}
               </span>
             </div>
@@ -287,8 +329,8 @@ onMounted(() => {
               class="inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] font-medium transition-colors"
               :class="
                 likedIds.has(comment.id)
-                  ? 'text-primary border-primary/30 bg-primary/10 cursor-default'
-                  : 'text-muted-foreground border-border/70 bg-background hover:text-primary hover:border-primary/40'
+                  ? 'text-foreground border-foreground/30 bg-muted cursor-default'
+                  : 'text-muted-foreground border-border/70 bg-background hover:text-foreground hover:border-foreground/30'
               "
               :disabled="likedIds.has(comment.id)"
               :aria-label="`댓글 좋아요 ${comment.likes}`"
@@ -304,8 +346,8 @@ onMounted(() => {
         </li>
       </ul>
 
-      <!-- 빈 상태 -->
-      <p v-else-if="commentsEnabled" class="text-center text-caption text-muted-foreground py-4">
+      <!-- 빈 상태 — 실제로 글이 0개일 때만 -->
+      <p v-else-if="showEmptyState" class="text-center text-caption text-muted-foreground py-4">
         첫 댓글을 남겨보세요
       </p>
     </div>

@@ -180,7 +180,7 @@ watch(
                       v-for="row in result.comparisonData"
                       :key="row.years"
                       class="border-b border-border/20"
-                      :class="{ 'bg-primary/5 font-semibold': row.years === yearsOfService }"
+                      :class="{ 'bg-muted/60 font-semibold': row.years === yearsOfService }"
                     >
                       <td class="py-1">{{ row.years }}년</td>
                       <td class="py-1 text-right tabular-nums">{{ formatWon(row.amount) }}</td>

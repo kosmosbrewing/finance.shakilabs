@@ -65,7 +65,7 @@ function reloadPage(): void {
           <div class="flex flex-wrap gap-2">
             <button
               type="button"
-              class="rounded-xl border border-primary bg-primary px-3 py-2 text-caption font-semibold text-primary-foreground"
+              class="pill-link pill-link--solid sh-pill"
               @click="reloadPage"
             >
               새로고침

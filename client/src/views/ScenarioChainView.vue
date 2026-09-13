@@ -54,10 +54,10 @@ const jsonLd = computed(() => chain.value
           <li v-for="(step, index) in chain.steps" :key="step.to">
             <RouterLink
               :to="step.to"
-              class="group block rounded-lg border border-border/40 bg-background p-3.5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+              class="group block rounded-lg border border-border/40 bg-background p-3.5 transition-colors hover:border-foreground/30 hover:bg-muted/40"
             >
-              <p class="text-caption font-semibold text-foreground transition-colors group-hover:text-primary">
-                <span class="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-tiny font-bold text-primary">{{ index + 1 }}</span>
+              <p class="text-caption font-semibold text-foreground">
+                <span class="mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted text-tiny font-bold text-foreground">{{ index + 1 }}</span>
                 {{ step.label }}
               </p>
               <p class="text-tiny text-muted-foreground mt-1.5 leading-5">{{ step.why }}</p>
@@ -69,12 +69,12 @@ const jsonLd = computed(() => chain.value
           <h2 class="text-body font-bold text-foreground mb-2">다른 상황 가이드</h2>
           <ul class="space-y-1.5">
             <li v-for="linked in relatedChains" :key="linked.slug">
-              <RouterLink :to="linked.route" class="text-caption font-semibold text-primary hover:underline">
+              <RouterLink :to="linked.route" class="text-caption font-semibold text-link">
                 {{ linked.heading }} →
               </RouterLink>
             </li>
             <li>
-              <RouterLink to="/all" class="text-caption font-semibold text-primary hover:underline">
+              <RouterLink to="/all" class="text-caption font-semibold text-link">
                 전체 계산기 모음 →
               </RouterLink>
             </li>

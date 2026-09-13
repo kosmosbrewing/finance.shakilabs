@@ -46,7 +46,7 @@ function diffClass(delta: number): string {
       <div class="overflow-x-auto">
         <table aria-label="이직 전후 공제액 비교" class="w-full text-caption border-collapse">
           <thead>
-            <tr class="border-b-2 border-primary/20 bg-muted/40">
+            <tr class="border-b-2 border-border bg-muted/40">
               <th scope="col" class="px-2 py-2 text-left font-semibold md:px-3 md:py-2.5">항목</th>
               <th scope="col" class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">현재 회사</th>
               <th scope="col" class="hidden px-3 py-2.5 text-right font-semibold md:table-cell">이직 회사</th>
@@ -57,7 +57,7 @@ function diffClass(delta: number): string {
             <tr
               v-for="row in rows"
               :key="row.label"
-              class="border-t border-border/40 even:bg-muted/10 hover:bg-primary/5 transition-colors"
+              class="border-t border-border/40 even:bg-muted/10 hover:bg-muted/40 transition-colors"
             >
               <td class="px-2 py-2 whitespace-nowrap md:px-3 md:py-2.5">{{ row.label }}</td>
               <td class="hidden px-3 py-2.5 text-right tabular-nums whitespace-nowrap md:table-cell">{{ formatWon(row.a) }}</td>

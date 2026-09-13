@@ -70,7 +70,7 @@ const nearestAnnualRemuneration = computed(() => {
               v-for="example in HEALTH_INSURANCE_EXAMPLES"
               :key="example.annualRemuneration"
               class="border-b border-border/30 last:border-b-0"
-              :class="example.annualRemuneration === nearestAnnualRemuneration ? 'bg-primary/5 text-primary font-semibold' : ''"
+              :class="example.annualRemuneration === nearestAnnualRemuneration ? 'bg-muted/60 text-foreground font-semibold' : ''"
             >
               <td class="py-2 pl-3">
                 {{ formatManWon(example.annualRemuneration) }}

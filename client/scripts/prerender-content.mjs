@@ -165,7 +165,7 @@ function buildSalaryContent(manWon) {
 
       <p style="${P_STYLE}">
         2026년 최신 세율·요율을 적용한 연봉 <strong>${label}원</strong>의 월 실수령액은
-        <strong style="color:hsl(var(--primary));">${formatWon(result.monthlyNet)}</strong>입니다.
+        <strong>${formatWon(result.monthlyNet)}</strong>입니다.
         세전 월급 ${formatWon(result.monthlyGross)}에서 4대보험 ${formatWon(result.totalInsurance)}과
         소득세·지방소득세 ${formatWon(result.totalTax)}이 공제되며, 연간 실수령액은 약
         ${formatWon(result.annualNet)}, 실효세율은 ${formatPercent(result.effectiveTaxRate)}입니다.
@@ -204,7 +204,7 @@ function buildSalaryContent(manWon) {
           </tr>
           <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>실수령액</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatWon(result.monthlyNet)}</strong></td>
+            <td style="${TD_STYLE}"><strong>${formatWon(result.monthlyNet)}</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(result.annualNet)}</strong></td>
           </tr>
         </tbody>
@@ -423,7 +423,7 @@ function buildFreelancerContent(manWon) {
 
       <p style="${P_STYLE}">
         ${calc.refund >= 0
-          ? `확정세액이 기납부액보다 적으므로 <strong style="color:hsl(var(--primary));">약 ${formatWon(calc.refund)}을 환급</strong>받게 됩니다. 이 구간에서는 3.3%가 실제 세부담보다 크게 떼이고 있다는 뜻입니다.`
+          ? `확정세액이 기납부액보다 적으므로 <strong>약 ${formatWon(calc.refund)}을 환급</strong>받게 됩니다. 이 구간에서는 3.3%가 실제 세부담보다 크게 떼이고 있다는 뜻입니다.`
           : `확정세액이 기납부액을 넘어 <strong style="color:hsl(var(--destructive));">약 ${formatWon(Math.abs(calc.refund))}을 추가로 납부</strong>해야 합니다. 매달 ${formatWon(reserveMonthly)}씩 따로 모아두면 5월에 목돈을 마련하지 않아도 됩니다.`}
       </p>
 
@@ -686,7 +686,7 @@ function buildEitcContent(householdSlug) {
 
       <p style="${P_STYLE}">
         ${bracket.label}는 연간 총급여 <strong>${formatWon(bracket.phaseOutEnd)}</strong> 미만일 때 신청할 수 있고,
-        최대 <strong style="color:hsl(var(--primary));">${formatWon(bracket.maxAmount)}</strong>까지 받을 수 있습니다.
+        최대 <strong>${formatWon(bracket.maxAmount)}</strong>까지 받을 수 있습니다.
         총급여 ${formatWon(bracket.phaseInEnd)}까지는 소득에 비례해 늘어나는 점증 구간,
         ${formatWon(bracket.plateauEnd)}까지는 최대액을 유지하는 평탄 구간,
         그 이후는 상한에서 0원이 되는 점감 구간입니다.
@@ -787,7 +787,7 @@ function buildUnpaidWageContent(manWon) {
 
       <p style="${P_STYLE}">
         밀린 임금·퇴직금 <strong>${formatWon(amount)}</strong>은 퇴직일부터 14일(금품청산 기한)이 지난
-        다음 날부터 근로기준법 제37조에 따라 <strong style="color:hsl(var(--primary));">연 20%</strong>의 지연이자가 붙습니다.
+        다음 날부터 근로기준법 제37조에 따라 <strong>연 20%</strong>의 지연이자가 붙습니다.
         하루 약 ${formatWon(dailyRetired)}, 한 달 기준 약 ${formatWon(monthlyRetired)}씩 늘어나는 셈입니다.
         재직 중 체불이나 소송 단계에서는 민법 5%·상법 6%·소송촉진법 12%가 적용됩니다.
       </p>
@@ -1178,7 +1178,7 @@ function buildInsuranceContent(fee) {
 
       <p style="${P_STYLE}">
         월 건강보험료가 <strong>${formatWon(fee)}</strong>이라면, 2026년 건보료 요율 3.595%(근로자 부담)를
-        기준으로 역산한 월 과세 급여는 약 <strong style="color:hsl(var(--primary));">${formatWon(monthlyTaxable)}</strong>,
+        기준으로 역산한 월 과세 급여는 약 <strong>${formatWon(monthlyTaxable)}</strong>,
         비과세 식대(월 20만원) 포함 월 총 지급액은 약 ${formatWon(monthlyTaxable + 200_000)}이며,
         연봉으로 환산하면 <strong>약 ${formatManWonValue(estimatedManWon)}원</strong>입니다.
       </p>
@@ -1212,7 +1212,7 @@ function buildInsuranceContent(fee) {
           </tr>
           <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>추정 연봉</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatManWonValue(estimatedManWon)}원 (${formatWon(estimatedAnnual)})</strong></td>
+            <td style="${TD_STYLE}"><strong>${formatManWonValue(estimatedManWon)}원 (${formatWon(estimatedAnnual)})</strong></td>
           </tr>
           <tr>
             <td style="${TD_STYLE}">예상 월 실수령액</td>
@@ -1672,9 +1672,9 @@ function buildComprehensiveTaxContent(manWon) {
       <p style="${P_STYLE}">
         프리랜서·개인사업자가 연 수입 <strong>${label}원</strong>을 올렸을 때,
         단순경비율(IT·디자인·작가 등 인적용역 기준: 4천만원 이하 64.1% + 초과분 49.7%) 적용 시 종합소득세는 약
-        <strong style="color:hsl(var(--primary));">${formatWon(totalTax)}</strong>(지방소득세 포함)입니다.
+        <strong>${formatWon(totalTax)}</strong>(지방소득세 포함)입니다.
         3.3% 원천징수로 미리 납부한 금액이 ${formatWon(withholdingPrepaid)}이라면,
-        ${refund >= 0 ? `<strong style="color:hsl(var(--primary));">약 ${formatWon(refund)} 환급</strong>` : `<strong style="color:hsl(var(--destructive));">약 ${formatWon(-refund)} 추가 납부</strong>`}이 예상됩니다.
+        ${refund >= 0 ? `<strong>약 ${formatWon(refund)} 환급</strong>` : `<strong style="color:hsl(var(--destructive));">약 ${formatWon(-refund)} 추가 납부</strong>`}이 예상됩니다.
       </p>
 
       <p style="${P_STYLE}">
@@ -1720,7 +1720,7 @@ function buildComprehensiveTaxContent(manWon) {
           </tr>
           <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>최종 납부세액</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatWon(totalTax)}</strong></td>
+            <td style="${TD_STYLE}"><strong>${formatWon(totalTax)}</strong></td>
           </tr>
         </tbody>
       </table>
@@ -2053,7 +2053,7 @@ function buildCompareContent(aManWon, bManWon) {
       <p style="${P_STYLE}">
         연봉 ${formatManWonValue(aManWon)}에서 ${formatManWonValue(bManWon)}으로 이직(또는 인상) 시
         세전 연봉은 <strong>${formatWon(grossDiff)}</strong> 증가하지만,
-        실제 월 실수령액 증가는 <strong style="color:hsl(var(--primary));">${formatWon(netDiff)}</strong>,
+        실제 월 실수령액 증가는 <strong>${formatWon(netDiff)}</strong>,
         연간 실수령 증가는 <strong>${formatWon(netAnnualDiff)}</strong>입니다.
         즉, 연봉 인상분의 약 <strong>${retentionRate.toFixed(1)}%</strong>만 실제 통장에 남습니다.
       </p>
@@ -2095,7 +2095,7 @@ function buildCompareContent(aManWon, bManWon) {
           <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>월 실수령</strong></td>
             <td style="${TD_STYLE}"><strong>${formatWon(a.monthlyNet)}</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatWon(b.monthlyNet)}</strong></td>
+            <td style="${TD_STYLE}"><strong>${formatWon(b.monthlyNet)}</strong></td>
             <td style="${TD_STYLE}"><strong>+${formatWon(netDiff)}</strong></td>
           </tr>
           <tr>
@@ -2211,7 +2211,7 @@ function buildQuitContent(years) {
 
       <p style="${P_STYLE}">
         평균 월급 300만원 기준으로 <strong>${years}년 근속</strong> 후 퇴사하면,
-        예상 퇴직금은 <strong style="color:hsl(var(--primary));">약 ${formatWon(severancePay)}</strong>,
+        예상 퇴직금은 <strong>약 ${formatWon(severancePay)}</strong>,
         실업급여 총액은 <strong>약 ${formatWon(unemploymentTotal)}</strong>(${totalDays}일간)이며,
         월 200만원 생활비 기준 <strong>약 ${survivalMonths}개월</strong>의 생존 기간을 확보할 수 있습니다.
       </p>
@@ -2375,7 +2375,7 @@ function buildUnemploymentContent(manWon) {
       <p style="${P_STYLE}">
         월급 <strong>${formatManWonValue(manWon)}원</strong> 기준으로 실업급여(구직급여)의 일 수급액은
         평균임금의 60%인 <strong>${formatWon(rawDaily)}</strong>이지만, 2026년 고시 상한액 68,100원과 하한액 66,048원이 적용되어
-        실제 수급액은 <strong style="color:hsl(var(--primary));">${formatWon(dailyAmount)}/일</strong>입니다.
+        실제 수급액은 <strong>${formatWon(dailyAmount)}/일</strong>입니다.
       </p>
 
       <p style="${P_STYLE}">
@@ -2510,7 +2510,7 @@ function buildSeverancePayContent(years) {
 
       <p style="${P_STYLE}">
         평균 월급 300만원·상여금 포함 평균임금 ${formatWon(avgWage)} 기준으로
-        <strong>${years}년 근속</strong> 시 세전 퇴직금은 약 <strong style="color:hsl(var(--primary));">${formatWon(severance)}</strong>,
+        <strong>${years}년 근속</strong> 시 세전 퇴직금은 약 <strong>${formatWon(severance)}</strong>,
         근속연수 공제 ${formatWon(yearDeduction)} 적용 후 예상 퇴직소득세는 약 ${formatWon(estimatedTax)},
         실수령 퇴직금은 <strong>약 ${formatWon(netSeverance)}</strong>입니다.
       </p>
@@ -2573,7 +2573,7 @@ function buildSeverancePayContent(years) {
           </tr>
           <tr style="background:hsl(var(--accent));">
             <td style="${TD_STYLE}"><strong>실수령 퇴직금</strong></td>
-            <td style="${TD_STYLE}"><strong style="color:hsl(var(--primary));">${formatWon(netSeverance)}</strong></td>
+            <td style="${TD_STYLE}"><strong>${formatWon(netSeverance)}</strong></td>
           </tr>
         </tbody>
       </table>
@@ -2654,7 +2654,7 @@ function buildYearEndContent(manWon) {
       <p style="${P_STYLE}">
         연봉 <strong>${label}원</strong> 기준 원천징수된 소득세는 연간 약 ${formatWon(result.determinedTax)}이며,
         신용카드·의료비·교육비·월세·연금저축 등 공제 항목을 모두 적용할 경우 예상 환급액은
-        <strong style="color:hsl(var(--primary));">약 ${formatWon(refundEstimate)}</strong> 수준입니다. (표준 시나리오 기준)
+        <strong>약 ${formatWon(refundEstimate)}</strong> 수준입니다. (표준 시나리오 기준)
       </p>
 
       <p style="${P_STYLE}">
@@ -2773,7 +2773,7 @@ function buildParentalLeaveContent(manWon) {
         1~3개월 동안 월 <strong>${formatWon(pay1_3)}</strong>(통상임금 100%·상한 250만원),
         4~6개월 동안 월 <strong>${formatWon(pay4_6)}</strong>(통상임금 100%·상한 200만원),
         7~12개월 동안 월 <strong>${formatWon(pay7_12)}</strong>(통상임금 80%·상한 160만원)을 받으며,
-        총 수령액은 약 <strong style="color:hsl(var(--primary));">${formatWon(total)}</strong>입니다.
+        총 수령액은 약 <strong>${formatWon(total)}</strong>입니다.
       </p>
 
       <p style="${P_STYLE}">
@@ -2875,7 +2875,7 @@ function buildWithholdingContent(amount) {
 
       <p style="${P_STYLE}">
         매월 소득세 <strong>${formatWon(amount)}</strong>이 원천징수되고 있다면,
-        국세청 근로소득 간이세액표(2026년 개정) 기준 추정 연봉은 약 <strong style="color:hsl(var(--primary));">${formatManWonValue(estimatedManWon)}원</strong> 수준입니다.
+        국세청 근로소득 간이세액표(2026년 개정) 기준 추정 연봉은 약 <strong>${formatManWonValue(estimatedManWon)}원</strong> 수준입니다.
         (부양가족 1인, 비과세 식대 월 20만원 가정)
       </p>
 
@@ -2954,7 +2954,7 @@ function buildWeeklyHolidayPayContent(hourly) {
 
       <p style="${P_STYLE}">
         시급 <strong>${hourly.toLocaleString("ko-KR")}원</strong>으로 주 40시간을 일하면 기본 주급은 ${formatWon(weeklyBase)},
-        추가로 지급되는 주휴수당은 <strong style="color:hsl(var(--primary));">${formatWon(weeklyHoliday)}</strong>(8시간분),
+        추가로 지급되는 주휴수당은 <strong>${formatWon(weeklyHoliday)}</strong>(8시간분),
         주휴수당 포함 실질 시급은 <strong>${formatWon(effectiveHourly)}</strong>입니다.
       </p>
 
@@ -3054,7 +3054,7 @@ function buildWageConverterContent(hourly) {
 
       <p style="${P_STYLE}">
         시급 <strong>${hourly.toLocaleString("ko-KR")}원</strong>으로 주 40시간·월 4.345주 근무 시
-        주휴수당을 포함한 월급은 <strong style="color:hsl(var(--primary));">${formatWon(monthlyTotal)}</strong>,
+        주휴수당을 포함한 월급은 <strong>${formatWon(monthlyTotal)}</strong>,
         연봉은 <strong>${formatWon(annualTotal)}</strong>으로 환산됩니다.
       </p>
 
@@ -3165,7 +3165,7 @@ function buildRegionalHealthContent(manWon) {
       <p style="${P_STYLE}">
         월급 <strong>${formatManWonValue(manWon)}원</strong>으로 근무 중이던 근로자가 퇴사할 경우,
         <strong>지역가입자</strong>(소득 점수만 반영) 월 건강보험료는 약 <strong style="color:hsl(var(--destructive));">${formatWon(estimatedRegionalIncomeOnly)}</strong>,
-        <strong>임의계속가입</strong>(최대 36개월) 시 직전 근무 때와 동일한 <strong style="color:hsl(var(--primary));">${formatWon(formerEmployed)}</strong>으로
+        <strong>임의계속가입</strong>(최대 36개월) 시 직전 근무 때와 동일한 <strong>${formatWon(formerEmployed)}</strong>으로
         유지할 수 있습니다. (재산·자동차 점수는 개인별 편차가 커서 제외한 최소 추정)
       </p>
 

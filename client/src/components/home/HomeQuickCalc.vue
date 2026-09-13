@@ -73,7 +73,7 @@ const detailRoute = computed(() =>
         <div class="amount-stepper flex items-center gap-2">
           <button
             type="button"
-            class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
             aria-label="100만원 감소"
             @click="setAnnualGross(annualGrossInput - HOME_QUICK_CALC_STEP)"
           >
@@ -89,7 +89,7 @@ const detailRoute = computed(() =>
           />
           <button
             type="button"
-            class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
             aria-label="100만원 증가"
             @click="setAnnualGross(annualGrossInput + HOME_QUICK_CALC_STEP)"
           >
@@ -136,7 +136,7 @@ const detailRoute = computed(() =>
 
       <RouterLink
         :to="detailRoute"
-        class="inline-flex items-center gap-1 text-caption font-semibold text-primary hover:underline"
+        class="pill-link sh-pill"
       >
         부양가족·비과세까지 넣어 자세히 보기
         <ArrowRight class="h-4 w-4" aria-hidden="true" />

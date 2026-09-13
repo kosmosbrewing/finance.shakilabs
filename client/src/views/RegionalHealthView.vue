@@ -141,7 +141,7 @@ const cheapestLabel = computed(() => {
                 />
   
                 <div class="retro-panel-muted retro-panel-content space-y-3 text-caption leading-6 text-muted-foreground">
-                  <p v-if="result.dependentEligible" class="font-semibold text-primary">
+                  <p v-if="result.dependentEligible" class="font-semibold text-foreground">
                     피부양자 등록 요건을 충족할 수 있습니다. 배우자 등 직장가입자가 있다면 보험료 0원이 가능합니다.
                   </p>
                   <p>지역가입자 보험료는 소득·재산·자동차를 기반으로 한 간이 추정입니다. 실제 보험료는 건강보험공단 고지 기준으로 달라질 수 있습니다.</p>
@@ -168,7 +168,7 @@ const cheapestLabel = computed(() => {
                       <span>현재 (근로자 부담)</span>
                       <span class="font-medium text-foreground tabular-nums">{{ formatWon(result.currentMonthly) }}</span>
                     </li>
-                    <li class="flex justify-between" :class="{ 'text-primary font-semibold': result.cheapestOption === 'voluntary' }">
+                    <li class="flex justify-between" :class="{ 'text-foreground font-semibold': result.cheapestOption === 'voluntary' }">
                       <span>임의계속가입 (경감 후)</span>
                       <span class="tabular-nums">{{ formatWon(result.voluntaryMonthly) }}</span>
                     </li>
@@ -176,11 +176,11 @@ const cheapestLabel = computed(() => {
                       <span>└ 건강보험 {{ formatWon(result.voluntaryHealth) }} + 장기요양 {{ formatWon(result.voluntaryLongTerm) }}</span>
                       <span class="tabular-nums">경감 전 전액 {{ formatWon(result.voluntaryGrossMonthly) }}</span>
                     </li>
-                    <li class="flex justify-between" :class="{ 'text-primary font-semibold': result.cheapestOption === 'regional' }">
+                    <li class="flex justify-between" :class="{ 'text-foreground font-semibold': result.cheapestOption === 'regional' }">
                       <span>지역가입자</span>
                       <span class="tabular-nums">{{ formatWon(result.regionalMonthly) }}</span>
                     </li>
-                    <li v-if="result.dependentEligible" class="flex justify-between text-primary font-semibold">
+                    <li v-if="result.dependentEligible" class="flex justify-between text-foreground font-semibold">
                       <span>피부양자 등록</span>
                       <span class="tabular-nums">0원</span>
                     </li>

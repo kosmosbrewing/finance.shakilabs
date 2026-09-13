@@ -48,8 +48,10 @@
     <meta property="og:image:height" content="630" />
 
     <!-- 테마 -->
-    <meta name="theme-color" content="hsl(160, 56%, 38%)" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="hsl(160, 30%, 12%)" media="(prefers-color-scheme: dark)" />
+    <!-- 브라우저 UI 색은 셸을 따른다. manifest theme_color는 설치 타이틀바용이라
+         --primary와 묶여 있어 건드리지 않는다(verify-pwa). -->
+    <meta name="theme-color" content="hsl(40, 25%, 99%)" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="hsl(40, 12%, 7%)" media="(prefers-color-scheme: dark)" />
 
     <!--
       No static JSON-LD here on purpose. This shell is the template for every prerendered page
@@ -82,51 +84,61 @@
     </script>
     <!-- Critical CSS: finance 테마 — 본문과 버튼에서 WCAG AA 대비 확보 -->
     <style>
+      /* Archive 톤 — docs/ARCHIVE_TONE_SPEC.md가 단일 출처.
+         --primary는 유지하고 쓰이는 자리만 줄인다(포커스·선택·상태). */
       :root {
-        --background: 210 40% 98%;
-        --foreground: 222 47% 11%;
-        --muted: 210 40% 96%;
-        --muted-foreground: 215 16% 37%;
+        --background: 40 25% 99%;
+        --foreground: 40 7% 12%;
+        --muted: 36 14% 95%;
+        --muted-foreground: 30 8% 38%;
         --card: 0 0% 100%;
-        --card-foreground: 222 47% 11%;
+        --card-foreground: 40 7% 12%;
         --primary: 160 62% 24%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 160 15% 91%;
-        --secondary-foreground: 222 47% 11%;
-        --accent: 160 58% 95%;
-        --accent-foreground: 160 56% 30%;
+        /* 브랜드 hue 틴트였다 — hover 워시·표 강조 행이 전부 연녹색이었다 */
+        --secondary: 36 14% 93%;
+        --secondary-foreground: 40 7% 12%;
+        --accent: 36 14% 95%;
+        --accent-foreground: 40 7% 12%;
         --popover: 0 0% 100%;
-        --popover-foreground: 222 47% 11%;
+        --popover-foreground: 40 7% 12%;
         /* 0 72% 52%는 본문 배경 위 text-destructive가 4.49:1로 AA(4.5:1) 미달이었다. */
         --destructive: 0 74% 44%;
-        --destructive-foreground: 210 40% 98%;
-        --border: 214 16% 85%;
-        --input: 214 16% 85%;
+        --destructive-foreground: 40 25% 99%;
+        /* Archive --line(#e6e2dd) 대응 헤어라인 */
+        --border: 33 14% 87%;
+        --input: 33 14% 87%;
         --ring: 160 62% 24%;
         --radius: 0.4rem;
         --deduction: 0 62% 52%;
         --deduction-foreground: 0 0% 100%;
-        /* --highlight 자체는 프리렌더 h2 밑줄·안내 상자 테두리(장식)로 쓰이므로 값을 유지한다.
-           흰색 전경이 2.41:1이었던 게 원인이라 전경만 앱 hue의 어두운 값으로 내린다. */
-        --highlight: 160 60% 46%;
-        --highlight-foreground: 160 56% 10%;
+        /* 프리렌더 h2 밑줄·안내 상자 테두리(장식) — 무채색 헤어라인 */
+        --highlight: 33 10% 52%;
+        --highlight-foreground: 40 7% 12%;
+        /* 스티키 내비 높이 — scroll-padding의 단일 출처(모바일은 2행) */
+        --header-h: 3rem;
+      }
+
+      @media (max-width: 639px) {
+        :root { --header-h: 6.5rem; }
       }
 
       .dark {
-        --background: 222 47% 11%;
-        --foreground: 210 40% 96%;
-        --muted: 217 33% 17%;
-        --muted-foreground: 215 20% 72%;
-        --card: 217 33% 17%;
-        --card-foreground: 210 40% 96%;
+        /* Archive dark: --bg #14120f, --fg #f3efe9, --muted #a49c93, --line #2e2a25 */
+        --background: 40 12% 7%;
+        --foreground: 39 29% 93%;
+        --muted: 37 10% 15%;
+        --muted-foreground: 32 12% 68%;
+        --card: 38 10% 12%;
+        --card-foreground: 39 29% 93%;
         --primary: 160 56% 56%;
         --primary-foreground: 160 56% 10%;
-        --secondary: 160 15% 20%;
-        --secondary-foreground: 210 40% 96%;
-        --accent: 160 40% 22%;
-        --accent-foreground: 158 56% 78%;
-        --popover: 217 33% 17%;
-        --popover-foreground: 210 40% 96%;
+        --secondary: 37 9% 19%;
+        --secondary-foreground: 39 29% 93%;
+        --accent: 37 9% 18%;
+        --accent-foreground: 39 29% 93%;
+        --popover: 38 10% 12%;
+        --popover-foreground: 39 29% 93%;
         /* 다크에서 적색 의미색은 "밝은 면 + 어두운 전경"이어야 AA를 넘는다.
            흰 전경을 유지한 채로는 배지(4.04:1)·본문(3.67:1) 어느 쪽도 통과할 수 없었다.
            함대 공통값 0 75% 72%는 민무늬 배경(6.91:1)에서만 충분했다. 이 앱은 허브 표의
@@ -134,18 +146,20 @@
            hue는 그대로 두고 명도만 올려 틴트 행에서 4.69:1, 민무늬에서 9.03:1을 확보한다. */
         --destructive: 0 82% 80%;
         --destructive-foreground: 0 60% 10%;
-        --border: 214 16% 26%;
-        --input: 214 16% 30%;
+        --border: 37 13% 20%;
+        --input: 37 13% 26%;
         --ring: 160 56% 56%;
         --deduction: 0 75% 72%;
         --deduction-foreground: 0 60% 10%;
-        --highlight: 160 56% 50%;
-        --highlight-foreground: 160 56% 10%;
+        --highlight: 33 8% 48%;
+        --highlight-foreground: 39 29% 93%;
       }
 
       html {
         scroll-behavior: auto;
         font-size: 16px;
+        /* 스티키 내비가 앵커 대상을 가리던 문제 */
+        scroll-padding-top: calc(var(--header-h) + 1rem);
       }
 
       /* 프리렌더 헤더·푸터만 숨긴다. 본문 article은 하이드레이션 후 <main> 안으로 옮겨져

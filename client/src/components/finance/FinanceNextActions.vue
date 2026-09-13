@@ -144,12 +144,12 @@ function trackNextClick(key: NextCalculatorKey, route: string): void {
         <ShSurface
           variant="outlined"
           padding="md"
-          class="flex h-full flex-col transition-colors hover:border-primary"
+          class="flex h-full flex-col transition-colors hover:border-foreground"
         >
           <ShText as="h3" variant="heading">{{ item.title }}</ShText>
           <ShText variant="caption" tone="muted" class="mt-2">{{ item.question }}</ShText>
           <template v-if="item.preview">
-            <p class="mt-3 text-body font-semibold tabular-nums text-primary">
+            <p class="mt-3 text-body font-semibold tabular-nums text-foreground">
               {{ item.preview.value }}
             </p>
             <ShText variant="caption" tone="muted" class="mt-1">
@@ -157,7 +157,7 @@ function trackNextClick(key: NextCalculatorKey, route: string): void {
             </ShText>
           </template>
           <span
-            class="mt-auto pt-4 inline-flex items-center gap-1 text-caption font-semibold text-primary"
+            class="mt-auto pt-4 inline-flex items-center gap-1 text-caption font-semibold text-muted-foreground"
             aria-hidden="true"
           >
             계산하러 가기 <ArrowRight class="h-4 w-4" />

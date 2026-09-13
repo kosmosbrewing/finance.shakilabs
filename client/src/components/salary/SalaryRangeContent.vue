@@ -39,7 +39,7 @@ const faqItems = computed(() => [
       <h2 class="text-h1 mb-3">연봉 {{ amountLabel }} 실수령액 요약</h2>
       <p class="text-body text-muted-foreground leading-relaxed">
         2026년 최신 세율 기준으로 연봉 {{ amountLabel }}의 월 실수령액은
-        <strong class="text-primary">{{ formatWon(calc.monthlyNet.value) }}</strong>입니다.
+        <strong class="text-foreground">{{ formatWon(calc.monthlyNet.value) }}</strong>입니다.
         월 급여 {{ formatWon(calc.monthlyGross.value) }}에서 4대보험 {{ formatWon(calc.totalInsurance.value) }}과
         세금 {{ formatWon(calc.totalTax.value) }}이 공제됩니다.
         연간 실수령액은 {{ formatKrwAuto(calc.annualNet.value) }}이며, 실효세율은 {{ formatPercent(calc.effectiveTaxRate.value, 1) }}입니다.

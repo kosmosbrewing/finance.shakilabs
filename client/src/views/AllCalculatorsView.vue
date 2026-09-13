@@ -93,9 +93,9 @@ const categories = [
           v-for="chain in scenarioChains"
           :key="chain.slug"
           :to="chain.route"
-          class="group block rounded-lg border border-border/40 bg-background p-3 transition-colors hover:border-primary/40 hover:bg-primary/5"
+          class="group block rounded-lg border border-border/40 bg-background p-3 transition-colors hover:border-foreground/30 hover:bg-muted/40"
         >
-          <p class="text-caption font-semibold text-foreground transition-colors group-hover:text-primary">{{ chain.name }}</p>
+          <p class="text-caption font-semibold text-foreground">{{ chain.name }}</p>
           <p class="text-tiny text-muted-foreground mt-0.5">{{ chain.steps.length }}단계 · {{ chain.steps[0].label }}부터</p>
         </RouterLink>
       </div>
@@ -118,9 +118,9 @@ const categories = [
             <li v-for="item in cat.items" :key="item.to">
               <RouterLink
                 :to="item.to"
-                class="group block rounded-lg border border-border/40 bg-background p-2.5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                class="group block rounded-lg border border-border/40 bg-background p-2.5 transition-colors hover:border-foreground/30 hover:bg-muted/40"
               >
-                <p class="text-caption font-semibold text-foreground group-hover:text-primary transition-colors">{{ item.label }}</p>
+                <p class="text-caption font-semibold text-foreground">{{ item.label }}</p>
                 <p class="text-tiny text-muted-foreground mt-0.5">{{ item.desc }}</p>
               </RouterLink>
             </li>

@@ -32,7 +32,7 @@ defineProps<{
           <strong class="shrink-0 tabular-nums">{{ formatWon(pensionMonthly) }}</strong>
         </div>
 
-        <div class="retro-board-item bg-primary/5 font-semibold text-body">
+        <div class="retro-board-item bg-muted/60 font-semibold text-body">
           <span>월 고정비 합계</span>
           <strong class="shrink-0 tabular-nums text-primary">{{ formatWon(monthlyFixedCost) }}</strong>
         </div>

@@ -76,7 +76,7 @@ const eligibleLabel: Record<string, string> = {
         <div class="rounded-xl border border-border/70 bg-background overflow-hidden">
           <div class="px-3 py-2 bg-muted/30 flex items-center justify-between">
             <span class="font-semibold text-foreground">① 퇴직금</span>
-            <span class="tabular-nums font-bold text-primary">{{ formatKrwAuto(retirementNet) }}</span>
+            <span class="tabular-nums font-bold text-foreground">{{ formatKrwAuto(retirementNet) }}</span>
           </div>
           <div class="divide-y divide-border/40">
             <div class="px-3 py-1.5 flex items-center justify-between text-muted-foreground">
@@ -154,9 +154,9 @@ const eligibleLabel: Record<string, string> = {
       </div>
 
       <!-- 합계 -->
-      <div class="rounded-xl bg-primary/[8%] border border-primary/20 px-4 py-3 flex items-center justify-between">
+      <div class="rounded-xl bg-muted/60 border border-border px-4 py-3 flex items-center justify-between">
         <span class="text-body font-bold text-foreground">총 합계</span>
-        <span class="text-body font-bold tabular-nums text-primary">{{ formatKrwAuto(totalReceivables) }}</span>
+        <span class="text-body font-bold tabular-nums text-foreground">{{ formatKrwAuto(totalReceivables) }}</span>
       </div>
     </div>
   </section>

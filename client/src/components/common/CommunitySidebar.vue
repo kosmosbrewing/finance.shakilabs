@@ -85,7 +85,7 @@ onUnmounted(() => {
         <div v-if="feedback === 'none'" class="flex gap-2">
           <button
             type="button"
-            class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-background px-3 py-2.5 text-caption font-semibold transition-all duration-200 hover:border-primary/50 hover:text-primary hover:scale-[1.02]"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-background px-3 py-2.5 text-caption font-semibold transition-all duration-200 hover:border-foreground/40 hover:text-foreground hover:scale-[1.02]"
             @click="submitFeedback('helpful')"
           >
             <ThumbsUp class="h-3.5 w-3.5" />
@@ -104,7 +104,7 @@ onUnmounted(() => {
         <!-- 피드백 후 -->
         <div
           v-else
-          class="rounded-xl border border-primary/30 bg-primary/5 px-3 py-3 text-caption text-foreground space-y-2"
+          class="rounded-xl border border-border bg-muted/60 px-3 py-3 text-caption text-foreground space-y-2"
         >
           <template v-if="feedback === 'helpful'">
             <p>피드백 감사합니다! 더 정확한 계산기를 만들겠습니다.</p>
@@ -119,7 +119,9 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <div class="min-h-[360px]">
+    <!-- 높이 예약은 비동기 청크가 들어오기 전까지만 한다. 패널이 뜬 뒤에도 360px를
+         붙잡아 두면, 글이 없을 때 빈 공간만 남는다(감사 §3 High #3 "미사용 시 영역 축소"). -->
+    <div :class="showCommentPanel ? '' : 'min-h-[360px]'">
       <MiniCommentPanel
         v-if="showCommentPanel"
         :page-key="props.pageKey"

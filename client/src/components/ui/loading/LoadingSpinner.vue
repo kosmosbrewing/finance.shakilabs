@@ -39,7 +39,7 @@ const spinnerSizes: Record<SpinnerSize, string> = {
 
 const textColorClasses = computed(() => {
   const map: Record<SpinnerColor, string> = {
-    primary: "text-primary",
+    primary: "text-foreground",
     white: "text-white dark:text-foreground",
     muted: "text-muted-foreground",
     foreground: "text-foreground",
@@ -49,7 +49,7 @@ const textColorClasses = computed(() => {
 
 const dotColorClasses = computed(() => {
   const map: Record<SpinnerColor, string> = {
-    primary: "bg-primary",
+    primary: "bg-foreground",
     white: "bg-white dark:bg-foreground",
     muted: "bg-muted-foreground",
     foreground: "bg-foreground",

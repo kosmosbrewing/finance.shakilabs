@@ -54,18 +54,18 @@ const rows = computed(() =>
         </colgroup>
         <thead>
           <tr class="bg-muted/45">
-            <th scope="col" class="sticky left-0 z-20 border-b-2 border-primary/20 bg-muted/60 pl-2.5 pr-1.5 py-2 text-left font-semibold sm:px-3 md:px-3 md:py-2.5">
+            <th scope="col" class="sticky left-0 z-20 border-b-2 border-border bg-muted/60 pl-2.5 pr-1.5 py-2 text-left font-semibold sm:px-3 md:px-3 md:py-2.5">
               연봉
             </th>
-            <th scope="col" class="border-b-2 border-primary/20 px-1.5 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
+            <th scope="col" class="border-b-2 border-border px-1.5 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
               <span class="md:hidden">공제</span>
               <span class="hidden md:inline">월 공제 합계</span>
             </th>
-            <th scope="col" class="border-b-2 border-primary/20 px-1.5 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
+            <th scope="col" class="border-b-2 border-border px-1.5 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
               <span class="md:hidden">실수령</span>
               <span class="hidden md:inline">월 실수령</span>
             </th>
-            <th scope="col" class="border-b-2 border-primary/20 pl-1 pr-3 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
+            <th scope="col" class="border-b-2 border-border pl-1 pr-3 py-2 text-right font-semibold sm:px-3 md:px-3 md:py-2.5">
               <span class="md:hidden">비율</span>
               <span class="hidden md:inline">공제 비율</span>
             </th>
@@ -75,10 +75,10 @@ const rows = computed(() =>
           <tr
             v-for="row in rows"
             :key="row.annualSalary"
-            class="group even:bg-muted/10 transition-colors hover:bg-primary/5"
+            class="group even:bg-muted/10 transition-colors hover:bg-muted/40"
           >
             <td class="sticky left-0 z-10 border-t border-border/40 bg-card pl-2.5 pr-1.5 py-2 group-even:bg-muted/10 sm:px-3 md:px-3 md:py-2.5">
-              <RouterLink :to="`/salary/${row.manWon}`" class="whitespace-nowrap font-semibold text-primary hover:underline">
+              <RouterLink :to="`/salary/${row.manWon}`" class="whitespace-nowrap font-semibold text-link">
                 <span class="md:hidden">{{ formatMobileSalary(row.annualSalary) }}</span>
                 <span class="hidden md:inline">{{ formatManWon(row.annualSalary) }}</span>
               </RouterLink>
