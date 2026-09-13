@@ -139,7 +139,7 @@ function updateRetirementIncluded(value: boolean): void {
           <div class="amount-stepper flex items-center gap-2">
             <button
               type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
               aria-label="1만원 감소"
               @click="emit('update:healthInsuranceFee', Math.max(0, healthInsuranceFee - 10_000))"
             >
@@ -155,7 +155,7 @@ function updateRetirementIncluded(value: boolean): void {
             />
             <button
               type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
               aria-label="1만원 증가"
               @click="emit('update:healthInsuranceFee', Math.min(1_000_000, healthInsuranceFee + 10_000))"
             >
@@ -190,7 +190,7 @@ function updateRetirementIncluded(value: boolean): void {
           <div class="amount-stepper flex items-center gap-2">
             <button
               type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
               aria-label="100만원 감소"
               @click="emit('update:annualGross', Math.max(10_000_000, annualGross - 1_000_000))"
             >
@@ -206,7 +206,7 @@ function updateRetirementIncluded(value: boolean): void {
             />
             <button
               type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
               aria-label="100만원 증가"
               @click="emit('update:annualGross', Math.min(300_000_000, annualGross + 1_000_000))"
             >

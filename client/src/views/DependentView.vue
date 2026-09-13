@@ -153,7 +153,7 @@ const registrationOptions = [
             </ul>
             <p class="text-caption leading-relaxed text-muted-foreground">
               피부양자에서 제외되면 지역가입자로 전환되어 소득·재산 기준 보험료가 부과됩니다.
-              <RouterLink to="/regional-health" class="font-semibold text-primary underline">
+              <RouterLink to="/regional-health" class="font-semibold text-link">
                 지역가입자 건보료 계산기
               </RouterLink>로 예상 보험료를 미리 확인해 보세요.
             </p>

@@ -108,15 +108,15 @@ defineProps<{
               </div>
               <div class="retro-board-item pl-6 sm:pl-8">
                 <span class="text-muted-foreground">(-) 근로소득공제</span>
-                <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.earnedIncomeDeduction.value) }}</span>
+                <span class="font-semibold tabular-nums text-foreground">{{ formatWon(calc.earnedIncomeDeduction.value) }}</span>
               </div>
               <div class="retro-board-item pl-6 sm:pl-8">
                 <span class="text-muted-foreground">(-) 인적공제 ({{ calc.dependents.value }}인)</span>
-                <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.personalDeduction.value) }}</span>
+                <span class="font-semibold tabular-nums text-foreground">{{ formatWon(calc.personalDeduction.value) }}</span>
               </div>
               <div class="retro-board-item pl-6 sm:pl-8">
                 <span class="text-muted-foreground">(-) 보험료공제 (연)</span>
-                <span class="font-semibold tabular-nums text-primary">{{ formatKrwAuto(calc.annualInsuranceDeduction.value) }}</span>
+                <span class="font-semibold tabular-nums text-foreground">{{ formatKrwAuto(calc.annualInsuranceDeduction.value) }}</span>
               </div>
               <div class="retro-board-item bg-muted/50">
                 <span class="font-bold">= 과세표준</span>
@@ -133,16 +133,16 @@ defineProps<{
               </div>
               <div class="retro-board-item pl-6 sm:pl-8">
                 <span class="text-muted-foreground">(-) 근로소득세액공제</span>
-                <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.taxCredit.value) }}</span>
+                <span class="font-semibold tabular-nums text-foreground">{{ formatWon(calc.taxCredit.value) }}</span>
               </div>
               <div class="retro-board-item pl-6 sm:pl-8">
                 <span class="text-muted-foreground">(-) 표준세액공제</span>
-                <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.standardTaxCredit.value) }}</span>
+                <span class="font-semibold tabular-nums text-foreground">{{ formatWon(calc.standardTaxCredit.value) }}</span>
               </div>
               <Transition name="fade">
                 <div v-if="calc.childTaxCredit.value > 0" class="retro-board-item pl-6 sm:pl-8">
                   <span class="text-muted-foreground">(-) 자녀세액공제</span>
-                  <span class="font-semibold tabular-nums text-primary">{{ formatWon(calc.childTaxCredit.value) }}</span>
+                  <span class="font-semibold tabular-nums text-foreground">{{ formatWon(calc.childTaxCredit.value) }}</span>
                 </div>
               </Transition>
               <div class="retro-board-item bg-muted/50">

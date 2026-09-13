@@ -217,7 +217,7 @@ const suggestions = computed(() => {
       v-for="item in suggestions"
       :key="item.label"
       :to="item.to"
-      class="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-caption font-semibold text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+      class="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-caption font-semibold text-foreground transition-colors hover:border-foreground/40"
     >
       {{ item.label }}
     </RouterLink>

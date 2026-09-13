@@ -124,7 +124,7 @@ const RATE_REFERENCES = [
             v-for="item in group.items"
             :key="item.path"
             :to="item.path"
-            class="retro-board-item hover:bg-primary/5 transition-colors"
+            class="retro-board-item hover:bg-muted/40 transition-colors"
           >
             <span class="font-semibold text-foreground">{{ item.name }}</span>
             <span class="text-muted-foreground text-tiny">{{ item.desc }}</span>
@@ -180,27 +180,27 @@ const RATE_REFERENCES = [
       <div class="retro-panel-content">
         <ul class="space-y-2 text-caption text-muted-foreground">
           <li class="flex gap-2">
-            <span class="text-primary shrink-0">▸</span>
+            <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
             <span><strong class="text-foreground">회원가입 불필요</strong> — 계정·이름·연락처를 받지 않고 즉시 사용 가능</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0">▸</span>
+            <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
             <span><strong class="text-foreground">클라이언트 연산</strong> — 입력한 급여·세금 정보는 서버로 전송되지 않고 브라우저 내에서만 처리됩니다.</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0">▸</span>
+            <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
             <span><strong class="text-foreground">법령 기반</strong> — 모든 계산은 국세청·건보공단·고용부 공식 고시에 기반합니다.</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0">▸</span>
+            <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
             <span><strong class="text-foreground">세율·요율 반영</strong> — 정해진 갱신 주기는 없고, 세법·요율 개정을 사람이 확인한 시점에 반영 (최근 반영: 2026년 1월 시행분)</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0">▸</span>
+            <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
             <span><strong class="text-foreground">오류 제보 환영</strong> — 이메일로 계산 오류 제보 시 빠르게 수정합니다.</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0">▸</span>
+            <span class="text-muted-foreground shrink-0" aria-hidden="true">▸</span>
             <span><strong class="text-foreground">무료 사용</strong> — 광고 수익을 통해 운영되며, 사용자 과금이 없습니다.</span>
           </li>
         </ul>
@@ -275,23 +275,23 @@ const RATE_REFERENCES = [
       <div class="retro-panel-content">
         <ul class="space-y-2 text-caption text-muted-foreground">
           <li class="flex gap-2">
-            <span class="text-primary shrink-0 font-mono">2026.07</span>
+            <span class="eyebrow shrink-0 font-mono">2026.07</span>
             <span>연말정산 신용카드 소득공제 한도와 공식 출처 재검증</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0 font-mono">2026.03</span>
+            <span class="eyebrow shrink-0 font-mono">2026.03</span>
             <span>사이트 구조 개편 — 9탭 네비게이션, 전체 계산기 허브 페이지 추가</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0 font-mono">2026.01</span>
+            <span class="eyebrow shrink-0 font-mono">2026.01</span>
             <span>2026년 세법·요율 전면 반영 (자녀세액공제, 실업급여 상한 68,100원, 최저시급 10,320원)</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0 font-mono">2025.12</span>
+            <span class="eyebrow shrink-0 font-mono">2025.12</span>
             <span>연말정산 계산기, 월세 세액공제, IRP 계산기 추가</span>
           </li>
           <li class="flex gap-2">
-            <span class="text-primary shrink-0 font-mono">2025.11</span>
+            <span class="eyebrow shrink-0 font-mono">2025.11</span>
             <span>지역가입자 건보료·임의계속가입 비교 기능 추가</span>
           </li>
         </ul>

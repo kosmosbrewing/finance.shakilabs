@@ -307,7 +307,7 @@ onUnmounted(() => {
       <div class="grid grid-cols-2 gap-2">
         <button
           type="button"
-          class="rounded-lg border border-border/70 bg-background px-3 py-2 text-left transition-colors hover:border-primary/60"
+          class="rounded-lg border border-border/70 bg-background px-3 py-2 text-left transition-colors hover:border-foreground/50"
           aria-label="시작일 선택"
           @click="openCalendar('start')"
         >
@@ -316,7 +316,7 @@ onUnmounted(() => {
         </button>
         <button
           type="button"
-          class="rounded-lg border border-border/70 bg-background px-3 py-2 text-left transition-colors hover:border-primary/60"
+          class="rounded-lg border border-border/70 bg-background px-3 py-2 text-left transition-colors hover:border-foreground/50"
           aria-label="종료일 선택"
           @click="openCalendar('end')"
         >

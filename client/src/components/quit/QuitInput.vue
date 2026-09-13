@@ -294,7 +294,7 @@ const inputIds = {
         <div class="grid grid-cols-2 gap-2">
           <button
             type="button"
-            class="retro-input px-3 py-2 text-left transition-colors hover:border-primary/60"
+            class="retro-input px-3 py-2 text-left transition-colors hover:border-foreground/50"
             @click="openCalendar('start')"
           >
             <p class="text-tiny font-medium text-foreground/70">시작일</p>
@@ -302,7 +302,7 @@ const inputIds = {
           </button>
           <button
             type="button"
-            class="retro-input px-3 py-2 text-left transition-colors hover:border-primary/60"
+            class="retro-input px-3 py-2 text-left transition-colors hover:border-foreground/50"
             @click="openCalendar('end')"
           >
             <p class="text-tiny font-medium text-foreground/70">종료일</p>
@@ -325,7 +325,7 @@ const inputIds = {
           <div class="flex items-center gap-2">
             <button
               type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
               aria-label="10만원 감소"
               @click="emit('update:monthlySalary', Math.max(1_000_000, monthlySalary - 100_000))"
             >
@@ -341,7 +341,7 @@ const inputIds = {
             />
             <button
               type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
               aria-label="10만원 증가"
               @click="emit('update:monthlySalary', Math.min(100_000_000, monthlySalary + 100_000))"
             >

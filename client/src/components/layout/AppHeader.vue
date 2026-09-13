@@ -84,7 +84,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <header class="border-b border-border bg-primary/[8%]">
+  <!-- 셸은 무채색이다 — 8% 브랜드 틴트를 걷어내 헤더·내비를 한 톤으로 묶는다.
+       (주석에 옛 유틸리티 이름을 그대로 적으면 죽은-유틸리티 게이트가 잡는다) -->
+  <header class="border-b border-border bg-card">
     <div class="container pt-2.5 pb-2.5">
       <div class="overflow-hidden">
         <div class="retro-titlebar h-[44px] border-b-0 px-2 bg-transparent">

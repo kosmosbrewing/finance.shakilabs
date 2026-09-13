@@ -79,7 +79,7 @@ function taxationLabel(source: SourceResult): string {
                   class="text-tiny px-1.5 py-0.5 rounded-full font-medium"
                   :class="source.taxation === 'separate'
                     ? 'bg-muted/60 text-muted-foreground'
-                    : 'bg-primary/10 text-primary'"
+                    : 'bg-muted text-foreground'"
                 >{{ taxationLabel(source) }}</span>
               </div>
               <strong class="tabular-nums shrink-0">{{ formatWon(source.incomeAmount) }}</strong>
@@ -90,7 +90,7 @@ function taxationLabel(source: SourceResult): string {
         <!-- STEP 1: 과세표준 계산 -->
         <div class="rounded-xl border border-border/70 bg-background overflow-hidden">
           <div class="px-3 py-2 bg-muted/30 flex items-center gap-2">
-            <span class="text-tiny font-bold text-primary bg-primary/10 rounded-full px-2 py-0.5">STEP 1</span>
+            <span class="eyebrow bg-muted rounded-full px-2 py-0.5">STEP 1</span>
             <p class="font-semibold text-foreground">과세표준 계산</p>
           </div>
           <div class="divide-y divide-border/40">
@@ -116,7 +116,7 @@ function taxationLabel(source: SourceResult): string {
         <!-- STEP 2: 세액 계산 -->
         <div class="rounded-xl border border-border/70 bg-background overflow-hidden">
           <div class="px-3 py-2 bg-muted/30 flex items-center gap-2">
-            <span class="text-tiny font-bold text-primary bg-primary/10 rounded-full px-2 py-0.5">STEP 2</span>
+            <span class="eyebrow bg-muted rounded-full px-2 py-0.5">STEP 2</span>
             <p class="font-semibold text-foreground">세액 계산</p>
           </div>
           <div class="divide-y divide-border/40">
@@ -150,7 +150,7 @@ function taxationLabel(source: SourceResult): string {
         <!-- STEP 3: 최종 정산 -->
         <div class="rounded-xl border border-border/70 bg-background overflow-hidden">
           <div class="px-3 py-2 bg-muted/30 flex items-center gap-2">
-            <span class="text-tiny font-bold text-primary bg-primary/10 rounded-full px-2 py-0.5">STEP 3</span>
+            <span class="eyebrow bg-muted rounded-full px-2 py-0.5">STEP 3</span>
             <p class="font-semibold text-foreground">최종 정산</p>
           </div>
           <div class="divide-y divide-border/40">

@@ -42,8 +42,11 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 
 const alertStyles = computed(() => {
   if (props.confirmMode) return "";
-  if (props.type === "error") return "bg-primary text-destructive-foreground";
-  return "bg-primary text-primary-foreground";
+  // 에러 토스트가 bg-primary(녹색)였다 — 성공 토스트와 같은 면색이라
+  // "실패"가 색으로는 전혀 읽히지 않았다. 의미색으로 바로잡는다.
+  if (props.type === "error") return "bg-destructive text-destructive-foreground";
+  // 일반 토스트는 셸과 같은 어휘: 검정 면 + 배경색 글자 (Archive CTA 반전형)
+  return "bg-foreground text-background";
 });
 
 const containerStyles = computed(() => {
@@ -110,11 +113,12 @@ onUnmounted(() => {
         <div v-if="isVisible" :class="cn(containerStyles, alertStyles, props.class)" role="alert">
           <template v-if="confirmMode">
             <div class="pt-6 pb-4 px-5 sm:pt-6 sm:pb-4 sm:px-6 flex flex-col items-center gap-2.5">
-              <div v-if="!isDestructive" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/5 flex items-center justify-center">
-                <CheckCircle2 class="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+              <div v-if="!isDestructive" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-muted flex items-center justify-center">
+                <CheckCircle2 class="w-6 h-6 sm:w-8 sm:h-8 text-foreground" />
               </div>
-              <div v-else class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/5 flex items-center justify-center">
-                <AlertTriangle class="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+              <!-- 경고 아이콘이 브랜드 녹색이었다 — 확인 아이콘과 같은 색이라 구분이 없었다 -->
+              <div v-else class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertTriangle class="w-6 h-6 sm:w-8 sm:h-8 text-destructive" />
               </div>
               <p class="text-caption sm:text-body font-medium text-foreground text-center whitespace-pre-line">
                 {{ message }}
@@ -129,7 +133,7 @@ onUnmounted(() => {
               </button>
               <button
                 @click="handleConfirm"
-                class="flex-1 py-3 sm:py-3.5 text-caption sm:text-body font-semibold transition-colors text-primary hover:bg-primary/5"
+                class="flex-1 py-3 sm:py-3.5 text-caption sm:text-body font-semibold transition-colors text-foreground hover:bg-muted/60"
               >
                 {{ confirmText }}
               </button>

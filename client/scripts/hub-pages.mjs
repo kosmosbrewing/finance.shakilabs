@@ -146,7 +146,7 @@ function comprehensiveTaxHub() {
               won(calc.taxableBase),
               won(calc.totalTax),
               calc.refund >= 0
-                ? `<strong style="color:hsl(var(--primary));">${won(calc.refund)} 환급</strong>`
+                ? `<strong>${won(calc.refund)} 환급</strong>`
                 : `<strong style="color:hsl(var(--destructive));">${won(Math.abs(calc.refund))} 추가 납부</strong>`,
             ],
           })),
@@ -227,7 +227,7 @@ function compareHub() {
               `<strong>${won(row.monthlyGap)}</strong>`,
               won(row.annualGap),
               formatPercent(row.nominal),
-              `<strong style="color:hsl(var(--primary));">${formatPercent(row.afterTax)}</strong>`,
+              `<strong>${formatPercent(row.afterTax)}</strong>`,
             ],
           })),
         },
@@ -311,7 +311,7 @@ function quitHub() {
               won(row.severance),
               `${row.days}일`,
               won(row.unemploymentTotal),
-              `<strong style="color:hsl(var(--primary));">약 ${row.survivalMonths}개월</strong>`,
+              `<strong>약 ${row.survivalMonths}개월</strong>`,
             ],
           })),
         },
@@ -380,7 +380,7 @@ function withholdingHub() {
             cells: [
               won(row.tax),
               won(row.tax * 12),
-              `<strong style="color:hsl(var(--primary));">약 ${manWon(row.estimatedManWon)}</strong>`,
+              `<strong>약 ${manWon(row.estimatedManWon)}</strong>`,
             ],
           })),
         },
@@ -465,7 +465,7 @@ function freelancerHub() {
               won(calc.withholdingPrepaid),
               won(calc.totalTax),
               calc.refund >= 0
-                ? `<strong style="color:hsl(var(--primary));">${won(calc.refund)} 환급</strong>`
+                ? `<strong>${won(calc.refund)} 환급</strong>`
                 : `<strong style="color:hsl(var(--destructive));">${won(Math.abs(calc.refund))} 추가 납부</strong>`,
             ],
           })),
@@ -612,7 +612,7 @@ function severancePayHub() {
               won(row.severance),
               won(row.yearDeduction),
               won(row.estimatedTax),
-              `<strong style="color:hsl(var(--primary));">${won(row.netSeverance)}</strong>`,
+              `<strong>${won(row.netSeverance)}</strong>`,
             ],
           })),
         },
@@ -680,7 +680,7 @@ function parentalLeaveHub() {
               won(row.pay1_3),
               won(row.pay4_6),
               won(row.pay7_12),
-              `<strong style="color:hsl(var(--primary));">${won(row.total)}</strong>`,
+              `<strong>${won(row.total)}</strong>`,
             ],
           })),
         },
@@ -746,7 +746,7 @@ function weeklyHolidayPayHub() {
               won(row.weeklyBase),
               `<strong>+${won(row.weeklyHoliday)}</strong>`,
               won(row.weeklyTotal),
-              `<strong style="color:hsl(var(--primary));">${won(row.effectiveHourly)}</strong>`,
+              `<strong>${won(row.effectiveHourly)}</strong>`,
             ],
           })),
         },
@@ -809,7 +809,7 @@ function regionalHealthHub() {
             cells: [
               manWon(row.amount),
               `<strong style="color:hsl(var(--destructive));">${won(row.regionalIncomeOnly)}</strong>`,
-              `<strong style="color:hsl(var(--primary));">${won(row.formerEmployed)}</strong>`,
+              `<strong>${won(row.formerEmployed)}</strong>`,
               won(row.regionalIncomeOnly - row.formerEmployed),
             ],
           })),
@@ -891,7 +891,7 @@ function unemploymentHub() {
             cells: [
               manWon(row.amount),
               won(row.rawDaily),
-              `<strong style="color:hsl(var(--primary));">${won(row.dailyAmount)}</strong>`,
+              `<strong>${won(row.dailyAmount)}</strong>`,
               won(row.dailyAmount * 150),
               won(row.dailyAmount * 270),
             ],
@@ -981,7 +981,7 @@ function yearEndHub() {
               won(row.determinedTax),
               won(row.extraDeduction),
               formatPercent(row.marginalRate, 1),
-              `<strong style="color:hsl(var(--primary));">약 ${won(row.refund)}</strong>`,
+              `<strong>약 ${won(row.refund)}</strong>`,
             ],
           })),
         },
@@ -1226,7 +1226,7 @@ function eitcHub() {
               `~${won(bracket.phaseInEnd)}`,
               `${won(bracket.phaseInEnd)}~${won(bracket.plateauEnd)}`,
               won(bracket.phaseOutEnd),
-              `<strong style="color:hsl(var(--primary));">${won(bracket.maxAmount)}</strong>`,
+              `<strong>${won(bracket.maxAmount)}</strong>`,
             ],
           })),
         },

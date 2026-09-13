@@ -105,6 +105,73 @@
 }
 
 @layer components {
+  /* ── docs/ARCHIVE_TONE_SPEC.md §2 공통 컴포넌트 (root src/style.css와 동일) ── */
+
+  /* Archive의 'COMING SOON' 라벨 — 색이 아니라 자간·크기로 계층을 만든다.
+     Archive 원본 자간 .28em은 라틴 대문자 전용이라 한글 음절을 흩뜨린다 → 0.04em. */
+  .eyebrow {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* Archive CTA — 얇은 아웃라인 pill, hover 시 반전 */
+  .pill-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 1.05rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 999px;
+    color: hsl(var(--foreground));
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  }
+
+  .pill-link:hover,
+  .pill-link:focus-visible {
+    border-color: hsl(var(--foreground));
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+
+  /* 주 행동(도구 진입 등) — Archive pill의 hover 상태를 기본형으로 */
+  .pill-link--solid {
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    border-color: hsl(var(--foreground));
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--background));
+    font-size: 0.875rem;
+  }
+
+  .pill-link--solid:hover,
+  .pill-link--solid:focus-visible {
+    background-color: transparent;
+    color: hsl(var(--foreground));
+  }
+
+  /* 본문 흐름 안의 링크 — 색 대신 밑줄로 링크임을 알린다(색맹 대응 겸).
+     밑줄 대비 3.22:1 (비텍스트 3:1 충족). --border 헤어라인은 1.13:1로 안 보인다. */
+  .text-link {
+    color: hsl(var(--foreground));
+    text-decoration: underline;
+    text-decoration-color: hsl(var(--foreground) / 0.5);
+    text-underline-offset: 0.28em;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color 0.18s ease;
+  }
+
+  .text-link:hover,
+  .text-link:focus-visible {
+    text-decoration-color: hsl(var(--foreground));
+  }
+
   .retro-panel-content {
     @apply px-4 py-3 sm:px-5 sm:py-4;
   }
@@ -137,8 +204,20 @@
     @apply shrink-0 inline-flex items-center rounded-full border border-border/80 bg-background/60 px-2.5 py-1 text-caption font-semibold text-muted-foreground;
   }
 
+  /* 본문 링크는 색이 아니라 밑줄로 알린다 (WCAG 1.4.1 — 무채색으로 바꾸면
+     색이 유일한 식별 수단이 되므로 밑줄이 필수다). 밑줄 대비는 .text-link와 동일. */
   .retro-link {
-    @apply font-semibold text-primary hover:text-primary/80 hover:underline underline-offset-2;
+    @apply font-semibold text-foreground;
+    text-decoration: underline;
+    text-decoration-color: hsl(var(--foreground) / 0.5);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color 0.18s ease;
+  }
+
+  .retro-link:hover,
+  .retro-link:focus-visible {
+    text-decoration-color: hsl(var(--foreground));
   }
 
   .retro-input {
@@ -274,12 +353,21 @@
     @apply px-3 py-1 text-tiny text-muted-foreground sm:hidden;
   }
 
+  /* 본문 CTA에서 브랜드색을 뺀다 — Archive CTA는 검정 면/검정 아웃라인이다.
+     리프트(hover:scale)도 제거: 셸이 그림자·변형을 !important로 이미 끄고 있어
+     선언만 남아 있던 죽은 코드였다. */
   .retro-button {
-    @apply inline-flex items-center justify-center rounded-lg border border-primary bg-primary px-4 py-2 text-body font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02];
+    @apply inline-flex items-center justify-center rounded-lg border border-foreground bg-foreground px-4 py-2 text-body font-semibold text-background transition-colors duration-200;
+  }
+
+  .retro-button:hover,
+  .retro-button:focus-visible {
+    background-color: transparent;
+    color: hsl(var(--foreground));
   }
 
   .retro-button-subtle {
-    @apply inline-flex items-center justify-center rounded-lg border border-border/70 bg-card px-3 py-2 text-body font-medium text-foreground transition-all duration-200 hover:border-primary/50 hover:text-primary hover:scale-[1.02];
+    @apply inline-flex items-center justify-center rounded-lg border border-border bg-card px-3 py-2 text-body font-medium text-foreground transition-colors duration-200 hover:border-foreground hover:bg-muted;
   }
 
   .retro-chip {
@@ -421,15 +509,87 @@
   transform: translateY(6px);
 }
 
-/* 탭 텍스트가 모바일과 데스크톱 모두 WCAG AA 대비를 유지하도록 보정 */
-nav[aria-label="주요 메뉴"].bg-primary {
-  background-color: #17634d !important;
+/* 카테고리 컬러 내비 → 무채색 셸 + 얇은 액센트 (디자인 감사 2026-09-13 P0-2).
+   위 세 규칙은 nav[aria-label="주요 메뉴"]를 겨냥했지만 실제 aria-label은
+   "주요 계산기"다 — 즉 아무것도 적용되지 않는 죽은 CSS였고, 녹색 바는
+   @shakilabs/ui의 .sh-primary-navigation{background:var(--sh-color-primary)}가
+   그리고 있었다. 패키지는 vendor tgz라 앱에서 덮는다.
+
+   패키지 CSS가 main.css보다 나중에 로드되므로 같은 명시도로는 못 이긴다 →
+   .design-system-shell을 앞에 붙여 (0,2,0)으로 올린다. */
+.design-system-shell .sh-primary-navigation {
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
 }
 
-nav[aria-label="주요 메뉴"] .tab-scroll > a {
-  color: #fff !important;
+.design-system-shell .sh-primary-navigation__link {
+  color: hsl(var(--muted-foreground));
 }
 
-nav[aria-label="주요 메뉴"] .tab-scroll > a[aria-current="page"] {
-  background-color: rgb(255 255 255 / 12%) !important;
+.design-system-shell .sh-primary-navigation__link--active {
+  color: hsl(var(--foreground));
+}
+
+.design-system-shell .sh-primary-navigation__link:hover {
+  color: hsl(var(--foreground));
+  /* 패키지 기본 hover는 --sh-nav-active-wash(검정 12%)로 탭 전체를 칠한다.
+     무채색 셸에서는 그게 회색 블록으로 읽혀 활성 탭과 구분되지 않는다. */
+  background: hsl(var(--muted));
+}
+
+/* 얇은 액센트 — 브랜드색이 남는 유일한 셸 요소. 활성 탭 2px 밑줄이다.
+   (밑줄 자체는 ui 0.3.9 후속 오버라이드가 label 폭으로 그린다) */
+.design-system-shell .sh-primary-navigation__link--active .sh-primary-navigation__label::after {
+  background: hsl(var(--primary));
+}
+
+.design-system-shell .sh-primary-navigation__link:focus-visible {
+  outline-color: hsl(var(--ring));
+}
+
+/* 데스크톱 가로 스크롤 페이드가 --sh-color-primary(녹색)에서 투명으로 갔다.
+   셸이 흰색이 됐으니 카드색에서 페이드해야 한다. */
+.design-system-shell .sh-primary-navigation__container::after {
+  background: linear-gradient(to left, hsl(var(--card)), transparent);
+}
+
+/* @shakilabs/ui 0.3.14의 셸 규칙이 버튼·링크 radius를 var(--sh-radius-sm)(2px)로
+   !important 고정한다. 앱이 명시도로 되받아치면 패키지 계약을 뚫는 형태가 되므로,
+   패키지가 제공하는 공식 탈출구(.sh-pill / [data-sh-pill])를 마크업에서 쓴다.
+   → .design-system-shell :is([data-sh-pill],.sh-pill){border-radius:9999px!important} */
+
+/* 푸터 "전체 서비스" 링크가 패키지에서 브랜드색으로 칠해진다
+   (.sh-site-footer__all{color:var(--sh-color-primary)}). 셸이 무채색이 된 뒤에는
+   페이지마다 초록 링크 하나만 남아 오히려 더 튄다. 색 대신 밑줄로 링크임을 알린다
+   — 무채색으로만 바꾸면 색이 유일한 식별 수단이 되므로(WCAG 1.4.1) 밑줄이 필수다. */
+.design-system-shell .sh-site-footer__all {
+  color: hsl(var(--foreground));
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--foreground) / 0.5);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.design-system-shell .sh-site-footer__all:hover,
+.design-system-shell .sh-site-footer__all:focus-visible {
+  text-decoration-color: hsl(var(--foreground));
+}
+
+/* 프리렌더 본문(하이드레이션 후 <main> 안으로 옮겨진다)의 내부 링크는
+   클래스 없는 <a>라 Tailwind preflight가 color/text-decoration을 상속으로 만든다.
+   → 본문 안에서 링크임을 알릴 수단이 색도 밑줄도 없다 (WCAG 1.4.1).
+   셸을 무채색으로 바꾸기 전부터 있던 문제지만, 색을 더 걷어낸 지금 반드시 밑줄이 필요하다.
+   .text-link와 같은 어휘: 밑줄 대비 3.22:1(비텍스트 3:1). */
+[data-prerender-adopted] a:not([class]),
+body > section[data-seo-prerender] a:not([class]) {
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--foreground) / 0.5);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+[data-prerender-adopted] a:not([class]):hover,
+[data-prerender-adopted] a:not([class]):focus-visible {
+  text-decoration-color: hsl(var(--foreground));
 }

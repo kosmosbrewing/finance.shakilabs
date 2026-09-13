@@ -79,7 +79,7 @@ function raiseHub() {
           rows: [
             { cells: ["4대보험료 증가", `-${won(r.insuranceDelta)}`] },
             { cells: ["소득세·지방소득세 증가", `-${won(r.taxDelta)}`] },
-            { cells: ["<strong>월 실수령 증가</strong>", `<strong style="color:hsl(var(--primary));">${won(r.monthlyNetDiff)}</strong>`], highlight: true },
+            { cells: ["<strong>월 실수령 증가</strong>", `<strong>${won(r.monthlyNetDiff)}</strong>`], highlight: true },
           ],
         },
         tableNote:
@@ -172,7 +172,7 @@ function bonusHub() {
           head: ["성과급(세전)", "세금·보험료", "실수령액", "수령률"],
           rows: grid.map((g) => ({
             highlight: g.amount === bonus,
-            cells: [won(g.amount), `-${won(g.bonusTax)}`, `<strong style="color:hsl(var(--primary));">${won(g.netBonus)}</strong>`, pct(g.effectiveBonusRate)],
+            cells: [won(g.amount), `-${won(g.bonusTax)}`, `<strong>${won(g.netBonus)}</strong>`, pct(g.effectiveBonusRate)],
           })),
         },
         tableNote: `연봉 ${won(salary)}·부양가족 1인 기준입니다. 성과급이 커질수록 수령률이 떨어지는 것은 늘어난 금액이 더 높은 누진 구간에 들어가기 때문입니다.`,
@@ -338,7 +338,7 @@ function overtimeHub() {
             { cells: ["야간근로", "6시간", "0.5배 추가", won(o.nightPay)] },
             { cells: ["휴일근로", "8시간", "1.5배", won(o.holidayPay)] },
             { cells: ["<strong>세전 합계</strong>", "26시간", "—", `<strong>${won(o.totalExtraGross)}</strong>`], highlight: true },
-            { cells: ["<strong>세후 실수령 증가</strong>", "—", "—", `<strong style="color:hsl(var(--primary));">${won(o.totalExtraNet)}</strong>`] },
+            { cells: ["<strong>세후 실수령 증가</strong>", "—", "—", `<strong>${won(o.totalExtraNet)}</strong>`] },
           ],
         },
         tableNote: `통상시급 ${won(o.hourlyRate)}(월급 ÷ 209) 기준입니다. 세후 금액은 가산수당이 더해진 연봉으로 4대보험과 소득세를 다시 계산해 구한 차액입니다.`,
@@ -521,7 +521,7 @@ function monthlyRentHub() {
               `${won(g.s)} 이하`,
               g.eligible ? pct(g.deductionRate) : "대상 아님",
               g.eligible ? `${won(g.taxCredit)}` : "0원",
-              g.eligible ? `<strong style="color:hsl(var(--primary));">${won(g.taxCreditWithLocalTax)}</strong>` : "0원",
+              g.eligible ? `<strong>${won(g.taxCreditWithLocalTax)}</strong>` : "0원",
             ],
           })),
         },
@@ -602,7 +602,7 @@ function irpHub() {
                 `${won(55_000_000)} 이하`,
                 pct(maxLow.taxCreditRate),
                 `${won(maxLow.taxCredit)}`,
-                `<strong style="color:hsl(var(--primary));">${won(maxLow.taxCreditWithLocalTax)}</strong>`,
+                `<strong>${won(maxLow.taxCreditWithLocalTax)}</strong>`,
               ],
             },
             {
@@ -795,7 +795,7 @@ function freelanceRateHub() {
           head: ["목표 월 실수령", "필요 월 청구액", "일 단가(월 18일)", "시급(일 6시간)"],
           rows: grid.map((g) => ({
             highlight: g.t === target,
-            cells: [won(g.t), `<strong>${won(g.monthlyGross)}</strong>`, won(g.dailyRate), `<strong style="color:hsl(var(--primary));">${won(g.hourlyRate)}</strong>`],
+            cells: [won(g.t), `<strong>${won(g.monthlyGross)}</strong>`, won(g.dailyRate), `<strong>${won(g.hourlyRate)}</strong>`],
           })),
         },
         tableNote:

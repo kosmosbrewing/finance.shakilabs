@@ -12,7 +12,7 @@ defineProps<{
     <RouterLink
       v-if="backTo"
       :to="backTo"
-      class="text-primary text-body hover:underline"
+      class="text-link text-body"
     >
       {{ backLabel || '돌아가기' }}
     </RouterLink>

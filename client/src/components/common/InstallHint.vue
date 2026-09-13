@@ -16,7 +16,7 @@ const { canInstall, installed, promptInstall } = usePwaInstall();
   >
     <Download class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
     <span>자주 쓰신다면</span>
-    <button type="button" class="font-semibold text-primary underline" @click="promptInstall">
+    <button type="button" class="font-semibold text-link" @click="promptInstall">
       홈 화면에 추가
     </button>
     <span>해 두면 앱처럼 바로 열립니다.</span>

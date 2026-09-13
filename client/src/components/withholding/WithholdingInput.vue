@@ -105,7 +105,7 @@ const inputIds = {
           <div class="flex items-center gap-2">
             <button
               type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
               aria-label="1만원 감소"
               @click="emit('update:monthlyIncomeTax', Math.max(0, monthlyIncomeTax - 10_000))"
             >
@@ -121,7 +121,7 @@ const inputIds = {
             />
             <button
               type="button"
-              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              class="touch-target flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-lg font-bold text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
               aria-label="1만원 증가"
               @click="emit('update:monthlyIncomeTax', Math.min(MAX_TAX, monthlyIncomeTax + 10_000))"
             >

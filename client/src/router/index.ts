@@ -425,12 +425,27 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
+// 앵커 여백은 --header-h 하나에서 나온다(index.html). 여기에 80을 박아두면
+// 데스크톱(스티키 49px)에선 과하고 모바일(2행 내비 105px)에선 모자란다.
+// CSS의 scroll-padding-top과 같은 식을 쓴다: header-h + 1rem.
+function anchorOffset(): number {
+  if (typeof window === "undefined") return 80;
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue("--header-h")
+    .trim();
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const headerH = raw.endsWith("rem")
+    ? parseFloat(raw) * rem
+    : parseFloat(raw);
+  return Number.isFinite(headerH) ? headerH + rem : 80;
+}
+
 const router = createRouter({
   history: createWebHistory("/finance/"),
   routes,
   scrollBehavior(to, _from, savedPosition) {
     if (savedPosition) return savedPosition;
-    if (to.hash) return { el: to.hash, behavior: "smooth", top: 80 };
+    if (to.hash) return { el: to.hash, behavior: "smooth", top: anchorOffset() };
     return { top: 0 };
   },
 });
