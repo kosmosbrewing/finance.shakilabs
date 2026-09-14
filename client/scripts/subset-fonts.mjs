@@ -17,11 +17,18 @@ function hash(content) {
 try {
   writeFileSync(characterFile, characters);
   const fonts = fontJobs.map((fontJob) => {
+    // 잡이 자기 문자셋을 선언하면 그것만 쓴다 — 숫자 전용 폰트를 UI 전체 한글로
+    // 자르면 8.8KB짜리가 122KB가 된다.
+    let jobCharacterFile = characterFile;
+    if (fontJob.characters) {
+      jobCharacterFile = resolve(temporaryRoot, `${fontJob.publicName}.txt`);
+      writeFileSync(jobCharacterFile, fontJob.characters);
+    }
     const result = spawnSync("python3", [
       "-m",
       "fontTools.subset",
       fontJob.source,
-      `--text-file=${characterFile}`,
+      `--text-file=${jobCharacterFile}`,
       `--output-file=${fontJob.output}`,
       "--flavor=woff2",
       "--layout-features=*",

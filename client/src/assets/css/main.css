@@ -19,13 +19,18 @@
   font-display: swap;
 }
 
+/* 강조 숫자 전용. 이 폰트는 히어로 숫자 한 곳(ResultHero의 font-title)에서만 쓰이고
+   값은 전부 포맷터(formatWon/formatKrwAuto/formatManWon) 출력이라 숫자·단위 44자면 충분하다.
+   전체 문자셋(978자) 서브셋 122KB → 8.8KB.
+   U+2212(−)는 이 폰트에 없어 폴백(Pretendard)이 글리프 단위로 받는다. */
 @font-face {
   font-family: "GmarketSans";
-  src: url("/fonts/GmarketSansBold-subset-v3.woff2") format("woff2"),
-       url("/fonts/GmarketSansBold.woff") format("woff");
+  src: url("/fonts/GmarketSansBold-num-v1.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: optional;
+  unicode-range: U+0020, U+0028-0029, U+002B-002F, U+0030-0039, U+007E, U+0025,
+    U+00B7, U+3131-318E, U+AC00-D7A3, U+33A1;
 }
 
 @tailwind base;
