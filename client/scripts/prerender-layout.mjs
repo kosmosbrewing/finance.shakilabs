@@ -3,6 +3,7 @@
 
 import { readFileSync } from "node:fs";
 import { CALCULATOR_CATALOG } from "./calculator-catalog.mjs";
+import { PRIMARY_NAV_ITEMS } from "./primary-nav-items.mjs";
 
 // 공유 카탈로그 단일 출처 — Vue 푸터와 같은 목록을 정적 HTML에도 심는다(JS 없이도 크롤 경로 확보)
 const SERVICE_CATALOG = JSON.parse(
@@ -37,24 +38,65 @@ function buildOtherServicesBlock() {
 }
 
 /**
- * 모든 프리렌더 페이지 최상단에 삽입되는 정적 header/nav HTML
- * - 로고
- * - 주요 5개 카테고리 대표 링크 (중복 최소화)
- * - About/전체계산기
+ * v3 §3.3-1 모바일 좌측 드로어의 **정적 쌍둥이**.
+ *
+ * 왜 필요한가: 이 앱의 프리렌더 산출물에는 Vue 출력이 한 글자도 없다(#app은 빈
+ * div이고, 크롤러와 첫 페인트가 보는 셸은 전부 이 파일이 만든다). 드로어를 Vue에만
+ * 두면 모바일 내비를 숨긴 순간 158개 원시 HTML에서 계산기 10개로 가는 헤더 경로가
+ * 0이 된다. 수화 후 헤더와 같은 클래스·같은 목록으로 여기에도 심는다.
+ *
+ * 목록은 `scripts/primary-nav-items.mjs` 하나에서만 온다 — Vue 헤더·인라인 내비도
+ * 같은 파일을 import한다. 복제가 없으니 대조 게이트도 필요 없다.
+ *
+ * 트리거는 수화 전이므로 동작하지 않는다. 패널은 패키지 CSS가
+ * `visibility:hidden; transform:translate(-100%)`로 숨기므로(스타일시트는
+ * 렌더 블로킹이라 첫 페인트에 이미 도착해 있다) 화면에는 보이지 않고 DOM에만 남는다.
+ */
+export function buildPrerenderDrawer() {
+  const links = PRIMARY_NAV_ITEMS.map(
+    ({ to, label }) =>
+      `<a class="sh-nav-drawer__link" href="/finance${to}">${label}</a>`,
+  ).join("");
+
+  return `<button type="button" class="sh-nav-drawer__trigger" aria-label="메뉴 열기" aria-expanded="false" aria-controls="sh-nav-drawer-prerender" style="border:0;background:transparent;color:#fafafa;">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+        </button>
+        <div class="sh-nav-drawer" data-open="false">
+          <div class="sh-nav-drawer__scrim"></div>
+          <nav id="sh-nav-drawer-prerender" class="sh-nav-drawer__panel" aria-label="계산기 메뉴" aria-hidden="true" tabindex="-1">
+            <p class="sh-nav-drawer__title">계산기</p>${links}
+          </nav>
+        </div>`;
+}
+
+/**
+ * 모든 프리렌더 페이지 최상단에 삽입되는 정적 header HTML.
+ *
+ * v3 §3.2 — 검정 GlobalHeader. 이 블록은 Vue가 mount하기 전까지 사람이 실제로 보는
+ * 헤더이므로 수화 후 헤더와 같아야 한다. 예전에는 여기에 흰 배경 "ShakiLabs 연봉계산기"
+ * 인라인 헤더가 있었고 Vue는 다른 헤더를 그려서, 첫 페인트와 수화 사이에 셸이 통째로
+ * 바뀌는 플래시가 났다(모바일·finance 재검수 §1).
+ *
+ * 클래스는 패키지 CSS(.sh-global-header)와 같은 이름을 쓰되, 배경·높이·글자색은
+ * 인라인으로도 못박는다 — 스타일시트가 도착하기 전 첫 페인트에서도 검정이어야 한다.
+ *
+ * 헤더에 있던 계산기 링크 7개는 여기서 뺐다. 크롤 경로는 같은 페이지 푸터
+ * (buildPrerenderFooter)가 26개 계산기 전부 + 다른 서비스 + 블로그로 이미 덮는다.
  */
 export function buildPrerenderHeader() {
+  const link = (href, label) =>
+    `<a class="sh-global-header__link" href="${href}" style="display:inline-flex;align-items:center;min-height:44px;padding-inline:10px;color:#fafafa;font-size:13px;font-weight:600;text-decoration:none;">${label}</a>`;
+
   return `
-    <header data-seo-prerender="header" style="max-width:1120px;margin:0 auto;padding:14px 16px;border-bottom:1px solid hsl(var(--border));">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <a href="/finance/salary" style="font-weight:700;font-size:18px;color:hsl(var(--foreground));text-decoration:none;">ShakiLabs 연봉계산기</a>
-        <nav aria-label="주요 계산기" style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
-          <a href="/finance/salary" style="color:hsl(var(--foreground));text-decoration:none;">연봉 실수령</a>
-          <a href="/finance/insurance" style="color:hsl(var(--foreground));text-decoration:none;">건강보험료</a>
-          <a href="/finance/comprehensive-tax" style="color:hsl(var(--foreground));text-decoration:none;">종합소득세</a>
-          <a href="/finance/year-end-settlement" style="color:hsl(var(--foreground));text-decoration:none;">연말정산</a>
-          <a href="/finance/quit" style="color:hsl(var(--foreground));text-decoration:none;">퇴사 계산</a>
-          <a href="/finance/all" style="color:hsl(var(--foreground));text-decoration:none;">전체 계산기</a>
-          <a href="/finance/about" style="color:hsl(var(--foreground));text-decoration:none;">서비스 소개</a>
+    <header data-seo-prerender="header" class="sh-global-header" style="position:sticky;top:0;z-index:50;background:#0a0a0a;color:#fafafa;">
+      <div class="sh-global-header__inner" style="display:flex;align-items:center;gap:16px;height:56px;margin-inline:auto;padding-inline:16px;max-width:72rem;">
+        ${buildPrerenderDrawer()}
+        <a class="sh-global-header__brand" href="/" aria-label="ShakiLabs 홈" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:#fafafa;font-size:15px;font-weight:700;letter-spacing:-0.01em;text-decoration:none;white-space:nowrap;">
+          <img class="sh-global-header__logo" src="/finance/logo.png" alt="" aria-hidden="true" width="20" height="20" style="width:20px;height:20px;filter:invert(1) brightness(1.6);" />
+          <span class="sh-global-header__brand-text">ShakiLabs</span>
+        </a>
+        <nav class="sh-global-header__nav" aria-label="사이트 메뉴" style="display:flex;align-items:center;gap:4px;margin-inline-start:auto;">
+          ${link("/blog", "블로그")}${link("/finance/about", "소개")}
         </nav>
       </div>
     </header>`;
@@ -93,6 +135,10 @@ export function buildPrerenderFooter() {
       <div style="padding-top:16px;border-top:1px solid hsl(var(--border));font-size:12px;color:hsl(var(--muted-foreground));line-height:1.8;">
         <p style="margin:0 0 6px;">운영 <strong>Shakilabs</strong> · 문의 <a href="mailto:skdba1313@gmail.com" style="color:hsl(var(--muted-foreground));">skdba1313@gmail.com</a></p>
         <p style="margin:0 0 6px;">
+          <!-- /all 허브는 카테고리 카탈로그에 없다. 예전에는 프리렌더 헤더가 이 링크를 들고
+               있었으므로, 헤더를 v3 셸로 바꾸면서 여기로 옮기지 않으면 JS 없는 크롤러에게
+               허브로 가는 정적 경로가 전 페이지에서 사라진다. -->
+          <a href="/finance/all" style="color:hsl(var(--muted-foreground));margin-right:12px;">전체 계산기</a>
           <a href="/finance/about" style="color:hsl(var(--muted-foreground));margin-right:12px;">서비스 소개</a>
           <a href="/finance/privacy" style="color:hsl(var(--muted-foreground));margin-right:12px;">개인정보처리방침</a>
           <a href="/finance/terms" style="color:hsl(var(--muted-foreground));margin-right:12px;">이용약관</a>

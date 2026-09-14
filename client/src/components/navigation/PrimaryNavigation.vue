@@ -1,84 +1,17 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { RouterLink, useRoute } from "vue-router";
+import { ShPrimaryNavigation, type PrimaryNavigationItem } from "@shakilabs/ui";
 import {
-  ShPrimaryNavigation,
-  type PrimaryNavigationItem,
-} from "@shakilabs/ui";
+  PRIMARY_NAV_ITEMS,
+  findActiveNavItem,
+} from "../../../scripts/primary-nav-items.mjs";
 import { trackEvent } from "@/lib/analytics";
 import { getPageGroup } from "@/utils/pageTracking";
 
-interface FinanceNavigationItem extends PrimaryNavigationItem {
-  matchPaths: readonly string[];
-}
-
 const route = useRoute();
 
-const navigationItems: readonly FinanceNavigationItem[] = [
-  { key: "insurance", label: "건보료", to: "/insurance", matchPaths: ["/insurance"] },
-  { key: "salary", label: "연봉 실수령", to: "/salary", matchPaths: ["/salary"] },
-  {
-    key: "comprehensive-tax",
-    label: "종합소득세",
-    to: "/comprehensive-tax",
-    matchPaths: ["/comprehensive-tax", "/freelancer"],
-  },
-  {
-    key: "year-end-settlement",
-    label: "연말정산",
-    to: "/year-end-settlement",
-    matchPaths: ["/year-end-settlement"],
-  },
-  { key: "severance-pay", label: "퇴직금", to: "/severance-pay", matchPaths: ["/severance-pay"] },
-  { key: "unemployment", label: "실업급여", to: "/unemployment", matchPaths: ["/unemployment"] },
-  {
-    key: "weekly-holiday-pay",
-    label: "주휴수당",
-    to: "/weekly-holiday-pay",
-    matchPaths: ["/weekly-holiday-pay"],
-  },
-  {
-    key: "parental-leave",
-    label: "육아휴직",
-    to: "/parental-leave",
-    matchPaths: ["/parental-leave"],
-  },
-  {
-    key: "wage-converter",
-    label: "시급 환산",
-    to: "/wage-converter",
-    matchPaths: ["/wage-converter"],
-  },
-  { key: "all", label: "전체 계산기", to: "/all", matchPaths: ["/all"] },
-];
-
-const mobileDefaultKeys = [
-  "insurance",
-  "salary",
-  "comprehensive-tax",
-  "year-end-settlement",
-  "severance-pay",
-  "all",
-] as const;
-
-function isActive(item: FinanceNavigationItem): boolean {
-  return item.matchPaths.some(
-    (path) => route.path === path || route.path.startsWith(`${path}/`),
-  );
-}
-
-const activeItem = computed(() => navigationItems.find(isActive));
-const mobileItems = computed(() => {
-  const keys: string[] = [...mobileDefaultKeys];
-
-  if (activeItem.value && !keys.includes(activeItem.value.key)) {
-    keys[4] = activeItem.value.key;
-  }
-
-  return keys
-    .map((key) => navigationItems.find((item) => item.key === key))
-    .filter((item): item is FinanceNavigationItem => Boolean(item));
-});
+const activeItem = computed(() => findActiveNavItem(route.path));
 
 function trackNavigation(item: PrimaryNavigationItem): void {
   trackEvent("nav_click", {
@@ -90,12 +23,24 @@ function trackNavigation(item: PrimaryNavigationItem): void {
 </script>
 
 <template>
+  <!-- v3 §3.3-1 — 모바일(<48rem)에서는 이 인라인 내비를 숨기고 헤더의 좌측 드로어가
+       같은 목록을 대신 연다. 10개 탭을 가로 스크롤 1행에 넣어도 첫 화면 밖 비율이
+       절반에 가까웠고, 그 1행이 모바일 chrome을 57px 더 먹었다.
+       드로어는 링크를 항상 DOM에 렌더하므로 크롤 경로는 끊기지 않는다. -->
   <ShPrimaryNavigation
-    :items="navigationItems"
-    :mobile-items="mobileItems"
+    class="primary-navigation--desktop-only"
+    :items="PRIMARY_NAV_ITEMS"
     :active-key="activeItem?.key"
     :link-component="RouterLink"
     aria-label="주요 계산기"
     @select="trackNavigation"
   />
 </template>
+
+<style scoped>
+@media (max-width: 47.99rem) {
+  .primary-navigation--desktop-only {
+    display: none;
+  }
+}
+</style>
