@@ -87,12 +87,15 @@
       /* Archive 톤 — docs/ARCHIVE_TONE_SPEC.md가 단일 출처.
          --primary는 유지하고 쓰이는 자리만 줄인다(포커스·선택·상태). */
       :root {
-        --background: 40 25% 99%;
-        --foreground: 40 7% 12%;
+        /* v3 §2.1 역할 토큰 — 목표 hex에서 HSL을 역산했다(반올림하면 빗나간다:
+           `60 9% 96%`는 #F6F6F4). `40 25% 99%`(=#FEFCF9)는 v3가 폐기 목록에 올린
+           아이보리다 — 순백 카드와 대비가 1% 남짓이라 canvas/card 계층이 안 보였다. */
+        --background: 60 11.11% 96.47%; /* color.canvas #F7F7F5 */
+        --foreground: 0 0% 3.92%; /* color.ink #0A0A0A */
         --muted: 36 14% 95%;
-        --muted-foreground: 30 8% 38%;
-        --card: 0 0% 100%;
-        --card-foreground: 40 7% 12%;
+        --muted-foreground: 60 3.37% 34.9%; /* color.ink-muted #5C5C56 */
+        --card: 0 0% 100%; /* color.card #FFFFFF */
+        --card-foreground: 0 0% 3.92%;
         --primary: 160 62% 24%;
         --primary-foreground: 0 0% 100%;
         /* 브랜드 hue 틴트였다 — hover 워시·표 강조 행이 전부 연녹색이었다 */
@@ -105,9 +108,8 @@
         /* 0 72% 52%는 본문 배경 위 text-destructive가 4.49:1로 AA(4.5:1) 미달이었다. */
         --destructive: 0 74% 44%;
         --destructive-foreground: 40 25% 99%;
-        /* Archive --line(#e6e2dd) 대응 헤어라인 */
-        --border: 33 14% 87%;
-        --input: 33 14% 87%;
+        --border: 60 8% 90.2%; /* color.line #E8E8E4 */
+        --input: 60 8% 90.2%;
         --ring: 160 62% 24%;
         --radius: 0.4rem;
         --deduction: 0 62% 52%;
@@ -123,8 +125,10 @@
         --secondary-nav-h: 3rem;
       }
 
-      @media (max-width: 639px) {
-        :root { --secondary-nav-h: 3.5rem; }
+      /* v3 §3.3-1 — <48rem에서는 인라인 2차 내비가 숨고 헤더 드로어가 대신한다.
+         스티키 층이 헤더 하나뿐이므로 앵커 오프셋에서도 2차 내비 높이를 빼야 한다. */
+      @media (max-width: 47.99rem) {
+        :root { --secondary-nav-h: 0px; }
       }
 
       .dark {

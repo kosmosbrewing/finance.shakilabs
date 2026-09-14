@@ -523,14 +523,9 @@
   color: hsl(var(--foreground));
 }
 
-/* v3 §3.1 — 검정 GlobalHeader가 1차 셸이고 이 내비는 2차다. 패키지 기본값은
-   top:0 / z-index:50이라 글로벌 헤더(z-index 50, sticky top 0)와 같은 자리에 겹친다.
-   스크롤하면 두 스티키가 포개져 내비가 헤더 밑으로 숨는다 → 헤더 높이만큼 내리고
-   레이어를 한 단 낮춘다(--sh-z-secondary-nav: 40). */
-.design-system-shell .sh-primary-navigation {
-  top: var(--sh-header-h, 56px);
-  z-index: var(--sh-z-secondary-nav, 40);
-}
+/* v3 §3.1 적층(헤더 아래 2차 내비)은 이제 패키지가 구조로 처리한다 — 0.3.16의
+   `:root:has(.sh-global-header){--sh-secondary-nav-top: var(--sh-header-h)}`.
+   여기 있던 top/z-index 오버라이드는 그 규칙과 중복이라 제거했다(레시피 §2). */
 
 /* v3 §3.3 — 모바일 2~3행 그리드 금지. 가로 스크롤 1행, 탭 min-height 44px.
    그리드일 때 105px였던 2차 내비가 1행이 되면서 모바일 스티키 chrome이 줄어든다. */

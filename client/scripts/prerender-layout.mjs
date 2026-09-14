@@ -3,6 +3,7 @@
 
 import { readFileSync } from "node:fs";
 import { CALCULATOR_CATALOG } from "./calculator-catalog.mjs";
+import { PRIMARY_NAV_ITEMS } from "./primary-nav-items.mjs";
 
 // 공유 카탈로그 단일 출처 — Vue 푸터와 같은 목록을 정적 HTML에도 심는다(JS 없이도 크롤 경로 확보)
 const SERVICE_CATALOG = JSON.parse(
@@ -37,6 +38,38 @@ function buildOtherServicesBlock() {
 }
 
 /**
+ * v3 §3.3-1 모바일 좌측 드로어의 **정적 쌍둥이**.
+ *
+ * 왜 필요한가: 이 앱의 프리렌더 산출물에는 Vue 출력이 한 글자도 없다(#app은 빈
+ * div이고, 크롤러와 첫 페인트가 보는 셸은 전부 이 파일이 만든다). 드로어를 Vue에만
+ * 두면 모바일 내비를 숨긴 순간 158개 원시 HTML에서 계산기 10개로 가는 헤더 경로가
+ * 0이 된다. 수화 후 헤더와 같은 클래스·같은 목록으로 여기에도 심는다.
+ *
+ * 목록은 `scripts/primary-nav-items.mjs` 하나에서만 온다 — Vue 헤더·인라인 내비도
+ * 같은 파일을 import한다. 복제가 없으니 대조 게이트도 필요 없다.
+ *
+ * 트리거는 수화 전이므로 동작하지 않는다. 패널은 패키지 CSS가
+ * `visibility:hidden; transform:translate(-100%)`로 숨기므로(스타일시트는
+ * 렌더 블로킹이라 첫 페인트에 이미 도착해 있다) 화면에는 보이지 않고 DOM에만 남는다.
+ */
+export function buildPrerenderDrawer() {
+  const links = PRIMARY_NAV_ITEMS.map(
+    ({ to, label }) =>
+      `<a class="sh-nav-drawer__link" href="/finance${to}">${label}</a>`,
+  ).join("");
+
+  return `<button type="button" class="sh-nav-drawer__trigger" aria-label="메뉴 열기" aria-expanded="false" aria-controls="sh-nav-drawer-prerender" style="border:0;background:transparent;color:#fafafa;">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+        </button>
+        <div class="sh-nav-drawer" data-open="false">
+          <div class="sh-nav-drawer__scrim"></div>
+          <nav id="sh-nav-drawer-prerender" class="sh-nav-drawer__panel" aria-label="계산기 메뉴" aria-hidden="true" tabindex="-1">
+            <p class="sh-nav-drawer__title">계산기</p>${links}
+          </nav>
+        </div>`;
+}
+
+/**
  * 모든 프리렌더 페이지 최상단에 삽입되는 정적 header HTML.
  *
  * v3 §3.2 — 검정 GlobalHeader. 이 블록은 Vue가 mount하기 전까지 사람이 실제로 보는
@@ -57,6 +90,7 @@ export function buildPrerenderHeader() {
   return `
     <header data-seo-prerender="header" class="sh-global-header" style="position:sticky;top:0;z-index:50;background:#0a0a0a;color:#fafafa;">
       <div class="sh-global-header__inner" style="display:flex;align-items:center;gap:16px;height:56px;margin-inline:auto;padding-inline:16px;max-width:72rem;">
+        ${buildPrerenderDrawer()}
         <a class="sh-global-header__brand" href="/" aria-label="ShakiLabs 홈" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:#fafafa;font-size:15px;font-weight:700;letter-spacing:-0.01em;text-decoration:none;white-space:nowrap;">
           <img class="sh-global-header__logo" src="/finance/logo.png" alt="" aria-hidden="true" width="20" height="20" style="width:20px;height:20px;filter:invert(1) brightness(1.6);" />
           <span class="sh-global-header__brand-text">ShakiLabs</span>

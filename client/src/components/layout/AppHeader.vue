@@ -5,10 +5,14 @@
 // 담아 65px였고, 팁 문구 길이에 따라 페이지마다 높이가 달랐다(BL-005). 포털 `/`는 같은
 // 사이트인데 56px 검정 헤더라 수화 전후·앱 간 셸이 갈라져 보였다. 팁은 본문 eyebrow로
 // 내리고(TipEyebrow.vue) 헤더에는 로고·사이트 링크·테마 토글만 남긴다.
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { Moon, Sun } from "lucide-vue-next";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import { ShGlobalHeader, type GlobalHeaderLink } from "@shakilabs/ui";
+import {
+  PRIMARY_NAV_ITEMS,
+  findActiveNavItem,
+} from "../../../scripts/primary-nav-items.mjs";
 
 const THEME_STORAGE_KEY = "salary-calc:theme:v1";
 type ThemeMode = "light" | "dark";
@@ -18,6 +22,11 @@ const links: GlobalHeaderLink[] = [
   { href: "/blog", label: "블로그" },
   { to: "/about", label: "소개" },
 ];
+
+// v3 §3.3-1 — 모바일 좌측 드로어. 목록은 2차 내비와 같은 모듈에서 온다(복제 금지).
+// 비우면 패키지가 드로어 자체를 렌더하지 않으므로, 여기서 넘기는 것이 유일한 배선이다.
+const route = useRoute();
+const navActiveKey = computed(() => findActiveNavItem(route.path)?.key ?? "");
 
 const theme = ref<ThemeMode>("light");
 
@@ -44,6 +53,9 @@ onMounted(() => {
     brand="ShakiLabs"
     logo-src="/finance/logo.png"
     :links="links"
+    :nav-items="PRIMARY_NAV_ITEMS"
+    :nav-active-key="navActiveKey"
+    nav-title="계산기"
     :link-component="RouterLink"
   >
     <template #utility>
