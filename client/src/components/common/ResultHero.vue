@@ -6,14 +6,23 @@
 //
 // Count-up animation lives HERE and only here (gate: resultHeroGrammar.test.ts).
 // Views must never ship a local rAF copy - one implementation serves all 26
-// calculators uniformly. Rules:
+// calculators uniformly. Rules (v3 design system 8.6):
+//  - the ONLY trigger is the formatted value string changing. Load, hydration,
+//    theme toggle, resize and a recalculation landing on the same number must
+//    not re-run the count.
 //  - displayValue initializes to the FINAL formatted value, so prerendered HTML
-//    and the first client render both show the finished number (never 0), and
-//    hydration matches. The animation only starts after mount.
-//  - mount: 0 -> value; prop change: previous -> new value; 700ms ease-out.
+//    and the first client render both show the finished number (never 0).
+//  - prop change: previous displayed number -> new value; 700ms ease-out. An
+//    interrupted run continues from what is on screen, it does not reset to 0.
 //  - prefers-reduced-motion: no animation, final value immediately.
 //  - non-numeric values (e.g. eligibility verdict text) stay static.
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+//
+// Why the mount animation was removed (BL-020, measured 2026-09-14): onMounted
+// used to animate 0 -> value, so every page load and every hydration re-ran the
+// count. On /finance/salary the hero painted the final 2,924,335 and then
+// dropped to -121,973 and climbed back - 84 distinct strings in one load. On
+// /finance/compare the pass-through "+" prefix made it read "+-13,841" mid-run.
+import { onBeforeUnmount, ref, watch } from "vue";
 
 const props = defineProps<{
   label: string;
@@ -106,19 +115,16 @@ function animateTo(finalText: string, from: number[]): void {
   rafId = requestAnimationFrame(step);
 }
 
-onMounted(() => {
-  const targets = numbersOf(tokenize(props.value));
-  animateTo(
-    props.value,
-    targets.map(() => 0)
-  );
-});
+// Seed the painted numbers from the first value so an interrupted animation can
+// continue from the screen. No animation here: the first paint is already final.
+liveNumbers = numbersOf(tokenize(props.value));
 
 watch(
   () => props.value,
-  (next) => {
-    const from = liveNumbers ?? [];
-    animateTo(next, from);
+  (next, previous) => {
+    // Same formatted string -> nothing visibly changed -> no animation (8.6).
+    if (next === previous) return;
+    animateTo(next, liveNumbers ?? []);
   }
 );
 

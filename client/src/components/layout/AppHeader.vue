@@ -1,70 +1,25 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+// v3 §3.2 — 전역 검정 헤더. 셸 마크업은 패키지가 소유하고 앱은 링크와 유틸 슬롯만 채운다.
+//
+// 왜 앱 자체 헤더를 버리는가: 이전 헤더는 로고 + 중앙 팁 티커 + 테마 토글 박스를 한 줄에
+// 담아 65px였고, 팁 문구 길이에 따라 페이지마다 높이가 달랐다(BL-005). 포털 `/`는 같은
+// 사이트인데 56px 검정 헤더라 수화 전후·앱 간 셸이 갈라져 보였다. 팁은 본문 eyebrow로
+// 내리고(TipEyebrow.vue) 헤더에는 로고·사이트 링크·테마 토글만 남긴다.
+import { onMounted, ref } from "vue";
 import { Moon, Sun } from "lucide-vue-next";
-import { ShButton } from "@shakilabs/ui";
-import { useRoute } from "vue-router";
-import TickerBar from "@/components/common/TickerBar.vue";
-import {
-  annualLeaveTickerMessages,
-  insuranceTickerMessages,
-  salaryTickerMessages,
-  raiseTickerMessages,
-  bonusTickerMessages,
-  overtimeTickerMessages,
-  pensionTickerMessages,
-  monthlyRentTickerMessages,
-  irpTickerMessages,
-  employerInsuranceTickerMessages,
-  compareTickerMessages,
-  quitTickerMessages,
-  withholdingTickerMessages,
-  comprehensiveTaxTickerMessages,
-  freelanceRateTickerMessages,
-  yearEndSettlementTickerMessages,
-  severancePayTickerMessages,
-  unemploymentTickerMessages,
-  weeklyHolidayPayTickerMessages,
-  parentalLeaveTickerMessages,
-  wageConverterTickerMessages,
-  allCalculatorsTickerMessages,
-} from "@/data/tickerMessages";
+import { RouterLink } from "vue-router";
+import { ShGlobalHeader, type GlobalHeaderLink } from "@shakilabs/ui";
 
 const THEME_STORAGE_KEY = "salary-calc:theme:v1";
 type ThemeMode = "light" | "dark";
 
-const route = useRoute();
-const theme = ref<ThemeMode>("light");
+// 블로그는 루트 앱이라 절대 경로(href), 소개는 이 앱 라우트라 RouterLink(to).
+const links: GlobalHeaderLink[] = [
+  { href: "/blog", label: "블로그" },
+  { to: "/about", label: "소개" },
+];
 
-const tickerMessages = computed(() => {
-  if (route.path.startsWith("/insurance")) return insuranceTickerMessages;
-  if (route.path.startsWith("/salary")) return salaryTickerMessages;
-  if (route.path.startsWith("/raise")) return raiseTickerMessages;
-  if (route.path.startsWith("/bonus")) return bonusTickerMessages;
-  if (route.path.startsWith("/annual-leave")) return annualLeaveTickerMessages;
-  if (route.path.startsWith("/overtime")) return overtimeTickerMessages;
-  if (route.path.startsWith("/pension")) return pensionTickerMessages;
-  if (route.path.startsWith("/monthly-rent-deduction")) return monthlyRentTickerMessages;
-  if (route.path.startsWith("/irp")) return irpTickerMessages;
-  if (route.path.startsWith("/4-insurance-employer")) return employerInsuranceTickerMessages;
-  if (route.path.startsWith("/compare")) return compareTickerMessages;
-  if (route.path.startsWith("/quit")) return quitTickerMessages;
-  if (route.path.startsWith("/withholding")) return withholdingTickerMessages;
-  if (route.path.startsWith("/freelance-rate")) return freelanceRateTickerMessages;
-  if (route.path.startsWith("/freelancer")) return comprehensiveTaxTickerMessages;
-  if (route.path.startsWith("/comprehensive-tax")) return comprehensiveTaxTickerMessages;
-  if (route.path.startsWith("/year-end-settlement")) return yearEndSettlementTickerMessages;
-  if (route.path.startsWith("/severance-pay")) return severancePayTickerMessages;
-  if (route.path.startsWith("/unemployment")) return unemploymentTickerMessages;
-  if (route.path.startsWith("/weekly-holiday-pay")) return weeklyHolidayPayTickerMessages;
-  if (route.path.startsWith("/parental-leave")) return parentalLeaveTickerMessages;
-  if (route.path.startsWith("/wage-converter")) return wageConverterTickerMessages;
-  if (route.path.startsWith("/regional-health")) return insuranceTickerMessages;
-  if (route.path.startsWith("/dependent")) return insuranceTickerMessages;
-  if (route.path.startsWith("/unpaid-wage")) return severancePayTickerMessages;
-  if (route.path.startsWith("/eitc")) return yearEndSettlementTickerMessages;
-  if (route.path === "/all") return allCalculatorsTickerMessages;
-  return salaryTickerMessages;
-});
+const theme = ref<ThemeMode>("light");
 
 function applyTheme(next: ThemeMode): void {
   theme.value = next;
@@ -84,45 +39,26 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- 셸은 무채색이다 — 8% 브랜드 틴트를 걷어내 헤더·내비를 한 톤으로 묶는다.
-       (주석에 옛 유틸리티 이름을 그대로 적으면 죽은-유틸리티 게이트가 잡는다) -->
-  <header class="border-b border-border bg-card">
-    <div class="container pt-2.5 pb-2.5">
-      <div class="overflow-hidden">
-        <div class="retro-titlebar h-[44px] border-b-0 px-2 bg-transparent">
-          <div class="flex h-full w-full items-center gap-2 sm:gap-4">
-            <a
-              href="/finance/salary"
-              aria-label="ShakiLabs 홈"
-              class="inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center gap-1 px-0.5 text-muted-foreground transition-colors hover:text-foreground sm:h-8 sm:w-auto sm:justify-start sm:gap-1.5"
-            >
-              <span
-                class="inline-flex h-6 w-6 items-center justify-center rounded-md bg-muted/60 ring-1 ring-border/60"
-                aria-hidden="true"
-              >
-                <img src="/logo.png" alt="" width="16" height="16" class="h-4 w-4 shrink-0" />
-              </span>
-              <span class="hidden sm:inline font-brand text-tiny font-semibold tracking-wide text-foreground/90">
-                ShakiLabs
-              </span>
-            </a>
-            <div class="flex min-w-0 flex-1 items-center justify-center px-1 text-center font-brand text-caption tracking-[-0.01em] sm:px-0 sm:text-body sm:tracking-[0.01em]">
-              <TickerBar :key="route.path" :messages="tickerMessages" />
-            </div>
-            <ShButton
-              type="button"
-              variant="secondary"
-              size="sm"
-              class="design-system-theme-toggle shrink-0 text-muted-foreground"
-              :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
-              @click="toggleTheme"
-            >
-              <Moon v-if="theme === 'dark'" class="h-4 w-4" />
-              <Sun v-else class="h-4 w-4" />
-            </ShButton>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
+  <ShGlobalHeader
+    home-href="/"
+    brand="ShakiLabs"
+    logo-src="/finance/logo.png"
+    :links="links"
+    :link-component="RouterLink"
+  >
+    <template #utility>
+      <!-- 패키지 헤더 링크 스타일을 그대로 쓴다 — 검정 위 밝은 글자·hover 10% 흰 배경·
+           밝은 포커스 링이 전부 .sh-global-header 규칙에서 온다. 별도 박스(ShButton
+           secondary)를 쓰면 검정 헤더 위에 흰 상자가 떠 보인다(재검수 §1). -->
+      <button
+        type="button"
+        class="sh-global-header__link"
+        :aria-label="theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'"
+        @click="toggleTheme"
+      >
+        <Moon v-if="theme === 'dark'" class="h-4 w-4" aria-hidden="true" />
+        <Sun v-else class="h-4 w-4" aria-hidden="true" />
+      </button>
+    </template>
+  </ShGlobalHeader>
 </template>

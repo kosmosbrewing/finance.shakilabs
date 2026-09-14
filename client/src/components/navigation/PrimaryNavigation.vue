@@ -52,15 +52,6 @@ const navigationItems: readonly FinanceNavigationItem[] = [
   { key: "all", label: "전체 계산기", to: "/all", matchPaths: ["/all"] },
 ];
 
-const mobileDefaultKeys = [
-  "insurance",
-  "salary",
-  "comprehensive-tax",
-  "year-end-settlement",
-  "severance-pay",
-  "all",
-] as const;
-
 function isActive(item: FinanceNavigationItem): boolean {
   return item.matchPaths.some(
     (path) => route.path === path || route.path.startsWith(`${path}/`),
@@ -68,17 +59,6 @@ function isActive(item: FinanceNavigationItem): boolean {
 }
 
 const activeItem = computed(() => navigationItems.find(isActive));
-const mobileItems = computed(() => {
-  const keys: string[] = [...mobileDefaultKeys];
-
-  if (activeItem.value && !keys.includes(activeItem.value.key)) {
-    keys[4] = activeItem.value.key;
-  }
-
-  return keys
-    .map((key) => navigationItems.find((item) => item.key === key))
-    .filter((item): item is FinanceNavigationItem => Boolean(item));
-});
 
 function trackNavigation(item: PrimaryNavigationItem): void {
   trackEvent("nav_click", {
@@ -90,9 +70,12 @@ function trackNavigation(item: PrimaryNavigationItem): void {
 </script>
 
 <template>
+  <!-- v3 §3.3 — 모바일은 가로 스크롤 1행이다(2~3행 그리드 금지). 그리드였을 때는
+       6칸 2행 = 105px가 스티키로 고정돼 검정 헤더 56px과 합쳐 모바일 chrome을 먹었고,
+       10개 중 6개만 보여 주느라 "현재 탭을 5번 칸에 끼워 넣는" 로직이 필요했다.
+       1행이 되면 항목을 자를 이유가 없으므로 mobile-items를 넘기지 않는다. -->
   <ShPrimaryNavigation
     :items="navigationItems"
-    :mobile-items="mobileItems"
     :active-key="activeItem?.key"
     :link-component="RouterLink"
     aria-label="주요 계산기"

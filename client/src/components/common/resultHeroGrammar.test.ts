@@ -125,4 +125,21 @@ describe("result hero grammar", () => {
       );
     expect(offenders).toEqual([]);
   });
+
+  // v3 8.6: the formatted string changing is the only trigger. A mount hook that
+  // animates 0 -> value re-runs the count on every load and every hydration; it
+  // was measured doing exactly that on /salary (84 distinct strings in one load)
+  // and /compare (a "+-13,841" frame) before BL-020.
+  it("count-up never runs on mount or hydration", () => {
+    const hero = vueSources[HERO_PATH];
+    // judge code, not prose: the comment above the fix names the removed hook.
+    const script = hero
+      .slice(0, hero.indexOf("<template>"))
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^\s*\/\/.*$/gm, "");
+    expect(script).not.toContain("onMounted");
+    // the watcher must compare against the previous formatted string, so a
+    // recalculation landing on the same number animates nothing
+    expect(script).toMatch(/if \(next === previous\) return;/);
+  });
 });

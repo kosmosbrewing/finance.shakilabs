@@ -425,19 +425,25 @@ const routes: RouteRecordRaw[] = [
   },
 ];
 
-// 앵커 여백은 --header-h 하나에서 나온다(index.html). 여기에 80을 박아두면
-// 데스크톱(스티키 49px)에선 과하고 모바일(2행 내비 105px)에선 모자란다.
-// CSS의 scroll-padding-top과 같은 식을 쓴다: header-h + 1rem.
+// 앵커 여백은 index.html의 두 토큰에서 나온다. 여기에 80을 박아두면 데스크톱에선
+// 과하고 모바일에선 모자란다. CSS의 scroll-padding-top과 같은 식을 쓴다
+// (v3 §3.1): --header-h + --secondary-nav-h + 8px.
 function anchorOffset(): number {
   if (typeof window === "undefined") return 80;
-  const raw = getComputedStyle(document.documentElement)
-    .getPropertyValue("--header-h")
-    .trim();
-  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-  const headerH = raw.endsWith("rem")
-    ? parseFloat(raw) * rem
-    : parseFloat(raw);
-  return Number.isFinite(headerH) ? headerH + rem : 80;
+  const styles = getComputedStyle(document.documentElement);
+  const rem = parseFloat(styles.fontSize) || 16;
+  const toPx = (raw: string): number => {
+    const trimmed = raw.trim();
+    if (!trimmed) return 0;
+    const value = parseFloat(trimmed);
+    if (!Number.isFinite(value)) return 0;
+    return trimmed.endsWith("rem") ? value * rem : value;
+  };
+  const total =
+    toPx(styles.getPropertyValue("--header-h")) +
+    toPx(styles.getPropertyValue("--secondary-nav-h")) +
+    8;
+  return total > 8 ? total : 80;
 }
 
 const router = createRouter({
