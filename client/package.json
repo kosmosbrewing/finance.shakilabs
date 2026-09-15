@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "fonts:subset": "node scripts/subset-fonts.mjs",
+    "fonts:brand-charset": "node scripts/collect-brand-font-characters.mjs",
     "prebuild": "node scripts/generate-sitemap.mjs && node scripts/generate-llms-txt.mjs",
     "build": "vite build && node scripts/prerender.mjs && node scripts/validate-static-output.mjs && node scripts/verify-credit-consistency.mjs && node scripts/verify-digest-similarity.mjs && node scripts/verify-fonts.mjs && node scripts/verify-calculator-analytics.mjs && node scripts/verify-pwa.mjs",
     "verify:credits": "node scripts/verify-credit-consistency.mjs",

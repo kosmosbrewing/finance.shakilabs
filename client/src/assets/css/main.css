@@ -19,18 +19,20 @@
   font-display: swap;
 }
 
-/* 강조 숫자 전용. 이 폰트는 히어로 숫자 한 곳(ResultHero의 font-title)에서만 쓰이고
-   값은 전부 포맷터(formatWon/formatKrwAuto/formatManWon) 출력이라 숫자·단위 44자면 충분하다.
-   전체 문자셋(978자) 서브셋 122KB → 8.8KB.
-   U+2212(−)는 이 폰트에 없어 폴백(Pretendard)이 글리프 단위로 받는다. */
+/* 브랜드 폰트 = h1/h2 제목 + 히어로 숫자(font-title·font-brand·retro-title·--sh-font-display).
+   문자셋은 렌더 실측 188자(scripts/brand-font-characters.json) — 122KB → 11KB.
+   숫자 41자로 자르면 '2026 원천세 계산기'의 "계산기"만 폴백으로 빠져 서체가 갈린다.
+   U+2212(−)는 이 폰트에 글리프가 없어 폴백(Pretendard)이 글리프 단위로 받는다.
+   .woff 폴백 src는 없다 — woff2를 지원하는 브라우저는 두 번째 포맷을 요청조차 하지 않아
+   폴백으로 동작한 적이 없고, 원본 966KB를 끌어올 위험만 있었다.
+   unicode-range도 걸지 않는다: 파일 자체가 이미 서브셋이라 범위를 좁힐 이득이 없고,
+   범위를 잘못 적으면 커버되는 글자가 폴백으로 새어나간다. */
 @font-face {
   font-family: "GmarketSans";
-  src: url("/fonts/GmarketSansBold-num-v1.woff2") format("woff2");
+  src: url("/fonts/GmarketSansBold-brand-v1.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
-  font-display: optional;
-  unicode-range: U+0020, U+0028-0029, U+002B-002F, U+0030-0039, U+007E, U+0025,
-    U+00B7, U+3131-318E, U+AC00-D7A3, U+33A1;
+  font-display: swap;
 }
 
 @tailwind base;
