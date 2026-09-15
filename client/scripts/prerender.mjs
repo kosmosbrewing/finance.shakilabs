@@ -5,6 +5,7 @@ import { SEO_ROUTES, CALCULATOR_ROUTES, canonicalPathFor } from "./seo-routes.mj
 import { CALCULATOR_CATALOG } from "./calculator-catalog.mjs";
 import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
 import { buildRichContent } from "./prerender-content.mjs";
+import { wrapPrerenderedTables } from "./prerender-table-scroll.mjs";
 import {
   buildPrerenderGuide,
   getPrerenderGuide,
@@ -1693,6 +1694,10 @@ function applyMeta(html, route, meta) {
   if (routeFaqs && !mainContent.includes("자주 묻는")) {
     mainContent = appendFaqSection(mainContent, routeFaqs);
   }
+  // 프리렌더 본문은 마운트 때 Vue 레이아웃으로 입양되므로, 여기 표가 곧 독자의 표다.
+  // 표는 min-content 폭 아래로 줄지 않아서 감싸지 않으면 390px에서 문서 자체를 가로로 민다
+  // — 여기가 본문 HTML이 확정되는 유일한 지점이라 래핑도 여기서 한 번만 한다.
+  mainContent = wrapPrerenderedTables(mainContent);
   const headerHtml = buildPrerenderHeader();
   const footerHtml = buildPrerenderFooter();
 

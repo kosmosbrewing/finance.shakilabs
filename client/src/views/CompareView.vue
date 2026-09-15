@@ -292,26 +292,30 @@ watch(
 
     <h1 class="text-h1 font-brand">2026 이직 연봉 비교 계산기</h1>
 
+    <!-- 입력·결과는 사이드바 옆 좁은 열이 아니라 컨테이너 전체 폭을 쓴다.
+         이 페이지만 폼이 둘이라 340px 사이드바를 빼고 나면 한 폼이 225px까지 눌렸다
+         (PC 1280 실측). 다른 계산기는 폼이 하나라 같은 폭에서 눌리지 않으므로,
+         컨테이너 max-width(디자인 시스템 960px)는 그대로 두고 배치만 바꾼다. -->
+    <CalculatorInteractionTracker>
+      <CompareInput
+        v-model:company-a="companyA"
+        v-model:company-b="companyB"
+        v-model:dependents="dependents"
+        v-model:children-under20="childrenUnder20"
+      >
+        <template #result>
+          <CompareResult
+            embedded
+            :calc-a="calcA"
+            :calc-b="calcB"
+            @share-request="openShare"
+          />
+        </template>
+      </CompareInput>
+    </CalculatorInteractionTracker>
+
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
-        <CalculatorInteractionTracker>
-          <CompareInput
-            v-model:company-a="companyA"
-            v-model:company-b="companyB"
-            v-model:dependents="dependents"
-            v-model:children-under20="childrenUnder20"
-          >
-            <template #result>
-              <CompareResult
-                embedded
-                :calc-a="calcA"
-                :calc-b="calcB"
-                @share-request="openShare"
-              />
-            </template>
-          </CompareInput>
-        </CalculatorInteractionTracker>
-
         <AdSlot unit="compare-top" label="광고 · top" />
 
         <AdSlot unit="compare-middle" label="광고 · middle" />

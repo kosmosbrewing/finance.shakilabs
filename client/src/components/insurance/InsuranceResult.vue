@@ -7,6 +7,7 @@ import ResultHero from "@/components/common/ResultHero.vue";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
 import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 import SalarySummaryStatGrid from "@/components/salary/SalarySummaryStatGrid.vue";
+import { useNarrowCollapse } from "@/composables/useNarrowCollapse";
 
 const props = defineProps<{
   mode: "reverse" | "forward";
@@ -43,6 +44,9 @@ const title = computed(() => {
 
 // Count-up animation removed on purpose (fleet-wide policy): 23 of 26 calculators
 // were already static, and animating from 0 would blank the prerendered value.
+
+// 공제 상세는 좁은 화면에서만 기본 접힘 (근거는 useNarrowCollapse 주석)
+const deductionOpen = useNarrowCollapse();
 </script>
 
 <template>
@@ -70,12 +74,19 @@ const title = computed(() => {
       />
 
       <!-- 공제 내역 통합 섹션 -->
-      <div class="retro-board-list text-caption">
-        <!-- 총공제 헤더 -->
-        <div class="retro-board-item bg-muted/60 text-body font-bold text-foreground">
+      <details
+        class="retro-board-list text-caption"
+        :open="deductionOpen"
+        @toggle="deductionOpen = ($event.target as HTMLDetailsElement).open"
+      >
+        <!-- 총공제 헤더가 곧 요약 줄이다 — 접어도 합계는 화면에 남는다 -->
+        <summary class="retro-board-item retro-details-summary bg-muted/60 text-body font-bold text-foreground">
           <span>공제 내역</span>
-          <strong class="tabular-nums">{{ formatWon(displayedTotalDeduction) }}</strong>
-        </div>
+          <span class="flex items-center gap-2">
+            <strong class="tabular-nums">{{ formatWon(displayedTotalDeduction) }}</strong>
+            <span class="retro-details-chevron" aria-hidden="true">▾</span>
+          </span>
+        </summary>
 
         <div class="px-3 py-1.5">
           <SalaryDeductionBar :calc="calc" :health-insurance="displayedHealthInsurance" />
@@ -116,7 +127,7 @@ const title = computed(() => {
           <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-localTax" />지방소득세</span>
           <strong class="tabular-nums">{{ formatWon(calc.monthlyLocalTax.value) }}</strong>
         </div>
-      </div>
+      </details>
 
       <!-- 추정 근거 (reverse 모드) -->
       <Transition name="fade">

@@ -92,8 +92,13 @@
     min-width: 44px;
   }
 
+  /* 요약 카드는 폭이 아니라 글자 크기에 맞춰 접힌다.
+     이 미디어 쿼리는 400px 이하를 하나로 보지만 그 안에는 두 부류가 섞여 있다 —
+     실제 390px 폰과, 200% 텍스트 확대로 뷰포트가 400px처럼 좁아진 PC. 예전처럼 무조건
+     1열로 고정하면 전자에서 카드 3장이 세로로 234px를 먹었다(PC는 66px).
+     minmax의 최소값을 rem으로 두면 루트 글자가 커질 때 같은 규칙이 알아서 1열로 떨어진다. */
   .text-resize-layout .result-stat-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
   }
 
   .text-resize-layout .retro-stat-grid {
