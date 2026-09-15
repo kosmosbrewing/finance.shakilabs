@@ -17,13 +17,16 @@ function hash(content) {
 try {
   writeFileSync(characterFile, characters);
   const fonts = fontJobs.map((fontJob) => {
-    const result = spawnSync("python3", [
-      "-m",
-      "fontTools.subset",
-      fontJob.source,
-      `--text-file=${characterFile}`,
-      `--output-file=${fontJob.output}`,
-      "--flavor=woff2",
+    // 잡이 자기 문자셋을 선언하면 그것만 쓴다 — 브랜드 폰트를 UI 전체 문자셋(979자)으로
+    // 자르면 11KB짜리가 122KB가 된다(Pretendard만 그리는 800여 자가 딸려 들어와서).
+    let jobCharacterFile = characterFile;
+    if (fontJob.characters) {
+      jobCharacterFile = resolve(temporaryRoot, `${fontJob.publicName}.txt`);
+      writeFileSync(jobCharacterFile, fontJob.characters);
+    }
+    // 잡이 플래그를 선언하면 그것만 쓴다. 브랜드 폰트는 --no-hinting 하나로 충분하고,
+    // 아래 기본 플래그(name 테이블 전체 보존 + 힌팅 유지)를 쓰면 같은 문자셋이 35% 커진다.
+    const subsetFlags = fontJob.subsetFlags ?? [
       "--layout-features=*",
       "--name-IDs=*",
       "--name-legacy",
@@ -33,6 +36,15 @@ try {
       "--recommended-glyphs",
       "--no-recalc-timestamp",
       "--drop-tables+=FFTM",
+    ];
+    const result = spawnSync("python3", [
+      "-m",
+      "fontTools.subset",
+      fontJob.source,
+      `--text-file=${jobCharacterFile}`,
+      `--output-file=${fontJob.output}`,
+      "--flavor=woff2",
+      ...subsetFlags,
     ], { encoding: "utf8" });
 
     if (result.error || result.status !== 0) {

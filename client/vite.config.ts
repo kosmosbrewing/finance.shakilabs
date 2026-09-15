@@ -76,7 +76,9 @@ export default defineConfig(({ mode }) => ({
           // v2는 어디서도 참조되지 않는 잔재라 제외한다 — 프리캐시는 설치 시점에
           // 전부 내려받으므로 죽은 자산 하나가 모든 설치자의 데이터를 쓴다.
           "fonts/Pretendard-*.woff2",
-          "fonts/GmarketSansBold-subset-v3.woff2",
+          // 서브셋 woff2만. 원본 .woff(966KB)는 서브셋 소스로 남아 있을 뿐 어떤 CSS도
+          // 참조하지 않으므로 프리캐시하면 설치자마다 죽은 1MB를 받는다.
+          "fonts/GmarketSansBold-brand-v1.woff2",
           "icons/*.png",
           "favicon.png",
           "logo.png",

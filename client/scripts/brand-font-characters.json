@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "family": "GmarketSans",
+  "routes": 158,
+  "characterCount": 188,
+  "characters": " %()+,-./0123456789IPR~·—가간강개거건게격결계고공과관교구국근금급기나내녀년는능단담당대데돈드득랜레려력련령로료률르리만말맞먼명무문묻뮬민및바받방배법별보봉부분불비사산상생서설성세션소수순스시신실아알액야약양억업에여역연영예와용운원월유육율을의이익인일임입자작장재저적전절점정제조존종주준지직질차처천체초추출칙침크타퇴트판표프피하한할합항험협환황회후휴",
+  "sources": [
+    {
+      "selector": "h1.break-keep.text-h1.font-brand",
+      "sample": "2026 연봉 실수령액·세금 계산기 — 상황별 시작점"
+    },
+    {
+      "selector": "h1.retro-title",
+      "sample": "IRP·퇴직연금 세액공제"
+    },
+    {
+      "selector": "h1.text-h1.font-brand",
+      "sample": "2026 원천세 계산기 — 소득세로 연봉 추정"
+    },
+    {
+      "selector": "h2.insurance-result-title.retro-title-brand",
+      "sample": "건보료 100,000원 기준"
+    },
+    {
+      "selector": "h2.retro-title",
+      "sample": "2026 연봉별 월 공제 합계·실수령·공제비율 표"
+    },
+    {
+      "selector": "h2.retro-title-brand",
+      "sample": "계산 결과"
+    },
+    {
+      "selector": "p.text-display.font-bold.font-title.text-primary.tabular-nums",
+      "sample": "+264,198원"
+    },
+    {
+      "selector": "span.hidden.sm:inline",
+      "sample": "2026 퇴사 계산기 — 퇴직금·실업급여·생존기간"
+    },
+    {
+      "selector": "span.retro-title",
+      "sample": "계산 기준 · 출처"
+    },
+    {
+      "selector": "span.sm:hidden",
+      "sample": "2026 퇴사 계산기"
+    }
+  ]
+}
