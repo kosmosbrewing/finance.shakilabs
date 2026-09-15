@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatKrwAuto, formatWon } from "@/lib/utils";
+import { useNarrowCollapse } from "@/composables/useNarrowCollapse";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import ResultHero from "@/components/common/ResultHero.vue";
 import SectionShareButton from "@/components/common/SectionShareButton.vue";
@@ -15,6 +16,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   shareRequest: [];
 }>();
+
+// 공제 상세는 좁은 화면에서만 기본 접힘 (근거는 useNarrowCollapse 주석)
+const deductionOpen = useNarrowCollapse();
 </script>
 
 <template>
@@ -39,11 +43,18 @@ const emit = defineEmits<{
       />
 
       <!-- 공제 내역 통합 섹션 -->
-      <div class="retro-board-list text-caption">
-        <div class="retro-board-item bg-muted/60 text-body font-bold text-foreground">
+      <details
+        class="retro-board-list text-caption"
+        :open="deductionOpen"
+        @toggle="deductionOpen = ($event.target as HTMLDetailsElement).open"
+      >
+        <summary class="retro-board-item retro-details-summary bg-muted/60 text-body font-bold text-foreground">
           <span>공제 내역</span>
-          <strong class="tabular-nums">{{ formatWon(props.calc.totalDeduction.value) }}</strong>
-        </div>
+          <span class="flex items-center gap-2">
+            <strong class="tabular-nums">{{ formatWon(props.calc.totalDeduction.value) }}</strong>
+            <span class="retro-details-chevron" aria-hidden="true">▾</span>
+          </span>
+        </summary>
         <div class="px-3 py-1.5">
           <SalaryDeductionBar :calc="props.calc" />
         </div>
@@ -79,7 +90,7 @@ const emit = defineEmits<{
           <span class="flex items-center gap-1.5"><span class="retro-chart-dot bg-chart-localTax" />지방소득세</span>
           <strong class="tabular-nums">{{ formatWon(props.calc.monthlyLocalTax.value) }}</strong>
         </div>
-      </div>
+      </details>
     </div>
   </section>
 </template>

@@ -12,6 +12,7 @@
     "verify:credits": "node scripts/verify-credit-consistency.mjs",
     "verify:digests": "node scripts/verify-digest-similarity.mjs",
     "verify:hydration": "node scripts/verify-hydration-survival.mjs",
+    "verify:mobile-overflow": "node scripts/verify-mobile-overflow.mjs",
     "lint": "eslint \"src/**/*.{ts,vue}\"",
     "lint:fix": "npm run lint -- --fix",
     "sbom:prod": "node scripts/sbom.mjs",

@@ -69,6 +69,29 @@ function urlFor(route) {
   return route === "/" ? canonicalBase : canonicalBase + route;
 }
 
+// 라우트 -> dist 출력 파일 (프리렌더와 같은 규칙: cleanUrls 디렉터리 + index.html)
+function outputPathForRoute(route) {
+  return route === "/"
+    ? resolve(distRoot, "index.html")
+    : resolve(distRoot, route.slice(1), "index.html");
+}
+// 정적 HTML의 모든 표가 가로 스크롤 래퍼 안에 있어야 한다.
+// 브라우저 게이트(verify-mobile-overflow)는 하이드레이션 뒤 화면만 본다 — 크롤러가 받는
+// 원시 HTML은 아무도 안 보고 있었다. 이건 파일만 읽어서 결정적으로 판정하니 빌드에 둔다.
+function validateTableScrollWrappers() {
+  const wrapperOpen = /<div data-table-scroll\b/gi;
+  for (const route of SEO_ROUTES) {
+    const html = readFileSync(outputPathForRoute(route), "utf8");
+    const tables = (html.match(/<table\b/gi) ?? []).length;
+    if (tables === 0) continue;
+    const wrappers = (html.match(wrapperOpen) ?? []).length;
+    assert(
+      wrappers === tables,
+      `${route}: ${tables}개 표 중 ${wrappers}개만 가로 스크롤 래퍼 안에 있다`,
+    );
+  }
+}
+
 function validateVercelConfig() {
   const config = JSON.parse(readFileSync(resolve(repositoryRoot, "vercel.json"), "utf8"));
   assert(config.cleanUrls === true, "vercel.json: cleanUrls must be true");
@@ -449,6 +472,7 @@ validateLlmsTxt();
 validateOpacityUtilitiesAreGenerated();
 validateNotFound();
 validateAdProvider();
+validateTableScrollWrappers();
 
 if (failures.length > 0) {
   // 첫 실패에서 던지지 않고 모아서 보고한다 — 게이트를 새로 켤 때 결함이 몇 종인지 한 번에 봐야 한다.

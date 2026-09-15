@@ -5,7 +5,9 @@ import RecentCalcStorageNote from "@/components/finance/RecentCalcStorageNote.vu
 import { CALCULATOR_COUNT } from "@/data/calculatorCount";
 import { SCENARIO_CHAINS as scenarioChains } from "../../scripts/scenario-chains.mjs";
 
-const seoTitle = `2026 세금·연봉·수당 계산기 모음 | ${CALCULATOR_COUNT}개 계산기`;
+// 화면 h1 = <title>의 앞부분 = 프리렌더 h1. 세 곳이 한 문장에서 파생되므로 어긋날 수 없다.
+const pageHeading = "2026 세금·연봉·수당 계산기 모음";
+const seoTitle = `${pageHeading} | ${CALCULATOR_COUNT}개 계산기`;
 const seoDescription = `연봉 실수령액, 종합소득세, 프리랜서 세금, 연말정산, 퇴직금, 실업급여, 근로장려금 등 ${CALCULATOR_COUNT}개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.`;
 const jsonLd = {
   "@context": "https://schema.org",
@@ -79,7 +81,13 @@ const categories = [
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="jsonLd" />
 
-    <RecentCalcStorageNote />
+    <!-- 페이지 목적을 말하는 제목이 맨 먼저 읽혀야 한다. 저장 안내가 위에 있던 동안에는
+         보조 섹션이 페이지 제목처럼 읽혔다(h1 top 451px). 문구는 <title>·프리렌더 h1과
+         같은 문장을 쓴다 — 크롤러가 받는 제목과 독자가 보는 제목이 달라선 안 된다. -->
+    <header class="space-y-1">
+      <h1 class="text-h1 font-brand">{{ pageHeading }}</h1>
+      <p class="text-caption text-muted-foreground">급여·세금·수당·퇴직·절세까지, {{ CALCULATOR_COUNT }}개 계산기를 한곳에서 확인하세요.</p>
+    </header>
 
     <div class="retro-panel overflow-hidden">
       <div class="retro-titlebar rounded-t-2xl">
@@ -103,10 +111,9 @@ const categories = [
 
     <div class="retro-panel overflow-hidden">
       <div class="retro-titlebar rounded-t-2xl">
-        <div class="space-y-1">
-          <h1 class="retro-title">전체 계산기</h1>
-          <p class="text-caption text-muted-foreground">급여·세금·수당·퇴직·절세까지, {{ CALCULATOR_COUNT }}개 계산기를 한곳에서 확인하세요.</p>
-        </div>
+        <!-- 페이지 제목이 위로 올라갔으므로 여기는 섹션 제목이다. 한 줄 설명도 위로 옮겨
+             중복을 제거했다. -->
+        <h2 class="retro-title">전체 계산기</h2>
       </div>
 
       <div class="retro-panel-content grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -128,5 +135,8 @@ const categories = [
         </div>
       </div>
     </div>
+
+    <!-- 저장 정책 안내는 계산기를 고른 뒤에야 의미가 있는 보조 정보다 — 맨 아래로 내린다. -->
+    <RecentCalcStorageNote />
   </div>
 </template>
