@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
+import CalculatorMemoryControl from "@/components/calculator/CalculatorMemoryControl.vue";
 import { computed, onUnmounted, ref, watch, watchEffect } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 
@@ -336,19 +337,28 @@ watch(
   <div class="container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <div class="flex items-start justify-between gap-2 sm:items-center">
-      <h1 class="min-w-0 flex-1 font-brand text-[1.22rem] leading-[1.2] sm:text-h1">
-        <span class="sm:hidden">2026 퇴사 계산기</span>
-        <span class="hidden sm:inline">2026 퇴사 계산기 — 퇴직금·실업급여·생존기간</span>
-      </h1>
-      <span
-        v-if="isRangeUpdating"
-        class="shrink-0 pt-0.5 text-caption text-muted-foreground sm:pt-0"
-        role="status"
-        aria-live="polite"
-      >
-        업데이트 중
-      </span>
+    <div class="space-y-2">
+      <div class="flex items-start justify-between gap-2 sm:items-center">
+        <h1 class="min-w-0 flex-1 font-brand text-[1.22rem] leading-[1.2] sm:text-h1">
+          <span class="sm:hidden">2026 퇴사 계산기</span>
+          <span class="hidden sm:inline">2026 퇴사 계산기 — 퇴직금·실업급여·생존기간</span>
+        </h1>
+        <span
+          v-if="isRangeUpdating"
+          class="shrink-0 pt-0.5 text-caption text-muted-foreground sm:pt-0"
+          role="status"
+          aria-live="polite"
+        >
+          업데이트 중
+        </span>
+      </div>
+      <!-- 입력이 11개다 — 다시 돌아와 조정할 값이 가장 많은 계산기 (v3 §7.3).
+           제목 오른쪽은 "업데이트 중" 상태가 이미 쓰고 있어 아래 줄에 둔다. -->
+      <div class="finance-page-header">
+        <div class="finance-page-header__control">
+          <CalculatorMemoryControl tool="quit" base-path="/quit" />
+        </div>
+      </div>
     </div>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
