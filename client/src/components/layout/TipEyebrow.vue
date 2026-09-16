@@ -68,12 +68,10 @@ const tickerMessages = computed(() => {
 </script>
 
 <template>
-  <div data-tip-eyebrow class="container pt-3">
-    <div
-      class="flex items-start gap-2 border-l-2 border-border pl-3 text-left text-caption text-muted-foreground"
-    >
-      <span class="shrink-0 font-semibold tracking-wide text-muted-foreground">참고</span>
-      <TickerBar :key="route.path" :messages="tickerMessages" />
-    </div>
-  </div>
+  <!-- 헤더 가운데 슬롯에 실린다. 바깥 여백·경계는 패키지의 .sh-global-header__tip이
+       소유하므로 여기서는 내용만 그린다 — 자체 컨테이너를 두면 헤더 높이가 흔들린다. -->
+  <span data-tip-eyebrow class="inline-flex items-center gap-2 whitespace-nowrap">
+    <span class="shrink-0 font-semibold tracking-wide opacity-80">참고</span>
+    <TickerBar :key="route.path" :messages="tickerMessages" />
+  </span>
 </template>
