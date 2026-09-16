@@ -3,12 +3,13 @@
 //
 // 왜 앱 자체 헤더를 버리는가: 이전 헤더는 로고 + 중앙 팁 티커 + 테마 토글 박스를 한 줄에
 // 담아 65px였고, 팁 문구 길이에 따라 페이지마다 높이가 달랐다(BL-005). 포털 `/`는 같은
-// 사이트인데 56px 검정 헤더라 수화 전후·앱 간 셸이 갈라져 보였다. 팁은 본문 eyebrow로
-// 내리고(TipEyebrow.vue) 헤더에는 로고·사이트 링크·테마 토글만 남긴다.
+// 사이트인데 56px 검정 헤더라 수화 전후·앱 간 셸이 갈라져 보였다. 팁은 0.3.24에서 헤더 가운데로 돌아왔지만
+// **흐름 밖 절대 배치 + 한 줄 말줄임**이라 높이가 더는 문구에 끌려가지 않는다.
 import { computed, onMounted, ref } from "vue";
 import { Moon, Sun } from "lucide-vue-next";
 import { RouterLink, useRoute } from "vue-router";
 import { ShGlobalHeader, type GlobalHeaderLink } from "@shakilabs/ui";
+import TipEyebrow from "@/components/layout/TipEyebrow.vue";
 import {
   PRIMARY_NAV_ITEMS,
   findActiveNavItem,
@@ -58,6 +59,12 @@ onMounted(() => {
     nav-title="계산기"
     :link-component="RouterLink"
   >
+    <!-- 헤더 가운데 회전 안내. 패키지가 흐름 밖에 절대 배치하므로 문구 길이가
+         56px 헤더 높이를 바꾸지 못한다(옛 65px 가변 사고 BL-005의 재발 방지). -->
+    <template #tip>
+      <TipEyebrow />
+    </template>
+
     <template #utility>
       <!-- 패키지 헤더 링크 스타일을 그대로 쓴다 — 검정 위 밝은 글자·hover 10% 흰 배경·
            밝은 포커스 링이 전부 .sh-global-header 규칙에서 온다. 별도 박스(ShButton
