@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
+import CalculatorMemoryControl from "@/components/calculator/CalculatorMemoryControl.vue";
 import FinanceNextActions from "@/components/finance/FinanceNextActions.vue";
 import InstallHint from "@/components/common/InstallHint.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -322,6 +323,12 @@ const communityPageKey = computed(() =>
   isForwardMode.value ? "salary-calc" : "insurance-main"
 );
 
+// MemoryControl 키는 mode(런타임 상태)가 아니라 라우트로 가른다.
+// /salary와 /insurance는 첫 세그먼트가 달라 App.vue의 RouterView key도 갈리므로
+// 인스턴스가 서로 다르다 — 한 키를 공유하면 모드 전환이 상대 초안을 덮어쓴다.
+const memoryTool = computed(() => (route.path.startsWith("/salary") ? "salary" : "insurance"));
+const memoryBasePath = computed(() => (route.path.startsWith("/salary") ? "/salary" : "/insurance"));
+
 const internalLinkCurrent = computed<
   "insurance" | "salary" | "comprehensive-tax" | "compare" | "quit" | "withholding"
 >(() => (isForwardMode.value ? "salary" : "insurance"));
@@ -372,7 +379,11 @@ watch(
   <div class="text-resize-layout container space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
-    <CalculatorPageHeader :title="pageTitle" />
+    <CalculatorPageHeader :title="pageTitle">
+      <template #control>
+        <CalculatorMemoryControl :tool="memoryTool" :base-path="memoryBasePath" />
+      </template>
+    </CalculatorPageHeader>
 
     <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div class="space-y-4 order-1">
