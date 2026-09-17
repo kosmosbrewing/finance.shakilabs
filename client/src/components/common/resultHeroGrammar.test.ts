@@ -126,18 +126,26 @@ describe("result hero grammar", () => {
     expect(offenders).toEqual([]);
   });
 
-  // v3 8.6: the formatted string changing is the only trigger. A mount hook that
-  // animates 0 -> value re-runs the count on every load and every hydration; it
-  // was measured doing exactly that on /salary (84 distinct strings in one load)
-  // and /compare (a "+-13,841" frame) before BL-020.
-  it("count-up never runs on mount or hydration", () => {
+  // 로드 카운트업은 요청으로 되살렸다. BL-020이 기록한 사고(`-121,973원`,
+  // `+-13,841원`)의 진짜 원인은 "마운트에서 센다"가 아니라 **rAF 진행도에 하한이
+  // 없어 ease-out 곡선이 음수를 돌려준 것**이었다(실측 재현). 그래서 금지하는 대신
+  // 재발 조건을 직접 고정한다.
+  it("load count-up animates from zero without crossing the sign", () => {
     const hero = vueSources[HERO_PATH];
-    // judge code, not prose: the comment above the fix names the removed hook.
     const script = hero
       .slice(0, hero.indexOf("<template>"))
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/^\s*\/\/.*$/gm, "");
-    expect(script).not.toContain("onMounted");
+    // 로드 시 센다
+    expect(script).toContain("onMounted");
+    // rAF 타임스탬프가 performance.now()보다 이를 수 있다 — 하한이 없으면
+    // progress가 음수가 되고 첫 프레임에 부호가 뒤집힌 값이 스친다
+    expect(script).toMatch(/Math\.max\(0,\s*\(now - start\)/);
+    // 값이 확정된 뒤에 시작해야 과도 값을 향해 달려가지 않는다
+    expect(script).toMatch(/SETTLE_MS/);
+    expect(script).toMatch(/loadAnimationDone/);
+    // 모션을 줄이면 애니메이션 없이 최종값
+    expect(script).toMatch(/prefersReducedMotion\(\)/);
     // the watcher must compare against the previous formatted string, so a
     // recalculation landing on the same number animates nothing
     expect(script).toMatch(/if \(next === previous\) return;/);
