@@ -99,7 +99,7 @@ function buildFaqSectionHtml(items) {
     .join("");
 
   return `
-      <h2 style="font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--highlight) / 0.3);color:hsl(var(--foreground));">자주 묻는 질문 (FAQ)</h2>${qaHtml}`;
+      <h2 style="font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--border));color:hsl(var(--foreground));">자주 묻는 질문 (FAQ)</h2>${qaHtml}`;
 }
 
 // 본문 마지막 닫는 태그 앞에 FAQ 섹션 삽입 (guide article·fallback section 공용)

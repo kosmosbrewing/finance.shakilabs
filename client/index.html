@@ -96,13 +96,16 @@
         --muted-foreground: 60 3.37% 34.9%; /* color.ink-muted #5C5C56 */
         --card: 0 0% 100%; /* color.card #FFFFFF */
         --card-foreground: 0 0% 3.92%;
-        --primary: 160 62% 24%;
+        /* v3 §4.4 — 브랜드 초록(160 62% 24%)은 status-success(#1B7A4A, hue 150)와 사실상 같은
+           계열이라 "이득"과 "브랜드"를 색으로 구분할 수 없었다. 돈·세금 그룹(finance·biz·loan·
+           invest)을 loan이 이미 쓰던 인디고 하나로 모은다. 값은 DESIGN_CLEANUP_PLAN §2.2
+           확정 표 그대로다 — 앱이 재계산하지 않는다. */
+        --primary: 243 55% 41%;
         --primary-foreground: 0 0% 100%;
-        /* 브랜드 hue 틴트였다 — hover 워시·표 강조 행이 전부 연녹색이었다 */
-        --secondary: 36 14% 93%;
-        --secondary-foreground: 40 7% 12%;
-        --accent: 36 14% 95%;
-        --accent-foreground: 40 7% 12%;
+        --secondary: 243 15% 91%;
+        --secondary-foreground: 222 47% 11%;
+        --accent: 243 53% 95%;
+        --accent-foreground: 243 55% 30%;
         --popover: 0 0% 100%;
         --popover-foreground: 40 7% 12%;
         /* 0 72% 52%는 본문 배경 위 text-destructive가 4.49:1로 AA(4.5:1) 미달이었다. */
@@ -110,13 +113,14 @@
         --destructive-foreground: 40 25% 99%;
         --border: 60 8% 90.2%; /* color.line #E8E8E4 */
         --input: 60 8% 90.2%;
-        --ring: 160 62% 24%;
+        /* v3 §2.1 color.focus — 포커스 링은 액센트가 아니라 ink다(#0A0A0A / #F5F5F5).
+           패키지 --sh-color-focus가 이 값을 그대로 가져가므로 함대 전체 포커스 링 결정이다.
+           미선언 시 패키지가 리터럴 222 47% 20%(슬레이트)로 조용히 폴백한다 — 반드시 명시한다. */
+        --ring: 0 0% 3.92%;
         --radius: 0.4rem;
-        --deduction: 0 62% 52%;
-        --deduction-foreground: 0 0% 100%;
-        /* 프리렌더 h2 밑줄·안내 상자 테두리(장식) — 무채색 헤어라인 */
-        --highlight: 33 10% 52%;
-        --highlight-foreground: 40 7% 12%;
+        /* @shakilabs/ui 카테고리 액센트 API (v3 §4.1) — 2차 내비 밑줄·ResultAmount가 읽는다 */
+        --accent-hsl: 243 55% 41%;
+        --accent-muted-hsl: 243 55% 41%;
         /* v3 §3.1 — 앵커 오프셋은 두 스티키 층의 합이다.
            --header-h      = 검정 GlobalHeader (패키지 --sh-header-h와 같은 56px)
            --secondary-nav-h = 2차 계산기 내비 (데스크톱 3rem / 모바일 1행 44px+패딩)
@@ -139,12 +143,14 @@
         --muted-foreground: 32 12% 68%;
         --card: 38 10% 12%;
         --card-foreground: 39 29% 93%;
-        --primary: 160 56% 56%;
-        --primary-foreground: 160 56% 10%;
-        --secondary: 37 9% 19%;
-        --secondary-foreground: 39 29% 93%;
-        --accent: 37 9% 18%;
-        --accent-foreground: 39 29% 93%;
+        /* 다크는 hue만 옮기면 틴트 위 4.5:1이 깨진다(loan 다크 27건 전례) — 명도를 다시 골랐다.
+           §2.2 확정 표: primary L 72% / accent L 22% / accent-fg L 78%. */
+        --primary: 243 60% 72%;
+        --primary-foreground: 243 60% 10%;
+        --secondary: 243 15% 20%;
+        --secondary-foreground: 210 40% 96%;
+        --accent: 243 40% 22%;
+        --accent-foreground: 243 60% 78%;
         --popover: 38 10% 12%;
         --popover-foreground: 39 29% 93%;
         /* 다크에서 적색 의미색은 "밝은 면 + 어두운 전경"이어야 AA를 넘는다.
@@ -156,11 +162,9 @@
         --destructive-foreground: 0 60% 10%;
         --border: 37 13% 20%;
         --input: 37 13% 26%;
-        --ring: 160 56% 56%;
-        --deduction: 0 75% 72%;
-        --deduction-foreground: 0 60% 10%;
-        --highlight: 33 8% 48%;
-        --highlight-foreground: 39 29% 93%;
+        --ring: 0 0% 96.08%;
+        --accent-hsl: 243 60% 72%;
+        --accent-muted-hsl: 243 60% 72%;
       }
 
       html {

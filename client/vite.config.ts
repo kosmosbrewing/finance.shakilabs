@@ -58,7 +58,7 @@ export default defineConfig(({ mode }) => ({
         background_color: "#f8fafc",
         // index.html의 --primary(light) hsl(160 62% 24%)와 같은 값.
         // 두 값이 갈리면 verify-pwa.mjs가 red.
-        theme_color: "#17634a",
+        theme_color: "#352fa2", // = --primary 243 55% 41% (verify-pwa.mjs가 셸 토큰과 대조한다)
         icons: [
           { src: "/finance/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
           { src: "/finance/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
