@@ -1,6 +1,7 @@
 import homeViewSource from "@/views/HomeView.vue?raw";
 import routerSource from "@/router/index.ts?raw";
 import { describe, expect, it } from "vitest";
+import { FOOTER_SECTIONS } from "@/data/footerNav";
 import {
   HOME_ALL_LINK,
   HOME_H1,
@@ -8,6 +9,7 @@ import {
   HOME_ITEM_LIST,
   HOME_LINKS_AFTER_SECTION,
   HOME_LINKS_H2,
+  HOME_LINKS_INTRO,
   HOME_PRERENDER_LINKS,
   HOME_SECTIONS,
 } from "../../scripts/home-content.mjs";
@@ -70,6 +72,32 @@ describe("home content", () => {
     for (const link of HOME_PRERENDER_LINKS) {
       expect(link.path.startsWith("/finance/")).toBe(true);
     }
+  });
+
+  it("도구 인덱스가 푸터의 계산기 전체를 같은 순서로 담는다", () => {
+    // 홈은 "26개 계산기 전체 목록"이라고 말한다. 한 개라도 빠지면 그 말이 거짓이 되고,
+    // 새 계산기가 푸터에만 생기고 본문에는 길이 없던 상태(15/26)로 되돌아간다.
+    const indexRoutes = HOME_HUB_GROUPS.flatMap((group) =>
+      group.items.map((item) => item.to)
+    );
+    const footerRoutes = FOOTER_SECTIONS.flatMap((section) =>
+      section.links.map((link) => link.to)
+    );
+    expect(indexRoutes).toEqual(footerRoutes);
+  });
+
+  it("도구 인덱스는 퀵계산기 바로 다음에 온다", () => {
+    // 프리렌더는 HOME_LINKS_AFTER_SECTION으로, 뷰는 템플릿 순서로 같은 순서를 만든다.
+    // 둘이 갈라지면 크롤러가 받는 읽기 순서와 사람이 보는 순서가 달라진다.
+    expect(HOME_LINKS_AFTER_SECTION).toBe(1);
+    expect(homeViewSource.indexOf("<HomeQuickCalc")).toBeLessThan(
+      homeViewSource.indexOf("<HomeToolIndex")
+    );
+    expect(homeViewSource.indexOf("<HomeToolIndex")).toBeLessThan(
+      homeViewSource.indexOf("<HomeScenarioChains")
+    );
+    expect(homeViewSource).toContain(':intro="HOME_LINKS_INTRO"');
+    expect(HOME_LINKS_INTRO.length).toBeGreaterThan(40);
   });
 
   it("홈 본문은 /salary 본문과 문장을 공유하지 않는다", () => {

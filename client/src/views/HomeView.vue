@@ -5,13 +5,15 @@ import SEOHead from "@/components/common/SEOHead.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import HomeQuickCalc from "@/components/home/HomeQuickCalc.vue";
-import HomeHub from "@/components/home/HomeHub.vue";
+import HomeToolIndex from "@/components/home/HomeToolIndex.vue";
+import HomeScenarioChains from "@/components/home/HomeScenarioChains.vue";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import {
   HOME_DESCRIPTION,
   HOME_H1,
   HOME_INTRO,
   HOME_LINKS_H2,
+  HOME_LINKS_INTRO,
   HOME_SECTIONS,
 } from "../../scripts/home-content.mjs";
 
@@ -55,10 +57,16 @@ const noteSections = computed(() =>
 
     <HomeQuickCalc :heading="quickCalcSection.h2" :note="quickCalcSection.body" />
 
-    <HomeHub
-      :guide-heading="situationSection.h2"
-      :guide-body="situationSection.body"
-      :links-heading="HOME_LINKS_H2"
+    <!-- 읽기 순서: 답 → 전체 인덱스 → 상황별 순서 → 기준·근거.
+         퀵계산기를 맨 위에 남긴 이유는 유입 1위 질의("연봉 실수령액")의 답이 첫 화면에
+         있어야 하기 때문이다(연봉 한 칸 → 월 실수령액). 26줄짜리 인덱스를 그 위에 두면
+         모바일에서 답이 화면 밖으로 밀린다. 프리렌더도 HOME_LINKS_AFTER_SECTION = 1로
+         같은 순서를 쓴다. -->
+    <HomeToolIndex :heading="HOME_LINKS_H2" :intro="HOME_LINKS_INTRO" />
+
+    <HomeScenarioChains
+      :heading="situationSection.h2"
+      :body="situationSection.body"
     />
 
     <AdSlot unit="home-top" label="광고 · top" />

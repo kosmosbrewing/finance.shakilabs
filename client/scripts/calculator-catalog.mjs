@@ -15,6 +15,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { CALCULATOR_ROUTES } from "./seo-routes.mjs";
+import { HOME_HUB_GROUPS } from "./home-content.mjs";
 
 // 분류는 Vue 푸터(footerNav.ts)와 같은 5개 묶음을 쓴다 — 화면과 llms.txt가 다른 분류를 쓰면
 // "같은 목록"이라는 주장 자체가 흔들린다.
@@ -229,3 +230,45 @@ assertSameRouteSet(
   CALCULATOR_ROUTES,
   "src/data/footerNav.ts(Vue 푸터)와 계산기 라우트가 다릅니다",
 );
+
+// 홈 도구 인덱스 미러 검증.
+// 홈(/)의 인덱스는 "26개 계산기 전체 목록"이라고 말한다. 목록이 카탈로그와 갈라지면 그 말이
+// 거짓이 되고, 새 계산기는 푸터에만 생기고 본문에는 길이 없는 상태로 되돌아간다
+// (개편 전 홈이 15/26이던 이유가 정확히 이것이다).
+// 라우트 집합만 보면 "엉뚱한 묶음에 넣었다"를 못 잡으므로 묶음 이름과 순서까지 맞춘다.
+const homeIndexGroups = HOME_HUB_GROUPS.map((group) => ({
+  category: group.title,
+  routes: group.items.map((item) => item.to),
+}));
+
+assertSameRouteSet(
+  homeIndexGroups.flatMap((group) => group.routes),
+  CALCULATOR_ROUTES,
+  "scripts/home-content.mjs(홈 도구 인덱스)와 계산기 라우트가 다릅니다",
+);
+
+const catalogShape = JSON.stringify(
+  CALCULATOR_CATALOG.map((group) => ({
+    category: group.category,
+    routes: group.items.map((item) => item.route),
+  })),
+);
+if (JSON.stringify(homeIndexGroups) !== catalogShape) {
+  throw new Error(
+    "[calculator-catalog] 홈 도구 인덱스의 묶음·순서가 카탈로그와 다릅니다\n" +
+      `  홈:     ${JSON.stringify(homeIndexGroups)}\n` +
+      `  카탈로그: ${catalogShape}`,
+  );
+}
+
+// 설명 문구가 비면 인덱스가 링크 목록으로 되돌아간다 — 줄마다 "무엇이 나오는지"가 있어야 한다.
+const missingDesc = HOME_HUB_GROUPS.flatMap((group) => group.items).filter(
+  (item) => !item.desc || item.desc.trim().length < 6,
+);
+if (missingDesc.length > 0) {
+  throw new Error(
+    `[calculator-catalog] 홈 인덱스 설명이 비었거나 너무 짧습니다: ${missingDesc
+      .map((item) => item.to)
+      .join(", ")}`,
+  );
+}

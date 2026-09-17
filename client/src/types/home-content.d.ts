@@ -30,6 +30,7 @@ declare module "*home-content.mjs" {
   export const HOME_SECTIONS: HomeSection[];
   export const HOME_GUIDE_H2: string;
   export const HOME_LINKS_H2: string;
+  export const HOME_LINKS_INTRO: string;
   export const HOME_LINKS_AFTER_SECTION: number;
   export const HOME_HUB_GROUPS: HomeHubGroup[];
   export const HOME_ALL_LINK: { to: string; label: string };

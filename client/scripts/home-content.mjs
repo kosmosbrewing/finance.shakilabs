@@ -59,13 +59,25 @@ export const HOME_SECTIONS = [
 ];
 
 export const HOME_GUIDE_H2 = "지금 상황에 맞는 계산기 고르기";
-export const HOME_LINKS_H2 = "대표 계산기 바로가기";
-// Splice the hub links right after the "situations" section so the static body follows
-// the same reading order as the rendered page.
-export const HOME_LINKS_AFTER_SECTION = 2;
+export const HOME_LINKS_H2 = "분야별 계산기 전체 목록";
+export const HOME_LINKS_INTRO =
+  "26개 계산기를 급여·세금·수당·퇴직·절세 다섯 갈래로 폈습니다. 각 줄에 무엇을 넣으면 무엇이 나오는지 적어 두었으니 지금 궁금한 것에 가장 가까운 줄을 고르세요.";
+// Splice the hub links right after the quick calculator so the static body follows the same
+// reading order as the rendered page: answer first, then the full index, then the guides.
+// It used to sit after "situations" (index = 2) — that pushed the tool index to third place
+// behind two prose blocks, which is what made the home read as an article instead of an index.
+export const HOME_LINKS_AFTER_SECTION = 1;
 
-// Five branches of the catalog. The view renders these as cards; the prerender flattens them
-// into the link list and the ItemList schema, so all three stay in one order.
+// 홈 도구 인덱스 — 26개 계산기 전체. 묶음·순서는 Vue 푸터(src/data/footerNav.ts)와 같다.
+//
+// 왜 전부 펴는가: 개편 전에는 그룹당 3개씩 15개만 있어서 나머지 11개는 본문에 길이 없었다
+// (푸터에만 있었다). 홈은 26개 계산기로 가는 인덱스여야지 대표 몇 개를 고르는 자리가 아니다.
+//
+// 설명 문구는 /all·llms.txt와 다른 문장을 쓴다 — 같은 목록을 같은 문장으로 세 번 내보내면
+// 그게 중복 콘텐츠 신호다. 여기는 "무엇을 넣으면 무엇이 나오는지"를 한 줄로 줄인 판이다.
+//
+// 라우트 집합이 카탈로그(= 사이트맵 = 푸터)와 어긋나면 scripts/calculator-catalog.mjs가
+// 빌드를 세운다. 계산기를 추가하면 이 목록도 같이 움직여야 한다.
 export const HOME_HUB_GROUPS = [
   {
     id: "pay",
@@ -75,6 +87,8 @@ export const HOME_HUB_GROUPS = [
       { to: "/salary", label: "연봉 실수령액 계산기", desc: "부양가족·비과세까지 넣어 정밀 계산" },
       { to: "/insurance", label: "건강보험료 역산 계산기", desc: "건보료만 알아도 연봉 추정" },
       { to: "/compare", label: "이직 연봉 비교", desc: "두 연봉의 월 실수령 차이" },
+      { to: "/raise", label: "연봉 인상률 계산기", desc: "협상 전에 체감 인상률 확인" },
+      { to: "/bonus", label: "성과급 실수령 계산기", desc: "상여금 지급 월의 세후 금액" },
     ],
   },
   {
@@ -85,6 +99,8 @@ export const HOME_HUB_GROUPS = [
       { to: "/comprehensive-tax", label: "종합소득세 계산기", desc: "사업·부업 소득 5월 신고 대비" },
       { to: "/freelancer", label: "프리랜서 세금 계산기", desc: "3.3% 원천징수 후 정산액" },
       { to: "/withholding", label: "원천세 계산기", desc: "떼인 소득세로 연봉 되짚기" },
+      { to: "/freelance-rate", label: "프리랜서 단가 역산", desc: "받고 싶은 금액에서 거꾸로" },
+      { to: "/4-insurance-employer", label: "사업주 4대보험 계산기", desc: "채용 한 명당 늘어나는 인건비" },
     ],
   },
   {
@@ -95,6 +111,7 @@ export const HOME_HUB_GROUPS = [
       { to: "/weekly-holiday-pay", label: "주휴수당 계산기", desc: "주 15시간 이상 근무의 추가 수당" },
       { to: "/wage-converter", label: "시급↔월급↔연봉 환산기", desc: "주휴수당 포함·미포함 양방향" },
       { to: "/overtime", label: "연장·야간·휴일수당", desc: "가산율 적용 후 수당" },
+      { to: "/annual-leave", label: "연차수당 계산기", desc: "남은 연차를 돈으로 바꾸면" },
     ],
   },
   {
@@ -102,9 +119,13 @@ export const HOME_HUB_GROUPS = [
     icon: "🏠",
     title: "퇴직·구직",
     items: [
+      { to: "/quit", label: "퇴사 계산기", desc: "퇴직금·실업급여·생존기간 종합" },
       { to: "/severance-pay", label: "퇴직금 계산기", desc: "퇴직소득세 뺀 실수령 퇴직금" },
       { to: "/unemployment", label: "실업급여 계산기", desc: "구직급여 수급액·수급기간" },
-      { to: "/quit", label: "퇴사 계산기", desc: "퇴직금·실업급여·생존기간 종합" },
+      { to: "/parental-leave", label: "육아휴직 급여 계산기", desc: "휴직 개월 차에 따라 달라지는 지급액" },
+      { to: "/regional-health", label: "지역가입자 건보료 계산기", desc: "재산·소득으로 매기는 보험료" },
+      { to: "/dependent", label: "건보 피부양자 판정기", desc: "부모·배우자를 올릴 수 있는지" },
+      { to: "/unpaid-wage", label: "임금체불 지연이자 계산기", desc: "청구 근거가 되는 지연이자액" },
     ],
   },
   {
@@ -113,7 +134,9 @@ export const HOME_HUB_GROUPS = [
     title: "절세·공제",
     items: [
       { to: "/year-end-settlement", label: "연말정산 계산기", desc: "환급액·세액공제 시뮬레이션" },
+      { to: "/monthly-rent-deduction", label: "월세 세액공제 계산기", desc: "무주택 세대주의 월세 환급" },
       { to: "/irp", label: "IRP 세액공제 계산기", desc: "납입액 대비 절세 효과" },
+      { to: "/pension", label: "국민연금 예상 수령액", desc: "지금 낸 보험료의 노후 월액" },
       { to: "/eitc", label: "근로장려금 계산기", desc: "가구 유형별 지급액 판정" },
     ],
   },
