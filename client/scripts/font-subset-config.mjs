@@ -79,11 +79,22 @@ function listTextFiles(path) {
   });
 }
 
+// 주석은 화면에 찍히지 않는다. 그런데 수집에 섞이면 "왜"를 적는 한국어 주석 하나가
+// 서브셋을 바꿔 무관한 작업이 폰트 재생성·해시 게이트에서 멈춘다(반복 발생).
+// 문자열 안의 `https://`도 잘리지만 URL은 ASCII라 한글 수집에는 영향이 없다 —
+// 위험한 건 과소 수집뿐이므로 렌더 결과와 차집합을 대조해 검증했다.
+function stripComments(source) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+}
+
 export function collectFontCharacters() {
   const characters = new Set();
   for (const path of contentRoots.flatMap(listTextFiles)) {
     if (!textExtensions.has(extname(path))) continue;
-    for (const character of readFileSync(path, "utf8")) characters.add(character);
+    for (const character of stripComments(readFileSync(path, "utf8"))) characters.add(character);
   }
   return [...characters].sort().join("");
 }
