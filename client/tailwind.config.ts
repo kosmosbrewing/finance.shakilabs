@@ -81,19 +81,11 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // 급여 계산기 전용 색상
-        deduction: {
-          DEFAULT: "hsl(var(--deduction))",
-          foreground: "hsl(var(--deduction-foreground))",
-        },
-        highlight: {
-          DEFAULT: "hsl(var(--highlight))",
-          foreground: "hsl(var(--highlight-foreground))",
-        },
+        // v3 §2.1 의미색 4종만 남긴다. 로컬 별칭(deduction·highlight)과 5번째 단계(caution)는
+        // 브랜드/의미 구분을 흐려 폐기했다 — 사용처는 status-* 또는 중성으로 옮겼다.
         status: {
           success: "hsl(var(--status-success))",
           warning: "hsl(var(--status-warning))",
-          caution: "hsl(var(--status-caution))",
           danger: "hsl(var(--status-danger))",
           info: "hsl(var(--status-info))",
         },

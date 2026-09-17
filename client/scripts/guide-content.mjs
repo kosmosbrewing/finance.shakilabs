@@ -18,7 +18,7 @@ import {
   yearEndStepValueDigest,
 } from "./hub-digests-guides.mjs";
 
-const H2 = "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--highlight) / 0.3);color:hsl(var(--foreground));";
+const H2 = "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--border));color:hsl(var(--foreground));";
 const P = "margin:0 0 10px;";
 const TABLE = "width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:14px;";
 const TH = "padding:8px 10px;background:hsl(var(--muted));text-align:left;border:1px solid hsl(var(--border));color:hsl(var(--foreground));font-weight:600;";

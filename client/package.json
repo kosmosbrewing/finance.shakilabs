@@ -8,7 +8,7 @@
     "fonts:subset": "node scripts/subset-fonts.mjs",
     "fonts:brand-charset": "node scripts/collect-brand-font-characters.mjs",
     "prebuild": "node scripts/generate-sitemap.mjs && node scripts/generate-llms-txt.mjs",
-    "build": "vite build && node scripts/prerender.mjs && node scripts/validate-static-output.mjs && node scripts/verify-credit-consistency.mjs && node scripts/verify-digest-similarity.mjs && node scripts/verify-fonts.mjs && node scripts/verify-calculator-analytics.mjs && node scripts/verify-pwa.mjs",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/validate-static-output.mjs && node scripts/verify-credit-consistency.mjs && node scripts/verify-digest-similarity.mjs && node scripts/verify-fonts.mjs && node scripts/verify-calculator-analytics.mjs && node scripts/verify-pwa.mjs && node scripts/verify-accent-tokens.mjs",
     "verify:credits": "node scripts/verify-credit-consistency.mjs",
     "verify:digests": "node scripts/verify-digest-similarity.mjs",
     "verify:hydration": "node scripts/verify-hydration-survival.mjs",

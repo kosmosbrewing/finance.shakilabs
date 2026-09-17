@@ -70,11 +70,13 @@ export function formatPercent(rate: number | null | undefined, decimals = 2): st
   return `${(rate * 100).toFixed(decimals)}%`;
 }
 
-// 공제비율 색상 클래스: 테이블 뱃지 (bg + text + border)
+// 공제비율 색상 클래스: 테이블 뱃지 (text + border)
+// v3 §2.1 고정 의미색(#B45309 등)은 라이트에서 자기 색 10% 틴트 위에 올리면 4.37:1로
+// AA에 못 미친다(실측). 면색은 걷고 글자+보더에만 의미색을 남긴다 — §4.3과도 맞는다.
 export function deductionToneClass(rate: number): string {
-  if (rate >= 0.32) return "bg-status-danger/10 text-status-danger border-status-danger/20";
-  if (rate >= 0.24) return "bg-status-caution/10 text-status-caution border-status-caution/20";
-  return "bg-status-success/10 text-status-success border-status-success/20";
+  if (rate >= 0.32) return "text-status-danger border-status-danger/30";
+  if (rate >= 0.24) return "text-status-warning border-status-warning/30";
+  return "text-status-success border-status-success/30";
 }
 
 // 통화 포맷: (14900, "KRW") → "₩14,900"

@@ -103,10 +103,10 @@ const eligibleLabel: Record<string, string> = {
           <div class="px-3 py-2 bg-muted/30 flex items-center justify-between gap-2">
             <span class="font-semibold text-foreground">② 실업급여</span>
             <span
-              class="text-tiny font-semibold px-2 py-0.5 rounded-full shrink-0"
+              class="text-tiny font-semibold px-2 py-0.5 rounded-full shrink-0 border"
               :class="unemploymentEligible
-                ? 'bg-status-success/15 text-status-success'
-                : 'bg-status-caution/15 text-status-caution'"
+                ? 'border-status-success/40 text-status-success'
+                : 'border-status-warning/40 text-status-warning'"
             >
               {{ unemploymentEligible ? eligibleLabel[quitReason] ?? '수급 가능' : '자발적 퇴사 · 수급 제한' }}
             </span>

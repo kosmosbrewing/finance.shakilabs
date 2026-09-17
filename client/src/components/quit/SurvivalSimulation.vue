@@ -14,9 +14,10 @@ function formatMonths(value: number): string {
 }
 
 const colorByMonths = computed(() => (months: number) => {
+  // caution(5번째 의미색)을 폐기해 12~18개월과 9~12개월을 warning 한 단계로 합쳤다.
+  // 두 분기를 남긴 채 같은 색을 주면 죽은 분기가 된다.
   if (months >= 18) return "text-status-success";
-  if (months >= 12) return "text-status-warning";
-  if (months >= 9) return "text-status-caution";
+  if (months >= 9) return "text-status-warning";
   return "text-status-danger";
 });
 </script>
