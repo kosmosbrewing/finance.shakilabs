@@ -46,7 +46,7 @@ import { SCENARIO_CHAINS as scenarioChains } from "../../../scripts/scenario-cha
             v-for="chain in scenarioChains"
             :key="chain.slug"
             :to="chain.route"
-            class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border/60 bg-background px-3 text-caption font-semibold text-foreground no-underline transition-colors hover:border-foreground/30 hover:bg-muted/40"
+            class="inline-flex min-h-9 items-center gap-1.5 rounded border border-border/60 bg-background px-3 text-caption font-semibold text-foreground no-underline transition-colors hover:border-foreground/30 hover:bg-muted/40"
           >
             {{ chain.name }}
             <span class="text-tiny font-normal text-muted-foreground">{{ chain.steps.length }}단계</span>
