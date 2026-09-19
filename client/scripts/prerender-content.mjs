@@ -75,6 +75,7 @@ import {
   HOME_INTRO,
   HOME_LINKS_AFTER_SECTION,
   HOME_LINKS_H2,
+  HOME_LINKS_INTRO,
   HOME_PRERENDER_LINKS,
   HOME_SECTIONS,
 } from "./home-content.mjs";
@@ -3776,6 +3777,7 @@ const LANDING_CONTENT = {
     description: HOME_DESCRIPTION,
     sections: HOME_SECTIONS,
     linksH2: HOME_LINKS_H2,
+    linksIntro: HOME_LINKS_INTRO,
     linksAfterSection: HOME_LINKS_AFTER_SECTION,
     links: HOME_PRERENDER_LINKS,
   },
@@ -3894,7 +3896,10 @@ function buildLandingContent(route) {
       `<h2 style="${H2_STYLE}">${s.h2}</h2><p style="${P_STYLE}">${s.body}</p>${s.extra ?? ""}`
   );
 
-  const linksBlock = `<h2 style="${H2_STYLE}">${data.linksH2 ?? "관련 계산기 바로가기"}</h2><ul style="${UL_STYLE}">${linksHtml}</ul>`;
+  // 목차 한 줄 소개는 화면과 같은 문장을 쓴다. 하이드레이션 때 이 h2 구간이 통째로 걷히므로
+  // (Vue가 같은 h2를 렌더한다) 사람에게 두 번 보이지는 않는다.
+  const linksIntroHtml = data.linksIntro ? `<p style="${P_STYLE}">${data.linksIntro}</p>` : "";
+  const linksBlock = `<h2 style="${H2_STYLE}">${data.linksH2 ?? "관련 계산기 바로가기"}</h2>${linksIntroHtml}<ul style="${UL_STYLE}">${linksHtml}</ul>`;
   // Routes may splice the link block mid-body so the static heading order matches the rendered
   // page (the home puts its hub right after the "which situation" section). Default: at the end.
   const linksIndex = Math.min(
