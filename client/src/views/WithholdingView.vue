@@ -192,7 +192,7 @@ watch(
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
     <h1 class="text-h1 font-brand">2026 원천세 계산기 — 소득세로 연봉 추정</h1>

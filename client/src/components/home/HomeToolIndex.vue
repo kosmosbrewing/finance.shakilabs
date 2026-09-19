@@ -26,8 +26,11 @@ defineProps<{
 
       <!-- 26줄이라 카드가 아니라 행이다. 카드 그리드로 깔면 한 화면에 5~6개밖에 안 들어와
            "전체 목록"이라는 약속을 화면이 못 지킨다. 행 끝 화살표가 카드의 "계산하기 →"와
-           같은 어포던스를 맡는다. -->
-      <div class="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+           같은 어포던스를 맡는다.
+           lg에서 묶음 수(5)와 열 수를 맞춘 이유: 3열이면 5묶음이 2행으로 접히면서 둘째 행의
+           높이를 가장 긴 묶음(퇴직·구직 7줄)이 혼자 정한다 — 실측 708px이 412px로 줄었다.
+           목록이 한 화면에 들어와야 "인덱스"라는 약속을 화면이 지킨다. -->
+      <div class="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-5">
         <div v-for="group in HOME_HUB_GROUPS" :key="group.id">
           <h3 class="mb-1.5 text-body font-bold text-foreground">
             <span class="mr-1" aria-hidden="true">{{ group.icon }}</span>{{ group.title }}

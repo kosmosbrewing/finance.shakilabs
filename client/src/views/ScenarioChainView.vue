@@ -38,7 +38,7 @@ const jsonLd = computed(() => chain.value
 </script>
 
 <template>
-  <div v-if="chain" class="container space-y-4 py-6">
+  <div v-if="chain" class="sh-container sh-container--prose space-y-4 py-6">
     <SEOHead :title="chain.seoTitle" :description="chain.seoDescription" :json-ld="jsonLd" />
 
     <div class="retro-panel overflow-hidden">

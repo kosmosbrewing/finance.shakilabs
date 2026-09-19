@@ -83,7 +83,7 @@ const RATE_REFERENCES = [
 </script>
 
 <template>
-  <div class="container py-8 space-y-4">
+  <div class="sh-container sh-container--prose py-8 space-y-4">
     <SEOHead
       title="서비스 소개 | 2026 연봉·세금 계산기"
       description="ShakiLabs 연봉·세금 계산기는 2026년 최신 세율 기준으로 22종의 무료 금융 계산 도구를 제공합니다. 국세청·건보공단·고용부 공식 고시 기반의 정확한 계산."

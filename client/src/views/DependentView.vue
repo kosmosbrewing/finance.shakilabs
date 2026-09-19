@@ -62,7 +62,7 @@ const registrationOptions = [
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(dependentFaqs)" />
 
     <CalculatorPageHeader title="건강보험 피부양자 자격 판정기" />

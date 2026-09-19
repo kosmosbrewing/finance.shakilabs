@@ -56,7 +56,7 @@ const summaryItems = computed(() => [
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDesc" :json-ld="buildFaqJsonLd(PARENTAL_LEAVE_FAQS)" />
 
     <CalculatorPageHeader title="육아휴직 급여 계산기" />

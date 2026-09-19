@@ -10,7 +10,7 @@ function goHome(): void {
 </script>
 
 <template>
-  <div class="container py-6">
+  <div class="sh-container sh-container--page py-6">
     <SEOHead
       title="페이지를 찾을 수 없습니다 | ShakiLabs"
       description="요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다."

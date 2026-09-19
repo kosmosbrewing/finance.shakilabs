@@ -83,7 +83,7 @@ const statItems = computed(() => [
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(eitcFaqs)" />
 
     <CalculatorPageHeader title="근로장려금·자녀장려금 계산기" />

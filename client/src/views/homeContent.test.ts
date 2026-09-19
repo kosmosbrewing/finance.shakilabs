@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 import { FOOTER_SECTIONS } from "@/data/footerNav";
 import {
   HOME_ALL_LINK,
+  HOME_FAQ_H2,
+  HOME_FAQS,
+  HOME_GUIDE,
   HOME_H1,
   HOME_HUB_GROUPS,
   HOME_ITEM_LIST,
@@ -35,16 +38,49 @@ describe("home content", () => {
       ...HOME_SECTIONS.slice(0, HOME_LINKS_AFTER_SECTION).map((section) => section.h2),
       HOME_LINKS_H2,
       ...HOME_SECTIONS.slice(HOME_LINKS_AFTER_SECTION).map((section) => section.h2),
+      HOME_FAQ_H2,
+      HOME_GUIDE.h2,
     ];
     expect(extractHeadings(homeHtml, "h2")).toEqual(expected);
+  });
+
+  it("홈은 도구 인덱스 화면이다 — 본문 h2가 네 개를 넘지 않는다", () => {
+    // 개편 전 홈은 안내 문단마다 h2를 달아 10개였다(프리렌더 9 + 관련 서비스). 그 상태가
+    // "인덱스가 아니라 긴 글"의 실제 원인이었으므로, 제목 개수 자체를 게이트로 둔다.
+    // 프리렌더 h2 = 퀵계산기 · 도구 인덱스 · FAQ · 종합 가이드.
+    expect(extractHeadings(homeHtml, "h2")).toHaveLength(4);
+    expect(HOME_SECTIONS).toHaveLength(1);
   });
 
   it("뷰가 렌더하는 섹션 id가 모두 존재한다", () => {
     const ids = HOME_SECTIONS.map((section) => section.id);
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).toContain("quick-calc");
-    expect(ids).toContain("situations");
     expect(HOME_LINKS_AFTER_SECTION).toBeLessThanOrEqual(HOME_SECTIONS.length);
+  });
+
+  it("FAQ 문답은 화면·정적 본문·스키마가 같은 배열에서 나온다", () => {
+    expect(HOME_FAQS.length).toBeGreaterThanOrEqual(4);
+    for (const faq of HOME_FAQS) {
+      expect(homeHtml).toContain(faq.q);
+      expect(homeHtml).toContain(faq.a);
+    }
+    // 질문을 제목 태그로 내보내면 화면(<summary>)에 없는 제목이 정적 HTML에만 생긴다.
+    const headings = [
+      ...extractHeadings(homeHtml, "h2"),
+      ...[...homeHtml.matchAll(/<h3[^>]*>([\s\S]*?)<\/h3>/g)].map((m) => m[1].trim()),
+    ];
+    for (const faq of HOME_FAQS) {
+      expect(headings).not.toContain(faq.q);
+    }
+  });
+
+  it("종합 가이드 절은 h3로 나간다 — h2를 늘리면 안 된다", () => {
+    const h3 = [...homeHtml.matchAll(/<h3[^>]*>([\s\S]*?)<\/h3>/g)].map((m) => m[1].trim());
+    for (const section of HOME_GUIDE.sections) {
+      expect(h3).toContain(section.h3);
+      expect(homeHtml).toContain(section.body);
+    }
   });
 
   it("허브 링크는 모두 라우터에 등록된 경로다", () => {
@@ -94,7 +130,10 @@ describe("home content", () => {
       homeViewSource.indexOf("<HomeToolIndex")
     );
     expect(homeViewSource.indexOf("<HomeToolIndex")).toBeLessThan(
-      homeViewSource.indexOf("<HomeScenarioChains")
+      homeViewSource.indexOf("<HomeFaqPanel")
+    );
+    expect(homeViewSource.indexOf("<HomeFaqPanel")).toBeLessThan(
+      homeViewSource.indexOf("<HomeSituationGuide")
     );
     expect(homeViewSource).toContain(':intro="HOME_LINKS_INTRO"');
     expect(HOME_LINKS_INTRO.length).toBeGreaterThan(40);
@@ -102,12 +141,31 @@ describe("home content", () => {
 
   it("홈 본문은 /salary 본문과 문장을 공유하지 않는다", () => {
     const salaryHtml = buildRichContent("/salary", null) as string;
-    const homeParagraphs = new Set(
-      HOME_SECTIONS.map((section) => section.body)
-    );
+    const homeParagraphs = new Set([
+      ...HOME_SECTIONS.map((section) => section.body),
+      ...HOME_GUIDE.sections.map((section) => section.body),
+      ...HOME_FAQS.map((faq) => faq.a),
+    ]);
     for (const paragraph of homeParagraphs) {
       expect(salaryHtml).not.toContain(paragraph);
     }
     expect(extractHeadings(salaryHtml, "h1")[0]).not.toBe(HOME_H1);
+  });
+
+  it("홈에서 걷어낸 안내는 /all에 살아 있다", () => {
+    // 이관이 조용히 삭제로 퇴화하는 것을 막는 게이트다. 제목만 옮기고 본문을 흘리면
+    // 사이트 전체 자수가 줄고, 그건 이 개편이 절대 하면 안 되는 일이다.
+    const allHtml = buildRichContent("/all", null) as string;
+    const moved = [
+      "계산 근거와 한계",
+      "회원가입도, 설치도 없이",
+      "자주 찾는 금액은 미리 계산해 두었습니다",
+      "여러 계산기를 순서대로 써야 할 때",
+      "숫자가 틀리면 알려주세요",
+    ];
+    for (const heading of moved) {
+      expect(allHtml).toContain(heading);
+      expect(homeHtml).not.toContain(heading);
+    }
   });
 });
