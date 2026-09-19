@@ -152,7 +152,7 @@ watch(
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="pageTitle" :description="pageDesc" :json-ld="seoJsonLd" />
 
     <h1 class="text-h1 font-brand">연봉 {{ amountLabel }} 실수령액 (2026년 기준)</h1>

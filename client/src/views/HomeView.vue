@@ -6,10 +6,12 @@ import AdSlot from "@/components/common/AdSlot.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import HomeQuickCalc from "@/components/home/HomeQuickCalc.vue";
 import HomeToolIndex from "@/components/home/HomeToolIndex.vue";
-import HomeScenarioChains from "@/components/home/HomeScenarioChains.vue";
+import HomeFaqPanel from "@/components/home/HomeFaqPanel.vue";
+import HomeSituationGuide from "@/components/home/HomeSituationGuide.vue";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import {
   HOME_DESCRIPTION,
+  HOME_FAQS,
   HOME_H1,
   HOME_INTRO,
   HOME_LINKS_H2,
@@ -23,13 +25,26 @@ const seoTitle = "2026 연봉 실수령액 계산기 | 건보료 계산·4대보
 const seoDescription =
   "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
-    { "@type": "ListItem", position: 1, name: "홈", item: DEFAULT_SITE_URL },
-  ],
-};
+// FAQPage는 화면 아코디언과 같은 배열에서 나온다. 스키마에만 있고 화면에 없는 문답은
+// 구조화 데이터 위반이므로, 두 곳이 갈라질 수 없게 소스를 하나로 묶어 둔다.
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "홈", item: DEFAULT_SITE_URL },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: HOME_FAQS.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: { "@type": "Answer", text: faq.a },
+    })),
+  },
+];
 
 const EMPTY_SECTION = { id: "", h2: "", body: "" };
 
@@ -38,15 +53,13 @@ function findSection(id: string): { id: string; h2: string; body: string } {
 }
 
 const quickCalcSection = computed(() => findSection("quick-calc"));
-const situationSection = computed(() => findSection("situations"));
-// 허브 아래로 내려가는 안내 문단 (요율 기준·근거·운영 방침·프리셋 페이지)
-const noteSections = computed(() =>
-  HOME_SECTIONS.filter((entry) => !["quick-calc", "situations"].includes(entry.id))
-);
 </script>
 
 <template>
-  <div class="text-resize-layout container space-y-4 py-6">
+  <!-- 홈은 도구 인덱스 화면이다(loan `/loan/` 패턴): 답 하나 → 26개 목록 → FAQ → 종합 가이드.
+       요율 기준·근거·운영 방침·프리셋 안내처럼 "읽는 글"은 /all로 옮겼다 — 홈에 두면 h2가
+       열 개로 불어나 인덱스가 산문 사이에 끼인 한 절이 된다(개편 전 상태). -->
+  <div class="text-resize-layout sh-container sh-container--page space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="jsonLd" />
 
     <div class="space-y-2">
@@ -55,32 +68,21 @@ const noteSections = computed(() =>
       <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ HOME_DESCRIPTION }}</p>
     </div>
 
-    <HomeQuickCalc :heading="quickCalcSection.h2" :note="quickCalcSection.body" />
-
-    <!-- 읽기 순서: 답 → 전체 인덱스 → 상황별 순서 → 기준·근거.
-         퀵계산기를 맨 위에 남긴 이유는 유입 1위 질의("연봉 실수령액")의 답이 첫 화면에
+    <!-- 퀵계산기를 인덱스 위에 남긴 이유는 유입 1위 질의("연봉 실수령액")의 답이 첫 화면에
          있어야 하기 때문이다(연봉 한 칸 → 월 실수령액). 26줄짜리 인덱스를 그 위에 두면
          모바일에서 답이 화면 밖으로 밀린다. 프리렌더도 HOME_LINKS_AFTER_SECTION = 1로
          같은 순서를 쓴다. -->
-    <HomeToolIndex :heading="HOME_LINKS_H2" :intro="HOME_LINKS_INTRO" />
+    <HomeQuickCalc :heading="quickCalcSection.h2" :note="quickCalcSection.body" />
 
-    <HomeScenarioChains
-      :heading="situationSection.h2"
-      :body="situationSection.body"
-    />
+    <HomeToolIndex :heading="HOME_LINKS_H2" :intro="HOME_LINKS_INTRO" />
 
     <AdSlot unit="home-top" label="광고 · top" />
 
-    <section class="retro-panel">
-      <div class="retro-panel-content space-y-5">
-        <div v-for="section in noteSections" :key="section.id" class="space-y-1.5">
-          <h2 class="text-body font-bold text-foreground">{{ section.h2 }}</h2>
-          <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ section.body }}</p>
-        </div>
-      </div>
-    </section>
+    <HomeFaqPanel />
 
     <RelatedServices />
+
+    <HomeSituationGuide />
 
     <AdSlot unit="home-bottom" label="광고 · bottom" />
   </div>

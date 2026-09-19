@@ -23,7 +23,7 @@ function reloadPage(): void {
 
 <template>
   <AppLayout>
-    <section v-if="showInlineRuntimeError" class="container py-4">
+    <section v-if="showInlineRuntimeError" class="sh-container sh-container--page py-4">
       <div class="rounded-2xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="space-y-1">
@@ -40,7 +40,7 @@ function reloadPage(): void {
         </div>
       </div>
     </section>
-    <section v-if="showBlockingRuntimeError" class="container py-6">
+    <section v-if="showBlockingRuntimeError" class="sh-container sh-container--page py-6">
       <div class="retro-panel overflow-hidden">
         <div class="retro-titlebar">
           <h2 class="retro-title">화면을 불러오지 못했습니다</h2>

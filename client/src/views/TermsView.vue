@@ -21,7 +21,7 @@ useSEO({
 </script>
 
 <template>
-  <div class="container py-6 space-y-4">
+  <div class="sh-container sh-container--prose py-6 space-y-4">
     <section class="retro-panel overflow-hidden">
       <div class="retro-titlebar">
         <h1 class="retro-title">이용약관</h1>

@@ -91,7 +91,7 @@ watch(
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(wageConverterFaqs)" />
 
     <CalculatorPageHeader title="시급·월급·연봉 환산기" />

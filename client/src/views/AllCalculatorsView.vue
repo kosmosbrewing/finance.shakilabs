@@ -78,7 +78,7 @@ const categories = [
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--page space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="jsonLd" />
 
     <!-- 페이지 목적을 말하는 제목이 맨 먼저 읽혀야 한다. 저장 안내가 위에 있던 동안에는

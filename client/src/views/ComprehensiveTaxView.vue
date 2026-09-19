@@ -362,7 +362,7 @@ watch(
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
     <h1 class="text-h1 font-brand">{{ isFreelancer ? '2026 프리랜서 세금 계산기' : '2026 종합소득세 계산기' }}</h1>

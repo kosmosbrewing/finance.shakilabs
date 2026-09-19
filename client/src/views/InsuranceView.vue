@@ -376,7 +376,7 @@ watch(
 </script>
 
 <template>
-  <div class="text-resize-layout container space-y-4 py-6">
+  <div class="text-resize-layout sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
     <CalculatorPageHeader :title="pageTitle">

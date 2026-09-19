@@ -24,11 +24,32 @@ declare module "*home-content.mjs" {
     label: string;
   }
 
+  export interface HomeFaq {
+    q: string;
+    a: string;
+  }
+
+  export interface HomeGuideSection {
+    h3: string;
+    body: string;
+  }
+
+  export interface HomeGuide {
+    h2: string;
+    intro: string;
+    sections: HomeGuideSection[];
+  }
+
   export const HOME_H1: string;
   export const HOME_INTRO: string;
   export const HOME_DESCRIPTION: string;
   export const HOME_SECTIONS: HomeSection[];
-  export const HOME_GUIDE_H2: string;
+  export const HOME_FAQS: HomeFaq[];
+  export const HOME_FAQ_H2: string;
+  export const HOME_FAQ_INTRO: string;
+  export const HOME_GUIDE: HomeGuide;
+  export const HOME_GUIDE_LINKS_H3: string;
+  export const HOME_GUIDE_LINKS_INTRO: string;
   export const HOME_LINKS_H2: string;
   export const HOME_LINKS_INTRO: string;
   export const HOME_LINKS_AFTER_SECTION: number;

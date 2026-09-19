@@ -50,7 +50,7 @@ const deductionItems = computed(() => [
 </script>
 
 <template>
-  <div class="container space-y-4 py-6">
+  <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDesc" :json-ld="buildFaqJsonLd(YEAR_END_FAQS)" />
 
     <CalculatorPageHeader title="연말정산 환급액 계산기" />
