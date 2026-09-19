@@ -51,8 +51,8 @@ const noteSections = computed(() =>
 
     <div class="space-y-2">
       <CalculatorPageHeader :title="HOME_H1" />
-      <p class="break-keep text-caption text-muted-foreground">{{ HOME_INTRO }}</p>
-      <p class="break-keep text-caption text-muted-foreground">{{ HOME_DESCRIPTION }}</p>
+      <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ HOME_INTRO }}</p>
+      <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ HOME_DESCRIPTION }}</p>
     </div>
 
     <HomeQuickCalc :heading="quickCalcSection.h2" :note="quickCalcSection.body" />
@@ -75,7 +75,7 @@ const noteSections = computed(() =>
       <div class="retro-panel-content space-y-5">
         <div v-for="section in noteSections" :key="section.id" class="space-y-1.5">
           <h2 class="text-body font-bold text-foreground">{{ section.h2 }}</h2>
-          <p class="break-keep text-caption text-muted-foreground">{{ section.body }}</p>
+          <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ section.body }}</p>
         </div>
       </div>
     </section>
