@@ -155,12 +155,14 @@ export function adoptPrerenderArticle(
   if (remaining < MIN_ADOPTED_CHARS) return false;
 
   matchHostWidthToView(host, root);
-  // 본문은 독립 문서용 인라인 max-width:920px를 들고 있다. 호스트가 좁아지는 prose 라우트에서
-  // 그 920px가 호스트보다 넓어 본문이 컨테이너 밖에서 시작했다(/guide/* 4개, 39~52개 블록).
-  // 입양된 뒤의 폭은 레이아웃이 정해야 하므로 호스트 폭으로 자른다 — 넓은 컨테이너에서는
-  // 920px가 그대로 이겨 기존 라우트의 줄 길이는 변하지 않는다.
-  article.style.maxWidth = "min(920px, 100%)";
-  article.style.boxSizing = "border-box";
+  // 본문은 첫 페인트용 자기 프레임(인라인 max-width·가운데 정렬·좌우 여백)을 들고 온다. 호스트가 이미
+  // 프레임이므로 그대로 두면 여백이 두 번 들어가고, 0.3.34까지의 920px 가운데 정렬은 본문만 108px
+  // 안쪽(x=276)에서 시작하게 했다. 걷어내서 호스트 콘텐츠 시작선(제목·계산기와 같은 x)에 붙이고,
+  // 줄 길이는 prose 규칙(글줄 42rem)에 맡긴다 — 계산기 뷰(--tool)에 입양돼도 읽는 폭은 같다.
+  article.style.maxWidth = "none";
+  article.style.marginInline = "0";
+  article.style.paddingInline = "0";
+  article.classList.add("sh-container--prose");
   host.appendChild(article);
   return true;
 }

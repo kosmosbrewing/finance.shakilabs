@@ -15,6 +15,8 @@ const props = defineProps<{
   estimatedTaxableMonthly: number;
   estimatedAnnualGross: number;
   calc: SalaryCalcResult;
+  /** 공유 모달을 가진 화면(/insurance·/salary)만 켠다 — 홈에는 모달이 없어 버튼이 아무 일도 하지 않는다 */
+  shareable?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -53,7 +55,7 @@ const deductionOpen = useNarrowCollapse();
   <section class="retro-panel overflow-hidden">
     <div class="retro-titlebar">
       <h2 class="insurance-result-title retro-title-brand">{{ title }}</h2>
-      <SectionShareButton class="min-h-[44px]" @click="emit('shareRequest')" />
+      <SectionShareButton v-if="props.shareable !== false" class="min-h-[44px]" @click="emit('shareRequest')" />
     </div>
 
     <div class="retro-panel-content space-y-3">

@@ -118,7 +118,7 @@ export function buildScenarioChainHtml(route) {
     .join("");
 
   return `
-    <article data-seo-prerender style="max-width:920px;margin:0 auto;padding:24px 16px;line-height:1.7;">
+    <article data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:24px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.7;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${chain.heading}</h1>
       <p ${MIRROR_ATTR}>${chain.intro}</p>
       <ol ${MIRROR_ATTR} style="list-style:none;padding:0;margin:16px 0;">${steps}</ol>

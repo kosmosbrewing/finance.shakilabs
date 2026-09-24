@@ -11,15 +11,15 @@ export const HOME_INTRO =
 
 // Kept to one short line: the mini calculator's answer must stay above the fold.
 export const HOME_DESCRIPTION =
-  "연봉 한 칸만 넣으면 월 실수령액이 바로 나오고, 조건이 더 필요한 계산은 아래 허브에서 이어집니다.";
+  "건보료나 연봉 한 칸만 넣으면 월 실수령액이 바로 나오고, 조건이 더 필요한 계산은 아래 목록에서 이어집니다.";
 
 // Section order is load-bearing: the view renders the same headings in the same order,
 // and HOME_LINKS_AFTER_SECTION decides where the hub link block is spliced in.
 export const HOME_SECTIONS = [
   {
     id: "quick-calc",
-    h2: "연봉 하나로 월 실수령액 먼저 보기",
-    body: "위 계산기는 연봉 한 칸만 받습니다. 기본값 4,000만원이 이미 채워져 있어 페이지를 열자마자 월 실수령액이 보이고, 금액을 바꾸면 잠깐 기다렸다가 자동으로 다시 계산합니다. 부양가족은 본인 1명, 비과세는 월 20만원, 퇴직금은 별도라는 표준 조건으로 고정해 두었습니다. 조건을 바꾸거나 공제 항목별 금액을 뜯어보려면 연봉 실수령액 계산기로 넘어가면 됩니다. 두 화면은 같은 계산 엔진을 쓰기 때문에 같은 연봉을 넣으면 1원 단위까지 같은 금액이 나옵니다.",
+    h2: "건보료 하나로 연봉·월 실수령액 먼저 보기",
+    body: "위 계산기는 매달 급여에서 빠지는 건강보험료(근로자 부담분) 하나로 추정 연봉과 월 실수령액을 거꾸로 계산합니다. 기본값 14만원이 이미 채워져 있어 페이지를 열자마자 결과가 보이고, '연봉으로 계산'을 고르면 세전 연봉에서 월 실수령액을 바로 계산합니다. 부양가족·20세 이하 자녀·월 비과세 금액도 같은 자리에서 바꿀 수 있습니다. 공제 항목별 금액과 연봉 구간표까지 보려면 건강보험료 연봉 계산기로 넘어가면 됩니다. 두 화면은 같은 계산 엔진을 쓰기 때문에 같은 값을 넣으면 1원 단위까지 같은 금액이 나옵니다.",
   },
 ];
 

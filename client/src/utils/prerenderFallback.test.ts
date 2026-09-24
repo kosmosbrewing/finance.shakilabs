@@ -76,8 +76,9 @@ function buildArticle(spec: Array<[string, string, boolean?]>) {
   }));
   els.forEach((el, i) => (el.nextElementSibling = els[i + 1] ?? null));
   const article = {
-    // 인라인 폭 인계(max-width 클램프)를 받아내는 자리 — 실제 HTMLElement.style 대역
+    // 입양 시 걷어내는 인라인 프레임을 받아내는 자리 — 실제 HTMLElement.style 대역
     style: {} as Record<string, string>,
+    classList: fakeClassList([]),
     querySelectorAll: (sel: string) => {
       if (sel === "[data-prerender-mirror]") return els.filter((e) => e.mirrored && !e.removed);
       if (sel.includes("h2")) return els.filter((e) => /^H[234]$/.test(e.tagName));
@@ -204,8 +205,8 @@ describe("adoptPrerenderArticle", () => {
     expect(host.classList.list).toEqual(["sh-container", "sh-container--page"]);
   });
 
-  // 좁은 prose 컨테이너 안에서 인라인 max-width:920px가 컨테이너를 넘어 본문이 새던 결함
-  it("입양 시 폭을 호스트 폭으로 자른다", () => {
+  // 0.3.34까지 920px 가운데 정렬이 남아 본문만 x=276에서 시작하던 결함(제목·계산기는 168)
+  it("입양 시 첫 페인트용 자기 프레임을 걷어내고 글줄만 묶는다", () => {
     const { article } = buildArticle([
       ["h2", "협상에서 실제로 쓰는 숫자"],
       ["p", "세후 인상분은 명목 인상분보다 작습니다. ".repeat(12)],
@@ -213,8 +214,10 @@ describe("adoptPrerenderArticle", () => {
     const { root } = hostFor([]);
 
     expect(adoptPrerenderArticle(article as never, root)).toBe(true);
-    expect(article.style.maxWidth).toBe("min(920px, 100%)");
-    expect(article.style.boxSizing).toBe("border-box");
+    expect(article.style.maxWidth).toBe("none");
+    expect(article.style.marginInline).toBe("0");
+    expect(article.style.paddingInline).toBe("0");
+    expect(article.classList.list).toContain("sh-container--prose");
   });
 
   it("본문이나 호스트가 없으면 조용히 넘어간다", () => {
