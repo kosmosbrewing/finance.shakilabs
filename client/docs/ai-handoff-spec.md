@@ -53,14 +53,12 @@
 `client/.env.example`이 환경변수 source다. 주요 항목은 다음과 같다.
 
 - `VITE_SITE_URL=https://shakilabs.com/finance`
-- `VITE_API_BASE=/api/finance`
-- `VITE_ENABLE_COMMENTS=false` by default
 - `VITE_GA_MEASUREMENT_ID`, `VITE_GA_DEBUG`
 - `VITE_SENTRY_DSN`
 - AdSense publisher/slot IDs
 - Kakao JS key and allowed hosts
 
-댓글 기능은 enabled일 때 Express backend를 사용한다. 브라우저에서 Supabase를 직접 호출하지 않는다.
+백엔드 의존 없음 — 계산기 상수는 번들에 포함되고(`fallbackConstants`), 원격 상수·댓글 API는 사용하지 않는다.
 
 ## 6. UI 경계
 

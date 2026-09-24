@@ -1,16 +1,8 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { ThumbsUp, ThumbsDown } from "lucide-vue-next";
-import CommentPanelFallback from "@/components/comment/CommentPanelFallback.vue";
 
 type FeedbackState = "none" | "helpful" | "not-helpful";
-
-const MiniCommentPanel = defineAsyncComponent({
-  loader: () => import("@/components/comment/MiniCommentPanel.vue"),
-  suspensible: false,
-  timeout: 10000,
-  errorComponent: CommentPanelFallback,
-});
 
 const props = defineProps<{
   pageKey: string;
@@ -19,8 +11,6 @@ const props = defineProps<{
 const feedbackStorageKey = computed(() => `finance-feedback:v1:${props.pageKey}`);
 const feedback = ref<FeedbackState>("none");
 const isClientReady = ref(false);
-const showCommentPanel = ref(false);
-let commentPanelTimer: ReturnType<typeof setTimeout> | null = null;
 
 function loadFeedback(): void {
   if (typeof window === "undefined") return;
@@ -56,16 +46,6 @@ watch(() => props.pageKey, () => {
 onMounted(() => {
   isClientReady.value = true;
   loadFeedback();
-  commentPanelTimer = window.setTimeout(() => {
-    showCommentPanel.value = true;
-  }, 300);
-});
-
-onUnmounted(() => {
-  if (commentPanelTimer) {
-    clearTimeout(commentPanelTimer);
-    commentPanelTimer = null;
-  }
 });
 </script>
 
@@ -112,32 +92,8 @@ onUnmounted(() => {
           <template v-else>
             <p>소중한 의견 감사합니다. 개선에 반영하겠습니다.</p>
           </template>
-          <p class="text-[0.72rem] leading-5 text-muted-foreground">
-            더 남길 내용이 있으면 아래 익명 게시판에 바로 적어주세요.
-          </p>
         </div>
       </div>
     </section>
-
-    <!-- 높이 예약은 비동기 청크가 들어오기 전까지만 한다. 패널이 뜬 뒤에도 360px를
-         붙잡아 두면, 글이 없을 때 빈 공간만 남는다(감사 §3 High #3 "미사용 시 영역 축소"). -->
-    <div :class="showCommentPanel ? '' : 'min-h-[360px]'">
-      <MiniCommentPanel
-        v-if="showCommentPanel"
-        :page-key="props.pageKey"
-        title="익명 게시판"
-        :max-length="300"
-      />
-      <section v-else class="retro-panel overflow-hidden h-full">
-        <div class="retro-titlebar">
-          <h2 class="retro-title">익명 게시판</h2>
-          <span class="text-tiny text-muted-foreground">로딩 준비 중</span>
-        </div>
-        <div class="retro-panel-content space-y-3">
-          <div class="h-20 rounded-xl border border-border/60 bg-muted/25" />
-          <div class="h-28 rounded-xl border border-border/60 bg-muted/20" />
-        </div>
-      </section>
-    </div>
   </aside>
 </template>
