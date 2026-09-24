@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { readClampedInteger, readClampedNumber, syncInputDisplay } from "./numericInput";
-import { clampHomeAnnualGross } from "@/composables/useHomeQuickCalc";
+// 연봉 입력과 같은 범위(1천만~3억, 정수)의 clamp — 옛 홈 퀵계산기 규칙을 그대로 옮겨 왔다
+function clampHomeAnnualGross(value: number): number {
+  if (!Number.isFinite(value)) return 40_000_000;
+  return Math.floor(Math.min(300_000_000, Math.max(10_000_000, value)));
+}
 
 // 라이브 재현: 연봉에 1000000 → 10,000,000으로 정정된 뒤, 이어서 5000000을 넣으면
 // 보정 결과가 또 10,000,000이라 값이 바뀌지 않는다. Vue는 리렌더하지 않으므로

@@ -4,7 +4,7 @@ import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.v
 import SEOHead from "@/components/common/SEOHead.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
-import HomeQuickCalc from "@/components/home/HomeQuickCalc.vue";
+import HomeInsuranceCalc from "@/components/home/HomeInsuranceCalc.vue";
 import HomeToolIndex from "@/components/home/HomeToolIndex.vue";
 import HomeFaqPanel from "@/components/home/HomeFaqPanel.vue";
 import HomeSituationGuide from "@/components/home/HomeSituationGuide.vue";
@@ -68,11 +68,11 @@ const quickCalcSection = computed(() => findSection("quick-calc"));
       <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ HOME_DESCRIPTION }}</p>
     </div>
 
-    <!-- 퀵계산기를 인덱스 위에 남긴 이유는 유입 1위 질의("연봉 실수령액")의 답이 첫 화면에
-         있어야 하기 때문이다(연봉 한 칸 → 월 실수령액). 26줄짜리 인덱스를 그 위에 두면
-         모바일에서 답이 화면 밖으로 밀린다. 프리렌더도 HOME_LINKS_AFTER_SECTION = 1로
-         같은 순서를 쓴다. -->
-    <HomeQuickCalc :heading="quickCalcSection.h2" :note="quickCalcSection.body" />
+    <!-- 첫 화면은 계산기다(사용자 결정 2026-09-24, B안) — 도구만 나열하던 인덱스를 첫 화면에서
+         내리고 가장 많이 쓰는 건보료 계산기를 올렸다. 연봉 모드도 같은 자리에서 고를 수 있어
+         "연봉 실수령액" 답도 첫 화면에 남는다. 26줄짜리 인덱스는 그 아래에 둔다 — 위에 두면
+         모바일에서 답이 화면 밖으로 밀린다. 프리렌더도 HOME_LINKS_AFTER_SECTION = 1로 같은 순서다. -->
+    <HomeInsuranceCalc :heading="quickCalcSection.h2" :note="quickCalcSection.body" />
 
     <HomeToolIndex :heading="HOME_LINKS_H2" :intro="HOME_LINKS_INTRO" />
 

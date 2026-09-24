@@ -1445,7 +1445,7 @@ function buildPrerenderSection(route, meta) {
     const estimatedAnnual = (taxableMonthly + 200_000) * 12;
 
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">건보료 ${Math.round(insuranceFee / 10000)}만원이면 연봉 얼마?</h1>
       <p style="margin:0 0 10px;">월 건강보험료 ${formatWon(insuranceFee)} 기준 추정 연봉은 약 ${formatWon(estimatedAnnual)}입니다.</p>
       <p style="margin:0;"><a href="/finance/insurance">건보료 계산기 열기</a></p>
@@ -1455,7 +1455,7 @@ function buildPrerenderSection(route, meta) {
   const salaryManWon = readSalaryManWon(route);
   if (salaryManWon !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">연봉 ${formatManWon(salaryManWon)}원 실수령액 계산</h1>
       <p style="margin:0 0 10px;">2026년 기준으로 4대보험, 소득세, 지방소득세를 반영해 월 실수령액을 계산할 수 있습니다.</p>
       <p style="margin:0;"><a href="/finance/salary">실수령액 계산기 열기</a></p>
@@ -1465,7 +1465,7 @@ function buildPrerenderSection(route, meta) {
   const freelancerAmt = readFreelancerManWon(route);
   if (freelancerAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">프리랜서 수입 ${formatManWon(freelancerAmt)} 세금 계산</h1>
       <p style="margin:0 0 10px;">3.3% 원천징수 후 종합소득세 정산 금액을 계산합니다.</p>
       <p style="margin:0;"><a href="/finance/freelancer">프리랜서 세금 계산기 열기</a></p>
@@ -1475,7 +1475,7 @@ function buildPrerenderSection(route, meta) {
   const comprehensiveTaxManWon = readComprehensiveTaxManWon(route);
   if (comprehensiveTaxManWon !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">종합소득 ${comprehensiveTaxManWon}만원 계산</h1>
       <p style="margin:0 0 10px;">사업소득·임대소득·기타소득을 합산하고 분리과세와 종합과세를 비교해 최종 세액을 계산할 수 있습니다.</p>
       <p style="margin:0;"><a href="/finance/comprehensive-tax">종합소득세 계산기 열기</a></p>
@@ -1485,7 +1485,7 @@ function buildPrerenderSection(route, meta) {
   const comparePair = readComparePair(route);
   if (comparePair) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">연봉 ${comparePair.a.toLocaleString("ko-KR")} vs ${comparePair.b.toLocaleString("ko-KR")} 이직 비교</h1>
       <p style="margin:0 0 10px;">두 회사의 연봉/복지 조건을 넣으면 월 실수령 및 실질 소득 차이를 확인할 수 있습니다.</p>
       <p style="margin:0;"><a href="/finance/compare">이직 연봉 비교 계산기 열기</a></p>
@@ -1495,7 +1495,7 @@ function buildPrerenderSection(route, meta) {
   const quitYears = readQuitYears(route);
   if (quitYears !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${quitYears}년 근속 퇴사 계산</h1>
       <p style="margin:0 0 10px;">퇴직금, 실업급여, 월 고정비를 계산해 퇴사 후 생존기간을 확인할 수 있습니다.</p>
       <p style="margin:0;"><a href="/finance/quit">퇴사 계산기 열기</a></p>
@@ -1505,7 +1505,7 @@ function buildPrerenderSection(route, meta) {
   const unemploymentAmt = readUnemploymentManWon(route);
   if (unemploymentAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">월급 ${formatManWon(unemploymentAmt)} 실업급여 계산</h1>
       <p style="margin:0 0 10px;">월급 ${formatManWon(unemploymentAmt)}원 기준 실업급여 일 수급액과 총 수급액을 계산합니다.</p>
       <p style="margin:0;"><a href="/finance/unemployment">실업급여 계산기 열기</a></p>
@@ -1515,7 +1515,7 @@ function buildPrerenderSection(route, meta) {
   const regionalHealthAmt = readRegionalHealthManWon(route);
   if (regionalHealthAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">월급 ${formatManWon(regionalHealthAmt)} 퇴사 후 건보료</h1>
       <p style="margin:0 0 10px;">지역가입자, 임의계속가입, 피부양자 등록 세 가지 옵션을 비교합니다.</p>
       <p style="margin:0;"><a href="/finance/regional-health">지역가입자 건보료 계산기 열기</a></p>
@@ -1525,7 +1525,7 @@ function buildPrerenderSection(route, meta) {
   const weeklyHolidayPayAmt = readWeeklyHolidayPayAmount(route);
   if (weeklyHolidayPayAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">시급 ${weeklyHolidayPayAmt.toLocaleString("ko-KR")}원 주휴수당</h1>
       <p style="margin:0 0 10px;">시급 ${weeklyHolidayPayAmt.toLocaleString("ko-KR")}원 기준 주휴수당과 실질 시급을 계산합니다.</p>
       <p style="margin:0;"><a href="/finance/weekly-holiday-pay">주휴수당 계산기 열기</a></p>
@@ -1535,7 +1535,7 @@ function buildPrerenderSection(route, meta) {
   const wageConverterAmt = readWageConverterHourly(route);
   if (wageConverterAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">시급 ${wageConverterAmt.toLocaleString("ko-KR")}원 월급·연봉 환산</h1>
       <p style="margin:0 0 10px;">시급 ${wageConverterAmt.toLocaleString("ko-KR")}원을 월급·일급·연봉으로 환산합니다.</p>
       <p style="margin:0;"><a href="/finance/wage-converter">시급 환산기 열기</a></p>
@@ -1545,7 +1545,7 @@ function buildPrerenderSection(route, meta) {
   const severancePayYearsAmt = readSeverancePayYears(route);
   if (severancePayYearsAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${severancePayYearsAmt}년 근속 퇴직금 계산</h1>
       <p style="margin:0 0 10px;">${severancePayYearsAmt}년 근속 기준 퇴직금과 퇴직소득세를 계산합니다.</p>
       <p style="margin:0;"><a href="/finance/severance-pay">퇴직금 계산기 열기</a></p>
@@ -1555,7 +1555,7 @@ function buildPrerenderSection(route, meta) {
   const parentalAmt = readParentalLeaveManWon(route);
   if (parentalAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">통상임금 ${formatManWon(parentalAmt)} 육아휴직 급여</h1>
       <p style="margin:0 0 10px;">일반·6+6 부모육아휴직제·한부모 특례별 월 급여와 총 수령액을 계산합니다.</p>
       <p style="margin:0;"><a href="/finance/parental-leave">육아휴직 급여 계산기 열기</a></p>
@@ -1565,7 +1565,7 @@ function buildPrerenderSection(route, meta) {
   const yearEndAmt = readYearEndManWon(route);
   if (yearEndAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">연봉 ${formatManWon(yearEndAmt)} 연말정산 계산</h1>
       <p style="margin:0 0 10px;">신용카드, 의료비, 교육비, 연금저축, 월세 등 공제 항목을 입력하면 예상 환급액을 계산합니다.</p>
       <p style="margin:0;"><a href="/finance/year-end-settlement">연말정산 계산기 열기</a></p>
@@ -1575,7 +1575,7 @@ function buildPrerenderSection(route, meta) {
   const withholdingAmt = readWithholdingAmount(route);
   if (withholdingAmt !== null) {
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">소득세 ${formatWon(withholdingAmt)}이면 연봉 얼마?</h1>
       <p style="margin:0 0 10px;">월 소득세 ${formatWon(withholdingAmt)} 기준 추정 연봉과 월 실수령액을 계산합니다.</p>
       <p style="margin:0;"><a href="/finance/withholding">원천세 계산기 열기</a></p>
@@ -1593,14 +1593,14 @@ function buildPrerenderSection(route, meta) {
       </ul>`,
     ).join("");
     return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">2026 세금·연봉·수당 계산기 모음</h1>
       <p style="margin:0 0 10px;">급여·세금·수당·퇴직·절세까지, ${CALCULATOR_ROUTES.length}개 계산기를 한곳에서 확인하세요.</p>${categoryBlocks}
     </section>`;
   }
 
   return `
-    <section data-seo-prerender style="max-width:920px;margin:0 auto;padding:20px 16px;line-height:1.6;">
+    <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${meta.title}</h1>
       <p style="margin:0 0 10px;">${meta.description}</p>
       <ul style="margin:0;padding-left:20px;">

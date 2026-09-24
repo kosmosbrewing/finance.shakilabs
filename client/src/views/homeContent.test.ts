@@ -126,7 +126,7 @@ describe("home content", () => {
     // 프리렌더는 HOME_LINKS_AFTER_SECTION으로, 뷰는 템플릿 순서로 같은 순서를 만든다.
     // 둘이 갈라지면 크롤러가 받는 읽기 순서와 사람이 보는 순서가 달라진다.
     expect(HOME_LINKS_AFTER_SECTION).toBe(1);
-    expect(homeViewSource.indexOf("<HomeQuickCalc")).toBeLessThan(
+    expect(homeViewSource.indexOf("<HomeInsuranceCalc")).toBeLessThan(
       homeViewSource.indexOf("<HomeToolIndex")
     );
     expect(homeViewSource.indexOf("<HomeToolIndex")).toBeLessThan(

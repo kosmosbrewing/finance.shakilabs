@@ -111,7 +111,7 @@ function parseInt10(s) {
 
 // --- 공통 HTML 스타일 ---
 const ARTICLE_STYLE =
-  "max-width:920px;margin:0 auto;padding:24px 16px;line-height:1.75;font-size:15px;color:hsl(var(--foreground));";
+  "max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:24px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.75;font-size:15px;color:hsl(var(--foreground));";
 const H1_STYLE = "font-size:28px;line-height:1.3;margin:0 0 16px;color:hsl(var(--foreground));";
 const H2_STYLE =
   "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--border));color:hsl(var(--foreground));";
