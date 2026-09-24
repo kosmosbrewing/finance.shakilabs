@@ -20,8 +20,9 @@ import PrimaryNavigation from "@/components/navigation/PrimaryNavigation.vue";
       <slot />
       <!-- 프리렌더 본문이 하이드레이션 직후 이 안으로 옮겨진다 (utils/prerenderFallback.ts).
            템플릿상 자식이 없어 Vue가 패치하지 않으므로 외부 노드를 넣어도 안전하다.
-           폭은 --page(1024)다: 주입되는 article 자체가 max-width 920px이라 이보다 좁은
-           --prose(672)를 주면 표가 눌리고, --tool(1152)을 줘도 보이는 폭은 920px로 같다. -->
+           여기 적힌 --page(1024)는 기본값일 뿐이고, 실제 폭은 입양 시점에 진입 뷰의 컨테이너
+           폭 변종으로 교체된다(matchHostWidthToView). 고정해 두면 --prose(672)를 쓰는
+           /guide/*에서 본문이 뷰보다 124px 넓게 그려져 왼쪽으로 삐져나온다. -->
       <div data-prerender-host class="sh-container sh-container--page"></div>
     </main>
     <AppFooter />

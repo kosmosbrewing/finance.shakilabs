@@ -63,10 +63,11 @@ describe("capturePrerenderArticle", () => {
 // 최소 DOM 흉내: 형제 체인 + contains + textContent. 떼어낸(detached) 본문을 다루므로
 // isConnected 같은 "문서에 붙어 있는가" 기준을 쓰면 전부 걸러져 dedupe가 통째로 무력화된다
 // — 실제로 그렇게 새어 나갔던 버그라 여기서 고정한다.
-function buildArticle(spec: Array<[string, string]>) {
-  const els = spec.map(([tag, text]) => ({
+function buildArticle(spec: Array<[string, string, boolean?]>) {
+  const els = spec.map(([tag, text, mirrored]) => ({
     tagName: tag.toUpperCase(),
     textContent: text,
+    mirrored: Boolean(mirrored),
     removed: false,
     nextElementSibling: null as unknown,
     remove() {
@@ -75,8 +76,13 @@ function buildArticle(spec: Array<[string, string]>) {
   }));
   els.forEach((el, i) => (el.nextElementSibling = els[i + 1] ?? null));
   const article = {
-    querySelectorAll: (sel: string) =>
-      sel.includes("h2") ? els.filter((e) => /^H[234]$/.test(e.tagName)) : els,
+    // 인라인 폭 인계(max-width 클램프)를 받아내는 자리 — 실제 HTMLElement.style 대역
+    style: {} as Record<string, string>,
+    querySelectorAll: (sel: string) => {
+      if (sel === "[data-prerender-mirror]") return els.filter((e) => e.mirrored && !e.removed);
+      if (sel.includes("h2")) return els.filter((e) => /^H[234]$/.test(e.tagName));
+      return els;
+    },
     contains: (node: { removed: boolean }) => !node.removed,
     get textContent() {
       return els.filter((e) => !e.removed).map((e) => e.textContent).join(" ");
@@ -85,13 +91,37 @@ function buildArticle(spec: Array<[string, string]>) {
   return { els, article };
 }
 
-function hostFor(renderedHeadings: Array<[string, string]>) {
+function fakeClassList(initial: string[]) {
+  const names = new Set(initial);
+  return {
+    add: (name: string) => names.add(name),
+    remove: (name: string) => names.delete(name),
+    [Symbol.iterator]: () => names.values(),
+    get list() {
+      return [...names];
+    },
+  };
+}
+
+function hostFor(renderedHeadings: Array<[string, string]>, viewWidthClass = "") {
   const main = {
     querySelectorAll: () =>
       renderedHeadings.map(([tag, text]) => ({ tagName: tag.toUpperCase(), textContent: text })),
   };
-  const host = { appendChild: vi.fn(), closest: vi.fn(() => main) };
-  return { host, root: { querySelector: vi.fn(() => host) } as unknown as ParentNode };
+  const host = {
+    appendChild: vi.fn(),
+    closest: vi.fn(() => main),
+    classList: fakeClassList(["sh-container", "sh-container--page"]),
+  };
+  const view = viewWidthClass
+    ? { classList: fakeClassList(["sh-container", viewWidthClass]) }
+    : null;
+  const root = {
+    querySelector: vi.fn(() => host),
+    // matchHostWidthToView는 main 안의 컨테이너를 훑는다 — 호스트 자신은 건너뛰어야 한다
+    querySelectorAll: vi.fn(() => (view ? [view, host] : [host])),
+  } as unknown as ParentNode;
+  return { host, root };
 }
 
 describe("adoptPrerenderArticle", () => {
@@ -128,6 +158,63 @@ describe("adoptPrerenderArticle", () => {
 
     expect(adoptPrerenderArticle(article as never, root)).toBe(false);
     expect(host.appendChild).not.toHaveBeenCalled();
+  });
+
+  // 회귀 방지: /guide/* 4개가 도입 문단과 단계 목록을 화면에 두 번 그렸다(2026-09-24).
+  // 제목 대조로는 못 잡는 중복이라 표식으로 걷어낸다.
+  it("data-prerender-mirror 블록은 제목 대조와 무관하게 걷어낸다", () => {
+    const { els, article } = buildArticle([
+      ["p", "이직 제안서의 연봉 숫자와 통장에 들어오는 돈은 다릅니다.", true],
+      ["ol", "1단계 · 제안 연봉 vs 현재 연봉 두 연봉의 실수령액 차이를 확인합니다.", true],
+      ["h2", "협상에서 실제로 쓰는 숫자"],
+      ["p", "세후 인상분은 명목 인상분보다 작습니다. ".repeat(12)],
+    ]);
+    // 뷰가 렌더한 제목은 겹치는 것이 하나도 없다 — 그래도 표식 블록은 사라져야 한다
+    const { host, root } = hostFor([["h2", "다른 상황 가이드"]]);
+
+    expect(adoptPrerenderArticle(article as never, root)).toBe(true);
+    expect(els[0].removed).toBe(true);
+    expect(els[1].removed).toBe(true);
+    expect(els[2].removed).toBe(false);
+    expect(els[3].removed).toBe(false);
+    expect(host.appendChild).toHaveBeenCalledWith(article);
+  });
+
+  // 라이브에서 로고-본문 어긋남으로 보이던 증상: 호스트는 --page(1024) 고정인데
+  // /guide/*의 뷰는 --prose(672)를 쓴다
+  it("호스트 폭을 진입 뷰의 컨테이너 폭 변종에 맞춘다", () => {
+    const { article } = buildArticle([
+      ["h2", "협상에서 실제로 쓰는 숫자"],
+      ["p", "세후 인상분은 명목 인상분보다 작습니다. ".repeat(12)],
+    ]);
+    const { host, root } = hostFor([], "sh-container--prose");
+
+    expect(adoptPrerenderArticle(article as never, root)).toBe(true);
+    expect(host.classList.list).toEqual(["sh-container", "sh-container--prose"]);
+  });
+
+  it("뷰 컨테이너가 없으면 호스트 폭을 그대로 둔다", () => {
+    const { article } = buildArticle([
+      ["h2", "협상에서 실제로 쓰는 숫자"],
+      ["p", "세후 인상분은 명목 인상분보다 작습니다. ".repeat(12)],
+    ]);
+    const { host, root } = hostFor([]);
+
+    expect(adoptPrerenderArticle(article as never, root)).toBe(true);
+    expect(host.classList.list).toEqual(["sh-container", "sh-container--page"]);
+  });
+
+  // 좁은 prose 컨테이너 안에서 인라인 max-width:920px가 컨테이너를 넘어 본문이 새던 결함
+  it("입양 시 폭을 호스트 폭으로 자른다", () => {
+    const { article } = buildArticle([
+      ["h2", "협상에서 실제로 쓰는 숫자"],
+      ["p", "세후 인상분은 명목 인상분보다 작습니다. ".repeat(12)],
+    ]);
+    const { root } = hostFor([]);
+
+    expect(adoptPrerenderArticle(article as never, root)).toBe(true);
+    expect(article.style.maxWidth).toBe("min(920px, 100%)");
+    expect(article.style.boxSizing).toBe("border-box");
   });
 
   it("본문이나 호스트가 없으면 조용히 넘어간다", () => {
