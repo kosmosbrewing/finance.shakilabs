@@ -20,6 +20,8 @@ const CHROME_SELECTOR =
   "body > header[data-seo-prerender], body > footer[data-seo-prerender]";
 export const PRERENDER_HOST_SELECTOR = "[data-prerender-host]";
 const ADOPTED_ATTRIBUTE = "data-prerender-adopted";
+// 프리렌더 스크립트가 "이 구간은 Vue 뷰가 화면에 똑같이 그린다"고 표시해 둔 블록.
+const MIRROR_SELECTOR = "[data-prerender-mirror]";
 
 // Vue 내비/푸터가 같은 내용을 렌더하므로 프리렌더 크롬은 하이드레이션 시점에 버린다.
 export function removePrerenderChrome(root: ParentNode = document): number {
@@ -40,6 +42,18 @@ export function capturePrerenderArticle(
   article.querySelector("h1")?.remove();
   article.setAttribute(ADOPTED_ATTRIBUTE, "");
   return article;
+}
+
+// 제목 대조로는 못 잡는 중복을 표식으로 걷어낸다.
+//
+// 왜 필요한가: dedupePrerenderArticle은 h2~h4로 시작하는 "구간"만 지운다. 그래서 제목 앞에 놓인
+// 도입 문단과, 프리렌더에만 제목이 달린(뷰는 같은 문장을 <p>로 그리는) 목록은 둘 다 통과해
+// 화면에 두 번 나왔다 — /guide/* 4개 라우트 전부. 문구 비교는 한 글자만 달라도 무너지므로
+// 판정은 발행처(프리렌더 스크립트)가 붙인 표식으로 한다.
+export function dropMirroredSections(article: HTMLElement): number {
+  const mirrored = article.querySelectorAll(MIRROR_SELECTOR);
+  mirrored.forEach((node) => node.remove());
+  return mirrored.length;
 }
 
 // "1. 수집하는 정보"와 "수집하는 정보", "자주 묻는 질문 (FAQ)"와 "자주 묻는 질문"을 같은 제목으로 본다.
@@ -100,6 +114,31 @@ export function dedupePrerenderArticle(
 // 남기는 것은 중복을 줄이는 게 아니라 어중간한 잔해를 남기는 것이다.
 const MIN_ADOPTED_CHARS = 200;
 
+const CONTAINER_CLASS = "sh-container";
+const CONTAINER_WIDTH_PREFIX = "sh-container--";
+
+// 호스트 폭을 진입 뷰의 컨테이너 폭에 맞춘다.
+//
+// 왜: 호스트는 AppLayout에 고정 폭(--page 1024)으로 박혀 있는데 뷰마다 컨테이너 폭이 다르다.
+// /guide/*는 --prose(672)를 써서 입양된 본문이 뷰 본문보다 124px 넓게, 즉 왼쪽으로 삐져나온
+// 채 그려졌다(라이브에서 로고-본문 어긋남으로 보인 증상). 폭 결정권은 뷰에 있으므로 뷰가 고른
+// 폭 변종을 그대로 가져온다 — --tool(1152)·--page(1024)처럼 920px보다 넓은 쪽에서는 위의
+// max-width 920px가 계속 이겨서 보이는 폭이 달라지지 않는다.
+export function matchHostWidthToView(host: Element, root: ParentNode = document): void {
+  const containers = [...root.querySelectorAll(`main .${CONTAINER_CLASS}`)];
+  const view = containers.find((node) => node !== host);
+  if (!view) return;
+
+  const width = [...view.classList].find((name) => name.startsWith(CONTAINER_WIDTH_PREFIX));
+  if (!width) return;
+
+  // 스냅샷을 뜨고 지운다 — 살아있는 classList를 순회하면서 지우면 항목을 건너뛴다.
+  for (const name of [...host.classList]) {
+    if (name.startsWith(CONTAINER_WIDTH_PREFIX)) host.classList.remove(name);
+  }
+  host.classList.add(width);
+}
+
 export function adoptPrerenderArticle(
   article: HTMLElement | null,
   root: ParentNode = document,
@@ -109,11 +148,19 @@ export function adoptPrerenderArticle(
   if (!host) return false;
 
   const main = host.closest("main") ?? root;
+  dropMirroredSections(article);
   dedupePrerenderArticle(article, main);
 
   const remaining = (article.textContent ?? "").replace(/\s+/g, "").length;
   if (remaining < MIN_ADOPTED_CHARS) return false;
 
+  matchHostWidthToView(host, root);
+  // 본문은 독립 문서용 인라인 max-width:920px를 들고 있다. 호스트가 좁아지는 prose 라우트에서
+  // 그 920px가 호스트보다 넓어 본문이 컨테이너 밖에서 시작했다(/guide/* 4개, 39~52개 블록).
+  // 입양된 뒤의 폭은 레이아웃이 정해야 하므로 호스트 폭으로 자른다 — 넓은 컨테이너에서는
+  // 920px가 그대로 이겨 기존 라우트의 줄 길이는 변하지 않는다.
+  article.style.maxWidth = "min(920px, 100%)";
+  article.style.boxSizing = "border-box";
   host.appendChild(article);
   return true;
 }

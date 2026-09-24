@@ -91,6 +91,14 @@ export function getScenarioChainBySlug(slug) {
 const APP_BASE = "/finance";
 const toHref = (path) => (path.startsWith(APP_BASE) ? path : `${APP_BASE}${path}`);
 
+// ScenarioChainView.vue가 화면에 그대로 렌더하는 구간에는 data-prerender-mirror를 붙인다.
+// 왜: 프리렌더 본문은 하이드레이션 뒤 <main>으로 입양되는데(utils/prerenderFallback.ts),
+// 그쪽 중복 제거는 "제목이 같은 구간"만 걷어낸다. 가이드의 도입 문단은 제목 앞이라 닿지 않고,
+// 단계 제목은 프리렌더만 h2("N단계 · 라벨")이고 뷰는 <p>라 제목 대조로도 안 걸린다.
+// 그 결과 /guide/* 4개 전부가 도입 문단과 전 단계를 화면에 두 번 그렸다(2026-09-24 실측).
+// 표식은 속성일 뿐이라 크롤러가 받는 원시 HTML의 본문 자수는 그대로다.
+const MIRROR_ATTR = "data-prerender-mirror";
+
 export function buildScenarioChainHtml(route) {
   const chain = getScenarioChain(route);
   if (!chain) return null;
@@ -112,8 +120,8 @@ export function buildScenarioChainHtml(route) {
   return `
     <article data-seo-prerender style="max-width:920px;margin:0 auto;padding:24px 16px;line-height:1.7;">
       <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${chain.heading}</h1>
-      <p>${chain.intro}</p>
-      <ol style="list-style:none;padding:0;margin:16px 0;">${steps}</ol>
+      <p ${MIRROR_ATTR}>${chain.intro}</p>
+      <ol ${MIRROR_ATTR} style="list-style:none;padding:0;margin:16px 0;">${steps}</ol>
       <h2>다른 상황 가이드</h2>
       <ul>${related}<li><a href="${toHref("/all")}">전체 계산기 모음</a></li></ul>
       <p>계산 기준: 2026년 세율·요율. 최종 신고·급여 정산 전에는 관계 기관과 회사 기준을 확인하세요.</p>
