@@ -39,13 +39,15 @@ const rows = computed(() =>
       <ChevronDown aria-hidden="true" class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
     </summary>
 
+    <!-- lg에선 아래 2열 반폭(478~542px)에 들어가므로 560px 하한을 푼다 — 4열이라 그 폭에 들어간다(실측).
+         모바일·태블릿은 560px 하한 + 가로 스크롤 그대로. -->
     <div
       class="salary-table-scroll overflow-x-auto px-2 pb-1 pt-2 md:px-0 md:pb-0 md:pt-0"
       role="region"
       aria-label="연봉별 실수령액 비교 표"
       tabindex="0"
     >
-      <table aria-label="2026 연봉별 공제와 실수령액 비교" class="min-w-[560px] table-fixed border-separate border-spacing-0 text-xs md:text-caption">
+      <table aria-label="2026 연봉별 공제와 실수령액 비교" class="w-full min-w-[560px] table-fixed lg:min-w-0 border-separate border-spacing-0 text-xs md:text-caption">
         <colgroup>
           <col class="w-[29%] md:w-auto" />
           <col class="w-[24%] md:w-auto" />

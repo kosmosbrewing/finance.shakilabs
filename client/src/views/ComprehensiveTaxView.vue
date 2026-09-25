@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ShCalculatorSplit } from "@shakilabs/ui";
+import { ShCalculatorSplit, ShPairRow } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
@@ -455,17 +455,22 @@ watch(
       :other-compare="result.otherCompare"
     />
 
-    <CalcSourceBox />
+    <!-- 아래 데이터 블록 2열(ShPairRow, 사용자 결정 2026-09-25). 광고는 묶음 뒤로 — 두 광고가 붙지 않게 피드백을 사이에 둔다 -->
+    <ShPairRow>
+      <template #start>
+        <CalcSourceBox />
+      </template>
+      <template #end>
+        <InternalLink :current="internalLinkKey" />
+        <VisitorCounter />
+      </template>
+    </ShPairRow>
 
     <AdSlot unit="comprehensive-top" label="광고 · top" />
 
-    <InternalLink :current="internalLinkKey" />
+    <CalculatorFeedbackRow :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" />
 
     <AdSlot unit="comprehensive-middle" label="광고 · middle" />
-
-    <VisitorCounter />
-
-    <CalculatorFeedbackRow :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" />
 
     <ShareModal
       :show="showShareModal"
