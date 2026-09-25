@@ -40,6 +40,10 @@ function buildOtherServicesBlock() {
 const CURRENT_SERVICE = SERVICE_CATALOG.services.find((service) => service.app === CURRENT_APP);
 
 // 헤더 사이트 링크 — Vue 헤더(AppHeader.vue의 links)와 같은 두 개. 모바일에서는 ☰ 안으로 들어간다.
+// 테마 토글의 정적 쌍둥이 — 패키지 ShThemeToggle과 같은 클래스·같은 아이콘. 수화 전이라 동작하지 않지만
+// 자리가 비어 있으면 수화 때 데스크톱 사이트 링크가 60px 옆으로 밀린다.
+const STATIC_THEME_TOGGLE = `<div class="sh-global-header__utility"><button type="button" class="sh-theme-toggle" aria-label="다크 모드로 전환" style="width:44px;min-height:44px;border:0;background:transparent;color:#fafafa;"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="20" height="20"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button></div>`;
+
 const SITE_LINKS = [
   { href: "/blog", label: "블로그" },
   { href: "/finance/about", label: "소개" },
@@ -115,6 +119,7 @@ export function buildPrerenderHeader() {
         </div>
         <div class="sh-global-header__end" style="display:flex;align-items:center;gap:16px;margin-inline-start:auto;">
           <nav class="sh-global-header__nav" aria-label="사이트 메뉴">${SITE_LINKS.map(link).join("")}</nav>
+          ${STATIC_THEME_TOGGLE}
           ${buildPrerenderDrawer()}
         </div>
       </div>
