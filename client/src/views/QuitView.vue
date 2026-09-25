@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import CalculatorMemoryControl from "@/components/calculator/CalculatorMemoryControl.vue";
 import { computed, onUnmounted, ref, watch, watchEffect } from "vue";
@@ -14,8 +15,7 @@ import ShareModal from "@/components/share/ShareModal.vue";
 
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useRetirementCalc } from "@/composables/useRetirementCalc";
 import { useUnemploymentCalc } from "@/composables/useUnemploymentCalc";
@@ -361,8 +361,8 @@ watch(
       </div>
     </div>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
+    <ShCalculatorSplit>
+      <template #input>
         <CalculatorInteractionTracker>
           <QuitInput
             v-model:start-date="startDate"
@@ -379,9 +379,8 @@ watch(
             @range-apply="handleRangeApply"
           />
         </CalculatorInteractionTracker>
-
-        <AdSlot unit="retirement-top" label="광고 · top" />
-
+      </template>
+      <template #result>
         <QuitReceivables
           :service-period-label="retirement.servicePeriodLabel"
           :retirement-gross="retirement.severanceGross"
@@ -399,36 +398,38 @@ watch(
           :quit-reason="quitReason"
           @share-request="openShare"
         />
-
-        <AdSlot unit="retirement-middle" label="광고 · middle" />
-
+      </template>
+      <!-- 퇴사 후 매달 내야 할 돈은 오른쪽 "받을 돈"과 짝이라 입력 아래 왼쪽 칸에 둔다 — 결과가 입력보다
+           357px 길어 왼쪽이 비던 자리(1440px 실측). 모바일에서는 받을 돈 바로 뒤에 온다. -->
+      <template #below-input>
         <QuitExpenses
           :regional-health-monthly="regionalHealthMonthly"
           :voluntary-continuation-monthly="voluntaryContinuationMonthly"
           :pension-monthly="pensionMonthly"
           :monthly-fixed-cost="monthlyFixedCost"
         />
+      </template>
+    </ShCalculatorSplit>
 
-        <SurvivalSimulation
-          :available-fund="survival.availableFund"
-          :monthly-fixed-cost="survival.monthlyFixedCost"
-          :monthly-living-cost="survival.monthlyLivingCost"
-          :scenarios="survival.scenarios"
-        />
+    <!-- 광고 두 개가 연달아 붙지 않게 본문 블록을 사이에 둔다 -->
+    <AdSlot unit="retirement-top" label="광고 · top" />
 
-        <QuitChecklist />
+    <SurvivalSimulation
+      :available-fund="survival.availableFund"
+      :monthly-fixed-cost="survival.monthlyFixedCost"
+      :monthly-living-cost="survival.monthlyLivingCost"
+      :scenarios="survival.scenarios"
+    />
 
-        <InternalLink current="quit" />
+    <AdSlot unit="retirement-middle" label="광고 · middle" />
 
-        <AdSlot unit="retirement-bottom" label="광고 · bottom" />
+    <QuitChecklist />
 
-      </div>
+    <InternalLink current="quit" />
 
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="quit-main" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <AdSlot unit="retirement-bottom" label="광고 · bottom" />
+
+    <CalculatorFeedbackRow page-key="quit-main" />
 
     <ShareModal
       :show="showShareModal"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -17,8 +18,7 @@ import ShareModal from "@/components/share/ShareModal.vue";
 
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -157,45 +157,42 @@ watch(
 
     <h1 class="text-h1 font-brand">연봉 {{ amountLabel }} 실수령액 (2026년 기준)</h1>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
-        <SalaryRangeContent :amount="amountManWon" :calc="calc" />
+    <!-- 계산기(입력 | 결과)를 먼저 둔다 — 요약·인사이트·FAQ 글 묶음이 위에 있으면 결과가 첫 화면 밖으로 밀린다 -->
+    <ShCalculatorSplit>
+      <template #input>
+        <SalaryInputPanel
+          v-model:annual-gross="calc.annualGross.value"
+          v-model:dependents="calc.dependents.value"
+          v-model:children-under20="calc.childrenUnder20.value"
+          v-model:non-taxable-monthly="calc.nonTaxableMonthly.value"
+          v-model:retirement-included="calc.retirementIncluded.value"
+        />
+      </template>
+      <template #result>
+        <SalaryResultPanel :calc="calc" @share-request="openShare" />
+      </template>
+    </ShCalculatorSplit>
 
-        <div class="space-y-4">
-          <SalaryInputPanel
-            v-model:annual-gross="calc.annualGross.value"
-            v-model:dependents="calc.dependents.value"
-            v-model:children-under20="calc.childrenUnder20.value"
-            v-model:non-taxable-monthly="calc.nonTaxableMonthly.value"
-            v-model:retirement-included="calc.retirementIncluded.value"
-          />
-          <SalaryResultPanel :calc="calc" @share-request="openShare" />
-        </div>
+    <SalaryRangeContent :amount="amountManWon" :calc="calc" />
 
-        <HealthInsuranceRank :calc="calc" />
+    <HealthInsuranceRank :calc="calc" />
 
-        <AdSlot unit="salary-landing-top" label="광고 · top" />
+    <AdSlot unit="salary-landing-top" label="광고 · top" />
 
-        <InsuranceDetail :calc="calc" />
-        <DeductionTable :calc="calc" />
+    <InsuranceDetail :calc="calc" />
+    <DeductionTable :calc="calc" />
 
-        <AdSlot unit="salary-landing-middle" label="광고 · middle" />
+    <AdSlot unit="salary-landing-middle" label="광고 · middle" />
 
-        <DeductionChart :calc="calc" />
-        <SalaryCompareTable />
+    <DeductionChart :calc="calc" />
+    <SalaryCompareTable />
 
-        <CalcSourceBox />
-        <InternalLink current="salary" />
+    <CalcSourceBox />
+    <InternalLink current="salary" />
 
-        <AdSlot unit="salary-landing-bottom" label="광고 · bottom" />
+    <AdSlot unit="salary-landing-bottom" label="광고 · bottom" />
 
-      </div>
-
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar :page-key="`salary-${amountManWon}`" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <CalculatorFeedbackRow :page-key="`salary-${amountManWon}`" />
 
     <ShareModal
       :show="showShareModal"

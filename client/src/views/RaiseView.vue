@@ -5,8 +5,7 @@ import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
 import FreshBadge from "@/components/common/FreshBadge.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import { Button } from "@/components/ui/button";
 import InternalLink from "@/components/common/InternalLink.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
@@ -126,76 +125,69 @@ watch(
   <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" />
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
-        <div class="retro-panel overflow-hidden">
-          <div class="retro-titlebar rounded-t-2xl">
-            <div class="space-y-1">
-              <h1 class="retro-title">연봉 협상 인상률 실수령 계산기</h1>
-              <p class="text-caption text-muted-foreground [text-wrap:balance]">세전 인상률보다 실제 체감 월급이 얼마나 늘어나는지 바로 계산합니다.</p>
-            </div>
-            <FreshBadge message="2026 세율 반영" />
-          </div>
-          <CalculatorInteractionTracker>
-            <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-              <div class="space-y-4">
-                <ScenarioField v-model="currentAnnual" label="현재 연봉" unit="원" :min="12_000_000" :max="300_000_000" :step="100_000" format="currency" :presets="[{ label: '4,000만원', value: 40_000_000 }, { label: '5,200만원', value: 52_000_000 }, { label: '7,000만원', value: 70_000_000 }]" />
-                <ScenarioField v-model="raisePercent" label="인상률" unit="%" description="성과급 제외, 기본 연봉만 반영합니다." :min="0" :max="30" :step="0.5" format="decimal" :presets="[{ label: '3%', value: 3 }, { label: '5%', value: 5 }, { label: '8%', value: 8 }, { label: '10%', value: 10 }]" />
-                <ScenarioField v-model="dependents" label="부양가족 수" unit="명" :min="1" :max="6" :presets="[{ label: '1명', value: 1 }, { label: '2명', value: 2 }, { label: '4명', value: 4 }]" />
-                <ScenarioField v-model="children" label="20세 이하 자녀" unit="명" :min="0" :max="4" :presets="[{ label: '0명', value: 0 }, { label: '1명', value: 1 }, { label: '2명', value: 2 }]" />
-                <ScenarioField v-model="nonTaxableMonthly" label="비과세 월급" unit="원" :min="0" :max="1_000_000" :step="10_000" format="currency" :presets="[{ label: '0원', value: 0 }, { label: '20만원', value: 200_000 }, { label: '30만원', value: 300_000 }]" />
-              </div>
-  
-              <div class="space-y-4">
-                <ResultHero label="월 체감 증가" :value="`+${formatWon(result.monthlyNetDiff)}`" />
-                <div class="retro-stat-grid">
-                  <div class="retro-stat">
-                    <p class="retro-stat-label">현재 월 실수령</p>
-                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.current.monthlyNet) }}</p>
-                  </div>
-                  <div class="retro-stat">
-                    <p class="retro-stat-label">협상 후 월 실수령</p>
-                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.next.monthlyNet) }}</p>
-                  </div>
-                  <div class="retro-stat">
-                    <p class="retro-stat-label">연간 실수령 증가</p>
-                    <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">+{{ formatWon(result.annualNetDiff) }}</p>
-                  </div>
-                </div>
-  
-                <ShMetricBars :metrics="comparisonMetrics" :format-value="formatWon" />
-  
-                <div class="retro-panel-muted retro-panel-content space-y-3">
-                  <p class="text-body font-semibold text-foreground">핵심 해석</p>
-                  <p class="text-caption leading-6 text-muted-foreground">
-                    세전으로는 <span class="tabular-nums">{{ formatWon(result.raiseAmount) }}</span> 인상이지만, 월 실수령 증가는
-                    <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.monthlyNetDiff) }}</span>
-                    입니다.
-                  </p>
-                  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                    <div>
-                      <p class="text-tiny uppercase tracking-wide text-muted-foreground">추가 보험료</p>
-                      <p class="mt-1 text-body font-semibold tabular-nums">+{{ formatWon(result.insuranceDelta) }}/월</p>
-                    </div>
-                    <div>
-                      <p class="text-tiny uppercase tracking-wide text-muted-foreground">추가 세금</p>
-                      <p class="mt-1 text-body font-semibold tabular-nums">+{{ formatWon(result.taxDelta) }}/월</p>
-                    </div>
-                  </div>
-                  <Button class="w-full" @click="openShare">결과 공유</Button>
-                </div>
-              </div>
-            </div>
-          </CalculatorInteractionTracker>
+    <div class="retro-panel overflow-hidden">
+      <div class="retro-titlebar rounded-t-2xl">
+        <div class="space-y-1">
+          <h1 class="retro-title">연봉 협상 인상률 실수령 계산기</h1>
+          <p class="text-caption text-muted-foreground [text-wrap:balance]">세전 인상률보다 실제 체감 월급이 얼마나 늘어나는지 바로 계산합니다.</p>
         </div>
-        <InternalLink current="raise" />
+        <FreshBadge message="2026 세율 반영" />
       </div>
+      <CalculatorInteractionTracker>
+        <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+          <div class="space-y-4">
+            <ScenarioField v-model="currentAnnual" label="현재 연봉" unit="원" :min="12_000_000" :max="300_000_000" :step="100_000" format="currency" :presets="[{ label: '4,000만원', value: 40_000_000 }, { label: '5,200만원', value: 52_000_000 }, { label: '7,000만원', value: 70_000_000 }]" />
+            <ScenarioField v-model="raisePercent" label="인상률" unit="%" description="성과급 제외, 기본 연봉만 반영합니다." :min="0" :max="30" :step="0.5" format="decimal" :presets="[{ label: '3%', value: 3 }, { label: '5%', value: 5 }, { label: '8%', value: 8 }, { label: '10%', value: 10 }]" />
+            <ScenarioField v-model="dependents" label="부양가족 수" unit="명" :min="1" :max="6" :presets="[{ label: '1명', value: 1 }, { label: '2명', value: 2 }, { label: '4명', value: 4 }]" />
+            <ScenarioField v-model="children" label="20세 이하 자녀" unit="명" :min="0" :max="4" :presets="[{ label: '0명', value: 0 }, { label: '1명', value: 1 }, { label: '2명', value: 2 }]" />
+            <ScenarioField v-model="nonTaxableMonthly" label="비과세 월급" unit="원" :min="0" :max="1_000_000" :step="10_000" format="currency" :presets="[{ label: '0원', value: 0 }, { label: '20만원', value: 200_000 }, { label: '30만원', value: 300_000 }]" />
+          </div>
+  
+          <div class="space-y-4">
+            <ResultHero label="월 체감 증가" :value="`+${formatWon(result.monthlyNetDiff)}`" />
+            <div class="retro-stat-grid">
+              <div class="retro-stat">
+                <p class="retro-stat-label">현재 월 실수령</p>
+                <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.current.monthlyNet) }}</p>
+              </div>
+              <div class="retro-stat">
+                <p class="retro-stat-label">협상 후 월 실수령</p>
+                <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.next.monthlyNet) }}</p>
+              </div>
+              <div class="retro-stat">
+                <p class="retro-stat-label">연간 실수령 증가</p>
+                <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">+{{ formatWon(result.annualNetDiff) }}</p>
+              </div>
+            </div>
+  
+            <ShMetricBars :metrics="comparisonMetrics" :format-value="formatWon" />
+  
+            <div class="retro-panel-muted retro-panel-content space-y-3">
+              <p class="text-body font-semibold text-foreground">핵심 해석</p>
+              <p class="text-caption leading-6 text-muted-foreground">
+                세전으로는 <span class="tabular-nums">{{ formatWon(result.raiseAmount) }}</span> 인상이지만, 월 실수령 증가는
+                <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.monthlyNetDiff) }}</span>
+                입니다.
+              </p>
+              <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <div>
+                  <p class="text-tiny uppercase tracking-wide text-muted-foreground">추가 보험료</p>
+                  <p class="mt-1 text-body font-semibold tabular-nums">+{{ formatWon(result.insuranceDelta) }}/월</p>
+                </div>
+                <div>
+                  <p class="text-tiny uppercase tracking-wide text-muted-foreground">추가 세금</p>
+                  <p class="mt-1 text-body font-semibold tabular-nums">+{{ formatWon(result.taxDelta) }}/월</p>
+                </div>
+              </div>
+              <Button class="w-full" @click="openShare">결과 공유</Button>
+            </div>
+          </div>
+        </div>
+      </CalculatorInteractionTracker>
+    </div>
+    <InternalLink current="raise" />
 
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="raise-main" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <CalculatorFeedbackRow page-key="raise-main" />
 
     <ShareModal :show="showShareModal" :kakao-busy="kakaoBusy" :summary-text="shareSummary" @close="closeShare" @share-kakao="shareKakao" @copy-link="copyLink" />
   </div>

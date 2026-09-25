@@ -133,7 +133,9 @@ function trackNextClick(key: NextCalculatorKey, route: string): void {
       {{ heading }}
     </ShText>
     <ShText variant="caption" tone="muted" class="mb-3 mt-1">{{ intro }}</ShText>
-    <div class="grid gap-3 md:grid-cols-3">
+    <!-- lg+에서는 1×2 틀의 왼쪽 칸(입력 아래, 반폭)에 들어가므로 1열로 쌓는다 — 3열이면 카드당
+         170px 남짓이라 미리 계산 금액 줄이 잘린다. 입력·결과가 위아래로 쌓이는 md에서만 3열. -->
+    <div class="grid gap-3 md:grid-cols-3 lg:grid-cols-1">
       <RouterLink
         v-for="item in actions"
         :key="item.key"

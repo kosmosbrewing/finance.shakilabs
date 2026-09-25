@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed } from "vue";
-import { ShPresetGroup, type PresetValue } from "@shakilabs/ui";
+import { ShCalculatorSplit, ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
@@ -61,8 +60,8 @@ const summaryItems = computed(() => [
 
     <CalculatorPageHeader title="육아휴직 급여 계산기" />
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+    <ShCalculatorSplit>
+      <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="parental-leave-input-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="parental-leave-input-title" class="retro-title">육아휴직 조건 입력</h2>
@@ -86,7 +85,8 @@ const summaryItems = computed(() => [
             </div>
           </CalculatorInteractionTracker>
         </section>
-
+      </template>
+      <template #result>
         <section class="retro-panel overflow-hidden" aria-labelledby="parental-leave-result-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="parental-leave-result-title" class="retro-title">육아휴직 예상 결과</h2>
@@ -95,55 +95,58 @@ const summaryItems = computed(() => [
             <ResultHero label="총 수령액" :value="formatWon(r.totalBenefit)" />
             <BenefitStatGrid :items="summaryItems" />
 
-            <div class="space-y-2">
-              <h2 class="text-body font-semibold">월별 급여 상세</h2>
-              <div class="overflow-x-auto rounded-xl border">
-                <table aria-label="육아휴직 월별 급여 상세" class="w-max min-w-full whitespace-nowrap text-caption">
-                  <thead>
-                    <tr class="border-b bg-muted/50">
-                      <th scope="col" class="px-3 py-2 text-left font-medium">월</th>
-                      <th scope="col" class="px-3 py-2 text-right font-medium">지급률</th>
-                      <th scope="col" class="px-3 py-2 text-right font-medium">상한</th>
-                      <th scope="col" class="px-3 py-2 text-right font-medium">수령액</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="d in r.monthlyDetails"
-                      :key="d.month"
-                      class="border-b last:border-0"
-                    >
-                      <td class="px-3 py-2">{{ d.month }}개월</td>
-                      <td class="px-3 py-2 text-right">{{ Math.round(d.rate * 100) }}%</td>
-                      <td class="px-3 py-2 text-right text-muted-foreground">{{ formatWon(d.cap) }}</td>
-                      <td class="px-3 py-2 text-right font-medium">{{ formatWon(d.benefit) }}</td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr class="border-t bg-muted/30">
-                      <td class="px-3 py-2 font-semibold" colspan="3">합계</td>
-                      <td class="px-3 py-2 text-right font-bold text-status-success">{{ formatWon(r.totalBenefit) }}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-
             <div class="retro-panel-muted retro-panel-content space-y-2 text-caption leading-6 text-muted-foreground">
               <p>6+6 부모육아휴직제는 자녀 출생 후 18개월 이내에 부모가 모두 휴직을 사용할 때 적용됩니다.</p>
               <p>실제 급여는 고용보험 가입기간, 지급 심사 결과에 따라 달라질 수 있습니다.</p>
             </div>
           </div>
         </section>
+      </template>
+    </ShCalculatorSplit>
 
-        <BenefitFaqPanel :items="PARENTAL_LEAVE_FAQS" />
-        <InternalLink current="parental-leave" />
-      </div>
-
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="parental-leave" />
-        <RecentCalcPanel />
+    <!-- 월별 표는 결과 칸(반폭)에 두면 결과가 입력보다 700px 길어져 왼쪽 칸이 빈다(1440px 실측) —
+         1×2 아래 전폭으로 내린다. 모바일 읽기 순서(결과 → 월별 표)는 그대로다. -->
+    <section class="retro-panel overflow-hidden" aria-labelledby="parental-leave-monthly-title">
+      <div class="retro-panel-content">
+        <div class="space-y-2">
+          <h2 id="parental-leave-monthly-title" class="text-body font-semibold">월별 급여 상세</h2>
+          <div class="overflow-x-auto rounded-xl border">
+            <table aria-label="육아휴직 월별 급여 상세" class="w-max min-w-full whitespace-nowrap text-caption">
+              <thead>
+                <tr class="border-b bg-muted/50">
+                  <th scope="col" class="px-3 py-2 text-left font-medium">월</th>
+                  <th scope="col" class="px-3 py-2 text-right font-medium">지급률</th>
+                  <th scope="col" class="px-3 py-2 text-right font-medium">상한</th>
+                  <th scope="col" class="px-3 py-2 text-right font-medium">수령액</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="d in r.monthlyDetails"
+                  :key="d.month"
+                  class="border-b last:border-0"
+                >
+                  <td class="px-3 py-2">{{ d.month }}개월</td>
+                  <td class="px-3 py-2 text-right">{{ Math.round(d.rate * 100) }}%</td>
+                  <td class="px-3 py-2 text-right text-muted-foreground">{{ formatWon(d.cap) }}</td>
+                  <td class="px-3 py-2 text-right font-medium">{{ formatWon(d.benefit) }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="border-t bg-muted/30">
+                  <td class="px-3 py-2 font-semibold" colspan="3">합계</td>
+                  <td class="px-3 py-2 text-right font-bold text-status-success">{{ formatWon(r.totalBenefit) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
       </div>
     </section>
+
+    <BenefitFaqPanel :items="PARENTAL_LEAVE_FAQS" />
+    <InternalLink current="parental-leave" />
+
+    <CalculatorFeedbackRow page-key="parental-leave" />
   </div>
 </template>

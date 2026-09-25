@@ -12,7 +12,6 @@ import HomeSituationGuide from "@/components/home/HomeSituationGuide.vue";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import {
   HOME_CHANGES_LINK,
-  HOME_DESCRIPTION,
   HOME_FAQS,
   HOME_H1,
   HOME_INTRO,
@@ -64,10 +63,9 @@ const quickCalcSection = computed(() => findSection("quick-calc"));
   <div class="text-resize-layout sh-container sh-container--page space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="jsonLd" />
 
-    <div class="space-y-2">
+    <div class="space-y-1.5">
       <CalculatorPageHeader :title="HOME_H1" />
-      <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ HOME_INTRO }}</p>
-      <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ HOME_DESCRIPTION }}</p>
+      <p class="max-w-[42rem] break-keep text-caption text-muted-foreground">{{ HOME_INTRO }}</p>
       <p>
         <RouterLink :to="HOME_CHANGES_LINK.to" class="text-caption font-semibold text-link">{{ HOME_CHANGES_LINK.label }}</RouterLink>
       </p>

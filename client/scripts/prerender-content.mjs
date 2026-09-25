@@ -71,7 +71,6 @@ import {
 } from "./hub-digests.mjs";
 import {
   HOME_CHANGES_LINK,
-  HOME_DESCRIPTION,
   HOME_FAQ_H2,
   HOME_FAQ_INTRO,
   HOME_FAQS,
@@ -3809,7 +3808,6 @@ const LANDING_CONTENT = {
   "/": {
     h1: HOME_H1,
     intro: HOME_INTRO,
-    description: HOME_DESCRIPTION,
     noticeLink: HOME_CHANGES_LINK,
     // 읽기 순서는 화면과 같다: 퀵계산기 → 도구 인덱스(링크 블록) → FAQ → 종합 가이드.
     // FAQ·가이드는 화면 컴포넌트와 같은 배열에서 나오므로 하이드레이션 때 제목이 일치해
@@ -3955,7 +3953,7 @@ function buildLandingContent(route) {
     <article data-seo-prerender="landing" style="${ARTICLE_STYLE}">
       <h1 style="${H1_STYLE}">${data.h1}</h1>
       <p style="${P_STYLE}">${data.intro}</p>
-      <p style="${P_STYLE}">${data.description}</p>
+      ${data.description ? `<p style="${P_STYLE}">${data.description}</p>` : ""}
       ${data.noticeLink ? `<p data-prerender-mirror style="${P_STYLE}"><a href="/finance${data.noticeLink.to}">${data.noticeLink.label}</a></p>` : ""}
       ${bodyHtml}
       <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">

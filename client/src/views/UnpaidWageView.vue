@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { ShButton } from "@shakilabs/ui";
+import { ShButton, ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
@@ -77,8 +76,8 @@ const statItems = computed(() => [
 
     <CalculatorPageHeader title="임금체불 지연이자 계산기" />
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+    <ShCalculatorSplit>
+      <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="unpaid-wage-input-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="unpaid-wage-input-title" class="retro-title">체불 조건 입력</h2>
@@ -131,31 +130,37 @@ const statItems = computed(() => [
             </CalculatorInteractionTracker>
           </div>
         </section>
-
-        <ResultHero label="예상 지연이자" :value="formatWon(result.totalInterest)" />
-        <BenefitStatGrid :items="statItems" />
-
-        <section class="retro-panel overflow-hidden">
+      </template>
+      <template #result>
+        <!-- 1×2에서 입력 패널과 짝이 맞도록 결과도 패널에 담는다 -->
+        <section class="retro-panel overflow-hidden" aria-labelledby="unpaid-wage-result-title">
           <div class="retro-titlebar rounded-t-2xl">
-            <h2 class="retro-title">적용 순서와 계산 한계</h2>
+            <h2 id="unpaid-wage-result-title" class="retro-title">지연이자 예상 결과</h2>
           </div>
-          <div class="retro-panel-content space-y-2 text-caption leading-relaxed text-muted-foreground">
-            <p><strong class="text-foreground">계산식:</strong> 체불액 × 연이율 × 이자 발생일수 ÷ 365</p>
-            <p><strong class="text-foreground">연 20% 대상:</strong> 근로기준법 제37조에 따라 퇴직·사망 근로자의 임금과 퇴직금에 적용됩니다. 퇴직일부터 {{ UNPAID_WAGE_2026.retiredGraceDays }}일(금품청산 기한)이 지난 다음 날부터 이자가 붙습니다.</p>
-            <p><strong class="text-foreground">재직 중 체불:</strong> 연 20%가 아니라 민법상 5% 또는 회사(상인)를 상대로 한 상법상 6%가 적용되는 것이 일반적이며, 소송에서는 소장 송달 다음 날부터 소송촉진법상 12%를 검토합니다.</p>
-            <p><strong class="text-foreground">미지원:</strong> 도산·회생 등 지연이자 적용 제외 사유(시행령 제18조), 일부 변제 충당 순서, 판결 주문별 이율 변경은 계산하지 않습니다.</p>
-            <p><strong class="text-foreground">신고·구제:</strong> 고용노동부 노동포털 임금체불 진정, 회사가 지급 능력이 없으면 간이대지급금 제도를 함께 확인하세요.</p>
+          <div class="retro-panel-content min-w-0 space-y-4">
+            <ResultHero label="예상 지연이자" :value="formatWon(result.totalInterest)" />
+            <BenefitStatGrid :items="statItems" />
           </div>
         </section>
+      </template>
+    </ShCalculatorSplit>
 
-        <InternalLink current="unpaid-wage" />
-        <BenefitFaqPanel :items="unpaidWageFaqs" />
+    <section class="retro-panel overflow-hidden">
+      <div class="retro-titlebar rounded-t-2xl">
+        <h2 class="retro-title">적용 순서와 계산 한계</h2>
       </div>
-
-      <div class="space-y-4">
-        <RecentCalcPanel />
-        <CommunitySidebar page-key="unpaid-wage-main" />
+      <div class="retro-panel-content space-y-2 text-caption leading-relaxed text-muted-foreground">
+        <p><strong class="text-foreground">계산식:</strong> 체불액 × 연이율 × 이자 발생일수 ÷ 365</p>
+        <p><strong class="text-foreground">연 20% 대상:</strong> 근로기준법 제37조에 따라 퇴직·사망 근로자의 임금과 퇴직금에 적용됩니다. 퇴직일부터 {{ UNPAID_WAGE_2026.retiredGraceDays }}일(금품청산 기한)이 지난 다음 날부터 이자가 붙습니다.</p>
+        <p><strong class="text-foreground">재직 중 체불:</strong> 연 20%가 아니라 민법상 5% 또는 회사(상인)를 상대로 한 상법상 6%가 적용되는 것이 일반적이며, 소송에서는 소장 송달 다음 날부터 소송촉진법상 12%를 검토합니다.</p>
+        <p><strong class="text-foreground">미지원:</strong> 도산·회생 등 지연이자 적용 제외 사유(시행령 제18조), 일부 변제 충당 순서, 판결 주문별 이율 변경은 계산하지 않습니다.</p>
+        <p><strong class="text-foreground">신고·구제:</strong> 고용노동부 노동포털 임금체불 진정, 회사가 지급 능력이 없으면 간이대지급금 제도를 함께 확인하세요.</p>
       </div>
     </section>
+
+    <InternalLink current="unpaid-wage" />
+    <BenefitFaqPanel :items="unpaidWageFaqs" />
+
+    <CalculatorFeedbackRow page-key="unpaid-wage-main" />
   </div>
 </template>
