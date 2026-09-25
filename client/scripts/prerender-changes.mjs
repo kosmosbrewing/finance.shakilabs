@@ -6,13 +6,13 @@
 // (utils/prerenderFallback.ts)에서 걷혀 화면에 두 번 나오지 않는다(/guide/* 중복 실측 이력).
 import {
   CHANGE_AREAS,
-  CHANGE_SOURCES,
   CHANGE_STATUSES,
   CHANGES_2027,
   CHANGES_2027_FAQS,
   CHANGES_2027_META,
   CHANGES_2027_VERIFIED_AT,
   changeCalcHref,
+  changeSourcesOf,
   changesStatusSummary,
   formatChangeDate,
 } from "./changes-2027.mjs";
@@ -31,7 +31,9 @@ function hrefFor(item) {
 }
 
 function renderItem(item) {
-  const source = CHANGE_SOURCES[item.source];
+  const sources = changeSourcesOf(item)
+    .map((source) => `<a href="${escapeHtml(source.url)}">${escapeHtml(source.title)}</a> (${formatChangeDate(source.date)})`)
+    .join(" · ");
   const href = hrefFor(item);
   const details = (item.details ?? []).map((detail) => `<li>${escapeHtml(detail)}</li>`).join("");
   return `
@@ -41,12 +43,12 @@ function renderItem(item) {
         <p style="margin:0 0 8px;">${escapeHtml(item.line)}</p>
         <dl style="margin:0 0 8px;">
           <dt>현행</dt><dd>${escapeHtml(item.before)}</dd>
-          <dt>2027</dt><dd>${escapeHtml(item.after)}</dd>
+          <dt>변경 후</dt><dd>${escapeHtml(item.after)}</dd>
           <dt>대상</dt><dd>${escapeHtml(item.target)}</dd>
           <dt>시행</dt><dd>${escapeHtml(item.effective)}</dd>
         </dl>
         ${details ? `<ul>${details}</ul>` : ""}
-        <p style="margin:0;">근거: <a href="${escapeHtml(source.url)}">${escapeHtml(source.title)}</a> (${formatChangeDate(source.date)})</p>
+        <p style="margin:0;">근거: ${sources}</p>
         ${href ? `<p style="margin:4px 0 0;"><a href="${escapeHtml(href)}">${escapeHtml(item.calc.label)} →</a></p>` : ""}
       </li>`;
 }

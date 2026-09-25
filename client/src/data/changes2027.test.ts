@@ -16,7 +16,7 @@ import { buildChanges2027Html } from "../../scripts/prerender-changes.mjs";
 import { MIN_WAGE_HOURLY as MIN_WAGE_HOURLY_2026 } from "../../scripts/hub-digests-guides.mjs";
 import { SEO_ROUTES, SITEMAP_ROUTES, CALCULATOR_ROUTES } from "../../scripts/seo-routes.mjs";
 
-// 다른 앱 계산기 경로 — 2026-09-26 각 저장소 origin/main 라우터에서 실존 확인.
+// 다른 앱 계산기 경로 — 2026-09-25 각 저장소 origin/main 라우터에서 실존 확인.
 // 앱 라우트가 바뀌면 여기서 먼저 깨진다(깨진 링크를 라이브에 내보내지 않는다).
 const OTHER_APP_ROUTES: Record<string, readonly string[]> = {
   baby: ["/first-meeting", "/child-allowance"],
@@ -51,6 +51,19 @@ describe("2027 달라지는 것 — 레지스트리", () => {
       expect(length, `${item.id}: ${length}자`).toBeLessThanOrEqual(60);
       expect(item.line.endsWith("."), item.id).toBe(true);
       expect(item.line.slice(0, -1).includes(". "), `${item.id}: 한 문장`).toBe(false);
+    }
+  });
+
+  it("확인일은 미래가 아니다 — 한국 시간 기준(CI는 UTC라 하루 어긋나지 않게)", () => {
+    // 2026-09-25에 26일로 적어 라이브에 "아직 오지 않은 날 확인"이 나갈 뻔했다
+    const todayKst = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" }).format(new Date());
+    expect(CHANGES_2027_VERIFIED_AT <= todayKst, `${CHANGES_2027_VERIFIED_AT} > ${todayKst}`).toBe(true);
+  });
+
+  it("보조 출처도 등록된 1차 출처다", () => {
+    for (const item of CHANGES_2027) {
+      for (const id of item.alsoSources ?? []) expect(Object.keys(CHANGE_SOURCES), item.id).toContain(id);
+      expect(item.alsoSources ?? []).not.toContain(item.source);
     }
   });
 
@@ -115,8 +128,9 @@ describe("2027 달라지는 것 — 프리렌더 본문", () => {
   it("화면이 그리는 모든 문장을 담고, 사이트맵 최소 본문(1,500자)을 넘는다", () => {
     const text = textOf(html);
     for (const item of CHANGES_2027) {
-      expect(text, item.id).toContain(item.line.replace(/\s+/g, ""));
-      expect(text, item.id).toContain(item.after.replace(/\s+/g, ""));
+      for (const field of [item.title, item.line, item.before, item.after, item.target, item.effective, ...(item.details ?? [])]) {
+        expect(text, `${item.id}: ${field.slice(0, 20)}`).toContain(field.replace(/\s+/g, ""));
+      }
     }
     for (const faq of CHANGES_2027_FAQS) expect(text).toContain(faq.a.replace(/\s+/g, ""));
     expect(text.length).toBeGreaterThan(1500);

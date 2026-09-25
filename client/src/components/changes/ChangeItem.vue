@@ -6,9 +6,9 @@ import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import { ShBadge } from "@shakilabs/ui";
 import {
-  CHANGE_SOURCES,
   CHANGE_STATUSES,
   changeCalcHref,
+  changeSourcesOf,
   formatChangeDate,
   type Change2027Item,
 } from "../../../scripts/changes-2027.mjs";
@@ -16,7 +16,7 @@ import {
 const props = defineProps<{ item: Change2027Item }>();
 
 const status = computed(() => CHANGE_STATUSES[props.item.status]);
-const source = computed(() => CHANGE_SOURCES[props.item.source]);
+const sources = computed(() => changeSourcesOf(props.item));
 const href = computed(() => changeCalcHref(props.item));
 const isInternal = computed(() => href.value?.startsWith("/") ?? false);
 </script>
@@ -35,7 +35,7 @@ const isInternal = computed(() => href.value?.startsWith("/") ?? false);
         <dd class="mt-0.5 text-caption text-foreground">{{ item.before }}</dd>
       </div>
       <div class="retro-panel-muted change-after px-3 py-2.5">
-        <dt class="text-tiny font-semibold text-muted-foreground">2027</dt>
+        <dt class="text-tiny font-semibold text-muted-foreground">변경 후</dt>
         <dd class="mt-0.5 text-caption font-semibold text-foreground">{{ item.after }}</dd>
       </div>
     </dl>
@@ -51,9 +51,12 @@ const isInternal = computed(() => href.value?.startsWith("/") ?? false);
       <details class="change-details text-tiny text-muted-foreground">
         <summary class="cursor-pointer font-semibold">근거{{ item.details?.length ? "·세부" : "" }}</summary>
         <ul v-if="item.details?.length" class="mt-2 list-disc space-y-1 pl-4">
-          <li v-for="detail in item.details" :key="detail">{{ detail }}</li>
+          <li v-for="(detail, index) in item.details" :key="`${item.id}-detail-${index}`">{{ detail }}</li>
         </ul>
-        <p class="mt-2">근거: <a :href="source.url" target="_blank" rel="noopener" class="text-link underline">{{ source.title }}</a> ({{ formatChangeDate(source.date) }})</p>
+        <p class="mt-2">
+          근거:
+          <template v-for="(source, index) in sources" :key="source.url"><template v-if="index"> · </template><a :href="source.url" target="_blank" rel="noopener" class="text-link underline">{{ source.title }}</a> ({{ formatChangeDate(source.date) }})</template>
+        </p>
       </details>
       <template v-if="href && item.calc">
         <RouterLink v-if="isInternal" :to="href" class="text-caption font-semibold text-link">{{ item.calc.label }} →</RouterLink>

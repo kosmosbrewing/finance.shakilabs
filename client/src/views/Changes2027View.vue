@@ -83,7 +83,7 @@ const jsonLd = [
         <h2 id="changes-faq-title" class="retro-title">자주 묻는 질문</h2>
       </div>
       <div class="retro-panel-content space-y-4">
-        <div v-for="faq in CHANGES_2027_FAQS" :key="faq.q" class="space-y-1">
+        <div v-for="(faq, index) in CHANGES_2027_FAQS" :key="`faq-${index}`" class="space-y-1">
           <h3 class="text-caption font-bold text-foreground">{{ faq.q }}</h3>
           <p class="text-caption text-muted-foreground">{{ faq.a }}</p>
         </div>

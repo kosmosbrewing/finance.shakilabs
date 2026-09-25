@@ -7,7 +7,7 @@
 //  - 현행 수치가 finance 계산기 상수와 겹치는 항목은 src/data 상수와 같아야 한다(테스트가 대조한다).
 // 12월 국회 의결 뒤 status·수치를 갱신하고 CHANGES_2027_VERIFIED_AT을 올린다.
 
-export const CHANGES_2027_VERIFIED_AT = "2026-09-26";
+export const CHANGES_2027_VERIFIED_AT = "2026-09-25";
 
 export const CHANGES_2027_META = {
   path: "/2027",
@@ -15,7 +15,7 @@ export const CHANGES_2027_META = {
   intro: "2026년 세제개편안과 2027년 예산안, 확정된 고시를 전후 숫자로 모았습니다.",
   title: "2027년 달라지는 세금·지원금 한눈에 | 세법개정안·예산안 정리",
   description:
-    "2027년 최저임금, 근로장려금, 월세 세액공제, 아이맞이지원금, 아동기본수당, 지방국립대 등록금까지 달라지는 세금·지원금 26가지를 확정·국회 심의 중으로 나눠 전후 숫자로 정리했습니다.",
+    "최저임금·근로장려금·월세 공제·아이맞이지원금·지방국립대 등록금 등 2027년 달라지는 26가지를 확정·심의 중으로 나눠 전후 숫자로 정리.",
 };
 
 export const CHANGE_AREAS = [
@@ -57,6 +57,11 @@ export const CHANGE_SOURCES = {
     title: "정책브리핑 2027년 청년정책 예산",
     url: "https://www.korea.kr/news/policyNewsView.do?newsId=148970791",
     date: "2026-08-28",
+  },
+  budgetCard: {
+    title: "정책브리핑 '나에게 올 2027년 예산안' 카드뉴스",
+    url: "https://www.korea.kr/multi/visualNewsView.do?newsId=148971392",
+    date: "2026-09-07",
   },
   marriageBudget: {
     title: "정책브리핑 2027년 성평등가족부 예산",
@@ -135,7 +140,7 @@ export const CHANGES_2027 = [
     title: "월세 세액공제 한도 1,200만 원",
     line: "월세 세액공제를 받을 수 있는 연간 월세 한도가 1,000만 원에서 1,200만 원으로 늘어납니다.",
     before: "연 월세 1,000만 원까지 · 공제율 15% (총급여 5,500만 원 이하 17%)",
-    after: "연 월세 1,200만 원까지 · 15~34세 청년은 총급여와 관계없이 17%",
+    after: "연 월세 1,200만 원까지 · 15~34세 청년은 총급여 5,500만 원을 넘어도 17%",
     target: "총급여 8,000만 원 이하 무주택 근로자",
     effective: "2027년 1월 1일 이후 내는 월세",
     calc: calc(FINANCE, "/monthly-rent-deduction", "월세 세액공제 계산"),
@@ -271,6 +276,7 @@ export const CHANGES_2027 = [
   },
   {
     id: "marriage-grant", area: "family", status: "review", source: "marriageBudget",
+    alsoSources: ["budget"],
     title: "혼인지원금 부부당 100만 원",
     line: "혼인 세액공제 대신 부부당 100만 원을 생애 한 번 주는 혼인지원금이 새로 생깁니다.",
     before: "혼인 세액공제 1인당 최대 50만 원 (2026년 혼인신고까지)",
@@ -279,13 +285,14 @@ export const CHANGES_2027 = [
     effective: "2027년 (대상 혼인신고 시점·지급 방법은 추후 안내)",
     details: [
       "이름은 가칭입니다(성평등가족부 2027년 예산).",
-      "대상 혼인신고 시점과 신청 방법은 아직 발표되지 않았습니다(2026년 9월 26일 확인).",
+      "대상 혼인신고 시점과 신청 방법은 아직 발표되지 않았습니다(2026년 9월 25일 확인).",
     ],
   },
 
   // ── 청년·교육 ──
   {
     id: "national-univ", area: "youth", status: "review", source: "budget",
+    alsoSources: ["budgetCard", "youthBudget"],
     title: "지방국립대 등록금 0원",
     line: "2027학년도 신입생부터 지방국립대 30곳의 등록금을 4년 동안 전액 장학금으로 지원합니다.",
     before: "신설 (지금은 소득 구간별 국가장학금)",
@@ -293,7 +300,7 @@ export const CHANGES_2027 = [
     target: "2027학년도 지방국립대 신입생",
     effective: "2027학년도 신입생부터",
     details: [
-      "대상 30개교 명단은 아직 발표되지 않았습니다(2026년 9월 26일 확인).",
+      "대상 30개교 명단은 아직 발표되지 않았습니다(2026년 9월 25일 확인).",
       "지방 사립대 학생 대상 지역인재장학금은 4,000명에서 1만 명으로 늘립니다.",
     ],
   },
@@ -415,6 +422,11 @@ export function changeCalcHref(item) {
 /** 표시용 날짜: 2026-08-03 → 2026.08.03 */
 export function formatChangeDate(date) {
   return date.replaceAll("-", ".");
+}
+
+/** 항목의 근거 출처(주 출처 + 보조 출처) — 화면·프리렌더가 같은 순서로 쓴다 */
+export function changeSourcesOf(item) {
+  return [item.source, ...(item.alsoSources ?? [])].map((id) => CHANGE_SOURCES[id]);
 }
 
 /** 머리말 한 줄 — 화면과 프리렌더가 같은 문장을 쓴다 */
