@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import CalculatorMemoryControl from "@/components/calculator/CalculatorMemoryControl.vue";
 import { computed, onUnmounted, ref, watch, watchEffect } from "vue";
@@ -15,7 +16,6 @@ import ShareModal from "@/components/share/ShareModal.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useRetirementCalc } from "@/composables/useRetirementCalc";
 import { useUnemploymentCalc } from "@/composables/useUnemploymentCalc";
@@ -361,7 +361,7 @@ watch(
       </div>
     </div>
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <CalculatorInteractionTracker>
           <QuitInput
@@ -399,18 +399,20 @@ watch(
           @share-request="openShare"
         />
       </template>
-    </CalculatorSplit>
+      <!-- 퇴사 후 매달 내야 할 돈은 오른쪽 "받을 돈"과 짝이라 입력 아래 왼쪽 칸에 둔다 — 결과가 입력보다
+           357px 길어 왼쪽이 비던 자리(1440px 실측). 모바일에서는 받을 돈 바로 뒤에 온다. -->
+      <template #below-input>
+        <QuitExpenses
+          :regional-health-monthly="regionalHealthMonthly"
+          :voluntary-continuation-monthly="voluntaryContinuationMonthly"
+          :pension-monthly="pensionMonthly"
+          :monthly-fixed-cost="monthlyFixedCost"
+        />
+      </template>
+    </ShCalculatorSplit>
 
+    <!-- 광고 두 개가 연달아 붙지 않게 본문 블록을 사이에 둔다 -->
     <AdSlot unit="retirement-top" label="광고 · top" />
-
-    <QuitExpenses
-      :regional-health-monthly="regionalHealthMonthly"
-      :voluntary-continuation-monthly="voluntaryContinuationMonthly"
-      :pension-monthly="pensionMonthly"
-      :monthly-fixed-cost="monthlyFixedCost"
-    />
-
-    <AdSlot unit="retirement-middle" label="광고 · middle" />
 
     <SurvivalSimulation
       :available-fund="survival.availableFund"
@@ -418,6 +420,8 @@ watch(
       :monthly-living-cost="survival.monthlyLivingCost"
       :scenarios="survival.scenarios"
     />
+
+    <AdSlot unit="retirement-middle" label="광고 · middle" />
 
     <QuitChecklist />
 

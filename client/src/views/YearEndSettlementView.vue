@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed } from "vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
@@ -55,7 +55,7 @@ const deductionItems = computed(() => [
 
     <CalculatorPageHeader title="연말정산 환급액 계산기" />
 
-    <CalculatorSplit sticky-result>
+    <ShCalculatorSplit>
       <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="year-end-input-title">
           <div class="retro-titlebar rounded-t-2xl">
@@ -121,20 +121,26 @@ const deductionItems = computed(() => [
             />
 
             <BenefitStatGrid :items="summaryItems" />
-
-            <div class="space-y-2">
-              <h2 class="text-body font-semibold">주요 공제 내역</h2>
-              <BenefitStatGrid :items="deductionItems" />
-
-              <div class="retro-panel-muted retro-panel-content space-y-2 text-caption leading-6 text-muted-foreground">
-                <p>기납부세액은 매월 원천징수(기본 소득공제만 적용) 기준으로 추정한 값입니다. 실제 원천징수 내역과 다를 수 있습니다.</p>
-                <p>의료비 공제는 총급여의 3% 초과분, 연 700만원 한도 기준입니다. 본인·65세이상·장애인 의료비는 한도가 다릅니다.</p>
-              </div>
-            </div>
           </div>
         </section>
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
+
+    <!-- 공제 내역은 결과 칸에 두면 결과가 800px라 900px 창에도 안 들어가 결과를 붙일 수 없다(1440×900 실측).
+         아래 전폭으로 내리면 결과가 약 460px가 되어 입력(1,689px)을 내리는 동안 결과가 옆에 붙어 있다. -->
+    <section class="retro-panel overflow-hidden" aria-labelledby="year-end-deductions-title">
+      <div class="retro-panel-content">
+        <div class="space-y-2">
+          <h2 id="year-end-deductions-title" class="text-body font-semibold">주요 공제 내역</h2>
+          <BenefitStatGrid :items="deductionItems" />
+
+          <div class="retro-panel-muted retro-panel-content space-y-2 text-caption leading-6 text-muted-foreground">
+            <p>기납부세액은 매월 원천징수(기본 소득공제만 적용) 기준으로 추정한 값입니다. 실제 원천징수 내역과 다를 수 있습니다.</p>
+            <p>의료비 공제는 총급여의 3% 초과분, 연 700만원 한도 기준입니다. 본인·65세이상·장애인 의료비는 한도가 다릅니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <BenefitFaqPanel :items="YEAR_END_FAQS" />
     <InternalLink current="year-end-settlement" />

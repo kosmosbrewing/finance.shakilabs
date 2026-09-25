@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { formatKrwAuto, formatWon } from "@/lib/utils";
 import ResultHero from "@/components/common/ResultHero.vue";
@@ -7,7 +6,7 @@ import SectionShareButton from "@/components/common/SectionShareButton.vue";
 import SalaryDeductionBar from "@/components/salary/SalaryDeductionBar.vue";
 import SalarySummaryStatGrid from "@/components/salary/SalarySummaryStatGrid.vue";
 
-const props = defineProps<{
+defineProps<{
   monthlyIncomeTax: number;       // 사용자 입력 소득세
   estimatedAnnualGross: number;
   calc: SalaryCalcResult;
@@ -16,12 +15,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   shareRequest: [];
 }>();
-
-// 검산: 계산된 소득세와 입력 소득세의 차이
-const calculatedIncomeTax = computed(() => props.calc.monthlyIncomeTax.value);
-const taxDiff = computed(() => Math.abs(calculatedIncomeTax.value - props.monthlyIncomeTax));
-// ±5,000원 이상 차이 시 안내 문구 표시
-const showDiffWarning = computed(() => taxDiff.value >= 5_000 && props.monthlyIncomeTax > 0);
 
 // Count-up animation removed on purpose (fleet-wide policy): 23 of 26 calculators
 // were already static, and animating from 0 would blank the prerendered value.
@@ -92,38 +85,6 @@ const showDiffWarning = computed(() => taxDiff.value >= 5_000 && props.monthlyIn
         </div>
       </div>
 
-      <!-- 검산 row -->
-      <div class="rounded-xl border border-border/60 bg-muted/20 p-2.5 text-caption space-y-1.5">
-        <p class="font-semibold">계산 검산</p>
-        <div class="space-y-1 text-muted-foreground">
-          <div class="flex justify-between">
-            <span>입력한 소득세</span>
-            <strong class="tabular-nums text-foreground">{{ formatWon(monthlyIncomeTax) }}</strong>
-          </div>
-          <div class="flex justify-between">
-            <span>계산된 소득세</span>
-            <strong class="tabular-nums text-foreground">{{ formatWon(calculatedIncomeTax) }}</strong>
-          </div>
-          <div class="flex justify-between">
-            <span>오차</span>
-            <strong
-              class="tabular-nums"
-              :class="taxDiff <= 5_000 ? 'text-status-success' : 'text-status-danger'"
-            >
-              {{ formatWon(taxDiff) }}
-            </strong>
-          </div>
-        </div>
-        <Transition name="fade">
-          <p v-if="showDiffWarning" class="text-status-warning text-caption">
-            비과세 조건, 8~20세 자녀 세액공제, 학자금대출 공제로 인해 차이가 커질 수 있습니다.
-          </p>
-        </Transition>
-        <p class="text-caption text-muted-foreground">
-          이 결과는 급여명세서의 월 소득세만으로 역산한 추정치입니다. 상여, 중도입사·퇴사,
-          추가 세액공제 반영 여부에 따라 실제 연봉과 달라질 수 있습니다.
-        </p>
-      </div>
     </div>
   </section>
 </template>

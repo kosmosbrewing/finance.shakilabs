@@ -5,10 +5,9 @@
 // 이 자리에 있던 연봉 퀵계산기(유입 상위 질의 "연봉 실수령액")의 역할도 그대로 이어받는다.
 import { computed, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
-import { ShToggleGroup } from "@shakilabs/ui";
+import { ShCalculatorSplit, ShToggleGroup } from "@shakilabs/ui";
 import { ArrowRight } from "lucide-vue-next";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import InsuranceInput from "@/components/insurance/InsuranceInput.vue";
 import InsuranceResult from "@/components/insurance/InsuranceResult.vue";
 import { useInsuranceReverse } from "@/composables/useInsuranceReverse";
@@ -89,7 +88,7 @@ const detailRoute = computed(() => {
       <ShToggleGroup v-model="mode" label="계산 방식" :options="INSURANCE_MODE_OPTIONS" />
     </div>
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <CalculatorInteractionTracker>
           <InsuranceInput
@@ -112,6 +111,7 @@ const detailRoute = computed(() => {
           :estimated-annual-gross="reverse.estimatedAnnualGross.value"
           :calc="activeCalc"
           :shareable="false"
+          deduction-collapsed
         />
       </template>
 
@@ -124,6 +124,6 @@ const detailRoute = computed(() => {
 
         <p class="break-keep text-caption leading-relaxed text-muted-foreground">{{ props.note }}</p>
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
   </section>
 </template>

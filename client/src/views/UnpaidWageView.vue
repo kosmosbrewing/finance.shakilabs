@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { ShButton } from "@shakilabs/ui";
+import { ShButton, ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
@@ -77,7 +76,7 @@ const statItems = computed(() => [
 
     <CalculatorPageHeader title="임금체불 지연이자 계산기" />
 
-    <CalculatorSplit sticky-result>
+    <ShCalculatorSplit>
       <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="unpaid-wage-input-title">
           <div class="retro-titlebar rounded-t-2xl">
@@ -144,7 +143,7 @@ const statItems = computed(() => [
           </div>
         </section>
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
 
     <section class="retro-panel overflow-hidden">
       <div class="retro-titlebar rounded-t-2xl">

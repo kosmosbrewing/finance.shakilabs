@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
-import { ShPresetGroup, type PresetValue } from "@shakilabs/ui";
+import { ShCalculatorSplit, ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -96,7 +95,7 @@ watch(
 
     <CalculatorPageHeader title="시급·월급·연봉 환산기" />
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="wage-converter-input-title">
           <div class="retro-titlebar rounded-t-2xl">
@@ -182,7 +181,7 @@ watch(
           </div>
         </section>
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
 
     <BenefitFaqPanel :items="wageConverterFaqs" />
     <InternalLink current="wage-converter" />

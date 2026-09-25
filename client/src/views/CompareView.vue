@@ -313,15 +313,16 @@ watch(
       </CompareInput>
     </CalculatorInteractionTracker>
 
+    <!-- 광고 두 개가 연달아 붙지 않게 본문 블록을 사이에 둔다(top·middle이 붙어 있었다) -->
     <AdSlot unit="compare-top" label="광고 · top" />
-
-    <AdSlot unit="compare-middle" label="광고 · middle" />
 
     <InternalLink current="compare" />
 
-    <AdSlot unit="compare-bottom" label="광고 · bottom" />
+    <AdSlot unit="compare-middle" label="광고 · middle" />
 
     <CalculatorFeedbackRow page-key="compare-main" />
+
+    <AdSlot unit="compare-bottom" label="광고 · bottom" />
 
     <ShareModal
       :show="showShareModal"

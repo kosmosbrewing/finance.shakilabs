@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -79,7 +79,7 @@ watch(
 
     <CalculatorPageHeader title="주휴수당 계산기" />
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="weekly-pay-input-title">
           <div class="retro-titlebar rounded-t-2xl">
@@ -166,7 +166,7 @@ watch(
           </div>
         </section>
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
 
     <BenefitFaqPanel :items="weeklyHolidayPayFaqs" />
     <InternalLink current="weekly-holiday-pay" />

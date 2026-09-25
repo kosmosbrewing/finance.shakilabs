@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
@@ -18,7 +19,6 @@ import ShareModal from "@/components/share/ShareModal.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -158,7 +158,7 @@ watch(
     <h1 class="text-h1 font-brand">연봉 {{ amountLabel }} 실수령액 (2026년 기준)</h1>
 
     <!-- 계산기(입력 | 결과)를 먼저 둔다 — 요약·인사이트·FAQ 글 묶음이 위에 있으면 결과가 첫 화면 밖으로 밀린다 -->
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <SalaryInputPanel
           v-model:annual-gross="calc.annualGross.value"
@@ -171,7 +171,7 @@ watch(
       <template #result>
         <SalaryResultPanel :calc="calc" @share-request="openShare" />
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
 
     <SalaryRangeContent :amount="amountManWon" :calc="calc" />
 

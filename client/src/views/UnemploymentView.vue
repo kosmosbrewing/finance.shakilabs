@@ -1,19 +1,10 @@
 <script setup lang="ts">
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref } from "vue";
-import {
-  ShButton,
-  ShTable,
-  ShTableBody,
-  ShTableCell,
-  ShTableHead,
-  ShTableHeader,
-  ShTableRow,
-} from "@shakilabs/ui";
+import { ShButton, ShCalculatorSplit, ShTable, ShTableBody, ShTableCell, ShTableHead, ShTableHeader, ShTableRow } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
@@ -76,7 +67,7 @@ const quitReasonOptions = [
 
     <CalculatorPageHeader title="실업급여 계산기" />
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="unemployment-input-title">
           <div class="retro-titlebar rounded-t-2xl">
@@ -179,7 +170,7 @@ const quitReasonOptions = [
           </div>
         </section>
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
 
     <BenefitFaqPanel :items="unemploymentFaqs" />
     <InternalLink current="unemployment" />

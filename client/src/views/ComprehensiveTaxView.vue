@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
@@ -11,7 +12,6 @@ import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import VisitorCounter from "@/components/common/VisitorCounter.vue";
 import {
   DEFAULT_INDUSTRY,
@@ -367,7 +367,7 @@ watch(
 
     <h1 class="text-h1 font-brand">{{ isFreelancer ? '2026 프리랜서 세금 계산기' : '2026 종합소득세 계산기' }}</h1>
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <CalculatorInteractionTracker class="space-y-4">
           <IncomeSourceInput
@@ -447,7 +447,7 @@ watch(
       <template #result>
         <ComprehensiveTaxResult :result="result" @share-request="openShare" />
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
 
     <SeparateTaxCompare
       v-if="result.rentalCompare || result.otherCompare"

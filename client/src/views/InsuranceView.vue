@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { ShToggleGroup } from "@shakilabs/ui";
+import { ShCalculatorSplit, ShToggleGroup } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorMemoryControl from "@/components/calculator/CalculatorMemoryControl.vue";
@@ -20,7 +20,6 @@ import ShareModal from "@/components/share/ShareModal.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import { useInsuranceReverse } from "@/composables/useInsuranceReverse";
@@ -394,7 +393,7 @@ watch(
          바꾸면 아래 route 동기화 watch가 상대 URL로 replace한다(가족·비과세 입력은 쿼리로 이어진다). -->
     <ShToggleGroup v-model="mode" label="계산 방식" :options="INSURANCE_MODE_OPTIONS" />
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <CalculatorInteractionTracker>
           <InsuranceInput
@@ -434,7 +433,7 @@ watch(
 
         <InstallHint />
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
 
     <HealthInsuranceRank :calc="activeCalc" :mode="isForwardMode ? 'salary' : 'insurance'" />
 

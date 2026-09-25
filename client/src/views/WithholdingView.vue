@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -9,8 +10,8 @@ import ShareModal from "@/components/share/ShareModal.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
+import WithholdingVerification from "@/components/withholding/WithholdingVerification.vue";
 import { useWithholdingReverse } from "@/composables/useWithholdingReverse";
 import { useShare } from "@/composables/useShare";
 import { formatManWon, formatWon } from "@/lib/utils";
@@ -197,7 +198,7 @@ watch(
 
     <h1 class="text-h1 font-brand">2026 원천세 계산기 — 소득세로 연봉 추정</h1>
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <CalculatorInteractionTracker>
           <WithholdingInput
@@ -216,11 +217,16 @@ watch(
           @share-request="openShare"
         />
       </template>
-    </CalculatorSplit>
+      <!-- 검산·계산 기준은 입력값을 확인하는 블록이라 입력 아래 왼쪽 칸에 둔다 — 결과가 입력보다
+           645px 길어 왼쪽이 비던 자리(1440px 실측). 모바일 순서는 결과 뒤 그대로다. -->
+      <template #below-input>
+        <WithholdingVerification :monthly-income-tax="monthlyIncomeTax" :calc="calc" />
+        <CalcSourceBox />
+      </template>
+    </ShCalculatorSplit>
 
     <AdSlot unit="withholding-top" label="광고 · top" />
 
-    <CalcSourceBox />
     <InternalLink current="withholding" />
 
     <AdSlot unit="withholding-bottom" label="광고 · bottom" />

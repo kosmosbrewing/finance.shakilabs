@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
-import { ShBreakdownBar } from "@shakilabs/ui";
+import { ShBreakdownBar, ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -82,7 +81,7 @@ watch(
 
     <CalculatorPageHeader title="퇴직금 계산기" />
 
-    <CalculatorSplit>
+    <ShCalculatorSplit>
       <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="severance-input-title">
           <div class="retro-titlebar rounded-t-2xl">
@@ -165,35 +164,40 @@ watch(
               </template>
               <Button class="w-full" @click="openShare">결과 공유</Button>
             </div>
-
-            <div v-if="result.isEligible" class="retro-panel-muted p-3">
-              <p class="mb-2 text-caption font-semibold text-foreground">근속연수별 퇴직금 비교</p>
-              <div class="overflow-x-auto">
-                <table aria-label="근속연수별 퇴직금 비교" class="w-full text-[11px] text-muted-foreground">
-                  <thead>
-                    <tr class="border-b border-border/40">
-                      <th scope="col" class="py-1 text-left">근속연수</th>
-                      <th scope="col" class="py-1 text-right">퇴직금</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="row in result.comparisonData"
-                      :key="row.years"
-                      class="border-b border-border/20"
-                      :class="{ 'bg-muted/60 font-semibold': row.years === yearsOfService }"
-                    >
-                      <td class="py-1">{{ row.years }}년</td>
-                      <td class="py-1 text-right tabular-nums">{{ formatWon(row.amount) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+          </div>
+        </section>
+      </template>
+      <!-- 근속연수별 비교표는 입력(근속연수)을 바꿔 보는 표라 입력 아래 왼쪽 칸에 둔다 — 결과 칸에 두면
+           결과가 입력보다 470px 길어져 왼쪽이 빈다(1440px 실측). 모바일 순서는 결과 뒤 그대로다. -->
+      <template v-if="result.isEligible" #below-input>
+        <section class="retro-panel overflow-hidden" aria-label="근속연수별 퇴직금 비교">
+          <div class="retro-panel-content">
+            <p class="mb-2 text-caption font-semibold text-foreground">근속연수별 퇴직금 비교</p>
+            <div class="overflow-x-auto">
+              <table aria-label="근속연수별 퇴직금 비교" class="w-full text-[11px] text-muted-foreground">
+                <thead>
+                  <tr class="border-b border-border/40">
+                    <th scope="col" class="py-1 text-left">근속연수</th>
+                    <th scope="col" class="py-1 text-right">퇴직금</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in result.comparisonData"
+                    :key="row.years"
+                    class="border-b border-border/20"
+                    :class="{ 'bg-muted/60 font-semibold': row.years === yearsOfService }"
+                  >
+                    <td class="py-1">{{ row.years }}년</td>
+                    <td class="py-1 text-right tabular-nums">{{ formatWon(row.amount) }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>
       </template>
-    </CalculatorSplit>
+    </ShCalculatorSplit>
 
     <BenefitFaqPanel :items="severancePayFaqs" />
     <InternalLink current="severance-pay" />
