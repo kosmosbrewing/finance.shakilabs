@@ -10,7 +10,6 @@ import HomeFaqPanel from "@/components/home/HomeFaqPanel.vue";
 import HomeSituationGuide from "@/components/home/HomeSituationGuide.vue";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import {
-  HOME_DESCRIPTION,
   HOME_FAQS,
   HOME_H1,
   HOME_INTRO,
@@ -62,10 +61,9 @@ const quickCalcSection = computed(() => findSection("quick-calc"));
   <div class="text-resize-layout sh-container sh-container--page space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="jsonLd" />
 
-    <div class="space-y-2">
+    <div class="space-y-1.5">
       <CalculatorPageHeader :title="HOME_H1" />
-      <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ HOME_INTRO }}</p>
-      <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ HOME_DESCRIPTION }}</p>
+      <p class="max-w-[42rem] break-keep text-caption text-muted-foreground">{{ HOME_INTRO }}</p>
     </div>
 
     <!-- 첫 화면은 계산기다(사용자 결정 2026-09-24, B안) — 도구만 나열하던 인덱스를 첫 화면에서

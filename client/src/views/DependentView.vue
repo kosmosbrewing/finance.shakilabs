@@ -4,8 +4,8 @@ import { ShButton } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
+import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
@@ -67,8 +67,8 @@ const registrationOptions = [
 
     <CalculatorPageHeader title="건강보험 피부양자 자격 판정기" />
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+    <CalculatorSplit sticky-result>
+      <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="dependent-input-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="dependent-input-title" class="retro-title">소득·재산 조건 입력</h2>
@@ -136,12 +136,21 @@ const registrationOptions = [
             </CalculatorInteractionTracker>
           </div>
         </section>
-
-        <ResultHero
-          label="판정 결과"
-          :value="result.isEligible ? '피부양자 유지 가능' : '탈락 예상'"
-        />
-        <BenefitStatGrid :items="statItems" />
+      </template>
+      <template #result>
+        <!-- 1×2에서 입력 패널과 짝이 맞도록 결과도 패널에 담는다 -->
+        <section class="retro-panel overflow-hidden" aria-labelledby="dependent-result-title">
+          <div class="retro-titlebar rounded-t-2xl">
+            <h2 id="dependent-result-title" class="retro-title">피부양자 판정 결과</h2>
+          </div>
+          <div class="retro-panel-content min-w-0 space-y-4">
+            <ResultHero
+              label="판정 결과"
+              :value="result.isEligible ? '피부양자 유지 가능' : '탈락 예상'"
+            />
+            <BenefitStatGrid :items="statItems" />
+          </div>
+        </section>
 
         <section v-if="!result.isEligible" class="retro-panel overflow-hidden">
           <div class="retro-titlebar rounded-t-2xl">
@@ -159,27 +168,24 @@ const registrationOptions = [
             </p>
           </div>
         </section>
+      </template>
+    </CalculatorSplit>
 
-        <section class="retro-panel overflow-hidden">
-          <div class="retro-titlebar rounded-t-2xl">
-            <h2 class="retro-title">판정 기준과 한계</h2>
-          </div>
-          <div class="retro-panel-content space-y-2 text-caption leading-relaxed text-muted-foreground">
-            <p><strong class="text-foreground">소득 요건:</strong> 연 합산소득 {{ formatWon(DEPENDENT_2026.incomeLimit) }} 이하. 이자·배당·사업·근로·연금·기타소득을 모두 합산합니다.</p>
-            <p><strong class="text-foreground">재산 요건:</strong> 재산세 과세표준 {{ formatWon(DEPENDENT_2026.propertyHighThreshold) }} 초과는 즉시 제외, {{ formatWon(DEPENDENT_2026.propertyMidThreshold) }} 초과~9억 이하는 연 소득 {{ formatWon(DEPENDENT_2026.midPropertyIncomeLimit) }} 이하일 때만 유지됩니다.</p>
-            <p><strong class="text-foreground">사업소득 요건:</strong> 사업자등록이 있으면 사업소득이 없어야 하고, 미등록(프리랜서 등)은 연 {{ formatWon(DEPENDENT_2026.unregisteredBusinessIncomeLimit) }} 이하까지 허용됩니다.</p>
-            <p><strong class="text-foreground">미반영:</strong> 부양요건(가족관계), 형제자매 특례(30세 미만·65세 이상 등), 주택임대소득 유무에 따른 예외는 이 간이 판정에 반영되지 않습니다. 최종 판정은 국민건강보험공단 확인이 필요합니다.</p>
-          </div>
-        </section>
-
-        <InternalLink current="dependent" />
-        <BenefitFaqPanel :items="dependentFaqs" />
+    <section class="retro-panel overflow-hidden">
+      <div class="retro-titlebar rounded-t-2xl">
+        <h2 class="retro-title">판정 기준과 한계</h2>
       </div>
-
-      <div class="space-y-4">
-        <RecentCalcPanel />
-        <CommunitySidebar page-key="dependent-main" />
+      <div class="retro-panel-content space-y-2 text-caption leading-relaxed text-muted-foreground">
+        <p><strong class="text-foreground">소득 요건:</strong> 연 합산소득 {{ formatWon(DEPENDENT_2026.incomeLimit) }} 이하. 이자·배당·사업·근로·연금·기타소득을 모두 합산합니다.</p>
+        <p><strong class="text-foreground">재산 요건:</strong> 재산세 과세표준 {{ formatWon(DEPENDENT_2026.propertyHighThreshold) }} 초과는 즉시 제외, {{ formatWon(DEPENDENT_2026.propertyMidThreshold) }} 초과~9억 이하는 연 소득 {{ formatWon(DEPENDENT_2026.midPropertyIncomeLimit) }} 이하일 때만 유지됩니다.</p>
+        <p><strong class="text-foreground">사업소득 요건:</strong> 사업자등록이 있으면 사업소득이 없어야 하고, 미등록(프리랜서 등)은 연 {{ formatWon(DEPENDENT_2026.unregisteredBusinessIncomeLimit) }} 이하까지 허용됩니다.</p>
+        <p><strong class="text-foreground">미반영:</strong> 부양요건(가족관계), 형제자매 특례(30세 미만·65세 이상 등), 주택임대소득 유무에 따른 예외는 이 간이 판정에 반영되지 않습니다. 최종 판정은 국민건강보험공단 확인이 필요합니다.</p>
       </div>
     </section>
+
+    <InternalLink current="dependent" />
+    <BenefitFaqPanel :items="dependentFaqs" />
+
+    <CalculatorFeedbackRow page-key="dependent-main" />
   </div>
 </template>

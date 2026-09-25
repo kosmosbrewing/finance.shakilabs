@@ -8,24 +8,24 @@ import { RouterLink } from "vue-router";
 import { ShToggleGroup } from "@shakilabs/ui";
 import { ArrowRight } from "lucide-vue-next";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
+import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import InsuranceInput from "@/components/insurance/InsuranceInput.vue";
 import InsuranceResult from "@/components/insurance/InsuranceResult.vue";
 import { useInsuranceReverse } from "@/composables/useInsuranceReverse";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
-import { DEFAULT_INSURANCE_PRESET } from "@/data/insurancePresets";
+import {
+  DEFAULT_INSURANCE_PRESET,
+  INSURANCE_MODE_OPTIONS,
+  type InsuranceCalcMode,
+} from "@/data/insurancePresets";
 import { buildQuery } from "@/lib/routeState";
 
 const props = defineProps<{ heading: string; note: string }>();
 
-type Mode = "reverse" | "forward";
-const MODE_OPTIONS: Array<{ label: string; value: Mode }> = [
-  { label: "건보료로 계산", value: "reverse" },
-  { label: "연봉으로 계산", value: "forward" },
-];
 const DEFAULT_ANNUAL_GROSS = 40_000_000;
 const DEFAULT_NON_TAXABLE = 200_000;
 
-const mode = ref<Mode>("reverse");
+const mode = ref<InsuranceCalcMode>("reverse");
 const healthInsuranceFee = ref(DEFAULT_INSURANCE_PRESET);
 const dependents = ref(1);
 const childrenUnder20 = ref(0);
@@ -83,38 +83,47 @@ const detailRoute = computed(() => {
 <template>
   <!-- 입력·결과가 각자 패널이라 이 섹션은 패널로 감싸지 않는다(카드 안 카드 금지) -->
   <section class="space-y-3" aria-labelledby="home-quick-calc-title">
-    <h2 id="home-quick-calc-title" class="text-heading font-bold text-foreground">{{ props.heading }}</h2>
-
-    <ShToggleGroup v-model="mode" label="계산 방식" :options="MODE_OPTIONS" />
-
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
-      <CalculatorInteractionTracker>
-        <InsuranceInput
-          :mode="mode"
-          v-model:health-insurance-fee="healthInsuranceFee"
-          v-model:annual-gross="forwardCalc.annualGross.value"
-          v-model:retirement-included="forwardCalc.retirementIncluded.value"
-          v-model:dependents="dependents"
-          v-model:children-under20="childrenUnder20"
-          v-model:non-taxable-monthly="nonTaxableMonthly"
-        />
-      </CalculatorInteractionTracker>
-
-      <InsuranceResult
-        :mode="mode"
-        :health-insurance-fee="healthInsuranceFee"
-        :estimated-taxable-monthly="reverse.estimatedTaxableMonthly.value"
-        :estimated-annual-gross="reverse.estimatedAnnualGross.value"
-        :calc="activeCalc"
-        :shareable="false"
-      />
+    <!-- 제목과 모드 전환을 한 줄에 — 계산기 위에 글줄이 겹겹이 쌓이지 않게 한다(좁으면 두 줄로 접힌다) -->
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <h2 id="home-quick-calc-title" class="text-heading font-bold text-foreground">{{ props.heading }}</h2>
+      <ShToggleGroup v-model="mode" label="계산 방식" :options="INSURANCE_MODE_OPTIONS" />
     </div>
 
-    <RouterLink :to="detailRoute" class="pill-link sh-pill">
-      공제 내역·연봉 구간표까지 자세히 보기
-      <ArrowRight class="h-4 w-4" aria-hidden="true" />
-    </RouterLink>
+    <CalculatorSplit>
+      <template #input>
+        <CalculatorInteractionTracker>
+          <InsuranceInput
+            :mode="mode"
+            v-model:health-insurance-fee="healthInsuranceFee"
+            v-model:annual-gross="forwardCalc.annualGross.value"
+            v-model:retirement-included="forwardCalc.retirementIncluded.value"
+            v-model:dependents="dependents"
+            v-model:children-under20="childrenUnder20"
+            v-model:non-taxable-monthly="nonTaxableMonthly"
+          />
+        </CalculatorInteractionTracker>
+      </template>
 
-    <p class="max-w-[65ch] break-keep text-caption text-muted-foreground">{{ props.note }}</p>
+      <template #result>
+        <InsuranceResult
+          :mode="mode"
+          :health-insurance-fee="healthInsuranceFee"
+          :estimated-taxable-monthly="reverse.estimatedTaxableMonthly.value"
+          :estimated-annual-gross="reverse.estimatedAnnualGross.value"
+          :calc="activeCalc"
+          :shareable="false"
+        />
+      </template>
+
+      <!-- 결과 패널이 입력보다 훨씬 길어 비는 왼쪽 칸을 상세 링크·설명이 채운다 -->
+      <template #below-input>
+        <RouterLink :to="detailRoute" class="pill-link sh-pill">
+          공제 내역·연봉 구간표까지 자세히 보기
+          <ArrowRight class="h-4 w-4" aria-hidden="true" />
+        </RouterLink>
+
+        <p class="break-keep text-caption leading-relaxed text-muted-foreground">{{ props.note }}</p>
+      </template>
+    </CalculatorSplit>
   </section>
 </template>

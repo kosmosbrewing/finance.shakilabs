@@ -10,8 +10,8 @@ import ShareModal from "@/components/share/ShareModal.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
+import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import VisitorCounter from "@/components/common/VisitorCounter.vue";
 import {
   DEFAULT_INDUSTRY,
@@ -367,8 +367,8 @@ watch(
 
     <h1 class="text-h1 font-brand">{{ isFreelancer ? '2026 프리랜서 세금 계산기' : '2026 종합소득세 계산기' }}</h1>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
+    <CalculatorSplit>
+      <template #input>
         <CalculatorInteractionTracker class="space-y-4">
           <IncomeSourceInput
             source-type="business"
@@ -443,31 +443,29 @@ watch(
             </div>
           </section>
         </CalculatorInteractionTracker>
-
+      </template>
+      <template #result>
         <ComprehensiveTaxResult :result="result" @share-request="openShare" />
+      </template>
+    </CalculatorSplit>
 
-        <SeparateTaxCompare
-          v-if="result.rentalCompare || result.otherCompare"
-          :rental-compare="result.rentalCompare"
-          :other-compare="result.otherCompare"
-        />
+    <SeparateTaxCompare
+      v-if="result.rentalCompare || result.otherCompare"
+      :rental-compare="result.rentalCompare"
+      :other-compare="result.otherCompare"
+    />
 
-        <CalcSourceBox />
+    <CalcSourceBox />
 
-        <AdSlot unit="comprehensive-top" label="광고 · top" />
+    <AdSlot unit="comprehensive-top" label="광고 · top" />
 
-        <InternalLink :current="internalLinkKey" />
+    <InternalLink :current="internalLinkKey" />
 
-        <AdSlot unit="comprehensive-middle" label="광고 · middle" />
+    <AdSlot unit="comprehensive-middle" label="광고 · middle" />
 
-        <VisitorCounter />
-      </div>
+    <VisitorCounter />
 
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <CalculatorFeedbackRow :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" />
 
     <ShareModal
       :show="showShareModal"

@@ -8,8 +8,8 @@ import WithholdingResult from "@/components/withholding/WithholdingResult.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
+import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import { useWithholdingReverse } from "@/composables/useWithholdingReverse";
 import { useShare } from "@/composables/useShare";
@@ -197,8 +197,8 @@ watch(
 
     <h1 class="text-h1 font-brand">2026 원천세 계산기 — 소득세로 연봉 추정</h1>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
+    <CalculatorSplit>
+      <template #input>
         <CalculatorInteractionTracker>
           <WithholdingInput
             v-model:monthly-income-tax="monthlyIncomeTax"
@@ -207,27 +207,25 @@ watch(
             v-model:non-taxable-monthly="nonTaxableMonthly"
           />
         </CalculatorInteractionTracker>
-
+      </template>
+      <template #result>
         <WithholdingResult
           :monthly-income-tax="monthlyIncomeTax"
           :estimated-annual-gross="estimatedAnnualGross"
           :calc="calc"
           @share-request="openShare"
         />
+      </template>
+    </CalculatorSplit>
 
-        <AdSlot unit="withholding-top" label="광고 · top" />
+    <AdSlot unit="withholding-top" label="광고 · top" />
 
-        <CalcSourceBox />
-        <InternalLink current="withholding" />
+    <CalcSourceBox />
+    <InternalLink current="withholding" />
 
-        <AdSlot unit="withholding-bottom" label="광고 · bottom" />
-      </div>
+    <AdSlot unit="withholding-bottom" label="광고 · bottom" />
 
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="withholding-main" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <CalculatorFeedbackRow page-key="withholding-main" />
 
     <ShareModal
       :show="showShareModal"

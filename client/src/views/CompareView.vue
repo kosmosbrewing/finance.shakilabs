@@ -11,8 +11,7 @@ import ShareModal from "@/components/share/ShareModal.vue";
 
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useShare } from "@/composables/useShare";
 
@@ -314,23 +313,15 @@ watch(
       </CompareInput>
     </CalculatorInteractionTracker>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
-        <AdSlot unit="compare-top" label="광고 · top" />
+    <AdSlot unit="compare-top" label="광고 · top" />
 
-        <AdSlot unit="compare-middle" label="광고 · middle" />
+    <AdSlot unit="compare-middle" label="광고 · middle" />
 
-        <InternalLink current="compare" />
+    <InternalLink current="compare" />
 
-        <AdSlot unit="compare-bottom" label="광고 · bottom" />
+    <AdSlot unit="compare-bottom" label="광고 · bottom" />
 
-      </div>
-
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="compare-main" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <CalculatorFeedbackRow page-key="compare-main" />
 
     <ShareModal
       :show="showShareModal"

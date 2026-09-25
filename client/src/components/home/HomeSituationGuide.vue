@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
+import { ChevronDown } from "lucide-vue-next";
 import {
   HOME_GUIDE,
   HOME_GUIDE_LINKS_H3,
@@ -27,13 +28,26 @@ import { SCENARIO_CHAINS as scenarioChains } from "../../../scripts/scenario-cha
         {{ HOME_GUIDE.intro }}
       </p>
 
-      <div class="grid gap-4 md:grid-cols-3">
-        <div v-for="section in HOME_GUIDE.sections" :key="section.h3" class="space-y-1.5">
-          <h3 class="text-caption font-bold text-foreground">{{ section.h3 }}</h3>
-          <p class="break-keep text-tiny leading-relaxed text-muted-foreground">
+      <!-- 세 절은 접힌 채 시작한다(HomeFaqPanel과 같은 이유) — 펼쳐 두면 5~6줄짜리 문단 세 개가
+           나란히 서서 홈 맨 아래가 다시 "읽는 페이지"가 된다. <details>는 본문을 DOM에 그대로
+           두므로 크롤러가 받는 글은 줄지 않는다(은닉이 아니라 점진적 공개). -->
+      <div class="grid gap-2 md:grid-cols-3 md:items-start">
+        <details
+          v-for="section in HOME_GUIDE.sections"
+          :key="section.h3"
+          class="group retro-panel-muted px-4 py-2.5"
+        >
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-3">
+            <h3 class="break-keep text-caption font-bold text-foreground">{{ section.h3 }}</h3>
+            <ChevronDown
+              aria-hidden="true"
+              class="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <p class="mt-2 break-keep text-caption leading-relaxed text-muted-foreground">
             {{ section.body }}
           </p>
-        </div>
+        </details>
       </div>
 
       <!-- 가이드 4개는 카드가 아니라 알약 한 줄이다. 카드로 깔면 인덱스 화면 맨 아래에

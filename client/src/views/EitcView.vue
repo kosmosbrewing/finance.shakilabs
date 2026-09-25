@@ -4,8 +4,8 @@ import { ShButton } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
+import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
@@ -88,8 +88,8 @@ const statItems = computed(() => [
 
     <CalculatorPageHeader title="근로장려금·자녀장려금 계산기" />
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+    <CalculatorSplit sticky-result>
+      <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="eitc-input-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="eitc-input-title" class="retro-title">가구·소득 조건 입력</h2>
@@ -158,30 +158,36 @@ const statItems = computed(() => [
             </CalculatorInteractionTracker>
           </div>
         </section>
-
-        <ResultHero label="근로장려금" :value="formatWon(result.eitcAfterProperty)" />
-        <BenefitStatGrid :items="statItems" />
-
-        <section class="retro-panel overflow-hidden">
+      </template>
+      <template #result>
+        <!-- 1×2에서 입력 패널과 짝이 맞도록 결과도 패널에 담는다 -->
+        <section class="retro-panel overflow-hidden" aria-labelledby="eitc-result-title">
           <div class="retro-titlebar rounded-t-2xl">
-            <h2 class="retro-title">산정 기준과 한계</h2>
+            <h2 id="eitc-result-title" class="retro-title">장려금 예상 결과</h2>
           </div>
-          <div class="retro-panel-content space-y-2 text-caption leading-relaxed text-muted-foreground">
-            <p><strong class="text-foreground">소득 상한:</strong> 단독 2,200만 / 홑벌이 3,200만 / 맞벌이 4,400만원 미만. 최대 지급액은 각각 165만 / 285만 / 330만원입니다.</p>
-            <p><strong class="text-foreground">재산 요건:</strong> 가구원 재산 합계 {{ formatWon(EITC_PROPERTY_2026.exclusionLimit) }} 이상은 지급 제외, {{ formatWon(EITC_PROPERTY_2026.halfReductionThreshold) }} 이상은 50% 감액됩니다. 부채는 차감하지 않습니다.</p>
-            <p><strong class="text-foreground">신청 시기:</strong> 정기 신청 5월, 근로소득자는 반기 신청(상반기분 9월, 하반기분 다음 해 3월)이 가능합니다.</p>
-            <p><strong class="text-foreground">한계:</strong> 실제 산정표는 총급여 구간 단위와 단수 조정, 사업소득의 업종별 조정률, 국민연금 수급 등 제외 요건이 있어 이 간이 계산과 소액 차이가 날 수 있습니다. 확정 금액은 홈택스 모의계산으로 확인하세요.</p>
+          <div class="retro-panel-content min-w-0 space-y-4">
+            <ResultHero label="근로장려금" :value="formatWon(result.eitcAfterProperty)" />
+            <BenefitStatGrid :items="statItems" />
           </div>
         </section>
+      </template>
+    </CalculatorSplit>
 
-        <InternalLink current="eitc" />
-        <BenefitFaqPanel :items="eitcFaqs" />
+    <section class="retro-panel overflow-hidden">
+      <div class="retro-titlebar rounded-t-2xl">
+        <h2 class="retro-title">산정 기준과 한계</h2>
       </div>
-
-      <div class="space-y-4">
-        <RecentCalcPanel />
-        <CommunitySidebar page-key="eitc-main" />
+      <div class="retro-panel-content space-y-2 text-caption leading-relaxed text-muted-foreground">
+        <p><strong class="text-foreground">소득 상한:</strong> 단독 2,200만 / 홑벌이 3,200만 / 맞벌이 4,400만원 미만. 최대 지급액은 각각 165만 / 285만 / 330만원입니다.</p>
+        <p><strong class="text-foreground">재산 요건:</strong> 가구원 재산 합계 {{ formatWon(EITC_PROPERTY_2026.exclusionLimit) }} 이상은 지급 제외, {{ formatWon(EITC_PROPERTY_2026.halfReductionThreshold) }} 이상은 50% 감액됩니다. 부채는 차감하지 않습니다.</p>
+        <p><strong class="text-foreground">신청 시기:</strong> 정기 신청 5월, 근로소득자는 반기 신청(상반기분 9월, 하반기분 다음 해 3월)이 가능합니다.</p>
+        <p><strong class="text-foreground">한계:</strong> 실제 산정표는 총급여 구간 단위와 단수 조정, 사업소득의 업종별 조정률, 국민연금 수급 등 제외 요건이 있어 이 간이 계산과 소액 차이가 날 수 있습니다. 확정 금액은 홈택스 모의계산으로 확인하세요.</p>
       </div>
     </section>
+
+    <InternalLink current="eitc" />
+    <BenefitFaqPanel :items="eitcFaqs" />
+
+    <CalculatorFeedbackRow page-key="eitc-main" />
   </div>
 </template>

@@ -14,8 +14,8 @@ import ShareModal from "@/components/share/ShareModal.vue";
 
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
+import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import { useRetirementCalc } from "@/composables/useRetirementCalc";
 import { useUnemploymentCalc } from "@/composables/useUnemploymentCalc";
@@ -361,8 +361,8 @@ watch(
       </div>
     </div>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
+    <CalculatorSplit>
+      <template #input>
         <CalculatorInteractionTracker>
           <QuitInput
             v-model:start-date="startDate"
@@ -379,9 +379,8 @@ watch(
             @range-apply="handleRangeApply"
           />
         </CalculatorInteractionTracker>
-
-        <AdSlot unit="retirement-top" label="광고 · top" />
-
+      </template>
+      <template #result>
         <QuitReceivables
           :service-period-label="retirement.servicePeriodLabel"
           :retirement-gross="retirement.severanceGross"
@@ -399,36 +398,34 @@ watch(
           :quit-reason="quitReason"
           @share-request="openShare"
         />
+      </template>
+    </CalculatorSplit>
 
-        <AdSlot unit="retirement-middle" label="광고 · middle" />
+    <AdSlot unit="retirement-top" label="광고 · top" />
 
-        <QuitExpenses
-          :regional-health-monthly="regionalHealthMonthly"
-          :voluntary-continuation-monthly="voluntaryContinuationMonthly"
-          :pension-monthly="pensionMonthly"
-          :monthly-fixed-cost="monthlyFixedCost"
-        />
+    <QuitExpenses
+      :regional-health-monthly="regionalHealthMonthly"
+      :voluntary-continuation-monthly="voluntaryContinuationMonthly"
+      :pension-monthly="pensionMonthly"
+      :monthly-fixed-cost="monthlyFixedCost"
+    />
 
-        <SurvivalSimulation
-          :available-fund="survival.availableFund"
-          :monthly-fixed-cost="survival.monthlyFixedCost"
-          :monthly-living-cost="survival.monthlyLivingCost"
-          :scenarios="survival.scenarios"
-        />
+    <AdSlot unit="retirement-middle" label="광고 · middle" />
 
-        <QuitChecklist />
+    <SurvivalSimulation
+      :available-fund="survival.availableFund"
+      :monthly-fixed-cost="survival.monthlyFixedCost"
+      :monthly-living-cost="survival.monthlyLivingCost"
+      :scenarios="survival.scenarios"
+    />
 
-        <InternalLink current="quit" />
+    <QuitChecklist />
 
-        <AdSlot unit="retirement-bottom" label="광고 · bottom" />
+    <InternalLink current="quit" />
 
-      </div>
+    <AdSlot unit="retirement-bottom" label="광고 · bottom" />
 
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="quit-main" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <CalculatorFeedbackRow page-key="quit-main" />
 
     <ShareModal
       :show="showShareModal"

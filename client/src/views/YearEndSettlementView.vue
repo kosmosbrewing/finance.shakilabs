@@ -3,8 +3,8 @@ import CalculatorInteractionTracker from "@/components/analytics/CalculatorInter
 import { computed } from "vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
+import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
 import BenefitStatGrid from "@/components/benefits/BenefitStatGrid.vue";
@@ -55,8 +55,8 @@ const deductionItems = computed(() => [
 
     <CalculatorPageHeader title="연말정산 환급액 계산기" />
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+    <CalculatorSplit sticky-result>
+      <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="year-end-input-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="year-end-input-title" class="retro-title">연말정산 조건 입력</h2>
@@ -107,7 +107,8 @@ const deductionItems = computed(() => [
             </div>
           </CalculatorInteractionTracker>
         </section>
-
+      </template>
+      <template #result>
         <section class="retro-panel overflow-hidden" aria-labelledby="year-end-result-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="year-end-result-title" class="retro-title">연말정산 예상 결과</h2>
@@ -132,15 +133,12 @@ const deductionItems = computed(() => [
             </div>
           </div>
         </section>
+      </template>
+    </CalculatorSplit>
 
-        <BenefitFaqPanel :items="YEAR_END_FAQS" />
-        <InternalLink current="year-end-settlement" />
-      </div>
+    <BenefitFaqPanel :items="YEAR_END_FAQS" />
+    <InternalLink current="year-end-settlement" />
 
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="year-end-settlement" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <CalculatorFeedbackRow page-key="year-end-settlement" />
   </div>
 </template>

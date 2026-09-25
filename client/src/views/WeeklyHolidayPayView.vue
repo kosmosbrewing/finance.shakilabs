@@ -4,8 +4,8 @@ import { computed, ref, watch } from "vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
+import CalculatorSplit from "@/components/calculator/CalculatorSplit.vue";
 import { Button } from "@/components/ui/button";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -79,8 +79,8 @@ watch(
 
     <CalculatorPageHeader title="주휴수당 계산기" />
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4">
+    <CalculatorSplit>
+      <template #input>
         <section class="retro-panel overflow-hidden" aria-labelledby="weekly-pay-input-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="weekly-pay-input-title" class="retro-title">근무 조건 입력</h2>
@@ -130,7 +130,8 @@ watch(
             </div>
           </CalculatorInteractionTracker>
         </section>
-
+      </template>
+      <template #result>
         <section class="retro-panel overflow-hidden" aria-labelledby="weekly-pay-result-title">
           <div class="retro-titlebar rounded-t-2xl">
             <h2 id="weekly-pay-result-title" class="retro-title">주휴수당 예상 결과</h2>
@@ -164,16 +165,13 @@ watch(
             </div>
           </div>
         </section>
+      </template>
+    </CalculatorSplit>
 
-        <BenefitFaqPanel :items="weeklyHolidayPayFaqs" />
-        <InternalLink current="weekly-holiday-pay" />
-      </div>
+    <BenefitFaqPanel :items="weeklyHolidayPayFaqs" />
+    <InternalLink current="weekly-holiday-pay" />
 
-      <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="weekly-holiday-pay-main" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <CalculatorFeedbackRow page-key="weekly-holiday-pay-main" />
 
     <ShareModal :show="showShareModal" :kakao-busy="kakaoBusy" :summary-text="shareSummary" @close="closeShare" @share-kakao="shareKakao" @copy-link="copyLink" />
   </div>
