@@ -5,6 +5,7 @@ import { trackPageView } from "@/lib/analytics";
 import { queryFirst } from "@/lib/routeState";
 import { clearRuntimeError } from "@/lib/runtimeError";
 import { buildPublicPagePath, shouldTrackPageView } from "@/utils/pageTracking";
+import { CHANGES_2027_META } from "../../scripts/changes-2027.mjs";
 
 function mapLegacyFreelanceQuery(
   query: Record<string, unknown>,
@@ -370,6 +371,14 @@ const routes: RouteRecordRaw[] = [
     name: "AllCalculators",
     component: () => import("@/views/AllCalculatorsView.vue"),
     meta: { title: `2026 세금·연봉·수당 계산기 모음 | ${CALCULATOR_COUNT}개 계산기` },
+  },
+  {
+    // 2027년 달라지는 세금·지원금 — 계산기가 아닌 안내 페이지(seo-routes NON_CALCULATOR_ROUTES).
+    // 경로는 리터럴로 둔다: validate-static-output이 라우터 소스의 path 문자열로 사이트맵을 대조한다.
+    path: "/2027",
+    name: "Changes2027",
+    component: () => import("@/views/Changes2027View.vue"),
+    meta: { title: CHANGES_2027_META.title },
   },
   {
     path: "/guide/resignation",

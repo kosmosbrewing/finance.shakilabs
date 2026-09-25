@@ -10,6 +10,9 @@ export const HOME_INTRO =
   "세전 연봉에서 통장에 찍히는 금액까지, 그리고 이직·퇴사·연말정산까지 이어지는 계산을 한곳에서 처리합니다. 급여·세금·수당·퇴직·절세 다섯 갈래의 계산기를 2026년 요율로 갱신해 운영합니다.";
 
 // Kept to one short line: the mini calculator's answer must stay above the fold.
+// 홈 소개 아래 한 줄 — 2027년 달라지는 세금·지원금 안내 페이지로. 화면(HomeView)과 프리렌더가 같은 문구를 쓴다.
+export const HOME_CHANGES_LINK = { to: "/2027", label: "2027년 달라지는 세금·지원금 한눈에 보기 →" };
+
 export const HOME_DESCRIPTION =
   "건보료나 연봉 한 칸만 넣으면 월 실수령액이 바로 나오고, 조건이 더 필요한 계산은 아래 목록에서 이어집니다.";
 

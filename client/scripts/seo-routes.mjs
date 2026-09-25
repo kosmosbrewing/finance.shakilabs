@@ -160,6 +160,8 @@ export const SEO_ROUTES = [
   "/compare",
   "/quit",
   "/all",
+  // 2027년 달라지는 세금·지원금 — 계산기가 아니라 안내 페이지(NON_CALCULATOR_ROUTES)
+  "/2027",
   "/guide/resignation",
   "/guide/job-change",
   "/guide/year-end",
@@ -213,7 +215,7 @@ export const SITEMAP_ROUTES = SEO_ROUTES.filter((route) => !PARAM_ROUTE_SET.has(
 // Everything in the sitemap that is not a calculator: the hub, the situation guides and the
 // policy pages. Listed by hand because it is the short, stable half — a new calculator must never
 // require an edit here, or the count below would drift again the moment one is added.
-const NON_CALCULATOR_ROUTES = new Set(["/", "/all", "/about", "/terms", "/privacy"]);
+const NON_CALCULATOR_ROUTES = new Set(["/", "/all", "/2027", "/about", "/terms", "/privacy"]);
 
 // The calculators, derived — never counted by hand.
 //

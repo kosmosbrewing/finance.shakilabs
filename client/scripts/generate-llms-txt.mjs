@@ -8,6 +8,7 @@
 import { writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { CALCULATOR_CATALOG, CALCULATOR_ITEMS } from "./calculator-catalog.mjs";
+import { CHANGES_2027, CHANGES_2027_META, CHANGES_2027_VERIFIED_AT } from "./changes-2027.mjs";
 
 const SITE_URL = "https://shakilabs.com/finance";
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
@@ -43,6 +44,10 @@ const llmsTxt = `# 연봉·세금·수당 계산기 — shakilabs.com/finance
 ## 계산기 목록
 
 ${sections}
+
+## 안내 페이지
+
+- [${CHANGES_2027_META.heading}](${SITE_URL}${CHANGES_2027_META.path}): 2026년 세제개편안·2027년 예산안·확정 고시 ${CHANGES_2027.length}개 항목을 확정/국회 심의 중으로 나눠 전후 수치로 정리 (마지막 확인 ${CHANGES_2027_VERIFIED_AT}). 대부분 국회 심의 중인 정부안이라 확정 전까지 바뀔 수 있습니다.
 
 ## 데이터 출처
 
