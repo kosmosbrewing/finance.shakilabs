@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShCalculatorSplit, ShPairRow } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
@@ -10,8 +11,7 @@ import ShareModal from "@/components/share/ShareModal.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import VisitorCounter from "@/components/common/VisitorCounter.vue";
 import {
   DEFAULT_INDUSTRY,
@@ -367,8 +367,8 @@ watch(
 
     <h1 class="text-h1 font-brand">{{ isFreelancer ? '2026 프리랜서 세금 계산기' : '2026 종합소득세 계산기' }}</h1>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
+    <ShCalculatorSplit>
+      <template #input>
         <CalculatorInteractionTracker class="space-y-4">
           <IncomeSourceInput
             source-type="business"
@@ -443,31 +443,34 @@ watch(
             </div>
           </section>
         </CalculatorInteractionTracker>
-
+      </template>
+      <template #result>
         <ComprehensiveTaxResult :result="result" @share-request="openShare" />
+      </template>
+    </ShCalculatorSplit>
 
-        <SeparateTaxCompare
-          v-if="result.rentalCompare || result.otherCompare"
-          :rental-compare="result.rentalCompare"
-          :other-compare="result.otherCompare"
-        />
+    <SeparateTaxCompare
+      v-if="result.rentalCompare || result.otherCompare"
+      :rental-compare="result.rentalCompare"
+      :other-compare="result.otherCompare"
+    />
 
+    <!-- 아래 데이터 블록 2열(ShPairRow, 사용자 결정 2026-09-25). 광고는 묶음 뒤로 — 두 광고가 붙지 않게 피드백을 사이에 둔다 -->
+    <ShPairRow>
+      <template #start>
         <CalcSourceBox />
-
-        <AdSlot unit="comprehensive-top" label="광고 · top" />
-
+      </template>
+      <template #end>
         <InternalLink :current="internalLinkKey" />
-
-        <AdSlot unit="comprehensive-middle" label="광고 · middle" />
-
         <VisitorCounter />
-      </div>
+      </template>
+    </ShPairRow>
 
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <AdSlot unit="comprehensive-top" label="광고 · top" />
+
+    <CalculatorFeedbackRow :page-key="isFreelancer ? 'freelancer-main' : 'comprehensive-tax-main'" />
+
+    <AdSlot unit="comprehensive-middle" label="광고 · middle" />
 
     <ShareModal
       :show="showShareModal"

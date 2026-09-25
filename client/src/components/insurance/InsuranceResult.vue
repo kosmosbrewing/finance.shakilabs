@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { formatKrwAuto, formatWon, formatPercent } from "@/lib/utils";
 import { RATES_2026 } from "@/data/taxRates2026";
@@ -17,6 +17,8 @@ const props = defineProps<{
   calc: SalaryCalcResult;
   /** 공유 모달을 가진 화면(/insurance·/salary)만 켠다 — 홈에는 모달이 없어 버튼이 아무 일도 하지 않는다 */
   shareable?: boolean;
+  /** 공제 내역을 폭과 무관하게 접힌 채로 시작한다 — 홈 퀵계산기용(상세 표는 /insurance에 있다) */
+  deductionCollapsed?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -48,7 +50,7 @@ const title = computed(() => {
 // were already static, and animating from 0 would blank the prerendered value.
 
 // 공제 상세는 좁은 화면에서만 기본 접힘 (근거는 useNarrowCollapse 주석)
-const deductionOpen = useNarrowCollapse();
+const deductionOpen = props.deductionCollapsed ? ref(false) : useNarrowCollapse();
 </script>
 
 <template>

@@ -65,6 +65,7 @@
 - 공통: `ShButton`, `ShSurface`, `ShText`, primary navigation, preset/slider, table/form primitives, `ShBreakdownBar`, `ShBulletProgress`
 - app-local: 세금·보험 계산 form, 결과 해석, 출처, focus 관리형 alert/accordion, share, SEO, analytics
 - 기존 retro utility는 호환 레이어로 유지하되 신규 공통 계약을 우회하는 별도 디자인 시스템을 만들지 않는다.
+- 계산기 뷰 틀: 제목 → `ShCalculatorSplit`(@shakilabs/ui 0.3.37 — lg+에서 입력 | 결과 1×2, 모바일은 입력 → 결과 → 보조) → 상세·FAQ·내부 링크 → `CalculatorFeedbackRow`(피드백·최근 계산). 우측 레일은 두지 않는다. 결과가 입력보다 300px 이상 길면 보조 블록(below-input)으로 왼쪽을 채우거나 상세 표를 1×2 아래로 내린다. sticky는 컴포넌트가 스스로 판정한다(앱이 켜지 않는다).
 - 모바일 360px, 390px, 430px에서 결과 overflow와 44px control target을 확인한다.
 
 ## 7. Build와 배포

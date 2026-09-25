@@ -17,6 +17,13 @@ export const INSURANCE_PRESETS = [
 
 export const DEFAULT_INSURANCE_PRESET = 140_000;
 
+// 건보료 역산 ↔ 연봉 정방향 전환 — 홈 계산기와 /insurance·/salary가 같은 라벨을 쓴다
+export type InsuranceCalcMode = "reverse" | "forward";
+export const INSURANCE_MODE_OPTIONS: Array<{ label: string; value: InsuranceCalcMode }> = [
+  { label: "건보료로 계산", value: "reverse" },
+  { label: "연봉으로 계산", value: "forward" },
+];
+
 // 연봉별 표 노출 구간
 export const SALARY_TABLE_PRESETS = [
   500_000_000,

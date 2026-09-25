@@ -70,7 +70,6 @@ import {
   toLandingSection,
 } from "./hub-digests.mjs";
 import {
-  HOME_DESCRIPTION,
   HOME_FAQ_H2,
   HOME_FAQ_INTRO,
   HOME_FAQS,
@@ -3808,7 +3807,6 @@ const LANDING_CONTENT = {
   "/": {
     h1: HOME_H1,
     intro: HOME_INTRO,
-    description: HOME_DESCRIPTION,
     // 읽기 순서는 화면과 같다: 퀵계산기 → 도구 인덱스(링크 블록) → FAQ → 종합 가이드.
     // FAQ·가이드는 화면 컴포넌트와 같은 배열에서 나오므로 하이드레이션 때 제목이 일치해
     // 통째로 걷힌다(utils/prerenderFallback.ts) — 사람에게 두 번 보이지 않는다.
@@ -3953,7 +3951,7 @@ function buildLandingContent(route) {
     <article data-seo-prerender="landing" style="${ARTICLE_STYLE}">
       <h1 style="${H1_STYLE}">${data.h1}</h1>
       <p style="${P_STYLE}">${data.intro}</p>
-      <p style="${P_STYLE}">${data.description}</p>
+      ${data.description ? `<p style="${P_STYLE}">${data.description}</p>` : ""}
       ${bodyHtml}
       <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 계산기는 2026년 공식 세율·요율 기반 추정치를 제공합니다. 법적 효력이 없는 참고용입니다.

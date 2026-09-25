@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -8,9 +9,9 @@ import WithholdingResult from "@/components/withholding/WithholdingResult.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
+import WithholdingVerification from "@/components/withholding/WithholdingVerification.vue";
 import { useWithholdingReverse } from "@/composables/useWithholdingReverse";
 import { useShare } from "@/composables/useShare";
 import { formatManWon, formatWon } from "@/lib/utils";
@@ -197,8 +198,8 @@ watch(
 
     <h1 class="text-h1 font-brand">2026 원천세 계산기 — 소득세로 연봉 추정</h1>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
+    <ShCalculatorSplit>
+      <template #input>
         <CalculatorInteractionTracker>
           <WithholdingInput
             v-model:monthly-income-tax="monthlyIncomeTax"
@@ -207,27 +208,30 @@ watch(
             v-model:non-taxable-monthly="nonTaxableMonthly"
           />
         </CalculatorInteractionTracker>
-
+      </template>
+      <template #result>
         <WithholdingResult
           :monthly-income-tax="monthlyIncomeTax"
           :estimated-annual-gross="estimatedAnnualGross"
           :calc="calc"
           @share-request="openShare"
         />
-
-        <AdSlot unit="withholding-top" label="광고 · top" />
-
+      </template>
+      <!-- 검산·계산 기준은 입력값을 확인하는 블록이라 입력 아래 왼쪽 칸에 둔다 — 결과가 입력보다
+           645px 길어 왼쪽이 비던 자리(1440px 실측). 모바일 순서는 결과 뒤 그대로다. -->
+      <template #below-input>
+        <WithholdingVerification :monthly-income-tax="monthlyIncomeTax" :calc="calc" />
         <CalcSourceBox />
-        <InternalLink current="withholding" />
+      </template>
+    </ShCalculatorSplit>
 
-        <AdSlot unit="withholding-bottom" label="광고 · bottom" />
-      </div>
+    <AdSlot unit="withholding-top" label="광고 · top" />
 
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar page-key="withholding-main" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+    <InternalLink current="withholding" />
+
+    <AdSlot unit="withholding-bottom" label="광고 · bottom" />
+
+    <CalculatorFeedbackRow page-key="withholding-main" />
 
     <ShareModal
       :show="showShareModal"

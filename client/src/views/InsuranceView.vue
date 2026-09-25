@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { ShCalculatorSplit, ShPairRow, ShToggleGroup } from "@shakilabs/ui";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorMemoryControl from "@/components/calculator/CalculatorMemoryControl.vue";
@@ -18,15 +19,18 @@ import HealthInsuranceRank from "@/components/salary/HealthInsuranceRank.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
-import CommunitySidebar from "@/components/common/CommunitySidebar.vue";
-import RecentCalcPanel from "@/components/common/RecentCalcPanel.vue";
+import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
 import { useInsuranceReverse } from "@/composables/useInsuranceReverse";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
 import { useShare } from "@/composables/useShare";
-import { DEFAULT_INSURANCE_PRESET } from "@/data/insurancePresets";
+import {
+  DEFAULT_INSURANCE_PRESET,
+  INSURANCE_MODE_OPTIONS,
+  type InsuranceCalcMode,
+} from "@/data/insurancePresets";
 import { formatManWon, formatWon } from "@/lib/utils";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import { addEntry } from "@/composables/useRecentCalcs";
@@ -47,12 +51,12 @@ const props = defineProps<{
 const route = useRoute();
 const router = useRouter();
 
-const defaultMode = computed<"reverse" | "forward">(() => {
+const defaultMode = computed<InsuranceCalcMode>(() => {
   if (props.initialMode) return props.initialMode;
   return route.path.startsWith("/salary") ? "forward" : "reverse";
 });
 
-const mode = ref<"reverse" | "forward">(defaultMode.value);
+const mode = ref<InsuranceCalcMode>(defaultMode.value);
 const healthInsuranceFee = ref(DEFAULT_INSURANCE_PRESET);
 const dependents = ref(1);
 const childrenUnder20 = ref(0);
@@ -385,70 +389,109 @@ watch(
       </template>
     </CalculatorPageHeader>
 
-    <section class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="space-y-4 order-1">
-        <div class="space-y-4">
-          <CalculatorInteractionTracker>
-            <InsuranceInput
-              :mode="mode"
-              v-model:health-insurance-fee="healthInsuranceFee"
-              v-model:annual-gross="forwardCalc.annualGross.value"
-              v-model:retirement-included="forwardCalc.retirementIncluded.value"
-              v-model:dependents="dependents"
-              v-model:children-under20="childrenUnder20"
-              v-model:non-taxable-monthly="nonTaxableMonthly"
-            />
-          </CalculatorInteractionTracker>
+    <!-- 홈 계산기와 같은 전환 — /insurance와 /salary는 검색어가 달라 URL은 둘로 두고 화면만 하나로 쓴다.
+         바꾸면 아래 route 동기화 watch가 상대 URL로 replace한다(가족·비과세 입력은 쿼리로 이어진다). -->
+    <ShToggleGroup v-model="mode" label="계산 방식" :options="INSURANCE_MODE_OPTIONS" />
 
-          <InsuranceResult
+    <ShCalculatorSplit>
+      <template #input>
+        <CalculatorInteractionTracker>
+          <InsuranceInput
             :mode="mode"
-            :health-insurance-fee="healthInsuranceFee"
-            :estimated-taxable-monthly="reverse.estimatedTaxableMonthly.value"
-            :estimated-annual-gross="reverse.estimatedAnnualGross.value"
-            :calc="activeCalc"
-            @share-request="handleSidebarShare"
+            v-model:health-insurance-fee="healthInsuranceFee"
+            v-model:annual-gross="forwardCalc.annualGross.value"
+            v-model:retirement-included="forwardCalc.retirementIncluded.value"
+            v-model:dependents="dependents"
+            v-model:children-under20="childrenUnder20"
+            v-model:non-taxable-monthly="nonTaxableMonthly"
           />
+        </CalculatorInteractionTracker>
+      </template>
 
-          <FinanceNextActions
-            :mode="isForwardMode ? 'salary' : 'insurance'"
-            :taxable-monthly="activeCalc.taxableMonthly.value"
-            :monthly-net="activeCalc.monthlyNet.value"
-            :monthly-health-insurance="activeCalc.healthInsurance.value"
-            :non-taxable-monthly="nonTaxableMonthly"
-            :dependents="dependents"
-            :health-insurance-fee="healthInsuranceFee"
-            :annual-gross="activeCalc.annualGross.value"
-          />
+      <template #result>
+        <InsuranceResult
+          :mode="mode"
+          :health-insurance-fee="healthInsuranceFee"
+          :estimated-taxable-monthly="reverse.estimatedTaxableMonthly.value"
+          :estimated-annual-gross="reverse.estimatedAnnualGross.value"
+          :calc="activeCalc"
+          @share-request="handleSidebarShare"
+        />
+      </template>
 
-          <InstallHint />
-        </div>
+      <template #below-input>
+        <FinanceNextActions
+          :mode="isForwardMode ? 'salary' : 'insurance'"
+          :taxable-monthly="activeCalc.taxableMonthly.value"
+          :monthly-net="activeCalc.monthlyNet.value"
+          :monthly-health-insurance="activeCalc.healthInsurance.value"
+          :non-taxable-monthly="nonTaxableMonthly"
+          :dependents="dependents"
+          :health-insurance-fee="healthInsuranceFee"
+          :annual-gross="activeCalc.annualGross.value"
+        />
 
-        <HealthInsuranceRank :calc="activeCalc" :mode="isForwardMode ? 'salary' : 'insurance'" />
+        <InstallHint />
+      </template>
+    </ShCalculatorSplit>
 
-        <AdSlot unit="insurance-top" label="광고 · top" />
-
-        <template v-if="isForwardMode">
+    <!-- 계산기 아래 데이터 블록도 2열(ShPairRow) — 위 입력 | 결과와 같은 문법(사용자 결정 2026-09-25).
+         순서는 그대로 두고 짧은 블록은 한 칸에 쌓는다. 관련 서비스(3열 카드)·광고·피드백은 전폭.
+         광고는 묶음 사이로 옮겼다 — 블록 사이에 있으면 짝을 지을 수 없고, 두 광고가 붙지 않게 본문을 사이에 둔다. -->
+    <template v-if="isForwardMode">
+      <ShPairRow>
+        <template #start>
+          <HealthInsuranceRank :calc="activeCalc" mode="salary" />
           <InsuranceDetail :calc="forwardCalc" />
-          <DeductionTable :calc="forwardCalc" />
-          <DeductionChart :calc="forwardCalc" />
-          <SalaryCompareTable />
         </template>
-        <InsuranceTable v-else />
+        <template #end>
+          <DeductionTable :calc="forwardCalc" />
+        </template>
+      </ShPairRow>
 
-        <AdSlot unit="insurance-middle" label="광고 · middle" />
+      <AdSlot unit="insurance-top" label="광고 · top" />
 
-        <CalcSourceBox />
-        <InternalLink :current="internalLinkCurrent" />
-        <RelatedServices />
+      <ShPairRow>
+        <template #start>
+          <DeductionChart :calc="forwardCalc" />
+        </template>
+        <template #end>
+          <SalaryCompareTable />
+          <CalcSourceBox />
+          <InternalLink :current="internalLinkCurrent" />
+        </template>
+      </ShPairRow>
 
-        <AdSlot unit="insurance-bottom" label="광고 · bottom" />
-      </div>
+      <AdSlot unit="insurance-middle" label="광고 · middle" />
 
-      <div class="space-y-4 order-2 lg:sticky lg:top-20 lg:self-start">
-        <CommunitySidebar :page-key="communityPageKey" />
-        <RecentCalcPanel />
-      </div>
-    </section>
+      <RelatedServices />
+
+      <AdSlot unit="insurance-bottom" label="광고 · bottom" />
+
+      <CalculatorFeedbackRow :page-key="communityPageKey" />
+    </template>
+    <template v-else>
+      <ShPairRow>
+        <template #start>
+          <HealthInsuranceRank :calc="activeCalc" mode="insurance" />
+        </template>
+        <template #end>
+          <InsuranceTable />
+          <CalcSourceBox />
+          <InternalLink :current="internalLinkCurrent" />
+        </template>
+      </ShPairRow>
+
+      <AdSlot unit="insurance-top" label="광고 · top" />
+
+      <RelatedServices />
+
+      <AdSlot unit="insurance-middle" label="광고 · middle" />
+
+      <CalculatorFeedbackRow :page-key="communityPageKey" />
+
+      <AdSlot unit="insurance-bottom" label="광고 · bottom" />
+    </template>
 
     <ShareModal
       :show="showShareModal"
