@@ -16,6 +16,7 @@ import {
   getScenarioChain,
 } from "./scenario-chains.mjs";
 import { appendGuideDeepDive } from "./guide-content.mjs";
+import { buildChanges2027Html, buildChanges2027Meta } from "./prerender-changes.mjs";
 import { FAQ_SOURCE_FILES, ROUTE_FAQS } from "./faq-data.mjs";
 import { HOME_FAQS, HOME_ITEM_LIST } from "./home-content.mjs";
 
@@ -270,6 +271,9 @@ function buildBreadcrumb(items) {
 // so the schema, the static body and src/views/HomeView.vue can never drift apart.
 
 function buildMeta(route) {
+  // 2027년 달라지는 세금·지원금 — 메타·JSON-LD도 화면과 같은 레지스트리에서 만든다
+  if (route === "/2027") return buildChanges2027Meta(SITE_URL, buildBreadcrumb);
+
   if (route === "/terms") {
     const title = "이용약관 | 2026 연봉·건보료 계산기";
     const description = "shakilabs.com/finance 서비스 이용약관을 안내합니다.";
@@ -1700,7 +1704,8 @@ function applyMeta(html, route, meta) {
   // 가이드 체인은 링크 나열이라 본문이 얇다 — 연말정산·알바 가이드에는 검증 수치 기반 심화 본문을 덧붙인다
   const scenarioHtml = buildScenarioChainHtml(route);
   const enrichedScenarioHtml = scenarioHtml ? appendGuideDeepDive(scenarioHtml, route) : null;
-  let mainContent = rich || enrichedScenarioHtml || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
+  let mainContent =
+    buildChanges2027Html(route) || rich || enrichedScenarioHtml || buildPrerenderGuide(route) || buildPrerenderSection(route, meta);
   // 스키마 규칙: FAQPage의 Q/A는 본문에 렌더되는 문구와 동일해야 하므로 같은 데이터로 본문 FAQ도 노출
   if (routeFaqs && !mainContent.includes("자주 묻는")) {
     mainContent = appendFaqSection(mainContent, routeFaqs);

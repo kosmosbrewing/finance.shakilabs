@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { RouterLink } from "vue-router";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
 import AdSlot from "@/components/common/AdSlot.vue";
@@ -10,6 +11,7 @@ import HomeFaqPanel from "@/components/home/HomeFaqPanel.vue";
 import HomeSituationGuide from "@/components/home/HomeSituationGuide.vue";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import {
+  HOME_CHANGES_LINK,
   HOME_FAQS,
   HOME_H1,
   HOME_INTRO,
@@ -64,6 +66,9 @@ const quickCalcSection = computed(() => findSection("quick-calc"));
     <div class="space-y-1.5">
       <CalculatorPageHeader :title="HOME_H1" />
       <p class="max-w-[42rem] break-keep text-caption text-muted-foreground">{{ HOME_INTRO }}</p>
+      <p>
+        <RouterLink :to="HOME_CHANGES_LINK.to" class="text-caption font-semibold text-link">{{ HOME_CHANGES_LINK.label }}</RouterLink>
+      </p>
     </div>
 
     <!-- 첫 화면은 계산기다(사용자 결정 2026-09-24, B안) — 도구만 나열하던 인덱스를 첫 화면에서

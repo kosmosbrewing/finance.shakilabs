@@ -12,6 +12,9 @@ export const HOME_H1 = "2026 연봉 실수령액·세금 계산기 — 상황별
 export const HOME_INTRO =
   "2026년 요율로 갱신한 급여·세금·수당·퇴직·절세 계산기 26개를 한곳에 모았습니다.";
 
+// 홈 소개 아래 한 줄 — 2027년 달라지는 세금·지원금 안내 페이지로. 화면(HomeView)과 프리렌더가 같은 문구를 쓴다.
+export const HOME_CHANGES_LINK = { to: "/2027", label: "2027년 달라지는 세금·지원금 한눈에 보기 →" };
+
 // Section order is load-bearing: the view renders the same headings in the same order,
 // and HOME_LINKS_AFTER_SECTION decides where the hub link block is spliced in.
 export const HOME_SECTIONS = [
