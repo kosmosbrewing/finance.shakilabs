@@ -17,7 +17,6 @@
 //   colour   index.html --primary (light)  ... parsed, never re-typed
 //   glyph    U+20A9 WON SIGN from public/fonts/Pretendard-Bold.woff
 //   outputs  public/icons/icon-192.png, icon-512.png, icon-maskable-512.png
-//            public/favicon.png  (tab and home screen show the same mark)
 //
 // WHEN A REAL LOGO ARRIVES
 // ---------------------------------------------------------------------------
@@ -132,6 +131,6 @@ console.log(
 await render(512, 0.56, resolve(iconsDir, "icon-512.png"));
 await render(192, 0.56, resolve(iconsDir, "icon-192.png"));
 await render(512, 0.44, resolve(iconsDir, "icon-maskable-512.png"));
-// The tab icon is the same mark, so the tab, the header and the home screen do
-// not disagree about what this app is.
-await render(48, 0.56, resolve(clientRoot, "public/favicon.png"));
+// The browser tab icon is NOT written here any more (2026-09-25): all ShakiLabs
+// apps share one site favicon (black rounded tile, white note) so the tabs of one
+// site look like one site. Only the installed-app icons above stay app-specific.

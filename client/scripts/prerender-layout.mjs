@@ -37,19 +37,31 @@ function buildOtherServicesBlock() {
       </nav>`;
 }
 
+const CURRENT_SERVICE = SERVICE_CATALOG.services.find((service) => service.app === CURRENT_APP);
+
+// 헤더 사이트 링크 — Vue 헤더(AppHeader.vue의 links)와 같은 두 개. 모바일에서는 ☰ 안으로 들어간다.
+// 테마 토글의 정적 쌍둥이 — 패키지 ShThemeToggle과 같은 클래스·같은 아이콘. 수화 전이라 동작하지 않지만
+// 자리가 비어 있으면 수화 때 데스크톱 사이트 링크가 60px 옆으로 밀린다.
+const STATIC_THEME_TOGGLE = `<div class="sh-global-header__utility"><button type="button" class="sh-theme-toggle" aria-label="다크 모드로 전환" style="width:44px;min-height:44px;border:0;background:transparent;color:#fafafa;"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="20" height="20"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button></div>`;
+
+const SITE_LINKS = [
+  { href: "/blog", label: "블로그" },
+  { href: "/finance/about", label: "소개" },
+];
+
 /**
- * v3 §3.3-1 모바일 좌측 드로어의 **정적 쌍둥이**.
+ * 전체 메뉴(☰)의 **정적 쌍둥이** — 0.3.38 "순수 내비게이션" 구조와 같다.
  *
  * 왜 필요한가: 이 앱의 프리렌더 산출물에는 Vue 출력이 한 글자도 없다(#app은 빈
- * div이고, 크롤러와 첫 페인트가 보는 셸은 전부 이 파일이 만든다). 드로어를 Vue에만
- * 두면 모바일 내비를 숨긴 순간 158개 원시 HTML에서 계산기 10개로 가는 헤더 경로가
- * 0이 된다. 수화 후 헤더와 같은 클래스·같은 목록으로 여기에도 심는다.
+ * div이고, 크롤러와 첫 페인트가 보는 셸은 전부 이 파일이 만든다). 메뉴를 Vue에만
+ * 두면 모바일 탭 줄이 숨은 상태에서 원시 HTML의 헤더 경로가 0이 된다. 수화 후 헤더와
+ * 같은 클래스·같은 목록으로 여기에도 심는다.
  *
- * 목록은 `scripts/primary-nav-items.mjs` 하나에서만 온다 — Vue 헤더·인라인 내비도
+ * 목록은 `scripts/primary-nav-items.mjs` 하나에서만 온다 — Vue 헤더·탭 줄도
  * 같은 파일을 import한다. 복제가 없으니 대조 게이트도 필요 없다.
  *
  * 트리거는 수화 전이므로 동작하지 않는다. 패널은 패키지 CSS가
- * `visibility:hidden; transform:translate(-100%)`로 숨기므로(스타일시트는
+ * `visibility:hidden; transform:translateX(100%)`로 숨기므로(스타일시트는
  * 렌더 블로킹이라 첫 페인트에 이미 도착해 있다) 화면에는 보이지 않고 DOM에만 남는다.
  */
 export function buildPrerenderDrawer() {
@@ -57,14 +69,19 @@ export function buildPrerenderDrawer() {
     ({ to, label }) =>
       `<a class="sh-nav-drawer__link" href="/finance${to}">${label}</a>`,
   ).join("");
+  const siteLinks = SITE_LINKS.map(
+    ({ href, label }) => `<a class="sh-nav-drawer__site-link" href="${href}">${label}</a>`,
+  ).join("");
 
   return `<button type="button" class="sh-nav-drawer__trigger" aria-label="메뉴 열기" aria-expanded="false" aria-controls="sh-nav-drawer-prerender" style="border:0;background:transparent;color:#fafafa;">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="22" height="22"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
         </button>
         <div class="sh-nav-drawer" data-open="false">
           <div class="sh-nav-drawer__scrim"></div>
-          <nav id="sh-nav-drawer-prerender" class="sh-nav-drawer__panel" aria-label="계산기 메뉴" aria-hidden="true" tabindex="-1">
-            <p class="sh-nav-drawer__title">계산기</p>${links}
+          <nav id="sh-nav-drawer-prerender" class="sh-nav-drawer__panel" aria-label="전체 메뉴" aria-hidden="true" tabindex="-1">
+            <div class="sh-nav-drawer__head"><p class="sh-nav-drawer__heading"><span class="sh-nav-drawer__eyebrow">ShakiLabs</span>${CURRENT_SERVICE.shortLabel}</p></div>
+            <div class="sh-nav-drawer__list">${links}</div>
+            <div class="sh-nav-drawer__site">${siteLinks}</div>
           </nav>
         </div>`;
 }
@@ -73,31 +90,38 @@ export function buildPrerenderDrawer() {
  * 모든 프리렌더 페이지 최상단에 삽입되는 정적 header HTML.
  *
  * v3 §3.2 — 검정 GlobalHeader. 이 블록은 Vue가 mount하기 전까지 사람이 실제로 보는
- * 헤더이므로 수화 후 헤더와 같아야 한다. 예전에는 여기에 흰 배경 "ShakiLabs 연봉계산기"
- * 인라인 헤더가 있었고 Vue는 다른 헤더를 그려서, 첫 페인트와 수화 사이에 셸이 통째로
- * 바뀌는 플래시가 났다(모바일·finance 재검수 §1).
+ * 헤더이므로 수화 후 헤더와 같아야 한다: `ShakiLabs / 급여·건보료` ··· 블로그 · 소개 · ☰.
+ * 예전에는 흰 배경 인라인 헤더가 있었고 Vue는 다른 헤더를 그려서, 첫 페인트와 수화
+ * 사이에 셸이 통째로 바뀌는 플래시가 났다(모바일·finance 재검수 §1).
  *
- * 클래스는 패키지 CSS(.sh-global-header)와 같은 이름을 쓰되, 배경·높이·글자색은
+ * 클래스는 패키지 CSS(.sh-global-header)와 같은 이름을 쓰고, 배경·높이·글자색은
  * 인라인으로도 못박는다 — 스타일시트가 도착하기 전 첫 페인트에서도 검정이어야 한다.
+ * 단 사이트 링크 묶음(nav)에는 display를 인라인으로 주지 않는다 — 인라인이 이기면
+ * 모바일에서 패키지가 링크를 ☰ 안으로 접는 규칙이 무시된다.
  *
- * 헤더에 있던 계산기 링크 7개는 여기서 뺐다. 크롤 경로는 같은 페이지 푸터
- * (buildPrerenderFooter)가 26개 계산기 전부 + 다른 서비스 + 블로그로 이미 덮는다.
+ * 크롤 경로는 같은 페이지 푸터(buildPrerenderFooter)가 26개 계산기 전부 + 다른
+ * 서비스 + 블로그로 이미 덮는다. 앱 이름은 services.json(푸터와 같은 출처)에서만 온다.
  */
 export function buildPrerenderHeader() {
-  const link = (href, label) =>
-    `<a class="sh-global-header__link" href="${href}" style="display:inline-flex;align-items:center;min-height:44px;padding-inline:10px;color:#fafafa;font-size:13px;font-weight:600;text-decoration:none;">${label}</a>`;
+  const link = ({ href, label }) =>
+    `<a class="sh-global-header__link" href="${href}" style="display:inline-flex;align-items:center;min-height:44px;padding-inline:10px;color:#a3a3a3;font-size:13px;font-weight:500;text-decoration:none;">${label}</a>`;
 
   return `
-    <header data-seo-prerender="header" class="sh-global-header" style="position:sticky;top:0;z-index:50;background:#0a0a0a;color:#fafafa;">
-      <div class="sh-global-header__inner" style="display:flex;align-items:center;gap:16px;height:56px;margin-inline:auto;padding-inline:16px;max-width:72rem;">
-        ${buildPrerenderDrawer()}
-        <a class="sh-global-header__brand" href="/" aria-label="ShakiLabs 홈" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:#fafafa;font-size:15px;font-weight:700;letter-spacing:-0.01em;text-decoration:none;white-space:nowrap;">
-          <img class="sh-global-header__logo" src="/finance/logo.png" alt="" aria-hidden="true" width="20" height="20" style="width:20px;height:20px;filter:invert(1) brightness(1.6);" />
-          <span class="sh-global-header__brand-text">ShakiLabs</span>
-        </a>
-        <nav class="sh-global-header__nav" aria-label="사이트 메뉴" style="display:flex;align-items:center;gap:4px;margin-inline-start:auto;">
-          ${link("/blog", "블로그")}${link("/finance/about", "소개")}
-        </nav>
+    <header data-seo-prerender="header" class="sh-global-header sh-global-header--has-app" style="position:sticky;top:0;z-index:50;background:#0a0a0a;color:#fafafa;">
+      <div class="sh-global-header__inner" style="display:flex;align-items:center;gap:16px;height:56px;margin-inline:auto;padding-inline:var(--sh-container-gutter, 16px);max-width:var(--sh-header-content-width, 72rem);">
+        <div class="sh-global-header__start" style="display:flex;align-items:center;min-width:0;">
+          <a class="sh-global-header__brand" href="/" aria-label="ShakiLabs 홈" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;color:#fafafa;font-size:15px;font-weight:700;letter-spacing:-0.01em;text-decoration:none;white-space:nowrap;">
+            <img class="sh-global-header__logo" src="/finance/logo.png" alt="" aria-hidden="true" width="20" height="20" style="width:20px;height:20px;filter:invert(1) brightness(1.6);" />
+            <span class="sh-global-header__brand-text">ShakiLabs</span>
+          </a>
+          <span class="sh-global-header__sep" aria-hidden="true" style="margin-inline:10px 4px;color:rgb(255 255 255 / 28%);font-size:16px;font-weight:400;">/</span>
+          <a class="sh-global-header__app" href="${CURRENT_SERVICE.href}" style="display:inline-flex;align-items:center;min-height:44px;padding-inline:6px;color:#fafafa;font-size:15px;font-weight:600;text-decoration:none;white-space:nowrap;">${CURRENT_SERVICE.shortLabel}</a>
+        </div>
+        <div class="sh-global-header__end" style="display:flex;align-items:center;gap:16px;margin-inline-start:auto;">
+          <nav class="sh-global-header__nav" aria-label="사이트 메뉴">${SITE_LINKS.map(link).join("")}</nav>
+          ${STATIC_THEME_TOGGLE}
+          ${buildPrerenderDrawer()}
+        </div>
       </div>
     </header>`;
 }
