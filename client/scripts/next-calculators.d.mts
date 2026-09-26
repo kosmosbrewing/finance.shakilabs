@@ -12,7 +12,8 @@ export type NextCalculatorKey =
 export interface NextCalculatorCard {
   route: string;
   title: string;
-  question: string;
+  /** 미리 계산 값이 없는 카드의 한 줄 요약(값이 있는 카드는 화면이 값의 가정을 note로 붙인다). */
+  note?: string;
 }
 
 export interface NextCalculatorState {
@@ -23,7 +24,6 @@ export interface NextCalculatorState {
 }
 
 export const NEXT_CALCULATORS_HEADING: string;
-export const NEXT_CALCULATORS_INTRO: string;
 export const NEXT_CALCULATOR_CARDS: Record<NextCalculatorKey, NextCalculatorCard>;
 export const HIGH_FEE_THRESHOLD: number;
 export const HIGH_GROSS_THRESHOLD: number;

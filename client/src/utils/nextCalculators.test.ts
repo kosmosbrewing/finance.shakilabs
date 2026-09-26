@@ -3,11 +3,15 @@
 // 카드 3개는 프리렌더 HTML(크롤러)과 화면(독자) 양쪽에 같은 문장으로 나간다. 규칙이 순수
 // 함수가 아니면 두 쪽이 다른 카드를 그리고, 그때는 하이드레이션 생존율이 떨어진 뒤에야 안다.
 import { describe, expect, it } from "vitest";
+import { createSSRApp, h } from "vue";
+import { renderToString } from "vue/server-renderer";
+import { ShNextActions } from "@shakilabs/ui";
 import {
   HIGH_FEE_THRESHOLD,
   HIGH_GROSS_THRESHOLD,
   INSURANCE_DEFAULT_STATE,
   NEXT_CALCULATOR_CARDS,
+  NEXT_CALCULATORS_HEADING,
   pickNextCalculators,
 } from "../../scripts/next-calculators.mjs";
 import { CALCULATOR_ROUTES } from "@/utils/calculatorIds";
@@ -54,13 +58,16 @@ describe("NEXT_CALCULATOR_CARDS", () => {
       expect(routes.has(card.route)).toBe(true);
     }
   });
+});
 
-  // 30자 미만 문장은 하이드레이션 생존율 게이트가 아예 세지 않는다 —
-  // 프리렌더에 넣어 놓고 측정되지 않는 문장이 생기면 "카드가 프리렌더에 있다"는 주장이
-  // 게이트로 뒷받침되지 않는다.
-  it("질문 문장은 생존율 게이트가 세는 길이(30자 이상)를 넘는다", () => {
-    for (const card of Object.values(NEXT_CALCULATOR_CARDS)) {
-      expect(card.question.length).toBeGreaterThanOrEqual(30);
-    }
+// 화면 블록은 패키지 ShNextActions가 그리고 제목도 패키지 기본값이다. 하이드레이션 때 프리렌더
+// 본문은 화면에 같은 제목이 있는 구간만 걷히므로(utils/prerenderFallback.ts), 두 제목이 갈리면
+// 프리렌더 카드 목록이 페이지 아래에 한 번 더 붙는다. 패키지를 올릴 때 여기서 먼저 멈춘다.
+describe("NEXT_CALCULATORS_HEADING", () => {
+  it("프리렌더 구간 제목은 화면 블록(ShNextActions 기본 제목)과 같다", async () => {
+    const html = await renderToString(
+      createSSRApp({ render: () => h(ShNextActions, { items: [] }) }),
+    );
+    expect(/<h2\b[^>]*>([^<]*)<\/h2>/.exec(html)?.[1]).toBe(NEXT_CALCULATORS_HEADING);
   });
 });

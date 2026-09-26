@@ -66,6 +66,7 @@ const eligibleLabel: Record<string, string> = {
           label="퇴사 시 총 수령액 구성"
           center-label="총 수령액"
           :format-value="formatWon"
+          half-width-at-lg
         />
       </div>
 

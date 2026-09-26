@@ -33,6 +33,7 @@ const payloadSchema = z.object({
 type MemoryControlExposed = {
   save: (payload: unknown) => void;
   clear: () => void;
+  markRestored: () => void;
 };
 
 const control = ref<MemoryControlExposed | null>(null);
@@ -93,6 +94,8 @@ async function handleRestore(payload: unknown): Promise<void> {
   // 맨 경로가 아니면 초안은 그대로 두고 이동만 하지 않는다(지우지 않는다 —
   // 복원 후 뷰가 리마운트되면서 이 분기로 다시 들어오기 때문이다)
   if (!enteredBare.value) return;
+  // 실제로 되살리는 경우에만 "복원함" — 위에서 링크 값을 지키고 돌아간 경우는 "기억 중"으로 남는다(0.3.41)
+  control.value?.markRestored();
   trackEvent("recent_result_open", {
     app_id: "finance",
     tool_id: props.tool,

@@ -1,17 +1,17 @@
 {
   "schemaVersion": 2,
-  "characterCount": 888,
-  "characterSha256": "ef50d6bcfde06e4cfba0c75c9ca4a072b37250503bca4892ac189365aeb0f800",
+  "characterCount": 887,
+  "characterSha256": "a98fe7be21db47367828098670a6393945806354246ae6ae2d1e6c0908b0f571",
   "fonts": [
     {
       "publicName": "Pretendard-Regular-subset.woff2",
-      "bytes": 64112,
-      "sha256": "2f7a6f7d83403da2b121ef1e90763165212ed7c40e95fd59b4cb8584a80a3f8b"
+      "bytes": 64136,
+      "sha256": "88f734dbe73b8892b9eca66056a073850eefc5b97e0d9c577d93732d39052302"
     },
     {
       "publicName": "Pretendard-Bold-subset.woff2",
-      "bytes": 65336,
-      "sha256": "68335c7b6ddd2459ea08a096a9a6c4ab76e406baeeb53c51aeefd45d5a82d6b7"
+      "bytes": 65352,
+      "sha256": "1657d625ea8c93fa6159cbf8efcffd6357d956a283c42a3cadb261aa7e493397"
     },
     {
       "publicName": "GmarketSansBold-brand-v1.woff2",
