@@ -39,7 +39,6 @@ import {
   INSURANCE_DEFAULT_STATE,
   NEXT_CALCULATOR_CARDS,
   NEXT_CALCULATORS_HEADING,
-  NEXT_CALCULATORS_INTRO,
   pickNextCalculators,
 } from "./next-calculators.mjs";
 // 가구 유형별 엔진 스캔 절 — 세 변종이 서로 다른 결론에 도달한다는 전제를 실제로 지탱하는 부분
@@ -3744,31 +3743,27 @@ function buildInsuranceBandTable() {
     <p style="${P_STYLE}">비과세 식대 월 20만원을 더해 연봉으로 환산한 값입니다. 건보료를 클릭하면 해당 금액의 상세 역산 페이지로 이동합니다.</p>`;
 }
 
-// "Next calculation" cards, prerendered for /insurance only.
+// "이어서 계산하기" 카드 — /insurance에만 프리렌더한다.
 //
-// The cards the crawler gets are the DEFAULT-state branch, which is exactly what a reader sees
-// on first paint at /insurance. Only the static half is prerendered: title and the question the
-// calculator answers. The preview amount is deliberately NOT here - it depends on inputs the
-// reader can change, so a number baked into static HTML would be a claim about a state that no
-// longer holds. The view adds it client-side with the assumption spelled out beside it.
+// 크롤러가 받는 카드는 기본 상태 분기, 즉 /insurance 첫 화면에서 독자가 보는 것과 같다. 정적인
+// 절반만 싣는다: 제목(링크)과 값이 없는 카드의 한 줄 note. 미리 계산 값과 그 가정은 일부러 뺀다 —
+// 독자가 바꿀 수 있는 입력에 달린 값이라, 정적 HTML에 박으면 이미 지난 상태에 대한 주장이 된다.
+// 화면(ShNextActions)이 링크 목록이라 여기도 목록으로 낸다.
 //
-// Copy comes from next-calculators.mjs, the same module FinanceNextActions.vue reads, so the
-// hydration survival gate measures one set of sentences rather than two drifting sets.
+// 구간 제목이 화면 블록 제목과 같아서 하이드레이션 때 이 구간은 통째로 걷힌다(prerenderFallback) —
+// 사람에게 두 번 보이지 않는다. 문구는 FinanceNextActions.vue와 같은 next-calculators.mjs에서 온다.
 function buildNextCalculatorsSection() {
-  const cards = pickNextCalculators(INSURANCE_DEFAULT_STATE)
+  const items = pickNextCalculators(INSURANCE_DEFAULT_STATE)
     .map((key) => {
       const card = NEXT_CALCULATOR_CARDS[key];
-      return (
-        `<h3 style="${H3_STYLE}"><a href="/finance${card.route}">${card.title}</a></h3>` +
-        `<p style="${P_STYLE}">${card.question}</p>`
-      );
+      const note = card.note ? ` — ${card.note}` : "";
+      return `<li style="${LI_STYLE}"><a href="/finance${card.route}">${card.title}</a>${note}</li>`;
     })
     .join("");
 
   return {
     h2: NEXT_CALCULATORS_HEADING,
-    body: NEXT_CALCULATORS_INTRO,
-    extra: cards,
+    extra: `<ul style="${UL_STYLE}">${items}</ul>`,
   };
 }
 
@@ -3930,7 +3925,8 @@ function buildLandingContent(route) {
 
   const sectionsHtml = data.sections.map(
     (s) =>
-      `<h2 style="${H2_STYLE}">${s.h2}</h2><p style="${P_STYLE}">${s.body}</p>${s.extra ?? ""}`
+      // 소개 문단이 없는 구간(이어서 계산하기 카드)은 빈 <p>를 내지 않는다.
+      `<h2 style="${H2_STYLE}">${s.h2}</h2>${s.body ? `<p style="${P_STYLE}">${s.body}</p>` : ""}${s.extra ?? ""}`
   );
 
   // 목차 한 줄 소개는 화면과 같은 문장을 쓴다. 하이드레이션 때 이 h2 구간이 통째로 걷히므로
