@@ -16,12 +16,18 @@ const props = withDefaults(
     centerValue?: string;
     emptyMessage?: string;
     formatValue?: (value: number) => string;
+    // lg+에서 1×2 틀의 반폭 칸(결과 카드)에 놓이고 범례에 금액을 쓰는 호출부만 켠다. 도넛(176px) 옆
+    // 범례를 2열로 두면 한 칸이 약 100~120px라 항목명과 금액이 같이 안 들어가 항목명이 잘린다
+    // (/4-insurance-employer "국민연금", /quit "연차수당"은 1024px에서 0px까지 — 실측).
+    // /salary 월 급여 구성은 범례 값이 비율(%)이라 반폭 2열에서도 안 잘려 기본값(2열)을 둔다.
+    halfWidthAtLg?: boolean;
   }>(),
   {
     centerLabel: "",
     centerValue: "",
     emptyMessage: "표시할 구성 항목이 없습니다.",
     formatValue: undefined,
+    halfWidthAtLg: false,
   },
 );
 
@@ -111,7 +117,7 @@ const arcs = computed(() =>
       </text>
     </svg>
 
-    <div class="grid w-full gap-x-4 gap-y-2 sm:grid-cols-1 md:grid-cols-2">
+    <div class="grid w-full gap-x-4 gap-y-2 sm:grid-cols-1 md:grid-cols-2" :class="{ 'lg:grid-cols-1': halfWidthAtLg }">
       <div
         v-for="arc in arcs"
         :key="`${arc.key}-legend`"

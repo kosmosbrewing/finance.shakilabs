@@ -2,14 +2,15 @@
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { ShCalculatorSplit } from "@shakilabs/ui";
+import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
-import FreshBadge from "@/components/common/FreshBadge.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
-import { Button } from "@/components/ui/button";
 import ScenarioChipGroup from "@/components/scenario/ScenarioChipGroup.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
+import FreelanceRateResult from "@/components/freelance-rate/FreelanceRateResult.vue";
 import { useShare } from "@/composables/useShare";
 import { addEntry } from "@/composables/useRecentCalcs";
 import {
@@ -18,8 +19,7 @@ import {
 } from "@/data/freelanceTaxRates";
 import { normalizeFreelanceRateInput } from "@/lib/validators";
 import { buildAbsoluteUrl, buildQuery, parseQueryInt, queryFirst } from "@/lib/routeState";
-import { formatPercent, formatWon } from "@/lib/utils";
-import ResultHero from "@/components/common/ResultHero.vue";
+import { formatWon } from "@/lib/utils";
 import { calculateFreelanceRateImpact } from "@/utils/scenarioCalculator";
 
 const route = useRoute();
@@ -130,62 +130,32 @@ const incomeTypeOptions = [
   <div class="sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" />
 
-    <div class="retro-panel overflow-hidden">
-      <div class="retro-titlebar rounded-t-2xl">
-        <div class="space-y-1">
-          <h1 class="retro-title">프리랜서 세후 단가 역산 계산기</h1>
-          <p class="text-caption text-muted-foreground [text-wrap:balance]">목표 실수령을 기준으로 월 청구액, 일 단가, 시급을 역산합니다.</p>
-        </div>
-        <FreshBadge message="2026 종소세 기준" />
-      </div>
-      <CalculatorInteractionTracker>
-        <div class="retro-panel-content grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-          <div class="space-y-4">
-            <ScenarioField v-model="targetMonthlyNet" label="목표 세후 월수입" unit="원" :min="1_000_000" :max="10_000_000" :step="10_000" format="currency" :presets="[{ label: '300만원', value: 3_000_000 }, { label: '400만원', value: 4_000_000 }, { label: '600만원', value: 6_000_000 }]" />
-            <ScenarioField v-model="workDaysMonthly" label="월 작업일수" unit="일" :min="8" :max="25" :presets="[{ label: '16일', value: 16 }, { label: '18일', value: 18 }, { label: '20일', value: 20 }]" />
-            <ScenarioField v-model="billableHoursDaily" label="하루 청구시간" unit="시간" :min="2" :max="10" :step="0.5" format="decimal" :presets="[{ label: '4시간', value: 4 }, { label: '6시간', value: 6 }, { label: '8시간', value: 8 }]" />
-            <ScenarioField v-model="dependents" label="부양가족 수" unit="명" :min="1" :max="6" :presets="[{ label: '1명', value: 1 }, { label: '2명', value: 2 }, { label: '4명', value: 4 }]" />
-            <ScenarioChipGroup v-model="incomeType" label="소득 유형" :options="incomeTypeOptions" />
-            <ScenarioChipGroup v-if="incomeType === 'business'" v-model="industryKey" label="업종 경비율" :options="industryOptions" />
-          </div>
-          <div class="space-y-4">
-            <ResultHero label="월 청구액" :value="formatWon(result.monthlyInvoice)" />
-            <div class="retro-stat-grid">
-              <div class="retro-stat">
-                <p class="retro-stat-label">일 단가</p>
-                <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.dailyRate) }}</p>
-              </div>
-              <div class="retro-stat">
-                <p class="retro-stat-label">시간당 단가</p>
-                <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatWon(result.hourlyRate) }}</p>
-              </div>
-              <div class="retro-stat">
-                <p class="retro-stat-label">실효 세율</p>
-                <p class="retro-stat-value whitespace-nowrap text-[0.95rem] sm:text-heading">{{ formatPercent(result.tax.effectiveTaxRate, 1) }}</p>
-              </div>
+    <CalculatorPageHeader title="프리랜서 세후 단가 역산 계산기" />
+
+    <!-- 퍼널 추적은 입력·결과 두 카드를 함께 감싼다 — 한 패널이던 때와 같은 범위라야 결과 공유 클릭까지
+         이벤트가 그대로다. 입력이 결과보다 길어 결과 칸은 ShCalculatorSplit이 스스로 붙인다(래퍼에 overflow 금지). -->
+    <CalculatorInteractionTracker>
+      <ShCalculatorSplit>
+        <template #input>
+          <section class="retro-panel overflow-hidden" aria-labelledby="freelance-rate-input-title">
+            <div class="retro-titlebar rounded-t-2xl">
+              <h2 id="freelance-rate-input-title" class="retro-title">역산 조건 입력</h2>
             </div>
-  
-            <div class="retro-panel-muted retro-panel-content space-y-3">
-              <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <div>
-                  <p class="text-tiny uppercase tracking-wide text-muted-foreground">원천징수 후 현금흐름</p>
-                  <p class="mt-1 text-body font-semibold tabular-nums">{{ formatWon(result.cashAfterWithholdingMonthly) }}/월</p>
-                </div>
-                <div>
-                  <p class="text-tiny uppercase tracking-wide text-muted-foreground">정산 차이</p>
-                  <p class="mt-1 text-body font-semibold tabular-nums">{{ result.settlementDelta >= 0 ? "추가 납부" : "환급 예상" }} {{ formatWon(Math.abs(result.settlementDelta)) }}</p>
-                </div>
-              </div>
-              <p class="text-caption leading-6 text-muted-foreground">
-                목표 세후 <span class="tabular-nums">{{ formatWon(input.targetMonthlyNet) }}</span>를 위해 연간 청구액은
-                <span class="font-semibold text-foreground tabular-nums">{{ formatWon(result.annualGross) }}</span> 수준이 필요합니다.
-              </p>
-              <Button class="w-full" @click="openShare">결과 공유</Button>
+            <div class="retro-panel-content space-y-4">
+              <ScenarioField v-model="targetMonthlyNet" label="목표 세후 월수입" unit="원" :min="1_000_000" :max="10_000_000" :step="10_000" format="currency" :presets="[{ label: '300만원', value: 3_000_000 }, { label: '400만원', value: 4_000_000 }, { label: '600만원', value: 6_000_000 }]" />
+              <ScenarioField v-model="workDaysMonthly" label="월 작업일수" unit="일" :min="8" :max="25" :presets="[{ label: '16일', value: 16 }, { label: '18일', value: 18 }, { label: '20일', value: 20 }]" />
+              <ScenarioField v-model="billableHoursDaily" label="하루 청구시간" unit="시간" :min="2" :max="10" :step="0.5" format="decimal" :presets="[{ label: '4시간', value: 4 }, { label: '6시간', value: 6 }, { label: '8시간', value: 8 }]" />
+              <ScenarioField v-model="dependents" label="부양가족 수" unit="명" :min="1" :max="6" :presets="[{ label: '1명', value: 1 }, { label: '2명', value: 2 }, { label: '4명', value: 4 }]" />
+              <ScenarioChipGroup v-model="incomeType" label="소득 유형" :options="incomeTypeOptions" />
+              <ScenarioChipGroup v-if="incomeType === 'business'" v-model="industryKey" label="업종 경비율" :options="industryOptions" />
             </div>
-          </div>
-        </div>
-      </CalculatorInteractionTracker>
-    </div>
+          </section>
+        </template>
+        <template #result>
+          <FreelanceRateResult :result="result" :target-monthly-net="input.targetMonthlyNet" @share-request="openShare" />
+        </template>
+      </ShCalculatorSplit>
+    </CalculatorInteractionTracker>
     <InternalLink current="freelance-rate" />
 
     <CalculatorFeedbackRow page-key="freelance-rate-main" />
