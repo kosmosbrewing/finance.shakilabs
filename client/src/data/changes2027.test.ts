@@ -16,11 +16,12 @@ import { buildChanges2027Html } from "../../scripts/prerender-changes.mjs";
 import { MIN_WAGE_HOURLY as MIN_WAGE_HOURLY_2026 } from "../../scripts/hub-digests-guides.mjs";
 import { SEO_ROUTES, SITEMAP_ROUTES, CALCULATOR_ROUTES } from "../../scripts/seo-routes.mjs";
 
-// 다른 앱 계산기 경로 — 2026-09-25 각 저장소 origin/main 라우터에서 실존 확인.
-// 앱 라우트가 바뀌면 여기서 먼저 깨진다(깨진 링크를 라이브에 내보내지 않는다).
+// 다른 앱 계산기 경로 — 2026-09-27 각 앱의 라이브 사이트맵(shakilabs.com/<앱>/sitemap.xml)과 대조해 확인.
+// 이 목록은 레지스트리 링크를 검사하는 기준이라, 목록 자체가 틀리면 틀린 링크가 통과한다 — 09-25판은
+// 없는 /holding-tax를 담고 있어 /2027의 보유세 링크 2곳이 404인 채 green이었다. 추가·수정할 때는 사이트맵으로 대조할 것.
 const OTHER_APP_ROUTES: Record<string, readonly string[]> = {
   baby: ["/first-meeting", "/child-allowance"],
-  house: ["/holding-tax", "/capital-gains-tax"],
+  house: ["/property-tax", "/capital-gains-tax"],
   invest: ["/isa"],
   car: ["/ev-vs-gas"],
 };
