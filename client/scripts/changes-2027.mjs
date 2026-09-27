@@ -343,7 +343,7 @@ export const CHANGES_2027 = [
     after: "거주 14억 원 · 비거주 9억 원 (공시가격 기준)",
     target: "종부세를 내는 1세대 1주택자",
     effective: "2027년분 종부세부터",
-    calc: calc("house", "/holding-tax", "보유세 계산(현행)"),
+    calc: calc("house", "/property-tax", "보유세 계산(현행)"),
     details: ["다주택자 기본공제는 9억 원에서 거주 주택 비중에 따라 4억~9억 원으로 바뀝니다."],
   },
   {
@@ -354,7 +354,7 @@ export const CHANGES_2027 = [
     after: "70% (1세대 1주택·지방 1~2주택) · 3주택 이상 등은 2028년부터 80%",
     target: "종부세를 내는 주택 보유자",
     effective: "2027년분 종부세부터",
-    calc: calc("house", "/holding-tax", "보유세 계산(현행)"),
+    calc: calc("house", "/property-tax", "보유세 계산(현행)"),
     details: [
       "과세표준 6억~12억 원 구간 세율도 1.0%에서 1.3%로 오릅니다(1·2주택).",
       "1주택자 고령·보유 세액공제에 한도가 생깁니다: 2027년 800만 원, 2028년부터 600만 원.",
