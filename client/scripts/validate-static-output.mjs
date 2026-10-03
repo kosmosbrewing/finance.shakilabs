@@ -324,6 +324,36 @@ function collectSourceFiles(dir, out = []) {
   return out;
 }
 
+function collectCssFiles(dir, out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) collectCssFiles(full, out);
+    else if (entry.name.endsWith(".css")) out.push(full);
+  }
+  return out;
+}
+
+// @media 블록의 내용만 뽑아낸다(중첩 { }를 직접 세어서) — 미디어 쿼리 밖의 !important
+// 규칙(현재는 없음)과 안쪽 규칙을 구분해야 "media rule" 범위를 정확히 지킨다.
+function extractMediaBlockBodies(css) {
+  const bodies = [];
+  const opener = /@media[^{]*\{/g;
+  let match;
+  while ((match = opener.exec(css))) {
+    const start = match.index + match[0].length;
+    let depth = 1;
+    let i = start;
+    while (i < css.length && depth > 0) {
+      if (css[i] === "{") depth++;
+      else if (css[i] === "}") depth--;
+      i++;
+    }
+    bodies.push(css.slice(start, i - 1));
+    opener.lastIndex = i;
+  }
+  return bodies;
+}
+
 function validateOpacityUtilitiesAreGenerated() {
   const cssDir = resolve(distRoot, "assets");
   if (!existsSync(cssDir)) {
@@ -371,6 +401,12 @@ function validateOpacityUtilitiesAreGenerated() {
 //    src/components/result-visualization/(차트 전용 디렉터리) 밖에서 쓰이면 실패 —
 //    v8 공통 규칙 "13px 미만 글자(차트 범례 12px 제외)"를 디렉터리 경계로 집행한다.
 //    .text-xs(Tailwind 기본 유틸)는 이 결함과 다른 토큰 계열이라 범위 밖이다.
+// 3) src/**/*.css의 @media 규칙 안 !important font-size가 13px 밑이면 실패 — 2026-10-03
+//    추가. responsive-accessibility.css의 "@media (max-width:400px)" 바닥이
+//    `.text-caption, .text-tiny, .text-xs, ...` 전부를 12px !important로 눌러서,
+//    (1)에서 토큰을 13px로 고쳐도 360~400px 폭(네이버 트래픽 다수가 쓰는 갤럭시 폭)
+//    에서는 이 !important가 다시 12px로 덮어 고친 게 무효화됐다 — 토큰과 바닥을 같이
+//    봐야 한다. `.retro-details-chevron`(접기 화살표 글리프, 본문 글자 아님)만 예외.
 function validateNoTinyTextUtilities() {
   const tailwindConfigPath = resolve(projectRoot, "tailwind.config.ts");
   const tailwindConfig = readFileSync(tailwindConfigPath, "utf8");
@@ -404,6 +440,34 @@ function validateNoTinyTextUtilities() {
       );
     }
   }
+  // (3) CSS 소스의 @media !important 바닥.
+  const chevronException = new Set([".retro-details-chevron"]);
+  const ruleWithinMedia = /([^{}]+)\{([^{}]*)\}/g;
+  for (const file of collectCssFiles(resolve(projectRoot, "src"))) {
+    // 주석을 먼저 지운다 — 안 지우면 셀렉터 바로 위 줄의 /* ... */ 설명이 "셀렉터"
+    // 캡처에 섞여 들어와 .retro-details-chevron처럼 정확히 비교해야 하는 예외가 안 걸린다.
+    const css = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const body of extractMediaBlockBodies(css)) {
+      for (const match of body.matchAll(ruleWithinMedia)) {
+        const [, selectorList, ruleBody] = match;
+        if (!/!important/.test(ruleBody)) continue;
+        const sizeMatch = ruleBody.match(/font-size:\s*([0-9.]+)(px|rem)\s*!important/);
+        if (!sizeMatch) continue;
+        const px =
+          sizeMatch[2] === "rem"
+            ? Number.parseFloat(sizeMatch[1]) * 16
+            : Number.parseFloat(sizeMatch[1]);
+        if (px >= 13) continue;
+        for (const selector of selectorList.split(",").map((s) => s.trim())) {
+          if (chevronException.has(selector)) continue;
+          offenders.push(
+            `${file.slice(projectRoot.length + 1)}: ${selector} { font-size: ${sizeMatch[1]}${sizeMatch[2]} !important } = ${px}px (media rule)`,
+          );
+        }
+      }
+    }
+  }
+
   assert(
     offenders.length === 0,
     "Sub-13px text utilities found (chart visualizations may use exactly 12px):\n  " +
