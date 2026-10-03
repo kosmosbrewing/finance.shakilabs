@@ -77,8 +77,6 @@ const arcs = computed(() =>
       :aria-label="label"
       :aria-describedby="descriptionId"
     >
-      <!-- SVG <title>은 네이버 서치어드바이저가 문서 <title> 중복으로 센다(렌더 후 2개 — 10-03 전수 스캔에서 finance만 남음).
-           이름은 aria-label, 설명은 <desc>로 — 읽기 보조는 그대로다. -->
       <desc :id="descriptionId">{{ description }}</desc>
       <template v-for="arc in arcs" :key="arc.key">
         <circle
