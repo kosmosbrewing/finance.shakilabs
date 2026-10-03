@@ -32,6 +32,16 @@ import {
 } from "./hub-styles.mjs";
 import { HUB_PAGES as FAMILY_HUB_PAGES } from "./hub-pages.mjs";
 import { TOOL_HUB_PAGES } from "./hub-pages-tools.mjs";
+// v8b 결함 수정(2026-10-03): 렌더되는 모든 <p>가 250자를 넘지 않게 하는 단일 지점.
+// hub-digests-*.mjs의 Finding.body·Section.body는 이미 배열(원소당 <p> 하나)이지만,
+// 원소 하나가 여러 문장을 이어 쓴 250자 초과 문자열인 경우가 있었다 — 렌더러 쪽에서
+// 한 번만 다시 쪼개면 9개 다이제스트 파일을 전부 손대지 않고 끝난다.
+import { ensureParagraphLength } from "./paragraph-chunks.mjs";
+
+// <p> 하나로 나갈 문단 후보 목록을 받아, 250자가 넘는 원소만 문장 경계에서 추가로 쪼갠다.
+function paragraphsFrom(value) {
+  return [value].flat().filter(Boolean).flatMap((text) => ensureParagraphLength(text));
+}
 
 // Family hubs (a base calculator that absorbs amount variants) and single-tool hubs share one
 // renderer but live in separate files — the family set is driven by the consolidation, the tool
@@ -59,28 +69,32 @@ function renderTable(table) {
 // them, so a finding that cannot be named in one clause does not belong in a digest.
 function renderBlock(block) {
   const parts = [`<h3 style="${H3_STYLE}">${block.h3}</h3>`];
-  for (const body of [block.body].flat().filter(Boolean)) {
+  for (const body of paragraphsFrom(block.body)) {
     parts.push(`<p style="${P_STYLE}">${body}</p>`);
   }
   if (block.table) parts.push(renderTable(block.table));
-  if (block.tableNote) parts.push(`<p style="${P_STYLE}">${block.tableNote}</p>`);
+  for (const note of paragraphsFrom(block.tableNote)) {
+    parts.push(`<p style="${P_STYLE}">${note}</p>`);
+  }
   return parts.join("");
 }
 
 function renderSection(section) {
   const parts = [`<h2 style="${H2_STYLE}">${section.h2}</h2>`];
-  for (const body of [section.body].flat().filter(Boolean)) {
+  for (const body of paragraphsFrom(section.body)) {
     parts.push(`<p style="${P_STYLE}">${body}</p>`);
   }
   for (const block of section.blocks ?? []) parts.push(renderBlock(block));
   if (section.table) parts.push(renderTable(section.table));
-  if (section.tableNote) parts.push(`<p style="${P_STYLE}">${section.tableNote}</p>`);
+  for (const note of paragraphsFrom(section.tableNote)) {
+    parts.push(`<p style="${P_STYLE}">${note}</p>`);
+  }
   if (section.callout) parts.push(`<div style="${CALLOUT_STYLE}">${section.callout}</div>`);
   if (section.list) {
     const items = section.list.map((item) => `<li style="${LI_STYLE}">${item}</li>`).join("");
     parts.push(`<ul style="${UL_STYLE}">${items}</ul>`);
   }
-  for (const body of [section.after].flat().filter(Boolean)) {
+  for (const body of paragraphsFrom(section.after)) {
     parts.push(`<p style="${P_STYLE}">${body}</p>`);
   }
   return parts.join("");
@@ -96,9 +110,12 @@ function renderVariants(variants) {
         `<li style="${LI_STYLE}"><a href="/finance${item.href}">${item.label}</a>${item.note ? ` — ${item.note}` : ""}</li>`,
     )
     .join("");
+  const lead = paragraphsFrom(variants.lead)
+    .map((text) => `<p style="${P_STYLE}">${text}</p>`)
+    .join("");
   return [
     `<h2 style="${H2_STYLE}">${variants.h2}</h2>`,
-    variants.lead ? `<p style="${P_STYLE}">${variants.lead}</p>` : "",
+    lead,
     `<ul style="${UL_STYLE}">${items}</ul>`,
   ].join("");
 }
@@ -112,10 +129,11 @@ export function buildHubContent(route) {
   if (!page) return null;
 
   const definition = typeof page === "function" ? page() : page;
-  const lead = [definition.lead]
-    .flat()
-    .filter(Boolean)
+  const lead = paragraphsFrom(definition.lead)
     .map((text) => `<p style="${P_STYLE}">${text}</p>`)
+    .join("");
+  const note = paragraphsFrom(definition.note)
+    .map((text) => `<p style="${NOTE_STYLE}">${text}</p>`)
     .join("");
 
   return `
@@ -124,7 +142,7 @@ export function buildHubContent(route) {
       ${lead}
       ${definition.sections.map(renderSection).join("")}
       ${renderVariants(definition.variants)}
-      <p style="${NOTE_STYLE}">${definition.note}</p>
+      ${note}
     </article>`;
 }
 

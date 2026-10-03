@@ -4,6 +4,12 @@
 }
 
 @media (max-width: 400px) {
+  /* v8 결함 수정(2026-10-03): 12px였다 — 이 규칙 자체가 모바일 결함이었다. 390px
+     스크린샷에서는 안 드러났지만 네이버 트래픽 대다수가 쓰는 360px 갤럭시 폭에서는
+     데스크톱에서 11px→13px로 고친 글자가 이 !important 바닥에 다시 12px로 깔려
+     토큰 수정이 무효화됐다. 13px(0.8125rem, caption과 동일)로 올려 바닥 자체를
+     본문 기준과 맞춘다 — 500px 폭 안에서 서로 다른 작은 글자 크기가 섞이지 않게
+     "하나로 정규화"하는 원래 취지는 유지한다. */
   .text-caption,
   .text-tiny,
   .text-xs,
@@ -12,10 +18,11 @@
   [class*="text-[10px]"],
   [class*="text-[11px]"],
   [class~="!text-xs"] {
-    font-size: 12px !important;
+    font-size: 13px !important;
     line-height: 1.4 !important;
   }
 
+  /* 접기/펼치기 화살표 글리프(▾)다 — 본문 글자가 아니라 이번 결함 수정 대상이 아니다. */
   .retro-details-chevron {
     font-size: 12px !important;
   }

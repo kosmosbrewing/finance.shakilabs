@@ -20,5 +20,9 @@ export const UL_STYLE = "margin:0 0 12px 20px;padding:0;";
 export const LI_STYLE = "margin-bottom:4px;";
 export const CALLOUT_STYLE =
   "background:hsl(var(--accent));border-left:4px solid hsl(var(--primary));padding:12px 14px;margin:12px 0 16px;border-radius:4px;";
-export const NOTE_STYLE = "font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;";
+// v8c 결함 수정(2026-10-03): 12px였다. getComputedStyle 실측으로 확인 — 인라인 style이라
+// Tailwind 스캐너는 못 보고, 프리렌더 article이 하이드레이션 때 그대로 입양돼(prerenderFallback)
+// 뷰포트와 무관하게 항상 12px였다(반응형 축소가 아니라 애초에 13px 미만). /comprehensive-tax·
+// /all 등 허브 note(출처·법적 효력 고지)가 이 스타일을 쓴다.
+export const NOTE_STYLE = "font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;";
 export const HIGHLIGHT_ROW_STYLE = "background:hsl(var(--accent));";

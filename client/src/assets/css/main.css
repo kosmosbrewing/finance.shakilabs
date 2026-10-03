@@ -114,10 +114,13 @@
   /* ── docs/ARCHIVE_TONE_SPEC.md §2 공통 컴포넌트 (root src/style.css와 동일) ── */
 
   /* Archive의 'COMING SOON' 라벨 — 색이 아니라 자간·크기로 계층을 만든다.
-     Archive 원본 자간 .28em은 라틴 대문자 전용이라 한글 음절을 흩뜨린다 → 0.04em. */
+     Archive 원본 자간 .28em은 라틴 대문자 전용이라 한글 음절을 흩뜨린다 → 0.04em.
+     v8b 결함 수정(2026-10-03): 0.7rem(11.2px)였다 — 일반 CSS 클래스라 Tailwind
+     유틸리티 스캐너(validateNoTinyTextUtilities)가 못 보는 사각지대였다. /comprehensive-tax의
+     STEP 1/2/3 배지·AboutView 날짜 라벨이 이 클래스를 쓴다. 13px(caption과 동일)로. */
   .eyebrow {
     color: hsl(var(--muted-foreground));
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.04em;
   }

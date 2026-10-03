@@ -100,6 +100,59 @@ function validateTableScrollWrappers() {
   }
 }
 
+// 렌더 문단(<p>) 250자 상한 게이트(v8b 결함 수정, 2026-10-03).
+//
+// 왜: 전수 스캔에서 39개 사이트맵 페이지 중 25개가 250자를 넘는 <p>를 하나 이상 갖고 있었다
+// (최장 437자, /guide/job-change). 단일 소스(scripts/paragraph-chunks.mjs의
+// ensureParagraphLength)를 hub-content.mjs·hub-digests-tools.mjs·hub-digests.mjs의 렌더러
+// 네 곳과 guide-content.mjs의 손글씨 HTML 한 곳에 연결해 고쳤다 — 이 게이트는 그 수정이
+// 되돌아가거나 새 긴 문단이 들어오면 빌드를 실패시킨다.
+//
+// 약관(/terms)·개인정보(/privacy)는 법률 문서라 제외한다(브리프 공통 규칙).
+const PARAGRAPH_LENGTH_LIMIT = 250;
+const PARAGRAPH_EXCLUDE_ROUTES = new Set(["/terms", "/privacy"]);
+// Ledger, not mute list(verify-hydration-survival.mjs의 KNOWN_BELOW_FLOOR와 같은 패턴):
+// /eitc의 "단독·홑벌이·맞벌이 한계 부담" 비교 문장은 세 유형을 한 문장 안에 쉼표로 나열하고
+// "…28.72%입니다."에서만 끝난다 — 문장 경계("다."/"요.")가 그 한 곳뿐이라 v8b 규칙(문장
+// 경계에서만 분할)으로는 254자보다 더 줄일 수 없다. 유형 하나를 지우면 세 유형 비교가 깨지므로
+// 삭제 대상도 아니다. 이 값이 더 커지면 실패하고, 250 이하로 내려오면 이 줄을 지워야 한다.
+const KNOWN_OVER_LIMIT = {
+  "/eitc": 254,
+};
+
+function longestParagraph(html) {
+  let max = 0;
+  for (const match of html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+    const text = match[1]
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (text.length > max) max = text.length;
+  }
+  return max;
+}
+
+function validateParagraphLength() {
+  for (const route of SEO_ROUTES) {
+    if (PARAGRAPH_EXCLUDE_ROUTES.has(route)) continue;
+    const path = outputPathForRoute(route);
+    if (!existsSync(path)) continue;
+    const max = longestParagraph(readFileSync(path, "utf8"));
+    const limit = KNOWN_OVER_LIMIT[route] ?? PARAGRAPH_LENGTH_LIMIT;
+    assert(
+      max <= limit,
+      `${route}: longest <p> is ${max} chars (limit ${limit}) — split at a sentence boundary ` +
+        "(다./요. + space) via ensureParagraphLength, do not delete sentences or change numbers",
+    );
+  }
+}
+
 function validateVercelConfig() {
   const config = JSON.parse(readFileSync(resolve(repositoryRoot, "vercel.json"), "utf8"));
   assert(config.cleanUrls === true, "vercel.json: cleanUrls must be true");
@@ -324,6 +377,36 @@ function collectSourceFiles(dir, out = []) {
   return out;
 }
 
+function collectCssFiles(dir, out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) collectCssFiles(full, out);
+    else if (entry.name.endsWith(".css")) out.push(full);
+  }
+  return out;
+}
+
+// @media 블록의 내용만 뽑아낸다(중첩 { }를 직접 세어서) — 미디어 쿼리 밖의 !important
+// 규칙(현재는 없음)과 안쪽 규칙을 구분해야 "media rule" 범위를 정확히 지킨다.
+function extractMediaBlockBodies(css) {
+  const bodies = [];
+  const opener = /@media[^{]*\{/g;
+  let match;
+  while ((match = opener.exec(css))) {
+    const start = match.index + match[0].length;
+    let depth = 1;
+    let i = start;
+    while (i < css.length && depth > 0) {
+      if (css[i] === "{") depth++;
+      else if (css[i] === "}") depth--;
+      i++;
+    }
+    bodies.push(css.slice(start, i - 1));
+    opener.lastIndex = i;
+  }
+  return bodies;
+}
+
 function validateOpacityUtilitiesAreGenerated() {
   const cssDir = resolve(distRoot, "assets");
   if (!existsSync(cssDir)) {
@@ -352,6 +435,142 @@ function validateOpacityUtilitiesAreGenerated() {
     "These opacity utilities generated no CSS — if the number is off Tailwind's opacity scale use " +
       "the arbitrary-value form (/[8%]), and check the colour name exists in the theme:\n  " +
       missing.join("\n  "),
+  );
+}
+
+// 11px 보조 글자 재발 방지 게이트(v8 결함 수정, 2026-10-03).
+//
+// 왜 소스를 보나(빌드 CSS·HTML이 아니라): /comprehensive-tax·/freelancer의 업종 주석,
+// /guide/*의 단계 설명·"N단계 · ", /all의 항목 설명은 모두 하이드레이션 뒤에만 DOM에
+// 들어오는 계산기 UI 안쪽 글자다. 이 앱의 크롤러용 정적 스냅샷(data-seo-prerender)은
+// 인라인 style로 구워 낸 별도 SEO 문단이라 Tailwind 클래스를 아예 안 쓴다 — 그래서
+// dist의 HTML·CSS를 대조해서는 이 결함을 재현도 재검증도 못 한다. 실제 방문자가 보는
+// 글자 크기는 소스의 tailwind.config.ts 토큰과 text-[...] 화살표 값이 전부이므로,
+// validateOpacityUtilitiesAreGenerated와 같은 방식으로 소스를 직접 스캔한다.
+//
+// 1) tiny 토큰(.text-tiny)이 다시 13px 밑으로 내려가면 실패 — 18곳이 넘는 호출부가
+//    공유하는 소스라 토큰 하나가 전체를 되돌릴 수 있다.
+// 2) text-[Npx]/text-[N.Mrem] 화살표 유틸은 전부 12px 이상이어야 하고, 12px대는
+//    src/components/result-visualization/(차트 전용 디렉터리) 밖에서 쓰이면 실패 —
+//    v8 공통 규칙 "13px 미만 글자(차트 범례 12px 제외)"를 디렉터리 경계로 집행한다.
+//    .text-xs(Tailwind 기본 유틸)는 이 결함과 다른 토큰 계열이라 범위 밖이다.
+// 3) src/**/*.css의 @media 규칙 안 !important font-size가 13px 밑이면 실패 — 2026-10-03
+//    추가. responsive-accessibility.css의 "@media (max-width:400px)" 바닥이
+//    `.text-caption, .text-tiny, .text-xs, ...` 전부를 12px !important로 눌러서,
+//    (1)에서 토큰을 13px로 고쳐도 360~400px 폭(네이버 트래픽 다수가 쓰는 갤럭시 폭)
+//    에서는 이 !important가 다시 12px로 덮어 고친 게 무효화됐다 — 토큰과 바닥을 같이
+//    봐야 한다. `.retro-details-chevron`(접기 화살표 글리프, 본문 글자 아님)만 예외.
+function validateNoTinyTextUtilities() {
+  const tailwindConfigPath = resolve(projectRoot, "tailwind.config.ts");
+  const tailwindConfig = readFileSync(tailwindConfigPath, "utf8");
+  const tinyMatch = tailwindConfig.match(/tiny:\s*\[\s*"([0-9.]+)rem"/);
+  assert(tinyMatch !== null, "tailwind.config.ts: could not find the `tiny` fontSize token");
+  if (tinyMatch) {
+    const tinyPx = Number.parseFloat(tinyMatch[1]) * 16;
+    assert(
+      tinyPx >= 13,
+      `tailwind.config.ts: fontSize.tiny is ${tinyMatch[1]}rem (${tinyPx}px) — must stay >= 13px. ` +
+        "This is the token behind /comprehensive-tax·/freelancer's industry note, /guide/* step " +
+        "descriptions, and /all's item descriptions.",
+    );
+  }
+
+  const chartDir = resolve(projectRoot, "src", "components", "result-visualization");
+  const arbitraryPattern = /text-\[([0-9.]+)(px|rem)\]/g;
+  const offenders = [];
+  for (const file of collectSourceFiles(resolve(projectRoot, "src"))) {
+    const isChartFile = file === chartDir || file.startsWith(chartDir + "/");
+    for (const match of readFileSync(file, "utf8").matchAll(arbitraryPattern)) {
+      const [, rawValue, unit] = match;
+      const px = unit === "rem" ? Number.parseFloat(rawValue) * 16 : Number.parseFloat(rawValue);
+      if (px >= 13) continue;
+      if (px >= 12 && isChartFile) continue;
+      offenders.push(
+        `${file.slice(projectRoot.length + 1)}: text-[${rawValue}${unit}] = ${px}px` +
+          (px < 12
+            ? " (below the 12px chart-legend floor)"
+            : " (12px is only allowed inside src/components/result-visualization/)"),
+      );
+    }
+  }
+  // (3) CSS 소스의 @media !important 바닥.
+  const chevronException = new Set([".retro-details-chevron"]);
+  const ruleWithinMedia = /([^{}]+)\{([^{}]*)\}/g;
+  for (const file of collectCssFiles(resolve(projectRoot, "src"))) {
+    // 주석을 먼저 지운다 — 안 지우면 셀렉터 바로 위 줄의 /* ... */ 설명이 "셀렉터"
+    // 캡처에 섞여 들어와 .retro-details-chevron처럼 정확히 비교해야 하는 예외가 안 걸린다.
+    const css = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const body of extractMediaBlockBodies(css)) {
+      for (const match of body.matchAll(ruleWithinMedia)) {
+        const [, selectorList, ruleBody] = match;
+        if (!/!important/.test(ruleBody)) continue;
+        const sizeMatch = ruleBody.match(/font-size:\s*([0-9.]+)(px|rem)\s*!important/);
+        if (!sizeMatch) continue;
+        const px =
+          sizeMatch[2] === "rem"
+            ? Number.parseFloat(sizeMatch[1]) * 16
+            : Number.parseFloat(sizeMatch[1]);
+        if (px >= 13) continue;
+        for (const selector of selectorList.split(",").map((s) => s.trim())) {
+          if (chevronException.has(selector)) continue;
+          offenders.push(
+            `${file.slice(projectRoot.length + 1)}: ${selector} { font-size: ${sizeMatch[1]}${sizeMatch[2]} !important } = ${px}px (media rule)`,
+          );
+        }
+      }
+    }
+  }
+
+  assert(
+    offenders.length === 0,
+    "Sub-13px text utilities found (chart visualizations may use exactly 12px):\n  " +
+      offenders.join("\n  "),
+  );
+}
+
+// 빌드 CSS 전체 스캔(v8c 결함 수정, 2026-10-03).
+//
+// 왜: validateNoTinyTextUtilities는 소스의 Tailwind 유틸리티(.text-tiny, text-[Npx])만 본다.
+// `.eyebrow`(main.css, font-size:0.7rem=11.2px, STEP 1/2/3 배지·AboutView 날짜 라벨에 쓰임)는
+// 일반 CSS 클래스라 그 스캔의 사각지대였다 — getComputedStyle 실측(360·1280px)으로 11.2px가
+// 드러난 뒤에야 찾았다. 빌드된 CSS는 출처(Tailwind 유틸·일반 클래스·@shakilabs/ui 패키지)를
+// 가리지 않고 전부 한 파일에 모이므로, 여기서 한 번 더 보면 이런 사각지대가 다시 안 생긴다.
+//
+// 허용: 차트 전용(.text-\[12px\], result-visualization 디렉터리 — 소스 스캔이 이미 집행),
+// .retro-details-chevron(글리프), .text-xs(Tailwind 기본 유틸 — 별도 토큰 계열, 사용자 결정
+// 대기), .sh-*(@shakilabs/ui 패키지 전체 — 이 웨이브 범위 밖, 0.3.43 백로그). 그 외 13px
+// 미만 font-size가 하나라도 남으면 실패한다.
+function validateBuiltCssFontSizes() {
+  const cssDir = resolve(distRoot, "assets");
+  if (!existsSync(cssDir)) {
+    assert(false, "No built CSS directory to validate font sizes against");
+    return;
+  }
+  const cssFiles = readdirSync(cssDir).filter((name) => name.endsWith(".css"));
+  assert(cssFiles.length > 0, "No built CSS found to validate font sizes against");
+  const css = cssFiles.map((name) => readFileSync(resolve(cssDir, name), "utf8")).join("\n");
+
+  const allowedExact = new Set([".text-\\[12px\\]", ".retro-details-chevron", ".text-xs"]);
+  const offenders = [];
+  for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const [, selectorList, body] = match;
+    // !important 규칙은 responsive-accessibility.css의 ≤400px 정규화(이미 13px 이상)다.
+    if (/!important/.test(body)) continue;
+    const sizeMatch = body.match(/font-size:\s*([0-9.]+)(px|rem)/);
+    if (!sizeMatch) continue;
+    const px =
+      sizeMatch[2] === "rem" ? Number.parseFloat(sizeMatch[1]) * 16 : Number.parseFloat(sizeMatch[1]);
+    if (px >= 13) continue;
+    for (const selector of selectorList.split(",").map((s) => s.trim())) {
+      if (allowedExact.has(selector)) continue;
+      if (selector.startsWith(".sh-")) continue;
+      offenders.push(`${selector} { font-size: ${sizeMatch[1]}${sizeMatch[2]} } = ${px}px`);
+    }
+  }
+  assert(
+    offenders.length === 0,
+    "13px 미만 font-size가 빌드 CSS에 남아 있다(.sh-* 패키지·text-xs·차트 예외 제외):\n  " +
+      offenders.join("\n  "),
   );
 }
 
@@ -549,9 +768,12 @@ validateTitleRecipe();
 validateRouterSitemapParity(validateSitemap());
 validateLlmsTxt();
 validateOpacityUtilitiesAreGenerated();
+validateNoTinyTextUtilities();
+validateBuiltCssFontSizes();
 validateNotFound();
 validateAdProvider();
 validateTableScrollWrappers();
+validateParagraphLength();
 
 if (failures.length > 0) {
   // 첫 실패에서 던지지 않고 모아서 보고한다 — 게이트를 새로 켤 때 결함이 몇 종인지 한 번에 봐야 한다.
