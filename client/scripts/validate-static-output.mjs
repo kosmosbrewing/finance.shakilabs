@@ -5,6 +5,7 @@
 //   (b) 157페이지 전부가 셸 <noscript>를 남겨 h1이 2개였다.
 // 두 결함 모두 04.card의 게이트가 이미 검사하던 항목이라, 코드가 아니라 게이트 부재가 원인이다.
 import { createHash } from "node:crypto";
+import { validateBuiltFontSizes } from "./validate-built-font-sizes.mjs";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -788,3 +789,7 @@ console.log(
     `(${SITEMAP_ROUTES.length} sitemap + ${PARAM_ROUTES.length} canonicalized variants), ` +
     "sitemap, and 404 output.",
 );
+
+// v8c(2026-10-04): 배포되는 CSS·HTML의 글자 크기를 직접 잰다 — 13px 미만은 차트 축 눈금(__scale)·차트 전용 text-[12px]만.
+const builtFontDeclarations = validateBuiltFontSizes({ distRoot: distRoot });
+console.log(`Validated built font sizes — ${builtFontDeclarations} declarations, 0 under 13px outside the chart-axis allowance.`);

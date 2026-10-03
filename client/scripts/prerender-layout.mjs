@@ -31,7 +31,7 @@ function buildOtherServicesBlock() {
     })
     .filter(Boolean)
     .join("");
-  return `<nav aria-label="다른 서비스" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid hsl(var(--border));font-size:12px;line-height:2;">
+  return `<nav aria-label="다른 서비스" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid hsl(var(--border));font-size:13px;line-height:2;">
         <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:hsl(var(--foreground));">다른 서비스</p>
         ${rows}
       </nav>`;
@@ -156,7 +156,7 @@ export function buildPrerenderFooter() {
         ${categoryBlocks}
       </nav>
       ${buildOtherServicesBlock()}
-      <div style="padding-top:16px;border-top:1px solid hsl(var(--border));font-size:12px;color:hsl(var(--muted-foreground));line-height:1.8;">
+      <div style="padding-top:16px;border-top:1px solid hsl(var(--border));font-size:13px;color:hsl(var(--muted-foreground));line-height:1.8;">
         <p style="margin:0 0 6px;">운영 <strong>Shakilabs</strong> · 문의 <a href="mailto:skdba1313@gmail.com" style="color:hsl(var(--muted-foreground));">skdba1313@gmail.com</a></p>
         <p style="margin:0 0 6px;">
           <!-- /all 허브는 카테고리 카탈로그에 없다. 예전에는 프리렌더 헤더가 이 링크를 들고
