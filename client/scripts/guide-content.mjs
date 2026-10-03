@@ -17,6 +17,9 @@ import {
   yearEndCeilingDigest,
   yearEndStepValueDigest,
 } from "./hub-digests-guides.mjs";
+// v8b 결함 수정(2026-10-03): 이 파일의 직접 HTML 문단(renderDigestBody를 거치지 않는 손글씨
+// <p>)도 같은 250자 규칙을 적용한다 — /guide/year-end 264자 문단.
+import { ensureParagraphLength } from "./paragraph-chunks.mjs";
 
 const H2 = "font-size:20px;line-height:1.35;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid hsl(var(--border));color:hsl(var(--foreground));";
 const P = "margin:0 0 10px;";
@@ -37,6 +40,14 @@ function buildYearEndDeepDive() {
     children: 0,
     retirementIncluded: false,
   });
+
+  // v8b 결함 수정(2026-10-03): 264자 단일 문단이었다. 문장 경계에서 쪼개 <p> 여러 개로
+  // 낸다 — 문장·링크·숫자는 그대로, 재배열만 한다.
+  const refundTimingParagraphs = ensureParagraphLength(
+    `회사는 매달 간이세액표 기준으로 소득세를 원천징수합니다. 연말정산은 이렇게 미리 낸 세금의 1년 합계와 위에서 계산한 결정세액을 비교하는 절차입니다. 미리 낸 세금이 더 많으면 차액이 환급되고, 적으면 추가 납부가 나옵니다. 즉 "환급 = 보너스"가 아니라 내 돈을 돌려받는 정산이므로, 공제를 늘려 결정세액 자체를 낮추는 것이 실제 절세입니다. 내 조건의 예상 환급·추납은 <a href="/finance/year-end-settlement">연말정산 계산기</a>에서, 매달 떼이는 원천세가 적정한지는 <a href="/finance/withholding">원천세 역산 계산기</a>에서 확인할 수 있습니다.`,
+  )
+    .map((text) => `<p style="${P}">${text}</p>`)
+    .join("");
 
   const limitRows = [
     ["신용카드 등 소득공제", "총급여 25% 초과 사용분", "신용 15%·체크/현금영수증 30%, 한도 300만원(총급여 7천만원 이하)·250만원(초과)"],
@@ -132,14 +143,7 @@ function buildYearEndDeepDive() {
       </p>
 
       <h2 style="${H2}">환급과 추가 납부가 갈리는 지점</h2>
-      <p style="${P}">
-        회사는 매달 간이세액표 기준으로 소득세를 원천징수합니다. 연말정산은 이렇게 미리 낸 세금의 1년
-        합계와 위에서 계산한 결정세액을 비교하는 절차입니다. 미리 낸 세금이 더 많으면 차액이 환급되고,
-        적으면 추가 납부가 나옵니다. 즉 "환급 = 보너스"가 아니라 내 돈을 돌려받는 정산이므로, 공제를
-        늘려 결정세액 자체를 낮추는 것이 실제 절세입니다. 내 조건의 예상 환급·추납은
-        <a href="/finance/year-end-settlement">연말정산 계산기</a>에서, 매달 떼이는 원천세가 적정한지는
-        <a href="/finance/withholding">원천세 역산 계산기</a>에서 확인할 수 있습니다.
-      </p>
+      ${refundTimingParagraphs}
       <p style="${P}">
         일정도 공제만큼 중요합니다. 간소화 자료는 1월 중순 열리고 회사 제출은 보통 1~2월에 마감되는데,
         연금저축·IRP처럼 "납입 시점"이 기준인 공제는 12월 31일까지 넣은 금액만 인정됩니다. 반대로

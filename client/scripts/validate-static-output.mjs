@@ -100,6 +100,59 @@ function validateTableScrollWrappers() {
   }
 }
 
+// 렌더 문단(<p>) 250자 상한 게이트(v8b 결함 수정, 2026-10-03).
+//
+// 왜: 전수 스캔에서 39개 사이트맵 페이지 중 25개가 250자를 넘는 <p>를 하나 이상 갖고 있었다
+// (최장 437자, /guide/job-change). 단일 소스(scripts/paragraph-chunks.mjs의
+// ensureParagraphLength)를 hub-content.mjs·hub-digests-tools.mjs·hub-digests.mjs의 렌더러
+// 네 곳과 guide-content.mjs의 손글씨 HTML 한 곳에 연결해 고쳤다 — 이 게이트는 그 수정이
+// 되돌아가거나 새 긴 문단이 들어오면 빌드를 실패시킨다.
+//
+// 약관(/terms)·개인정보(/privacy)는 법률 문서라 제외한다(브리프 공통 규칙).
+const PARAGRAPH_LENGTH_LIMIT = 250;
+const PARAGRAPH_EXCLUDE_ROUTES = new Set(["/terms", "/privacy"]);
+// Ledger, not mute list(verify-hydration-survival.mjs의 KNOWN_BELOW_FLOOR와 같은 패턴):
+// /eitc의 "단독·홑벌이·맞벌이 한계 부담" 비교 문장은 세 유형을 한 문장 안에 쉼표로 나열하고
+// "…28.72%입니다."에서만 끝난다 — 문장 경계("다."/"요.")가 그 한 곳뿐이라 v8b 규칙(문장
+// 경계에서만 분할)으로는 254자보다 더 줄일 수 없다. 유형 하나를 지우면 세 유형 비교가 깨지므로
+// 삭제 대상도 아니다. 이 값이 더 커지면 실패하고, 250 이하로 내려오면 이 줄을 지워야 한다.
+const KNOWN_OVER_LIMIT = {
+  "/eitc": 254,
+};
+
+function longestParagraph(html) {
+  let max = 0;
+  for (const match of html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)) {
+    const text = match[1]
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (text.length > max) max = text.length;
+  }
+  return max;
+}
+
+function validateParagraphLength() {
+  for (const route of SEO_ROUTES) {
+    if (PARAGRAPH_EXCLUDE_ROUTES.has(route)) continue;
+    const path = outputPathForRoute(route);
+    if (!existsSync(path)) continue;
+    const max = longestParagraph(readFileSync(path, "utf8"));
+    const limit = KNOWN_OVER_LIMIT[route] ?? PARAGRAPH_LENGTH_LIMIT;
+    assert(
+      max <= limit,
+      `${route}: longest <p> is ${max} chars (limit ${limit}) — split at a sentence boundary ` +
+        "(다./요. + space) via ensureParagraphLength, do not delete sentences or change numbers",
+    );
+  }
+}
+
 function validateVercelConfig() {
   const config = JSON.parse(readFileSync(resolve(repositoryRoot, "vercel.json"), "utf8"));
   assert(config.cleanUrls === true, "vercel.json: cleanUrls must be true");
@@ -673,6 +726,7 @@ validateNoTinyTextUtilities();
 validateNotFound();
 validateAdProvider();
 validateTableScrollWrappers();
+validateParagraphLength();
 
 if (failures.length > 0) {
   // 첫 실패에서 던지지 않고 모아서 보고한다 — 게이트를 새로 켤 때 결함이 몇 종인지 한 번에 봐야 한다.

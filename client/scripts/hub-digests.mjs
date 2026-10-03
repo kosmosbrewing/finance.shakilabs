@@ -46,6 +46,9 @@ import {
   TD_STYLE,
   TH_STYLE,
 } from "./hub-styles.mjs";
+// v8b 결함 수정(2026-10-03): toLandingSection도 hub-content.mjs의 renderSection을 거치지
+// 않는 별도 렌더러라 같은 250자 분할을 여기서도 적용한다.
+import { ensureParagraphLength } from "./paragraph-chunks.mjs";
 
 // =========================
 // 파생 상수 — 변종 빌더(prerender-content.mjs)와 허브 다이제스트가 공유한다.
@@ -135,12 +138,19 @@ function renderTable(table) {
 // LANDING_CONTENT(prerender-content.mjs)는 섹션당 `<h2>` + `<p>` 하나 + `extra` HTML을 렌더한다.
 // 그래서 첫 문단만 body로 넘기고 나머지(문단·표·콜아웃)를 extra 문자열로 접는다.
 export function toLandingSection(digest) {
-  const parts = [];
-  for (const body of digest.body.slice(1)) parts.push(`<p style="${P_STYLE}">${body}</p>`);
+  // body[0]이 250자를 넘으면 쪼개 첫 조각만 body로, 나머지는 extra 맨 앞 <p>로 보낸다 —
+  // 호출부(buildLandingContent)의 "body는 문자열 하나" 가정을 그대로 둘 수 있다.
+  const [firstBody, ...restOfFirst] = ensureParagraphLength(digest.body[0]);
+  const parts = restOfFirst.map((body) => `<p style="${P_STYLE}">${body}</p>`);
+  for (const body of digest.body.slice(1).flatMap((text) => ensureParagraphLength(text))) {
+    parts.push(`<p style="${P_STYLE}">${body}</p>`);
+  }
   if (digest.table) parts.push(renderTable(digest.table));
-  if (digest.tableNote) parts.push(`<p style="${P_STYLE}">${digest.tableNote}</p>`);
+  for (const note of ensureParagraphLength(digest.tableNote ?? "")) {
+    if (note) parts.push(`<p style="${P_STYLE}">${note}</p>`);
+  }
   if (digest.callout) parts.push(`<div style="${CALLOUT_STYLE}">${digest.callout}</div>`);
-  return { h2: digest.h2, body: digest.body[0], extra: parts.join("") };
+  return { h2: digest.h2, body: firstBody, extra: parts.join("") };
 }
 
 // =========================

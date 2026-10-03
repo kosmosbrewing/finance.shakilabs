@@ -35,6 +35,10 @@ import {
   UNPAID_WAGE_AMOUNTS,
 } from "./seo-routes.mjs";
 import { buildHubContent, renderDigestBody } from "./hub-content.mjs";
+// v8b 결함 수정(2026-10-03): 이 파일의 손글씨 <p> 중 여러 문장을 한 문단에 밀어 넣은 곳이
+// 있었다(건보료/종합소득세 변종 — /insurance/*·/comprehensive-tax/* 최대 302자). 같은 규칙으로
+// 쪼갠다.
+import { chunkSentences, ensureParagraphLength } from "./paragraph-chunks.mjs";
 import {
   INSURANCE_DEFAULT_STATE,
   NEXT_CALCULATOR_CARDS,
@@ -106,6 +110,14 @@ const FREELANCER_RE = /^\/freelancer\/(\d+)$/;
 function parseInt10(s) {
   const n = Number.parseInt(s, 10);
   return Number.isFinite(n) ? n : null;
+}
+
+// v8b 결함 수정(2026-10-03): 이 파일 곳곳의 손글씨 <p style="${P_STYLE}">...</p> 하나가
+// 여러 문장을 이어 써 250자를 넘겼다. 한 곳에서 쪼개 호출부를 전부 같은 방식으로 바꾼다.
+function pSplit(text) {
+  return ensureParagraphLength(text.replace(/\s+/g, " ").trim())
+    .map((chunk) => `<p style="${P_STYLE}">${chunk}</p>`)
+    .join("\n      ");
 }
 
 // --- 공통 HTML 스타일 ---
@@ -450,12 +462,12 @@ function buildFreelancerContent(manWon) {
       </table>
 
       <h2 style="${H2_STYLE}">2. 이 수입에서 실제로 인정되는 경비</h2>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         장부를 쓰지 않으면 인적용역 단순경비율이 적용되어 ${formatWon(calc.expenses)}이 필요경비로 인정됩니다.
         ${overThreshold
           ? `수입이 4,000만원을 넘으므로 4,000만원까지는 64.1%, 초과분 ${formatWon(income - SIMPLE_EXPENSE_THRESHOLD)}에는 49.7%가 적용된 결과입니다. 추가 수입 1원당 인정 경비가 0.497원으로 낮아진 구간이라, 실제 경비가 이보다 크다면 장부 작성이 유리합니다.`
           : `수입이 4,000만원 이하이므로 전액에 64.1%가 적용됩니다. 실제 지출이 수입의 64.1%를 넘지 않는다면 장부를 쓰지 않는 편이 오히려 유리합니다.`}
-      </p>
+      `)}
       <p style="${P_STYLE}">
         여기에 기본공제 150만원을 빼면 과세표준은 ${formatWon(calc.taxableBase)}이 되고, 누진세율을 적용한 산출세액에서
         표준세액공제 7만원을 뺀 뒤 지방소득세 10%를 더해 ${formatWon(calc.totalTax)}이 나옵니다.
@@ -791,12 +803,12 @@ function buildUnpaidWageContent(manWon) {
 
       <h1 style="${H1_STYLE}">체불임금 ${label}원 지연이자 — 퇴직 후 연 20% 기준 (2026)</h1>
 
-      <p style="${P_STYLE}">
+      ${pSplit(`
         밀린 임금·퇴직금 <strong>${formatWon(amount)}</strong>은 퇴직일부터 14일(금품청산 기한)이 지난
         다음 날부터 근로기준법 제37조에 따라 <strong>연 20%</strong>의 지연이자가 붙습니다.
         하루 약 ${formatWon(dailyRetired)}, 한 달 기준 약 ${formatWon(monthlyRetired)}씩 늘어나는 셈입니다.
         재직 중 체불이나 소송 단계에서는 민법 5%·상법 6%·소송촉진법 12%가 적용됩니다.
-      </p>
+      `)}
 
       <h2 style="${H2_STYLE}">1. 체불액 ${label}원의 기간·이율별 지연이자</h2>
       <table style="${TABLE_STYLE}">
@@ -820,20 +832,20 @@ function buildUnpaidWageContent(manWon) {
       </div>
 
       <h2 style="${H2_STYLE}">2. 어떤 이율이 적용되나</h2>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         연 20%는 <strong>퇴직·사망 근로자의 임금과 퇴직금</strong>에 적용되는 특칙입니다(근로기준법 제37조, 시행령 제17조).
         재직 중 밀린 임금은 민법상 연 5%, 회사(상인)를 상대로 상사채권 이율을 적용하면 연 6%가 일반적이며,
         소송에서는 소장이 송달된 다음 날부터 소송촉진법상 연 12%를 검토합니다.
         회사가 도산·회생 절차 중이면 시행령 제18조에 따라 연 20% 적용이 제외될 수 있습니다.
-      </p>
+      `)}
 
       <h2 style="${H2_STYLE}">3. 못 받은 ${label}원, 실무 대응 순서</h2>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         먼저 급여명세서·근로계약서·통장 내역으로 체불 사실을 정리한 뒤 회사에 지급을 요구하고,
         응하지 않으면 고용노동부 노동포털에서 임금체불 진정을 제기합니다.
         회사가 지급 능력이 없다면 간이대지급금 제도로 국가가 일정 한도까지 먼저 지급받을 수 있습니다.
         진정·소송 단계에서는 위 표의 지연이자를 함께 청구하는 것이 원칙입니다.
-      </p>
+      `)}
 
       <h2 style="${H2_STYLE}">4. 자주 묻는 질문 (FAQ)</h2>
 
@@ -994,7 +1006,7 @@ function buildInsuranceBracketInterpretation(fee, monthlyTaxable, estimatedAnnua
         역산 보수월액이 국민연금 기준소득월액 상한(${formatWon(PENSION_CAP_TAXABLE)})에서 차지하는
         비율은 ${capShare}입니다.
       </p>
-      ${paragraphs.map((body) => `<p style="${P_STYLE}">${body.trim()}</p>`).join("\n      ")}
+      ${paragraphs.flatMap((body) => ensureParagraphLength(body.trim())).map((text) => `<p style="${P_STYLE}">${text}</p>`).join("\n      ")}
       <table style="${TABLE_STYLE}">
         <thead>
           <tr>
@@ -1051,7 +1063,7 @@ function buildInsuranceAngleBlock(fee, estimatedAnnual, result) {
     });
     return `
       <h3 style="${H3_STYLE}">부양가족이 달라지면 — 건보료는 그대로, 실수령만 달라진다</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         건강보험료는 부양가족 수와 무관하게 보수월액으로만 정해지므로 이 페이지의 ${formatWon(fee)}은
         그대로입니다. 달라지는 것은 소득세입니다. 같은 추정 연봉에서 부양가족이 2인(배우자 포함)이면
         월 실수령이 ${formatWon(s2.monthlyNet)}으로 기본(1인) 대비 ${formatWon(s2.monthlyNet - result.monthlyNet)}
@@ -1062,7 +1074,7 @@ function buildInsuranceAngleBlock(fee, estimatedAnnual, result) {
         줄어들 세금 자체가 얼마 남아 있지 않습니다.`
             : `인적공제·자녀세액공제가 소득세를 줄이기 때문입니다.`
         }
-      </p>`;
+      `)}`;
   }
 
   if (angle === 1) {
@@ -1118,32 +1130,32 @@ function buildInsuranceParityBlock(fee, monthlyTaxable, result) {
     });
     return `
       <h3 style="${H3_STYLE}">비과세가 다르면 — 식대 30만원 가정으로 다시 역산</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         건강보험료는 과세 보수에만 붙습니다. 그래서 회사의 비과세 항목이 월 30만원(식대에 자가운전보조금
         등이 더해진 경우)이라면, 같은 건보료 ${formatWon(fee)}로 추정하는 연봉은 약
         ${formatManWonValue(Math.round(annualWith300k / 10_000))}원으로 올라가고 월 실수령도
         ${formatWon(resultWith300k.monthlyNet)}으로 달라집니다. 이 페이지 기본 가정(비과세 20만원)과의
         차이가 곧 비과세 설계의 효과입니다.
-      </p>`;
+      `)}`;
   }
 
   // 홀수: 원천세(소득세)로 교차 검증
   return `
       <h3 style="${H3_STYLE}">소득세로 교차 검증하기</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         역산이 맞는지 확인하는 가장 쉬운 방법은 급여명세서의 소득세와 대조하는 것입니다. 추정 연봉
         기준 이 페이지의 월 소득세+지방소득세는 ${formatWon(result.totalTax)}입니다. 실제 명세서 소득세가
         이보다 크게 높다면 부양가족 등록이 빠졌거나 상여가 그 달에 몰렸을 가능성이 있고, 반대로 크게
         낮다면 비과세 항목이 많다는 신호입니다. 소득세에서 연봉을 거꾸로 확인하려면
         <a href="/finance/withholding">원천세 역산 계산기</a>를 이용하세요.
-      </p>`;
+      `)}`;
 }
 
 // 같은 건보료의 직장가입 vs 지역가입 구조 차이 — 페이지 금액을 그대로 대입한 1문단
 function buildInsuranceRegionalCompare(fee) {
   return `
       <h2 style="${H2_STYLE}">5. 직장가입 ${formatWon(fee)} vs 지역가입 — 같은 금액의 다른 구조</h2>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         직장가입자의 ${formatWon(fee)}은 절반 구조입니다. 사업주가 같은 금액을 함께 내므로 이 급여에
         실제 걷히는 건강보험료는 월 ${formatWon(fee * 2)}(연 ${formatWon(fee * 24)})이고 본인 부담은 그
         절반입니다. 반면 지역가입자는 사업주 부담 없이 소득·재산·자동차를 점수화해 세대 단위로
@@ -1151,7 +1163,7 @@ function buildInsuranceRegionalCompare(fee) {
         경우가 많습니다. 퇴사를 앞두고 있다면 <a href="/finance/regional-health">지역가입 예상 보험료</a>를
         먼저 계산해 보고, 퇴사 후 2개월 안에 임의계속가입(최대 36개월 직장 수준 유지)을 신청할지
         판단하세요.
-      </p>`;
+      `)}`;
 }
 
 function buildInsuranceContent(fee) {
@@ -1341,11 +1353,11 @@ function buildInsuranceContent(fee) {
       </p>
 
       <h3 style="${H3_STYLE}">Q3. 회사가 신고한 건보료와 실제 급여가 다를 수 있나요?</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         네. 회사는 매년 4월 "보수총액신고"를 통해 직전 연도의 실제 급여를 반영합니다.
         따라서 성과급·상여금이 포함된 해에는 건보료가 일시적으로 높아질 수 있고, 이후 정산이 이뤄집니다.
         본 역산 결과는 신고된 보수월액 기준의 추정이므로 실제 연봉과 차이가 있을 수 있습니다.
-      </p>
+      `)}
 
       <h3 style="${H3_STYLE}">Q4. 장기요양보험료도 따로 내나요?</h3>
       <p style="${P_STYLE}">
@@ -1452,13 +1464,13 @@ function buildComprehensiveTaxAngleBlock(manWon, calc) {
     const saving = calc.totalTax - reducedTotal;
     return `
       <h3 style="${H3_STYLE}">장부를 쓰면 얼마나 달라질까 — 경비 500만원 추가 인정 시뮬레이션</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         실제 지출한 경비가 단순경비율 ${formatWon(calc.expenses)}보다 500만원 더 많다는 것을 장부로
         입증하면, 과세표준이 ${formatWon(calc.taxableBase)}에서 ${formatWon(reducedBase)}으로 내려가
         세금은 ${formatWon(reducedTotal)}이 됩니다. 지금 추정치보다 ${formatWon(saving)}이 줄어드는
         셈입니다. 여기에 복식부기 기장 시 기장세액공제(20%)까지 더해질 수 있으므로, 장비·외주비 지출이
         큰 해에는 장부 기장을 검토할 가치가 있습니다.
-      </p>`;
+      `)}`;
   }
 
   if (angle === 1) {
@@ -1479,14 +1491,14 @@ function buildComprehensiveTaxAngleBlock(manWon, calc) {
   // 렌즈 C: 사회보험 — 세금 밖에서 함께 늘어나는 부담
   return `
       <h3 style="${H3_STYLE}">세금 밖의 부담 — 프리랜서의 건보·연금</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         종합소득세가 전부는 아닙니다. 프리랜서는 직장가입자가 아니므로 지역가입자 건강보험료와
         국민연금(지역가입)을 별도로 부담하며, 지역 건보료는 이 페이지의 소득금액
         ${formatWon(calc.netIncome)} 같은 소득 자료에 재산·자동차까지 반영해 산정됩니다. 수입 증가는
         이듬해 보험료에 반영되는 시차가 있어 소득이 늘어난 해에는 미리 대비해 둘 필요가 있습니다.
         예상 보험료는
         <a href="/finance/regional-health">지역가입자 건보료 계산기</a>로 미리 확인해 두세요.
-      </p>`;
+      `)}`;
 }
 
 // 두 번째 로테이션(홀짝) — 3렌즈와 주기가 달라 인접 페이지에서 두 블록이 동시에 겹치지 않는다
@@ -1501,7 +1513,7 @@ function buildComprehensiveTaxParityBlock(manWon, calc) {
     const reducedBracket = findIncomeTaxBracket(reducedBase);
     return `
       <h3 style="${H3_STYLE}">공제 400만원의 효과 — 이 수입 기준 시뮬레이션</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         국민연금 보험료나 노란우산공제 부금처럼 전액 소득공제되는 항목으로 400만원을 인정받으면,
         과세표준이 ${formatWon(calc.taxableBase)}에서 ${formatWon(reducedBase)}으로 내려가 세금은
         ${formatWon(calc.totalTax)}에서 ${formatWon(reducedTotal)}으로 ${formatWon(calc.totalTax - reducedTotal)}
@@ -1512,18 +1524,18 @@ function buildComprehensiveTaxParityBlock(manWon, calc) {
             : ` 한계세율 ${formatPercent(bracket.rate, 0)} 구간에 그대로 머물지만, 공제액에 지방소득세까지
         곱해진 만큼 세금이 줄어드는 구조입니다.`
         }
-      </p>`;
+      `)}`;
   }
 
   // 홀수: 무신고 가산세 리스크 — 이 페이지 세액 기준 금액 환산
   return `
       <h3 style="${H3_STYLE}">신고를 놓치면 — 이 세액 기준 가산세 환산</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         5월 신고를 하지 않으면 무신고가산세가 납부세액의 20%로 붙습니다. 이 페이지 추정 세액
         ${formatWon(calc.totalTax)} 기준으로 약 ${formatWon(Math.floor(calc.determinedTax * 0.2))}(국세분
         기준)이 더해지는 셈이고, 납부가 늦어지는 기간만큼 납부지연가산세도 별도로 쌓입니다. 환급
         대상이라도 신고를 해야 돌려받으므로, 수입 규모와 무관하게 5월 신고 자체가 최우선입니다.
-      </p>`;
+      `)}`;
 }
 
 // 분리과세 임계 — 수치는 src/data/comprehensiveTaxRules.ts 검증 상수의 미러
@@ -1539,13 +1551,13 @@ function buildComprehensiveTaxSeparateSection(calc) {
   const rentalComprehensiveTax = Math.floor(rentalIncome * bracket.rate * 1.1);
   return `
       <h2 style="${H2_STYLE}">4. 분리과세 선택이 갈리는 임계점</h2>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         종합소득에 합산하지 않고 따로 끝낼 수 있는 소득이 있습니다. 주택임대 수입은 연 2,000만원
         이하일 때 14% 분리과세를 선택할 수 있고(등록임대 소득율 40%·기본공제 400만원, 미등록 50%·
         기본공제 200만원 — 기본공제는 분리과세 임대소득 외 종합소득금액이 2,000만원 이하일 때),
         기타소득은 필요경비 60% 인정 후 소득금액 300만원 이하면 분리과세로 종결할 수 있습니다.
-      </p>
-      <p style="${P_STYLE}">
+      `)}
+      ${pSplit(`
         ${
           separateFavorable
             ? `이 페이지 기준 과세표준의 한계세율 ${formatPercent(bracket.rate, 0)}는 분리과세율 14%보다
@@ -1557,8 +1569,8 @@ function buildComprehensiveTaxSeparateSection(calc) {
         }
         정확한 판단은 <a href="/finance/comprehensive-tax">종합소득세 계산기</a>의 분리과세 비교 기능으로
         본인 수치를 넣어 확인할 수 있습니다.
-      </p>
-      <p style="${P_STYLE}">
+      `)}
+      ${pSplit(`
         구체 예시로, 이 수입에 미등록 주택임대 수입 1,000만원(소득율 50% → 소득금액 ${formatWon(rentalIncome)})이
         더해진다고 해 보겠습니다. ${
           rentalBasicDeduction > 0
@@ -1575,7 +1587,7 @@ function buildComprehensiveTaxSeparateSection(calc) {
             ? `분리과세가 약 ${formatWon(rentalComprehensiveTax - rentalSeparateTax)} 유리합니다`
             : `종합과세가 약 ${formatWon(rentalSeparateTax - rentalComprehensiveTax)} 유리합니다`
         }.
-      </p>`;
+      `)}`;
 }
 
 // 인접 수입 프리셋 대비 세부담 델타 — 페이지마다 이웃이 달라 표·문장이 함께 달라진다
@@ -1641,7 +1653,9 @@ function buildComprehensiveTaxNeighborSection(manWon, calc) {
         <tbody>${rows}
         </tbody>
       </table>
-      <p style="${P_STYLE}">${sentences.map((sentence) => sentence.trim()).join(" ")}</p>`;
+      ${chunkSentences(sentences.map((sentence) => sentence.trim()))
+        .map((text) => `<p style="${P_STYLE}">${text}</p>`)
+        .join("\n      ")}`;
 }
 
 function buildComprehensiveTaxContent(manWon) {
@@ -1675,19 +1689,19 @@ function buildComprehensiveTaxContent(manWon) {
 
       <h1 style="${H1_STYLE}">프리랜서 수입 ${label}원 종합소득세 계산 (2026년)</h1>
 
-      <p style="${P_STYLE}">
+      ${pSplit(`
         프리랜서·개인사업자가 연 수입 <strong>${label}원</strong>을 올렸을 때,
         단순경비율(IT·디자인·작가 등 인적용역 기준: 4천만원 이하 64.1% + 초과분 49.7%) 적용 시 종합소득세는 약
         <strong>${formatWon(totalTax)}</strong>(지방소득세 포함)입니다.
         3.3% 원천징수로 미리 납부한 금액이 ${formatWon(withholdingPrepaid)}이라면,
         ${refund >= 0 ? `<strong>약 ${formatWon(refund)} 환급</strong>` : `<strong style="color:hsl(var(--destructive));">약 ${formatWon(-refund)} 추가 납부</strong>`}이 예상됩니다.
-      </p>
+      `)}
 
-      <p style="${P_STYLE}">
+      ${pSplit(`
         실제 종합소득세는 업종별 단순경비율·기준경비율, 공제 항목(국민연금·건강보험·노란우산공제·기부금·의료비 등),
         종합소득공제·세액공제 적용 여부에 따라 크게 달라집니다. 본 결과는 인적용역 단순경비율·인적공제 1인 기준의 단순 추정이며,
         정확한 계산은 홈택스 모의계산 또는 세무대리인 상담을 권장합니다.
-      </p>
+      `)}
 
       <h2 style="${H2_STYLE}">1. 계산 과정 요약</h2>
       <table style="${TABLE_STYLE}">
@@ -1771,11 +1785,11 @@ function buildComprehensiveTaxContent(manWon) {
       <h2 style="${H2_STYLE}">7. 자주 묻는 질문 (FAQ)</h2>
 
       <h3 style="${H3_STYLE}">Q1. 단순경비율 64.1%는 어떻게 정해지나요?</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         국세청은 업종별로 "단순경비율"과 "기준경비율"을 고시합니다.
         수입금액이 일정 기준 미만(일반적으로 연 7,500만원)이면 단순경비율을 적용할 수 있으며,
         IT·디자인·번역·교육 등 인적용역의 단순경비율은 4천만원 이하분 약 64.1%, 초과분 약 49.7% 수준입니다(국세청 2026 고시).
-      </p>
+      `)}
 
       <h3 style="${H3_STYLE}">Q2. 장부를 쓰면 세금이 줄어드나요?</h3>
       <p style="${P_STYLE}">
@@ -1803,7 +1817,7 @@ function buildComprehensiveTaxContent(manWon) {
       </p>
 
       <h3 style="${H3_STYLE}">Q6. 수입 ${label}원은 3.3% 떼였으면 끝난 것 아닌가요?</h3>
-      <p style="${P_STYLE}">
+      ${pSplit(`
         아닙니다. 3.3%는 선납일 뿐이고 확정은 5월 신고에서 이뤄집니다. 수입 ${label}원 기준 선납액은
         ${formatWon(withholdingPrepaid)}, 이 페이지 추정 세액은 ${formatWon(totalTax)}이므로
         ${
@@ -1813,7 +1827,7 @@ function buildComprehensiveTaxContent(manWon) {
             : `약 ${formatWon(-refund)}을 추가로 납부해야 합니다. 신고를 미루면 무신고가산세까지 붙어
         부담이 커집니다.`
         }
-      </p>
+      `)}
 
       <h2 style="${H2_STYLE}">8. 관련 계산기</h2>
       <ul style="${UL_STYLE}">
@@ -1928,7 +1942,7 @@ function buildCompareThresholdSection(bManWon, a, b) {
 
   return `
       <h2 style="${H2_STYLE}">3. 이 쌍이 건너는 경계선 — 연금 상한·세율 구간</h2>
-      ${paragraphs.map((body) => `<p style="${P_STYLE}">${body.trim()}</p>`).join("\n      ")}`;
+      ${paragraphs.flatMap((body) => ensureParagraphLength(body.trim())).map((text) => `<p style="${P_STYLE}">${text}</p>`).join("\n      ")}`;
 }
 
 // 협상 관점 — 세전/세후 인상률 괴리와 목표 실수령 역산

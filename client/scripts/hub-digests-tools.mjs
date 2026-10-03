@@ -32,6 +32,9 @@ import {
 import { WEEKLY_HOLIDAY_PAY_AMOUNTS } from "./seo-routes.mjs";
 import { MIN_WAGE_HOURLY_2026, PENSION_CAP_TAXABLE } from "./hub-digests.mjs";
 import { CALLOUT_STYLE, H2_STYLE, P_STYLE, TABLE_STYLE, TD_STYLE, TH_STYLE } from "./hub-styles.mjs";
+// v8b 결함 수정(2026-10-03): renderDigestHtml은 hub-content.mjs의 renderSection을 거치지
+// 않는 별도 렌더러라 그쪽의 250자 분할을 못 받는다 — 여기서도 같은 방식으로 적용한다.
+import { ensureParagraphLength } from "./paragraph-chunks.mjs";
 
 const won = (value) => formatWon(value);
 const manWon = (value) => `${formatManWonValue(Math.round(value / 10_000))}원`;
@@ -399,7 +402,9 @@ export function partTimeNetDigest() {
 // 가이드 본문은 문자열 HTML이라 renderSection을 거치지 않는다 — 같은 스타일 토큰으로 직접 그린다
 export function renderDigestHtml(digest) {
   const parts = [`<h2 style="${H2_STYLE}">${digest.h2}</h2>`];
-  for (const body of digest.body) parts.push(`<p style="${P_STYLE}">${body}</p>`);
+  for (const body of digest.body.flatMap((text) => ensureParagraphLength(text))) {
+    parts.push(`<p style="${P_STYLE}">${body}</p>`);
+  }
   if (digest.table) {
     const head = `<thead><tr>${digest.table.head.map((h) => `<th style="${TH_STYLE}">${h}</th>`).join("")}</tr></thead>`;
     const rows = digest.table.rows
@@ -410,7 +415,9 @@ export function renderDigestHtml(digest) {
       .join("");
     parts.push(`<table style="${TABLE_STYLE}">${head}<tbody>${rows}</tbody></table>`);
   }
-  if (digest.tableNote) parts.push(`<p style="${P_STYLE}">${digest.tableNote}</p>`);
+  for (const note of ensureParagraphLength(digest.tableNote ?? "")) {
+    if (note) parts.push(`<p style="${P_STYLE}">${note}</p>`);
+  }
   if (digest.callout) parts.push(`<div style="${CALLOUT_STYLE}">${digest.callout}</div>`);
   return parts.join("\n      ");
 }
