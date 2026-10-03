@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { ALL_CALCULATORS_HEADING, pageTitle } from "../../scripts/page-titles.mjs";
 import RecentCalcStorageNote from "@/components/finance/RecentCalcStorageNote.vue";
 import { CALCULATOR_COUNT } from "@/data/calculatorCount";
 import { SCENARIO_CHAINS as scenarioChains } from "../../scripts/scenario-chains.mjs";
 
-// 화면 h1 = <title>의 앞부분 = 프리렌더 h1. 세 곳이 한 문장에서 파생되므로 어긋날 수 없다.
-const pageHeading = "2026 세금·연봉·수당 계산기 모음";
-const seoTitle = `${pageHeading} | ${CALCULATOR_COUNT}개 계산기`;
+// 화면 h1 = <title>의 앞부분 = 프리렌더 h1. 세 곳이 page-titles.mjs 한 상수에서 파생되므로 어긋날 수 없다.
+const pageHeading = ALL_CALCULATORS_HEADING;
+const seoTitle = pageTitle("/all");
 const seoDescription = `연봉 실수령액, 종합소득세, 프리랜서 세금, 연말정산, 퇴직금, 실업급여, 근로장려금 등 ${CALCULATOR_COUNT}개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.`;
 const jsonLd = {
   "@context": "https://schema.org",

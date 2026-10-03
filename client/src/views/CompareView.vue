@@ -3,6 +3,7 @@ import CalculatorInteractionTracker from "@/components/analytics/CalculatorInter
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { compareVariantTitle, pageTitle } from "../../scripts/page-titles.mjs";
 
 
 import CompareInput from "@/components/compare/CompareInput.vue";
@@ -213,9 +214,12 @@ watch(
 
 const monthlyNetDiff = computed(() => calcB.monthlyNet.value - calcA.monthlyNet.value);
 
-const seoTitle = computed(
-  () =>
-    `2026 연봉 ${formatManWonValue(Math.floor(companyA.value.annualGross / 10_000))} vs ${formatManWonValue(Math.floor(companyB.value.annualGross / 10_000))} 이직 비교 | 실수령 차이 계산`
+// 제목은 입력값이 아니라 라우트에서 정한다 — 프리렌더 <title>과 같은 함수(page-titles.mjs)를 써야
+// 크롤러가 받은 제목이 하이드레이션 뒤에도 그대로 남는다(입력값을 따라가던 때는 첫 화면부터 달랐다).
+const seoTitle = computed(() =>
+  props.initialAManWon && props.initialBManWon
+    ? compareVariantTitle(props.initialAManWon, props.initialBManWon)
+    : pageTitle("/compare")
 );
 
 const seoDescription = computed(

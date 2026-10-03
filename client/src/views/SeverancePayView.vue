@@ -4,6 +4,7 @@ import { computed, ref, watch } from "vue";
 import { ShBreakdownBar, ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, severancePayVariantTitle } from "../../scripts/page-titles.mjs";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import { Button } from "@/components/ui/button";
@@ -38,8 +39,8 @@ const severanceSegments = computed(() => [
 
 const seoTitle = computed(() =>
   props.initialYears
-    ? `${props.initialYears}년 근속 퇴직금 계산기 | 2026`
-    : "2026 퇴직금 계산기 | 퇴직소득세·실수령 퇴직금",
+    ? severancePayVariantTitle(props.initialYears)
+    : pageTitle("/severance-pay"),
 );
 const seoDescription = computed(() =>
   props.initialYears

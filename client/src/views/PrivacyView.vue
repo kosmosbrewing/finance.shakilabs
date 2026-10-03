@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useSEO } from "@/composables/useSEO";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 
 useSEO({
-  title: "개인정보 처리방침 | 연봉 실수령액 계산기",
+  title: pageTitle("/privacy"),
   description: "연봉 실수령액 계산기 서비스의 개인정보 처리 원칙을 안내합니다.",
   jsonLd: {
     "@context": "https://schema.org",

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useSEO } from "@/composables/useSEO";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 
 useSEO({
-  title: "이용약관 | 2026 연봉·건보료 계산기",
+  title: pageTitle("/terms"),
   description: "연봉 실수령액 계산기 서비스의 이용약관입니다.",
   jsonLd: {
     "@context": "https://schema.org",

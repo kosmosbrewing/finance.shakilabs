@@ -19,6 +19,29 @@ import { appendGuideDeepDive } from "./guide-content.mjs";
 import { buildChanges2027Html, buildChanges2027Meta } from "./prerender-changes.mjs";
 import { FAQ_SOURCE_FILES, ROUTE_FAQS } from "./faq-data.mjs";
 import { HOME_FAQS, HOME_ITEM_LIST } from "./home-content.mjs";
+import {
+  META_DESCRIPTIONS,
+  NOT_FOUND_TITLE,
+  ALL_CALCULATORS_HEADING,
+  brandTitle,
+  comprehensiveTaxVariantTitle,
+  compareVariantTitle,
+  eitcVariantTitle,
+  freelancerVariantTitle,
+  insuranceVariantTitle,
+  pageTitle,
+  parentalLeaveVariantTitle,
+  quitVariantTitle,
+  regionalHealthVariantTitle,
+  salaryVariantTitle,
+  severancePayVariantTitle,
+  unemploymentVariantTitle,
+  unpaidWageVariantTitle,
+  wageConverterVariantTitle,
+  weeklyHolidayPayVariantTitle,
+  withholdingVariantTitle,
+  yearEndVariantTitle,
+} from "./page-titles.mjs";
 
 const DIST_DIR = resolve(import.meta.dirname, "../dist");
 const INDEX_HTML = resolve(DIST_DIR, "index.html");
@@ -275,7 +298,7 @@ function buildMeta(route) {
   if (route === "/2027") return buildChanges2027Meta(SITE_URL, buildBreadcrumb);
 
   if (route === "/terms") {
-    const title = "이용약관 | 2026 연봉·건보료 계산기";
+    const title = pageTitle("/terms");
     const description = "shakilabs.com/finance 서비스 이용약관을 안내합니다.";
     const canonical = `${SITE_URL}/terms`;
     return {
@@ -298,7 +321,7 @@ function buildMeta(route) {
   }
 
   if (route === "/privacy") {
-    const title = "개인정보처리방침 | 연봉 실수령액 계산기";
+    const title = pageTitle("/privacy");
     const description = "shakilabs.com/finance 서비스의 개인정보 처리 원칙을 안내합니다.";
     const canonical = `${SITE_URL}/privacy`;
     return {
@@ -321,7 +344,7 @@ function buildMeta(route) {
   }
 
   if (route === "/about") {
-    const title = "서비스 소개 | 2026 연봉·세금 계산기";
+    const title = pageTitle("/about");
     const description = "연봉 실수령액, 건보료 계산, 이직 비교, 퇴사 시뮬레이션을 제공하는 무료 계산기. 2026 최신 세율 반영.";
     const canonical = `${SITE_URL}/about`;
     return {
@@ -344,7 +367,7 @@ function buildMeta(route) {
   }
 
   if (route === "/all") {
-    const title = `2026 세금·연봉·수당 계산기 모음 | ${CALCULATOR_ROUTES.length}개 계산기`;
+    const title = pageTitle("/all");
     const description = `연봉 실수령액, 종합소득세, 연말정산, 퇴직금, 실업급여, 주휴수당 등 ${CALCULATOR_ROUTES.length}개 계산기를 한곳에서 이용하세요. 2026년 기준 반영.`;
     const canonical = `${SITE_URL}/all`;
     return {
@@ -368,7 +391,7 @@ function buildMeta(route) {
 
   const unemploymentManWon = readUnemploymentManWon(route);
   if (unemploymentManWon !== null) {
-    const title = `월급 ${formatManWon(unemploymentManWon)} 실업급여 계산기 | 2026 구직급여`;
+    const title = unemploymentVariantTitle(unemploymentManWon);
     const description = `월급 ${formatManWon(unemploymentManWon)}원 기준 실업급여 일 수급액과 총 수급액을 계산합니다.`;
     const canonical = `${SITE_URL}/unemployment/${unemploymentManWon}`;
     return {
@@ -400,7 +423,7 @@ function buildMeta(route) {
   const eitcHousehold = readEitcHousehold(route);
   if (eitcHousehold !== null) {
     const householdLabel = EITC_HOUSEHOLD_LABELS[eitcHousehold];
-    const title = `${householdLabel} 근로장려금 계산기 | 2026 지급액 조회`;
+    const title = eitcVariantTitle(householdLabel);
     const description = `${householdLabel} 기준 근로장려금 소득 구간별 지급액을 계산합니다. 재산 요건과 자녀장려금까지 확인하세요.`;
     const canonical = `${SITE_URL}/eitc/${eitcHousehold}`;
     return {
@@ -431,7 +454,7 @@ function buildMeta(route) {
 
   const unpaidWageManWon = readUnpaidWageManWon(route);
   if (unpaidWageManWon !== null) {
-    const title = `체불임금 ${formatManWon(unpaidWageManWon)} 지연이자 계산기 | 연 20% 기준`;
+    const title = unpaidWageVariantTitle(unpaidWageManWon);
     const description = `밀린 임금 ${formatManWon(unpaidWageManWon)}원의 지연이자를 퇴직 후 연 20%, 민법 5%, 상법 6%, 소송촉진법 12% 단계별로 계산합니다.`;
     const canonical = `${SITE_URL}/unpaid-wage/${unpaidWageManWon}`;
     return {
@@ -462,7 +485,7 @@ function buildMeta(route) {
 
   const regionalHealthManWon = readRegionalHealthManWon(route);
   if (regionalHealthManWon !== null) {
-    const title = `월급 ${formatManWon(regionalHealthManWon)} 지역가입자 건보료 | 퇴사 후 건강보험`;
+    const title = regionalHealthVariantTitle(regionalHealthManWon);
     const description = `월급 ${formatManWon(regionalHealthManWon)}원 기준 퇴사 후 지역가입자 건보료와 임의계속가입을 비교합니다.`;
     const canonical = `${SITE_URL}/regional-health/${regionalHealthManWon}`;
     return {
@@ -493,7 +516,7 @@ function buildMeta(route) {
 
   const weeklyHolidayPayAmount = readWeeklyHolidayPayAmount(route);
   if (weeklyHolidayPayAmount !== null) {
-    const title = `시급 ${weeklyHolidayPayAmount.toLocaleString("ko-KR")}원 주휴수당 계산 | 2026`;
+    const title = weeklyHolidayPayVariantTitle(weeklyHolidayPayAmount);
     const description = `시급 ${weeklyHolidayPayAmount.toLocaleString("ko-KR")}원 기준 주휴수당과 실질 시급을 계산합니다.`;
     const canonical = `${SITE_URL}/weekly-holiday-pay/${weeklyHolidayPayAmount}`;
     return {
@@ -524,7 +547,7 @@ function buildMeta(route) {
 
   const wageConverterHourly = readWageConverterHourly(route);
   if (wageConverterHourly !== null) {
-    const title = `시급 ${wageConverterHourly.toLocaleString("ko-KR")}원 월급·연봉 환산 | 2026`;
+    const title = wageConverterVariantTitle(wageConverterHourly);
     const description = `시급 ${wageConverterHourly.toLocaleString("ko-KR")}원을 월급·일급·연봉으로 환산합니다.`;
     const canonical = `${SITE_URL}/wage-converter/${wageConverterHourly}`;
     return {
@@ -555,7 +578,7 @@ function buildMeta(route) {
 
   const severancePayYears = readSeverancePayYears(route);
   if (severancePayYears !== null) {
-    const title = `${severancePayYears}년 근속 퇴직금 계산 | 2026`;
+    const title = severancePayVariantTitle(severancePayYears);
     const description = `${severancePayYears}년 근속 기준 퇴직금과 퇴직소득세를 계산합니다.`;
     const canonical = `${SITE_URL}/severance-pay/${severancePayYears}`;
     return {
@@ -586,7 +609,7 @@ function buildMeta(route) {
 
   const parentalManWon = readParentalLeaveManWon(route);
   if (parentalManWon !== null) {
-    const title = `통상임금 ${formatManWon(parentalManWon)} 육아휴직 급여 계산 | 2026`;
+    const title = parentalLeaveVariantTitle(parentalManWon);
     const description = `통상임금 ${formatManWon(parentalManWon)}원 기준 육아휴직 월별 급여와 총 수령액을 계산합니다.`;
     const canonical = `${SITE_URL}/parental-leave/${parentalManWon}`;
     return {
@@ -617,7 +640,7 @@ function buildMeta(route) {
 
   const yearEndManWon = readYearEndManWon(route);
   if (yearEndManWon !== null) {
-    const title = `연봉 ${formatManWon(yearEndManWon)} 연말정산 환급액 계산 | 2026`;
+    const title = yearEndVariantTitle(yearEndManWon);
     const description = `연봉 ${formatManWon(yearEndManWon)}원 기준 연말정산 예상 환급액과 세액공제 내역을 계산합니다.`;
     const canonical = `${SITE_URL}/year-end-settlement/${yearEndManWon}`;
     return {
@@ -648,7 +671,7 @@ function buildMeta(route) {
 
   const withholdingAmount = readWithholdingAmount(route);
   if (withholdingAmount !== null) {
-    const title = `월 소득세 ${formatWon(withholdingAmount)} → 연봉 계산기 | 2026`;
+    const title = withholdingVariantTitle(withholdingAmount);
     const description = `월 소득세 ${formatWon(withholdingAmount)} 기준 추정 연봉과 실수령액을 계산합니다. 4대보험 포함 공제 상세 확인.`;
     const canonical = `${SITE_URL}/withholding/${withholdingAmount}`;
 
@@ -693,7 +716,7 @@ function buildMeta(route) {
     const estimatedAnnual = (taxableMonthly + 200_000) * 12;
     const estimatedManWon = Math.round(estimatedAnnual / 10_000);
 
-    const title = `건보료 ${feeManWon}만원이면 연봉 약 ${estimatedManWon.toLocaleString("ko-KR")}만원 | 2026 기준`;
+    const title = insuranceVariantTitle(insuranceFee);
     const description = `월 건강보험료 ${formatWon(insuranceFee)} 기준 추정 연봉은 약 ${estimatedManWon.toLocaleString("ko-KR")}만원입니다. 4대보험과 실수령액을 함께 확인하세요.`;
     const canonical = `${SITE_URL}/insurance/${insuranceFee}`;
 
@@ -741,7 +764,7 @@ function buildMeta(route) {
 
   const salaryManWon = readSalaryManWon(route);
   if (salaryManWon !== null) {
-    const title = `연봉 ${formatManWon(salaryManWon)} 실수령액 | 2026 월급 실수령 계산기`;
+    const title = salaryVariantTitle(salaryManWon);
     const description = `2026년 연봉 ${formatManWon(salaryManWon)} 월 실수령액은 계산 결과를 기준으로 확인할 수 있습니다. 4대보험·소득세 공제 내역과 부양가족별 계산도 확인하세요.`;
     const canonical = `${SITE_URL}/salary/${salaryManWon}`;
 
@@ -789,7 +812,7 @@ function buildMeta(route) {
 
   const freelancerManWon = readFreelancerManWon(route);
   if (freelancerManWon !== null) {
-    const title = `프리랜서 수입 ${formatManWon(freelancerManWon)} 세금 계산 | 2026 3.3% 종합소득세`;
+    const title = freelancerVariantTitle(freelancerManWon);
     const description = `프리랜서 연수입 ${formatManWon(freelancerManWon)}원 기준 3.3% 원천징수 후 종합소득세를 계산합니다.`;
     const canonical = `${SITE_URL}/freelancer/${freelancerManWon}`;
     return {
@@ -820,7 +843,7 @@ function buildMeta(route) {
 
   const comprehensiveTaxManWon = readComprehensiveTaxManWon(route);
   if (comprehensiveTaxManWon !== null) {
-    const title = `종합소득 ${comprehensiveTaxManWon}만원 세금 계산 | 2026 종합소득세 계산기`;
+    const title = comprehensiveTaxVariantTitle(comprehensiveTaxManWon);
     const description = `연수입 ${comprehensiveTaxManWon}만원 기준으로 사업소득·임대소득·기타소득을 합산해 종합소득세를 계산합니다.`;
     const canonical = `${SITE_URL}/comprehensive-tax/${comprehensiveTaxManWon}`;
 
@@ -863,7 +886,7 @@ function buildMeta(route) {
     const aLabel = comparePair.a.toLocaleString("ko-KR");
     const bLabel = comparePair.b.toLocaleString("ko-KR");
     // 프리셋 8개가 같은 title을 쓰면 검색엔진이 중복 페이지로 본다. 금액을 넣어 고유하게 만든다.
-    const title = `연봉 ${aLabel}만원 vs ${bLabel}만원 비교 | 이직 실수령 차이 2026`;
+    const title = compareVariantTitle(comparePair.a, comparePair.b);
     const description = `연봉 ${aLabel}만원에서 ${bLabel}만원으로 이직하면 월 실수령 차이를 비교할 수 있습니다.`;
     const canonical = `${SITE_URL}/compare/${comparePair.a}-vs-${comparePair.b}`;
 
@@ -903,7 +926,7 @@ function buildMeta(route) {
 
   const quitYears = readQuitYears(route);
   if (quitYears !== null) {
-    const title = `${quitYears}년 근속 퇴사 계산기 | 퇴직금·실업급여·생존기간 2026`;
+    const title = quitVariantTitle(quitYears);
     const description = `${quitYears}년 근속 기준 퇴직금, 실업급여, 퇴사 후 월 고정비와 생존기간을 계산합니다.`;
     const canonical = `${SITE_URL}/quit/${quitYears}years`;
 
@@ -954,7 +977,7 @@ function buildMeta(route) {
   // so it shipped as an empty shell. It now owns its meta: the home is the app's
   // highest-authority entry point and must not reuse another route's title or body.
   if (route === "/") {
-    const title = "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세";
+    const title = pageTitle("/");
     const description =
       "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
     // vercel.json sets trailingSlash:false, so /finance/ 308s to /finance.
@@ -1021,7 +1044,7 @@ function buildMeta(route) {
 
   // --- 랜딩 페이지 ---
   if (route === "/insurance") {
-    const title = "2026 건강보험료로 연봉 계산기 | 4대보험";
+    const title = pageTitle("/insurance");
     const description =
       "건강보험료를 입력하면 추정 연봉과 월 실수령액을 계산합니다. 2026 최신 요율 반영.";
     const canonical = `${SITE_URL}/insurance`;
@@ -1051,7 +1074,7 @@ function buildMeta(route) {
   }
 
   if (route === "/salary") {
-    const title = "2026 연봉 실수령액 계산기 | 4대보험 + 소득세 자동 계산";
+    const title = pageTitle("/salary");
     const description = "2026년 연봉 실수령액을 즉시 계산하세요. 국민연금·건보료·소득세 공제 후 실제 통장에 들어오는 월급을 확인합니다.";
     const canonical = `${SITE_URL}/salary`;
     return {
@@ -1075,7 +1098,7 @@ function buildMeta(route) {
   }
 
   if (route === "/freelancer") {
-    const title = "2026 프리랜서 세금 계산기 | 3.3% 종합소득세";
+    const title = pageTitle("/freelancer");
     const description = "프리랜서·N잡러를 위한 세금 계산. 3.3% 원천징수 후 종합소득세 정산, 분리과세 비교까지 한 번에.";
     const canonical = `${SITE_URL}/freelancer`;
     return {
@@ -1099,7 +1122,7 @@ function buildMeta(route) {
   }
 
   if (route === "/comprehensive-tax") {
-    const title = "2026 종합소득세 계산기 | 프리랜서·사업소득 세금";
+    const title = pageTitle("/comprehensive-tax");
     const description = "프리랜서·사업자·임대소득자를 위한 종합소득세 계산. 분리과세 비교까지 한 번에 확인하세요.";
     const canonical = `${SITE_URL}/comprehensive-tax`;
     return {
@@ -1123,7 +1146,7 @@ function buildMeta(route) {
   }
 
   if (route === "/compare") {
-    const title = "이직 연봉 비교 계산기 | 실수령액 차이 비교 2026";
+    const title = pageTitle("/compare");
     const description = "연봉과 복지 조건을 입력해 4대보험·세금을 반영한 실수령 차이를 비교합니다.";
     const canonical = `${SITE_URL}/compare`;
     return {
@@ -1147,7 +1170,7 @@ function buildMeta(route) {
   }
 
   if (route === "/withholding") {
-    const title = "원천세 계산기 | 소득세로 연봉 추정 2026";
+    const title = pageTitle("/withholding");
     const description = "급여명세서 소득세를 입력하면 추정 연봉과 월 실수령액을 계산합니다. 2026 최신 세율 반영.";
     const canonical = `${SITE_URL}/withholding`;
     return {
@@ -1171,7 +1194,7 @@ function buildMeta(route) {
   }
 
   if (route === "/parental-leave") {
-    const title = "2026 육아휴직 급여 계산기 | 6+6 부모육아휴직제 반영";
+    const title = pageTitle("/parental-leave");
     const description = "통상임금과 휴직 기간을 입력하면 월별 급여와 총 수령액을 계산합니다. 6+6 부모육아휴직제, 한부모 특례 반영.";
     const canonical = `${SITE_URL}/parental-leave`;
     return {
@@ -1195,7 +1218,7 @@ function buildMeta(route) {
   }
 
   if (route === "/year-end-settlement") {
-    const title = "2026 연말정산 계산기 | 환급액·세액공제 시뮬레이터";
+    const title = pageTitle("/year-end-settlement");
     const description = "연봉과 공제 항목을 입력하면 예상 환급액 또는 추가 납부액을 계산합니다. 신용카드, 연금, 의료비, 월세 세액공제 포함.";
     const canonical = `${SITE_URL}/year-end-settlement`;
     return {
@@ -1219,7 +1242,7 @@ function buildMeta(route) {
   }
 
   if (route === "/unemployment") {
-    const title = "2026 실업급여 계산기 | 구직급여 수급액·수급기간";
+    const title = pageTitle("/unemployment");
     const description = "월급과 고용보험 가입기간을 입력하면 실업급여 일 수급액, 수급기간, 총 예상 수급액을 계산합니다.";
     const canonical = `${SITE_URL}/unemployment`;
     return {
@@ -1243,7 +1266,7 @@ function buildMeta(route) {
   }
 
   if (route === "/regional-health") {
-    const title = "지역가입자 건강보험료 계산기 | 퇴사 후 건보 비교";
+    const title = pageTitle("/regional-health");
     const description = "퇴사 후 지역가입자 건보료, 임의계속가입, 피부양자 등록 세 가지 옵션을 비교합니다.";
     const canonical = `${SITE_URL}/regional-health`;
     return {
@@ -1267,7 +1290,7 @@ function buildMeta(route) {
   }
 
   if (route === "/weekly-holiday-pay") {
-    const title = "2026 주휴수당 계산기 | 아르바이트 주휴수당·실질 시급";
+    const title = pageTitle("/weekly-holiday-pay");
     const description = "시급과 주 근무시간을 입력하면 주휴수당, 실질 시급, 예상 월급을 계산합니다. 2026 최저시급 반영.";
     const canonical = `${SITE_URL}/weekly-holiday-pay`;
     return {
@@ -1291,7 +1314,7 @@ function buildMeta(route) {
   }
 
   if (route === "/wage-converter") {
-    const title = "2026 시급 월급 연봉 환산기 | 주휴수당 포함·미포함";
+    const title = pageTitle("/wage-converter");
     const description = "시급↔월급↔연봉을 주휴수당 포함·미포함으로 양방향 환산합니다. 2026 최저시급 반영.";
     const canonical = `${SITE_URL}/wage-converter`;
     return {
@@ -1315,7 +1338,7 @@ function buildMeta(route) {
   }
 
   if (route === "/severance-pay") {
-    const title = "2026 퇴직금 계산기 | 퇴직소득세·실수령 퇴직금";
+    const title = pageTitle("/severance-pay");
     const description = "월급과 근속연수를 입력하면 퇴직금, 퇴직소득세, 실수령 퇴직금을 계산합니다.";
     const canonical = `${SITE_URL}/severance-pay`;
     return {
@@ -1339,7 +1362,7 @@ function buildMeta(route) {
   }
 
   if (route === "/quit") {
-    const title = "퇴사 계산기 2026 | 퇴직금·실업급여·생존기간";
+    const title = pageTitle("/quit");
     const description = "퇴직금, 실업급여, 퇴사 후 월 고정비를 한 번에 계산해 버틸 수 있는 기간을 확인합니다.";
     const canonical = `${SITE_URL}/quit`;
     return {
@@ -1399,13 +1422,14 @@ function buildMeta(route) {
     const canonical = `${SITE_URL}${route}`;
     return {
       title: guide.title,
-      description: guide.description,
+      // 가이드 description은 본문 첫 문단이기도 하다 — 메타 설명만 고칠 땐 META_DESCRIPTIONS가 우선한다
+      description: META_DESCRIPTIONS[route] ?? guide.description,
       canonical,
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         name: guide.heading,
-        description: guide.description,
+        description: META_DESCRIPTIONS[route] ?? guide.description,
         url: canonical,
         applicationCategory: "FinanceApplication",
         inLanguage: "ko",
@@ -1419,7 +1443,7 @@ function buildMeta(route) {
   }
 
   // fallback
-  const title = "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세";
+  const title = pageTitle("/");
   const description = "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
   const canonical = `${SITE_URL}${route}`;
 
@@ -1598,7 +1622,7 @@ function buildPrerenderSection(route, meta) {
     ).join("");
     return `
     <section data-seo-prerender style="max-width:var(--sh-container-frame, 72rem);margin:0 auto;padding:20px var(--sh-container-gutter, 16px);box-sizing:border-box;line-height:1.6;">
-      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">2026 세금·연봉·수당 계산기 모음</h1>
+      <h1 style="font-size:28px;line-height:1.3;margin:0 0 12px;">${ALL_CALCULATORS_HEADING}</h1>
       <p style="margin:0 0 10px;">급여·세금·수당·퇴직·절세까지, ${CALCULATOR_ROUTES.length}개 계산기를 한곳에서 확인하세요.</p>${categoryBlocks}
     </section>`;
   }
@@ -1652,7 +1676,9 @@ function replaceTag(html, pattern, next) {
 }
 
 function applyMeta(html, route, meta) {
-  const escapedTitle = escapeAttr(meta.title);
+  // meta.title은 접미사 없는 페이지 제목이다(스키마 name·폴백 h1에도 쓰인다). 브랜드 접미사는
+  // <title>·og:title·twitter:title에 붙는 이 한 지점에서만 붙인다 — 뷰(useSEO)도 같은 brandTitle을 쓴다.
+  const escapedTitle = escapeAttr(brandTitle(meta.title));
   const escapedDescription = escapeAttr(meta.description);
   const escapedCanonical = escapeAttr(meta.canonical);
   const escapedOgImage = escapeAttr(`${SITE_URL}/og-image.png`);
@@ -1801,7 +1827,7 @@ for (const route of PRERENDER_GUIDE_ROUTES) {
   const filePath = resolve(DIST_DIR, route.slice(1), "index.html");
   const html = readFileSync(filePath, "utf8");
   const body = html.match(/<article data-seo-prerender[\s\S]*?<\/article>/i)?.[0];
-  if (!guide || !html.includes(`<title>${guide.title}</title>`)) {
+  if (!guide || !html.includes(`<title>${escapeAttr(brandTitle(guide.title))}</title>`)) {
     throw new Error(`Missing guide title for ${route}`);
   }
   if (!html.includes(`<link rel="canonical" href="${SITE_URL}${route}"`)) {
@@ -1818,7 +1844,7 @@ if (guideBodies.size !== PRERENDER_GUIDE_ROUTES.length) {
 console.log(`Validated ${guideBodies.size} route-specific prerender guides.`);
 
 const notFoundMeta = {
-  title: "페이지를 찾을 수 없습니다 | ShakiLabs 금융 계산기",
+  title: NOT_FOUND_TITLE,
   description: "요청한 금융 계산기 페이지를 찾을 수 없습니다.",
   canonical: `${SITE_URL}/404`,
   jsonLd: null,

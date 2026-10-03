@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -40,7 +41,7 @@ const clampedIncome = computed(() =>
     ? input.value.averageMonthlyIncome
     : null
 );
-const seoTitle = computed(() => "2026 국민연금 수령액 계산기 | 예상 연금액·납부액 조회");
+const seoTitle = computed(() => pageTitle("/pension"));
 const seoDescription = computed(
   () => `가입 ${input.value.insuredYears}년 기준 예상 국민연금 월수령액은 ${formatWon(result.value.estimatedMonthlyPension)}입니다.`
 );

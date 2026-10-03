@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, regionalHealthVariantTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -37,9 +38,9 @@ const salaryLabel = computed(() =>
 );
 
 const seoTitle = computed(() =>
-  salaryLabel.value
-    ? `2026 월급 ${salaryLabel.value} 지역가입자 건강보험료 | 퇴사 후 건보`
-    : "2026 지역가입자 건강보험료 계산기 | 퇴사 후 건보·임의계속가입 비교",
+  props.initialSalary
+    ? regionalHealthVariantTitle(Math.floor(props.initialSalary / 10_000))
+    : pageTitle("/regional-health"),
 );
 const seoDescription = computed(() =>
   salaryLabel.value

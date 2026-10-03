@@ -5,6 +5,7 @@ import { useRoute } from "vue-router";
 import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioChipGroup from "@/components/scenario/ScenarioChipGroup.vue";
@@ -62,7 +63,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateFreelanceRateImpact(input.value));
-const seoTitle = computed(() => "2026 프리랜서 세후 단가 역산 계산기 | 원천세 제외 실수령");
+const seoTitle = computed(() => pageTitle("/freelance-rate"));
 const seoDescription = computed(
   () =>
     `월 세후 목표 ${formatWon(input.value.targetMonthlyNet)}를 만들기 위해 필요한 청구액은 월 ${formatWon(

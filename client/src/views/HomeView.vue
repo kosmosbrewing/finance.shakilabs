@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 import AdSlot from "@/components/common/AdSlot.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import HomeInsuranceCalc from "@/components/home/HomeInsuranceCalc.vue";
@@ -22,7 +23,8 @@ import {
 
 // 제목·본문은 프리렌더(scripts/home-content.mjs)와 같은 소스를 쓴다.
 // 크롤러가 보는 정적 HTML과 사용자가 보는 화면이 갈라지지 않게 하는 것이 이 화면의 존재 이유다.
-const seoTitle = "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세";
+// 홈 제목은 `<앱 이름> | ShakiLabs` 레시피 — 앱 이름은 page-titles.mjs APP_NAME
+const seoTitle = pageTitle("/");
 const seoDescription =
   "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
 

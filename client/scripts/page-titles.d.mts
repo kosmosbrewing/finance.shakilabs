@@ -1,0 +1,30 @@
+// scripts/page-titles.mjs(제목 단일 소스)를 src에서 타입과 함께 쓰기 위한 선언
+export const SITE_BRAND: string;
+export const BRAND_SUFFIX: string;
+export const APP_NAME: string;
+export const PAGE_TITLE_MAX_CHARS: number;
+export const SEARCH_PHRASE_WINDOW: number;
+export const APP_NAME_ROUTES: readonly string[];
+export const NOT_FOUND_TITLE: string;
+export const ALL_CALCULATORS_HEADING: string;
+export const PAGE_TITLES: Readonly<Record<string, string>>;
+export const META_DESCRIPTIONS: Readonly<Record<string, string>>;
+
+export function brandTitle(pageTitle: string | null | undefined): string;
+export function pageTitle(route: string): string;
+export function salaryVariantTitle(manWon: number): string;
+export function insuranceVariantTitle(feeWon: number): string;
+export function comprehensiveTaxVariantTitle(manWon: number): string;
+export function freelancerVariantTitle(manWon: number): string;
+export function compareVariantTitle(aManWon: number, bManWon: number): string;
+export function quitVariantTitle(years: number): string;
+export function withholdingVariantTitle(amountWon: number): string;
+export function yearEndVariantTitle(manWon: number): string;
+export function parentalLeaveVariantTitle(manWon: number): string;
+export function unemploymentVariantTitle(manWon: number): string;
+export function regionalHealthVariantTitle(manWon: number): string;
+export function weeklyHolidayPayVariantTitle(hourlyWon: number): string;
+export function wageConverterVariantTitle(hourlyWon: number): string;
+export function severancePayVariantTitle(years: number): string;
+export function unpaidWageVariantTitle(manWon: number): string;
+export function eitcVariantTitle(householdLabel: string): string;

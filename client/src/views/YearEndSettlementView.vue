@@ -4,6 +4,7 @@ import CalculatorInteractionTracker from "@/components/analytics/CalculatorInter
 import { computed } from "vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, yearEndVariantTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -25,8 +26,8 @@ const r = calc.result;
 
 const seoTitle = computed(() =>
   props.initialSalary
-    ? `연봉 ${Math.floor(props.initialSalary / 10_000).toLocaleString()}만원 연말정산 환급액 | 2026`
-    : "2026 연말정산 계산기 | 환급액·세액공제 통합 시뮬레이터",
+    ? yearEndVariantTitle(Math.floor(props.initialSalary / 10_000))
+    : pageTitle("/year-end-settlement"),
 );
 const seoDesc = computed(() =>
   r.value.isRefund

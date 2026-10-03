@@ -5,6 +5,7 @@ import { useRoute } from "vue-router";
 import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import InternalLink from "@/components/common/InternalLink.vue";
@@ -51,7 +52,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateBonusImpact(input.value));
-const seoTitle = computed(() => "2026 성과급 실수령 계산기 | 상여금 세금·4대보험 공제");
+const seoTitle = computed(() => pageTitle("/bonus"));
 const seoDescription = computed(
   () =>
     `연봉 ${formatManWon(input.value.annualSalary)}에서 성과급 ${formatWon(

@@ -7,13 +7,16 @@
 //  - 현행 수치가 finance 계산기 상수와 겹치는 항목은 src/data 상수와 같아야 한다(테스트가 대조한다).
 // 12월 국회 의결 뒤 status·수치를 갱신하고 CHANGES_2027_VERIFIED_AT을 올린다.
 
+import { pageTitle } from "./page-titles.mjs";
+
 export const CHANGES_2027_VERIFIED_AT = "2026-09-25";
 
 export const CHANGES_2027_META = {
   path: "/2027",
   heading: "2027년 달라지는 세금·지원금",
   intro: "2026년 세제개편안과 2027년 예산안, 확정된 고시를 전후 숫자로 모았습니다.",
-  title: "2027년 달라지는 세금·지원금 한눈에 | 세법개정안·예산안 정리",
+  // 제목은 page-titles.mjs가 정본이다(뷰·라우터·프리렌더 공통, 브랜드 접미사는 brandTitle이 붙인다)
+  title: pageTitle("/2027"),
   description:
     "최저임금·근로장려금·월세 공제·아이맞이지원금·지방국립대 등록금 등 2027년 달라지는 26가지를 확정·심의 중으로 나눠 전후 숫자로 정리.",
 };

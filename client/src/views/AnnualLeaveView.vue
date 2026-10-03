@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -30,7 +31,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateAnnualLeavePay(input.value));
-const seoTitle = computed(() => "2026 연차 수당 계산기 | 미사용 연차 보상금 계산");
+const seoTitle = computed(() => pageTitle("/annual-leave"));
 const seoDescription = computed(
   () =>
     `미사용 연차 ${result.value.payableDays}일 기준 예상 연차수당은 ${formatWon(

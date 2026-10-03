@@ -3,6 +3,7 @@ import { ShCalculatorSplit } from "@shakilabs/ui";
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { salaryVariantTitle } from "../../scripts/page-titles.mjs";
 
 
 import SalaryInputPanel from "@/components/salary/SalaryInputPanel.vue";
@@ -71,9 +72,8 @@ const amountLabel = computed(() => {
   return formatManWonValue(amountManWon.value);
 });
 
-const pageTitle = computed(
-  () => `연봉 ${amountLabel.value} 실수령액 | 2026 월급 실수령 계산기`
-);
+// 프리렌더(/salary/:amount)와 같은 제목 함수 — 숫자 표기까지 같아야 하이드레이션 뒤 제목이 바뀌지 않는다
+const pageTitle = computed(() => salaryVariantTitle(amountManWon.value));
 const pageDesc = computed(
   () => `2026년 연봉 ${amountLabel.value} 월 실수령액은 ${formatWon(calc.monthlyNet.value)}입니다. 4대보험·소득세 공제 내역과 부양가족별 계산도 확인하세요.`
 );
