@@ -15,6 +15,14 @@ import {
   CALCULATOR_ROUTES,
   canonicalPathFor,
 } from "./seo-routes.mjs";
+import {
+  APP_NAME,
+  APP_NAME_ROUTES,
+  BRAND_SUFFIX,
+  PAGE_TITLES,
+  PAGE_TITLE_MAX_CHARS,
+  brandTitle,
+} from "./page-titles.mjs";
 // Body-text floors.
 //
 // The measurement basis matters more than the threshold. This counts the text inside
@@ -465,8 +473,79 @@ function validateAdProvider() {
   }
 }
 
+// 제목 레시피 게이트(함대 공통, 2026-10-03).
+//  - 계산기·가이드: `<페이지 제목> | ShakiLabs`, 홈: `<앱 이름> | ShakiLabs`,
+//    허브·정책·404: `<페이지 제목> · <앱 이름> | ShakiLabs`
+//  - 페이지 제목 40자 이하 — 네이버가 약 35자에서 자르므로 길면 브랜드·핵심 구절이 잘린다
+//  - <title> 태그는 문서 전체에서 정확히 1개 — 차트 SVG <title>이 네이버에 "title 요소 2개 이상"(61페이지)으로
+//    잡힌 적이 있다. 셀 때는 `<title`로 세어 SVG 안의 것도 잡는다
+//  - page-titles.mjs에 있는 라우트는 산출물 제목이 그 값과 같아야 한다(뷰·라우터와 같은 소스라는 보증)
+function decodeEntities(value) {
+  return value
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+function checkTitleRecipe(label, route, html) {
+  const titleTags = (html.match(/<title\b/gi) ?? []).length;
+  assert(titleTags === 1, `${label}: expected exactly one <title, found ${titleTags}`);
+
+  const raw = html.match(/<title>([^<]*)<\/title>/)?.[1];
+  if (raw === undefined) return;
+  const title = decodeEntities(raw);
+  assert(title.endsWith(BRAND_SUFFIX), `${label}: title must end with "${BRAND_SUFFIX}": ${title}`);
+  const page = title.slice(0, -BRAND_SUFFIX.length);
+  assert(!page.includes("|"), `${label}: title has a middle "|" segment: ${title}`);
+
+  const appSuffix = ` · ${APP_NAME}`;
+  let head = page;
+  if (route === "/") {
+    assert(page === APP_NAME, `${label}: home title must be "${APP_NAME}${BRAND_SUFFIX}": ${title}`);
+  } else if (APP_NAME_ROUTES.includes(route)) {
+    assert(page.endsWith(appSuffix), `${label}: hub/policy title must end with "${appSuffix}": ${title}`);
+    head = page.slice(0, -appSuffix.length);
+  } else {
+    assert(!page.includes(APP_NAME), `${label}: calculator title must not carry the app name: ${title}`);
+  }
+  assert(
+    head.length <= PAGE_TITLE_MAX_CHARS,
+    `${label}: page title is ${head.length} chars (max ${PAGE_TITLE_MAX_CHARS}): ${head}`,
+  );
+
+  const expected = PAGE_TITLES[route];
+  if (expected !== undefined) {
+    assert(title === brandTitle(expected), `${label}: title drifted from page-titles.mjs: ${title}`);
+  }
+
+  const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "";
+  assert(description.trim().length > 0, `${label}: missing meta description`);
+  for (const property of ["og:title", "twitter:title"]) {
+    const attribute = property.startsWith("og:") ? "property" : "name";
+    const value = html.match(new RegExp(`<meta ${attribute}="${property}" content="([^"]*)"`))?.[1];
+    assert(
+      value !== undefined && decodeEntities(value) === title,
+      `${label}: ${property} must equal <title>`,
+    );
+  }
+}
+
+function validateTitleRecipe() {
+  for (const route of SEO_ROUTES) {
+    const path = outputPathForRoute(route);
+    if (!existsSync(path)) continue;
+    checkTitleRecipe(route, route, readFileSync(path, "utf8"));
+  }
+  const notFoundPath = resolve(distRoot, "404.html");
+  if (existsSync(notFoundPath)) {
+    checkTitleRecipe("404.html", "/404", readFileSync(notFoundPath, "utf8"));
+  }
+}
+
 validateVercelConfig();
 validateRoutes();
+validateTitleRecipe();
 validateRouterSitemapParity(validateSitemap());
 validateLlmsTxt();
 validateOpacityUtilitiesAreGenerated();

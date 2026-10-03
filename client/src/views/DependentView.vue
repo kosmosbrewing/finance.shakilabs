@@ -4,6 +4,7 @@ import { ShButton, ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -16,7 +17,7 @@ import { buildFaqJsonLd } from "@/lib/faqSeo";
 import { formatWon } from "@/lib/utils";
 import { useDependentEligibility } from "@/composables/useDependentEligibility";
 
-const seoTitle = "2026 건보 피부양자 자격 판정기 | 소득·재산 기준";
+const seoTitle = pageTitle("/dependent");
 const seoDescription =
   "연 합산소득 2,000만원, 재산세 과세표준 5억4천만·9억원 기준으로 건강보험 피부양자 유지 가능 여부를 판정합니다. 탈락 시 지역가입자 보험료 계산으로 이어집니다.";
 

@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -28,7 +29,7 @@ const input = computed(() =>
   })
 );
 const result = computed(() => calculateIrpTaxCredit(input.value));
-const seoTitle = computed(() => "2026 IRP 세액공제 계산기 | 개인형 퇴직연금 절세 효과");
+const seoTitle = computed(() => pageTitle("/irp"));
 const seoDescription = computed(
   () =>
     `연금저축과 IRP 납입액 기준 소득세 세액공제는 ${formatWon(result.value.taxCredit)}, 지방소득세까지 포함한 절세 총액은 ${formatWon(result.value.taxCreditWithLocalTax)}입니다.`

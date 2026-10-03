@@ -7,6 +7,7 @@ import CalculatorMemoryControl from "@/components/calculator/CalculatorMemoryCon
 import FinanceNextActions from "@/components/finance/FinanceNextActions.vue";
 import InstallHint from "@/components/common/InstallHint.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { insuranceVariantTitle, pageTitle as routePageTitle } from "../../scripts/page-titles.mjs";
 import { useRoute, useRouter } from "vue-router";
 import InsuranceInput from "@/components/insurance/InsuranceInput.vue";
 import InsuranceResult from "@/components/insurance/InsuranceResult.vue";
@@ -293,12 +294,13 @@ const pageTitle = computed(() =>
     : "건강보험료 연봉 계산기"
 );
 
+// 제목은 입력값이 아니라 라우트에서 정한다 — 프리렌더 <title>과 같은 함수(page-titles.mjs)를 써야
+// 크롤러가 받은 제목이 하이드레이션 뒤에도 그대로 남는다(입력값을 따라가던 때는 첫 화면부터 달랐다).
 const seoTitle = computed(() => {
-  if (!isForwardMode.value) {
-    return `건보료 ${formatWon(healthInsuranceFee.value)} 연봉 계산 | 2026 건강보험료 계산기`;
-  }
-
-  return "2026 연봉 실수령액 계산기 | 4대보험 + 소득세 자동 계산";
+  if (isForwardMode.value) return routePageTitle("/salary");
+  return props.initialHealthInsuranceFee
+    ? insuranceVariantTitle(props.initialHealthInsuranceFee)
+    : routePageTitle("/insurance");
 });
 
 const seoDescription = computed(() => {

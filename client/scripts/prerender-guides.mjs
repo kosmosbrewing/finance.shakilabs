@@ -1,6 +1,9 @@
+// 제목은 page-titles.mjs 한 곳에서 온다 — 뷰 SEOHead·라우터 meta와 같은 값을 쓰기 위해서다
+import { pageTitle } from "./page-titles.mjs";
+
 const GUIDES = {
   "/raise": {
-    title: "2026 연봉 인상률 계산기 | 연봉 협상 실수령액 비교",
+    title: pageTitle("/raise"),
     description: "현재 연봉과 제안 인상률을 입력해 세전 연봉과 월 실수령 증가액을 비교합니다. 기본 연봉만 반영하며 성과급은 제외합니다.",
     heading: "연봉 인상률 계산기",
     usage: "연봉 협상안을 세전 인상률이 아니라 실제 월급 증가액으로 비교할 때 사용합니다.",
@@ -9,7 +12,7 @@ const GUIDES = {
     links: [["/finance/compare", "이직 연봉 비교"], ["/finance/salary", "연봉 실수령액 계산"]],
   },
   "/bonus": {
-    title: "2026 성과급 실수령 계산기 | 상여금 세금·4대보험 공제",
+    title: pageTitle("/bonus"),
     description: "기본 연봉과 성과급을 합산해 예상 세금·보험료 증가분과 성과급 실수령액을 계산합니다.",
     heading: "성과급 실수령 계산기",
     usage: "성과급 제안액 중 실제로 남을 금액과 실효 수령률을 미리 확인할 때 사용합니다.",
@@ -18,7 +21,7 @@ const GUIDES = {
     links: [["/finance/salary", "연봉 실수령액 계산"], ["/finance/year-end-settlement", "연말정산 계산"]],
   },
   "/annual-leave": {
-    title: "2026 연차 수당 계산기 | 미사용 연차 보상금 계산",
+    title: pageTitle("/annual-leave"),
     description: "월 통상임금과 미사용 연차 일수로 예상 연차수당과 세후 수령액을 간이 계산합니다.",
     heading: "연차 수당 계산기",
     usage: "퇴사 또는 연차 정산 전에 미사용 일수의 예상 보상액을 확인할 때 사용합니다.",
@@ -27,7 +30,7 @@ const GUIDES = {
     links: [["/finance/overtime", "연장·야간·휴일수당"], ["/finance/severance-pay", "퇴직금 계산"]],
   },
   "/overtime": {
-    title: "2026 연장·야간·휴일수당 계산기 | 초과근무 수당 계산",
+    title: pageTitle("/overtime"),
     description: "통상임금과 연장·야간·휴일근로 시간을 입력해 추가 수당의 세전·세후 금액을 계산합니다.",
     heading: "연장·야간·휴일수당 계산기",
     usage: "급여에 포함되지 않은 초과근무 수당을 시간 유형별로 확인할 때 사용합니다.",
@@ -36,7 +39,7 @@ const GUIDES = {
     links: [["/finance/annual-leave", "연차 수당 계산"], ["/finance/wage-converter", "시급·월급 환산"]],
   },
   "/pension": {
-    title: "2026 국민연금 수령액 계산기 | 예상 연금액·납부액 조회",
+    title: pageTitle("/pension"),
     description: "평균 기준소득월액, 가입기간과 청구 나이로 국민연금 월 수령액을 간이 추정합니다.",
     heading: "국민연금 예상 수령액 계산기",
     usage: "가입기간이나 청구 시점을 바꿨을 때 예상 연금액의 방향과 규모를 비교할 때 사용합니다.",
@@ -45,7 +48,7 @@ const GUIDES = {
     links: [["/finance/insurance", "국민연금 보험료 확인"], ["/finance/irp", "IRP 세액공제"]],
   },
   "/monthly-rent-deduction": {
-    title: "2026 월세 세액공제 계산기 | 연말정산 월세 환급액",
+    title: pageTitle("/monthly-rent-deduction"),
     description: "총급여와 월세 납부액으로 월세 세액공제 대상 금액과 예상 연말정산 환급액을 계산합니다.",
     heading: "월세 세액공제 계산기",
     usage: "연말정산 전에 월세 납부액 중 공제 가능한 금액을 가늠할 때 사용합니다.",
@@ -54,7 +57,7 @@ const GUIDES = {
     links: [["/finance/year-end-settlement", "연말정산 계산"], ["/finance/irp", "IRP 세액공제"]],
   },
   "/irp": {
-    title: "2026 IRP 세액공제 계산기 | 개인형 퇴직연금 절세 효과",
+    title: pageTitle("/irp"),
     description: "연금저축과 IRP 납입액을 합산해 세액공제 대상 한도와 예상 절세액을 계산합니다.",
     heading: "IRP 세액공제 계산기",
     usage: "연말까지 연금계좌에 추가 납입할 금액과 예상 세액공제 효과를 비교할 때 사용합니다.",
@@ -63,7 +66,7 @@ const GUIDES = {
     links: [["/finance/year-end-settlement", "연말정산 계산"], ["/finance/pension", "국민연금 예상액"]],
   },
   "/4-insurance-employer": {
-    title: "2026 사업주 4대보험 계산기 | 고용주 부담금·인건비 계산",
+    title: pageTitle("/4-insurance-employer"),
     description: "직원 월급을 기준으로 사업주가 부담하는 국민연금·건강보험·장기요양·고용보험료를 계산합니다.",
     heading: "사업주 4대보험 계산기",
     usage: "채용 전 직원 1인당 월·연 인건비와 급여 외 보험료 부담을 추정할 때 사용합니다.",
@@ -72,7 +75,7 @@ const GUIDES = {
     links: [["/finance/insurance", "근로자 4대보험"], ["/finance/salary", "연봉 실수령액 계산"]],
   },
   "/freelance-rate": {
-    title: "2026 프리랜서 세후 단가 역산 계산기 | 원천세 제외 실수령",
+    title: pageTitle("/freelance-rate"),
     description: "목표 세후 수입과 근무일·시간을 기준으로 필요한 월 청구액, 일 단가와 시급을 역산합니다.",
     heading: "프리랜서 세후 단가 역산 계산기",
     usage: "프로젝트 견적이나 계약 협상에서 목표 실수령을 달성할 청구 단가를 정할 때 사용합니다.",
@@ -81,7 +84,7 @@ const GUIDES = {
     links: [["/finance/freelancer", "프리랜서 세금 계산"], ["/finance/comprehensive-tax", "종합소득세 계산"]],
   },
   "/eitc": {
-    title: "2026 근로장려금·자녀장려금 계산기 | 가구 유형별 지급액",
+    title: pageTitle("/eitc"),
     description: "가구 유형과 총급여를 입력하면 근로장려금(최대 330만원)과 자녀장려금 예상 지급액을 계산합니다. 9월 반기 신청 대비.",
     heading: "근로장려금·자녀장려금 계산기",
     usage: "5월 정기·9월 반기 신청 전에 우리 가구의 예상 지급액과 재산 요건 충족 여부를 확인할 때 사용합니다.",
@@ -90,7 +93,7 @@ const GUIDES = {
     links: [["/finance/year-end-settlement", "연말정산 계산"], ["/finance/weekly-holiday-pay", "주휴수당 계산"]],
   },
   "/unpaid-wage": {
-    title: "임금체불 지연이자 계산기 | 퇴직 후 연 20%·재직 5~6%",
+    title: pageTitle("/unpaid-wage"),
     description: "밀린 월급·퇴직금의 지연이자를 계산합니다. 퇴직 후 14일이 지나면 근로기준법상 연 20% 이자가 붙습니다.",
     heading: "임금체불 지연이자 계산기",
     usage: "밀린 월급이나 퇴직금을 청구할 때 지연이자까지 포함한 총액을 확인하고 협상·진정 근거로 활용합니다.",
@@ -99,7 +102,7 @@ const GUIDES = {
     links: [["/finance/severance-pay", "퇴직금 계산"], ["/finance/unemployment", "실업급여 계산"]],
   },
   "/dependent": {
-    title: "2026 건보 피부양자 자격 판정기 | 소득·재산 기준",
+    title: pageTitle("/dependent"),
     description: "연 합산소득 2,000만원, 재산세 과세표준 5억4천만·9억원 기준으로 건강보험 피부양자 유지 가능 여부를 판정합니다. 탈락 시 지역가입자 보험료 계산으로 이어집니다.",
     heading: "건강보험 피부양자 자격 판정기",
     usage: "연금 수령이나 금융소득 증가로 피부양자 탈락이 걱정될 때 소득·재산·사업소득 요건을 한 번에 점검합니다.",

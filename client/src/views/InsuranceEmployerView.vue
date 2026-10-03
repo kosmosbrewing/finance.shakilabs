@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import { ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -36,7 +37,7 @@ const burdenSegments = computed(() => [
   { key: "employment", label: "고용보험", value: result.value.employmentInsurance, color: "hsl(var(--chart-employment))" },
   { key: "accident", label: "산재보험", value: result.value.industrialAccident, color: "hsl(var(--chart-tax))" },
 ]);
-const seoTitle = computed(() => "2026 사업주 4대보험 계산기 | 고용주 부담금·인건비 계산");
+const seoTitle = computed(() => pageTitle("/4-insurance-employer"));
 const seoDescription = computed(
   () => `월급 ${formatWon(input.value.monthlySalary)} 기준 사업주 월 부담금은 ${formatWon(result.value.totalMonthlyBurden)}입니다.`
 );

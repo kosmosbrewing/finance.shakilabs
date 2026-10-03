@@ -4,6 +4,7 @@ import { ShButton, ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { eitcVariantTitle, pageTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -46,8 +47,8 @@ const householdLabel = computed(() =>
 
 const seoTitle = computed(() =>
   householdLabel.value
-    ? `${householdLabel.value} 근로장려금 계산기 | 2026 지급액 조회`
-    : "2026 근로장려금·자녀장려금 계산기 | 가구 유형별 지급액",
+    ? eitcVariantTitle(householdLabel.value)
+    : pageTitle("/eitc"),
 );
 const seoDescription = computed(() =>
   householdLabel.value

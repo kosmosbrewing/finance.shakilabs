@@ -4,6 +4,7 @@ import CalculatorInteractionTracker from "@/components/analytics/CalculatorInter
 import CalculatorMemoryControl from "@/components/calculator/CalculatorMemoryControl.vue";
 import { computed, onUnmounted, ref, watch, watchEffect } from "vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, quitVariantTitle } from "../../scripts/page-titles.mjs";
 
 
 import QuitInput from "@/components/quit/QuitInput.vue";
@@ -224,8 +225,10 @@ const survival = useSurvivalCalc(
   }))
 );
 
-const seoTitle = computed(
-  () => `2026 ${insuranceYears.value}년 근속 퇴사 계산기 | 퇴직금·실업급여·생존기간`
+// 제목은 입력값이 아니라 라우트에서 정한다 — 프리렌더 <title>과 같은 함수(page-titles.mjs)를 써야
+// 크롤러가 받은 제목이 하이드레이션 뒤에도 그대로 남는다(입력값을 따라가던 때는 첫 화면부터 달랐다).
+const seoTitle = computed(() =>
+  props.initialYears ? quitVariantTitle(props.initialYears) : pageTitle("/quit")
 );
 
 const seoDescription = computed(

@@ -4,6 +4,7 @@ import { computed, ref, watch } from "vue";
 import { ShCalculatorSplit, ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, wageConverterVariantTitle } from "../../scripts/page-titles.mjs";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import { Button } from "@/components/ui/button";
@@ -50,8 +51,8 @@ function updateWeeklyHolidayPreset(value: PresetValue): void {
 
 const seoTitle = computed(() =>
   props.initialHourlyWage
-    ? `시급 ${props.initialHourlyWage.toLocaleString()}원 월급·연봉 환산 | 2026`
-    : "2026 시급 월급 연봉 환산기 | 주휴수당 포함·미포함",
+    ? wageConverterVariantTitle(props.initialHourlyWage)
+    : pageTitle("/wage-converter"),
 );
 const seoDescription = computed(() =>
   props.initialHourlyWage

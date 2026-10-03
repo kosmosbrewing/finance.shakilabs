@@ -4,6 +4,7 @@ import CalculatorInteractionTracker from "@/components/analytics/CalculatorInter
 import { computed, ref, watch } from "vue";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, weeklyHolidayPayVariantTitle } from "../../scripts/page-titles.mjs";
 import ShareModal from "@/components/share/ShareModal.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import { Button } from "@/components/ui/button";
@@ -36,8 +37,8 @@ const result = computed(() =>
 
 const seoTitle = computed(() =>
   props.initialHourlyWage
-    ? `시급 ${props.initialHourlyWage.toLocaleString()}원 주휴수당 계산 | 2026`
-    : "2026 주휴수당 계산기 | 아르바이트 주휴수당·실질 시급",
+    ? weeklyHolidayPayVariantTitle(props.initialHourlyWage)
+    : pageTitle("/weekly-holiday-pay"),
 );
 const seoDescription = computed(() =>
   props.initialHourlyWage

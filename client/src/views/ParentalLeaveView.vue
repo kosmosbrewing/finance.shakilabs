@@ -4,6 +4,7 @@ import { computed } from "vue";
 import { ShCalculatorSplit, ShPresetGroup, type PresetValue } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, parentalLeaveVariantTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -39,8 +40,8 @@ function updateLeaveType(value: PresetValue): void {
 
 const seoTitle = computed(() =>
   props.initialWage
-    ? `통상임금 ${Math.floor(props.initialWage / 10_000)}만원 육아휴직 급여 | 2026`
-    : "2026 육아휴직 급여 계산기 | 6+6 부모육아휴직제 반영",
+    ? parentalLeaveVariantTitle(Math.floor(props.initialWage / 10_000))
+    : pageTitle("/parental-leave"),
 );
 const seoDesc = computed(() =>
   `육아휴직 ${calc.months.value}개월 예상 총 급여는 ${formatWon(r.value.totalBenefit)}입니다.`,

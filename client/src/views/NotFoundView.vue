@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { NOT_FOUND_TITLE } from "../../scripts/page-titles.mjs";
 
 const router = useRouter();
 
@@ -12,7 +13,7 @@ function goHome(): void {
 <template>
   <div class="sh-container sh-container--page py-6">
     <SEOHead
-      title="페이지를 찾을 수 없습니다 | ShakiLabs"
+      :title="NOT_FOUND_TITLE"
       description="요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다."
       noindex
     />

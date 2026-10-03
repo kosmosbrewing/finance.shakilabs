@@ -1,12 +1,14 @@
 // 상황별 계산기 체인 가이드 — 뷰(src)와 프리렌더(scripts)가 공유하는 단일 소스.
 // 하나의 생활 사건(퇴사·이직·연말정산·알바)을 계산기 여러 개의 "순서"로 분해한다.
+import { pageTitle } from "./page-titles.mjs";
+
 export const SCENARIO_CHAINS = [
   {
     slug: "resignation",
     route: "/guide/resignation",
     name: "퇴사 준비",
     heading: "퇴사 전 계산 순서 가이드",
-    seoTitle: "퇴사 전 계산 순서 가이드 | 퇴직금→실업급여→건보료",
+    seoTitle: pageTitle("/guide/resignation"),
     seoDescription: "퇴사 결심부터 이직 공백기까지 — 퇴직금, 실업급여, 지역가입 건보료, 미지급 임금을 순서대로 계산하는 6단계 가이드. 2026년 기준.",
     intro: "퇴사 판단의 절반은 돈 계산입니다. 아래 순서대로 계산하면 \"공백기를 몇 달 버틸 수 있는가\"가 숫자로 나옵니다. 각 단계는 앞 단계의 결과를 전제로 이어집니다.",
     steps: [
@@ -24,7 +26,7 @@ export const SCENARIO_CHAINS = [
     route: "/guide/job-change",
     name: "이직·연봉 협상",
     heading: "이직 연봉 협상 계산 순서",
-    seoTitle: "이직 연봉 협상 계산 순서 | 실수령·4대보험·인상률",
+    seoTitle: pageTitle("/guide/job-change"),
     seoDescription: "제안받은 연봉이 실제로 얼마나 오르는지 — 연봉 비교, 실수령액, 4대보험, 인상률, 성과급까지 5단계로 확인하는 이직 협상 가이드. 2026년 기준.",
     intro: "이직 제안서의 연봉 숫자와 통장에 들어오는 돈은 다릅니다. 협상 전에 아래 순서로 계산하면 \"세후로 얼마나 오르는가\"를 근거로 말할 수 있습니다.",
     steps: [
@@ -44,7 +46,7 @@ export const SCENARIO_CHAINS = [
     route: "/guide/year-end",
     name: "연말정산 준비",
     heading: "연말정산 준비 순서 가이드",
-    seoTitle: "연말정산 준비 순서 가이드 | 공제 계산기 5개 점검",
+    seoTitle: pageTitle("/guide/year-end"),
     seoDescription: "예상 환급액부터 부양가족, 월세, IRP, 근로장려금까지 — 연말정산에서 놓치기 쉬운 공제를 순서대로 점검하는 5단계 가이드. 2026년 기준.",
     intro: "연말정산은 마감 직전에 몰아서 하면 공제를 놓칩니다. 환급 예상액을 먼저 보고, 큰 공제부터 순서대로 점검하는 것이 남는 순서입니다.",
     steps: [
@@ -61,7 +63,7 @@ export const SCENARIO_CHAINS = [
     route: "/guide/part-time",
     name: "알바·단기 근로",
     heading: "알바 급여 계산 순서",
-    seoTitle: "알바 급여 계산 순서 | 시급 환산→주휴수당→연장수당",
+    seoTitle: pageTitle("/guide/part-time"),
     seoDescription: "시급 월급 환산, 주휴수당 요건, 연장·야간수당, 연차수당, 못 받은 임금까지 알바·단기 근로자가 순서대로 확인하는 5단계 가이드. 2026년 최저시급 10,320원 기준.",
     intro: "알바 급여는 시급만 보면 못 받는 돈이 생깁니다. 주휴수당과 가산수당은 요건만 맞으면 당연히 받는 돈입니다. 아래 순서로 내 급여를 검산해 보세요.",
     steps: [

@@ -4,4 +4,5 @@ export declare const SEO_ROUTES: string[];
 export declare const SITEMAP_ROUTES: string[];
 export declare const PARAM_ROUTES: string[];
 export declare const CALCULATOR_ROUTES: string[];
+export declare const COMPARE_PAIRS: readonly (readonly [number, number])[];
 export declare function canonicalPathFor(route: string): string;

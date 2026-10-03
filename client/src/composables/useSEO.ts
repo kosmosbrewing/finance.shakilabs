@@ -5,6 +5,7 @@ import {
   prerenderedJsonLdTypesForCurrentPath,
 } from "@/utils/prerenderedJsonLd";
 import { consolidateCanonicalUrl } from "@/utils/canonicalConsolidation";
+import { brandTitle } from "../../scripts/page-titles.mjs";
 
 type SEOOptions = {
   title: MaybeRefOrGetter<string>;
@@ -59,7 +60,9 @@ export function useSEO({
   jsonLd,
 }: SEOOptions): void {
   useHead(() => {
-    const resolvedTitle = toValue(title);
+    // 뷰는 접미사 없는 페이지 제목을 넘긴다. 프리렌더(applyMeta)와 같은 brandTitle로 붙여야
+    // 하이드레이션 뒤에도 `<페이지 제목> | ShakiLabs`가 정확히 한 번 남는다.
+    const resolvedTitle = brandTitle(toValue(title));
     const resolvedDescription = toValue(description);
     const resolvedNoindex = Boolean(toValue(noindex));
     const resolvedOgImage = toValue(ogImage);

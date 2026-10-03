@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import { ShButton, ShCalculatorSplit, ShTable, ShTableBody, ShTableCell, ShTableHead, ShTableHeader, ShTableRow } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, unemploymentVariantTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -43,9 +44,9 @@ const salaryLabel = computed(() =>
 );
 
 const seoTitle = computed(() =>
-  salaryLabel.value
-    ? `월급 ${salaryLabel.value} 실업급여 계산기 | 2026 구직급여`
-    : "2026 실업급여 계산기 | 구직급여 수급액·수급기간 계산",
+  props.initialSalary
+    ? unemploymentVariantTitle(Math.floor(props.initialSalary / 10_000))
+    : pageTitle("/unemployment"),
 );
 const seoDescription = computed(() =>
   salaryLabel.value

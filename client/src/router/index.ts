@@ -1,11 +1,14 @@
 import { nextTick } from "vue";
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
-import { CALCULATOR_COUNT } from "@/data/calculatorCount";
 import { trackPageView } from "@/lib/analytics";
 import { queryFirst } from "@/lib/routeState";
 import { clearRuntimeError } from "@/lib/runtimeError";
 import { buildPublicPagePath, shouldTrackPageView } from "@/utils/pageTracking";
-import { CHANGES_2027_META } from "../../scripts/changes-2027.mjs";
+import {
+  NOT_FOUND_TITLE,
+  brandTitle,
+  pageTitle,
+} from "../../scripts/page-titles.mjs";
 
 function mapLegacyFreelanceQuery(
   query: Record<string, unknown>,
@@ -37,6 +40,9 @@ function mapLegacyFreelanceQuery(
   return mapped;
 }
 
+// meta.title은 접미사 없는 페이지 제목이다(brandTitle이 붙인다). 기본 라우트는 page-titles.mjs 값을 그대로 쓰고,
+// 금액 변형 라우트는 GA page_title을 한 줄로 묶는 가족 제목을 둔다 — 실제 탭 제목은 뷰가 같은 모듈의
+// 변형 함수(salaryVariantTitle 등)로 덮어 프리렌더 <title>과 같아진다.
 const routes: RouteRecordRaw[] = [
   {
     // 홈은 /salary로 튕기지 않는다. 프리렌더된 정적 HTML은 허브였는데 사용자만 계산기로
@@ -44,14 +50,14 @@ const routes: RouteRecordRaw[] = [
     path: "/",
     name: "Home",
     component: () => import("@/views/HomeView.vue"),
-    meta: { title: "2026 연봉 실수령액 계산기 | 건보료 계산·4대보험·종합소득세" },
+    meta: { title: pageTitle("/") },
   },
   {
     path: "/insurance",
     name: "Insurance",
     component: () => import("@/views/InsuranceView.vue"),
     props: { initialMode: "reverse" },
-    meta: { title: "2026 건강보험료 연봉 계산기 | 4대보험" },
+    meta: { title: pageTitle("/insurance") },
   },
   {
     path: "/insurance/:amount(\\d+)",
@@ -61,26 +67,26 @@ const routes: RouteRecordRaw[] = [
       initialHealthInsuranceFee: Number.parseInt(String(route.params.amount), 10),
       initialMode: "reverse",
     }),
-    meta: { title: "2026 건보료 계산 결과 | 건강보험료 계산기" },
+    meta: { title: "2026 건보료 계산 결과 · 건강보험료 계산기" },
   },
   {
     path: "/salary",
     name: "SalaryHome",
     component: () => import("@/views/InsuranceView.vue"),
     props: { initialMode: "forward" },
-    meta: { title: "2026 연봉 실수령액 계산기 | 4대보험 + 소득세 자동 계산" },
+    meta: { title: pageTitle("/salary") },
   },
   {
     path: "/salary/:amount",
     name: "SalaryLanding",
     component: () => import("@/views/SalaryLandingView.vue"),
-    meta: { title: "2026 연봉 실수령액 계산기 | 월급 계산" },
+    meta: { title: "2026 연봉 실수령액 계산기 · 월급 계산" },
   },
   {
     path: "/comprehensive-tax",
     name: "ComprehensiveTax",
     component: () => import("@/views/ComprehensiveTaxView.vue"),
-    meta: { title: "2026 종합소득세 계산기 | 프리랜서·사업소득 세금" },
+    meta: { title: pageTitle("/comprehensive-tax") },
   },
   {
     path: "/comprehensive-tax/:amount(\\d+)",
@@ -89,20 +95,20 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialBusinessAmountManWon: Number.parseInt(String(route.params.amount), 10),
     }),
-    meta: { title: "2026 종합소득세 계산 결과 | 프리랜서 세금 계산기" },
+    meta: { title: "2026 종합소득세 계산 결과 · 프리랜서 세금 계산기" },
   },
   {
     path: "/freelance-rate",
     name: "FreelanceRate",
     component: () => import("@/views/FreelanceRateView.vue"),
-    meta: { title: "2026 프리랜서 세후 단가 역산 계산기 | 원천세 제외 실수령" },
+    meta: { title: pageTitle("/freelance-rate") },
   },
   {
     path: "/freelancer",
     name: "Freelancer",
     component: () => import("@/views/ComprehensiveTaxView.vue"),
     props: { isFreelancerRoute: true },
-    meta: { title: "2026 프리랜서 세금 계산기 | 3.3% 종합소득세" },
+    meta: { title: pageTitle("/freelancer") },
   },
   {
     path: "/freelancer/:amount(\\d+)",
@@ -112,7 +118,7 @@ const routes: RouteRecordRaw[] = [
       isFreelancerRoute: true,
       initialBusinessAmountManWon: Number.parseInt(String(route.params.amount), 10),
     }),
-    meta: { title: "2026 프리랜서 세금 계산 결과 | 종합소득세 계산기" },
+    meta: { title: "2026 프리랜서 세금 계산 결과 · 종합소득세 계산기" },
   },
   {
     path: "/freelance/:amount(\\d+)",
@@ -135,55 +141,55 @@ const routes: RouteRecordRaw[] = [
     path: "/compare",
     name: "Compare",
     component: () => import("@/views/CompareView.vue"),
-    meta: { title: "2026 이직 연봉 비교 계산기 | 실수령액 차이 비교" },
+    meta: { title: pageTitle("/compare") },
   },
   {
     path: "/raise",
     name: "Raise",
     component: () => import("@/views/RaiseView.vue"),
-    meta: { title: "2026 연봉 인상률 계산기 | 연봉 협상 실수령액 비교" },
+    meta: { title: pageTitle("/raise") },
   },
   {
     path: "/bonus",
     name: "Bonus",
     component: () => import("@/views/BonusView.vue"),
-    meta: { title: "2026 성과급 실수령 계산기 | 상여금 세금·4대보험 공제" },
+    meta: { title: pageTitle("/bonus") },
   },
   {
     path: "/annual-leave",
     name: "AnnualLeave",
     component: () => import("@/views/AnnualLeaveView.vue"),
-    meta: { title: "2026 연차 수당 계산기 | 미사용 연차 보상금 계산" },
+    meta: { title: pageTitle("/annual-leave") },
   },
   {
     path: "/overtime",
     name: "Overtime",
     component: () => import("@/views/OvertimeView.vue"),
-    meta: { title: "2026 연장·야간·휴일수당 계산기 | 초과근무 수당 계산" },
+    meta: { title: pageTitle("/overtime") },
   },
   {
     path: "/pension",
     name: "Pension",
     component: () => import("@/views/PensionView.vue"),
-    meta: { title: "2026 국민연금 수령액 계산기 | 예상 연금액·납부액 조회" },
+    meta: { title: pageTitle("/pension") },
   },
   {
     path: "/monthly-rent-deduction",
     name: "MonthlyRentDeduction",
     component: () => import("@/views/MonthlyRentDeductionView.vue"),
-    meta: { title: "2026 월세 세액공제 계산기 | 연말정산 월세 환급액" },
+    meta: { title: pageTitle("/monthly-rent-deduction") },
   },
   {
     path: "/irp",
     name: "Irp",
     component: () => import("@/views/IrpView.vue"),
-    meta: { title: "2026 IRP 세액공제 계산기 | 개인형 퇴직연금 절세 효과" },
+    meta: { title: pageTitle("/irp") },
   },
   {
     path: "/4-insurance-employer",
     name: "InsuranceEmployer",
     component: () => import("@/views/InsuranceEmployerView.vue"),
-    meta: { title: "2026 사업주 4대보험 계산기 | 고용주 부담금·인건비 계산" },
+    meta: { title: pageTitle("/4-insurance-employer") },
   },
   {
     path: "/compare/:a(\\d+)-vs-:b(\\d+)",
@@ -193,13 +199,13 @@ const routes: RouteRecordRaw[] = [
       initialAManWon: Number.parseInt(String(route.params.a), 10),
       initialBManWon: Number.parseInt(String(route.params.b), 10),
     }),
-    meta: { title: "2026 연봉 비교 결과 | 이직 실수령 차이 계산" },
+    meta: { title: "2026 연봉 비교 결과 · 이직 실수령 차이 계산" },
   },
   {
     path: "/withholding",
     name: "Withholding",
     component: () => import("@/views/WithholdingView.vue"),
-    meta: { title: "2026 원천세 계산기 | 소득세로 연봉 추정" },
+    meta: { title: pageTitle("/withholding") },
   },
   {
     path: "/withholding/:amount(\\d+)",
@@ -208,13 +214,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialAmountWon: Number.parseInt(String(route.params.amount), 10),
     }),
-    meta: { title: "2026 원천세 계산 결과 | 연봉 추정 계산기" },
+    meta: { title: "2026 원천세 계산 결과 · 연봉 추정 계산기" },
   },
   {
     path: "/quit",
     name: "Quit",
     component: () => import("@/views/QuitView.vue"),
-    meta: { title: "2026 퇴사 계산기 | 퇴직금·실업급여·생존기간" },
+    meta: { title: pageTitle("/quit") },
   },
   {
     path: "/quit/:years(\\d+years)",
@@ -223,13 +229,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialYears: Number.parseInt(String(route.params.years).replace("years", ""), 10),
     }),
-    meta: { title: "2026 퇴사 시뮬레이션 결과 | 퇴직금·실업급여 계산" },
+    meta: { title: "2026 퇴사 시뮬레이션 결과 · 퇴직금·실업급여 계산" },
   },
   {
     path: "/parental-leave",
     name: "ParentalLeave",
     component: () => import("@/views/ParentalLeaveView.vue"),
-    meta: { title: "2026 육아휴직 급여 계산기 | 6+6 부모육아휴직제" },
+    meta: { title: pageTitle("/parental-leave") },
   },
   {
     path: "/parental-leave/:amount(\\d+)",
@@ -238,13 +244,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialWage: Number.parseInt(String(route.params.amount), 10) * 10_000,
     }),
-    meta: { title: "2026 육아휴직 급여 계산 결과 | 월별 수령액" },
+    meta: { title: "2026 육아휴직 급여 계산 결과 · 월별 수령액" },
   },
   {
     path: "/year-end-settlement",
     name: "YearEndSettlement",
     component: () => import("@/views/YearEndSettlementView.vue"),
-    meta: { title: "2026 연말정산 계산기 | 환급액·세액공제 시뮬레이터" },
+    meta: { title: pageTitle("/year-end-settlement") },
   },
   {
     path: "/year-end-settlement/:amount(\\d+)",
@@ -253,13 +259,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialSalary: Number.parseInt(String(route.params.amount), 10) * 10_000,
     }),
-    meta: { title: "2026 연말정산 계산 결과 | 연봉별 환급액" },
+    meta: { title: "2026 연말정산 계산 결과 · 연봉별 환급액" },
   },
   {
     path: "/unemployment",
     name: "Unemployment",
     component: () => import("@/views/UnemploymentView.vue"),
-    meta: { title: "2026 실업급여 계산기 | 구직급여 수급액·수급기간" },
+    meta: { title: pageTitle("/unemployment") },
   },
   {
     path: "/unemployment/:amount(\\d+)",
@@ -268,13 +274,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialSalary: Number.parseInt(String(route.params.amount), 10) * 10_000,
     }),
-    meta: { title: "2026 실업급여 계산 결과 | 월급별 수급액" },
+    meta: { title: "2026 실업급여 계산 결과 · 월급별 수급액" },
   },
   {
     path: "/regional-health",
     name: "RegionalHealth",
     component: () => import("@/views/RegionalHealthView.vue"),
-    meta: { title: "2026 지역가입자 건강보험료 계산기 | 퇴사 후 건보 비교" },
+    meta: { title: pageTitle("/regional-health") },
   },
   {
     path: "/regional-health/:amount(\\d+)",
@@ -283,19 +289,19 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialSalary: Number.parseInt(String(route.params.amount), 10) * 10_000,
     }),
-    meta: { title: "2026 지역가입자 건보료 계산 결과 | 퇴사 후 보험료" },
+    meta: { title: "2026 지역가입자 건보료 계산 결과 · 퇴사 후 보험료" },
   },
   {
     path: "/dependent",
     name: "Dependent",
     component: () => import("@/views/DependentView.vue"),
-    meta: { title: "2026 건보 피부양자 자격 판정기 | 소득·재산 기준" },
+    meta: { title: pageTitle("/dependent") },
   },
   {
     path: "/unpaid-wage",
     name: "UnpaidWage",
     component: () => import("@/views/UnpaidWageView.vue"),
-    meta: { title: "임금체불 지연이자 계산기 | 퇴직 후 연 20%·재직 5~6%" },
+    meta: { title: pageTitle("/unpaid-wage") },
   },
   {
     path: "/unpaid-wage/:amount(\\d+)",
@@ -304,13 +310,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialAmount: Number.parseInt(String(route.params.amount), 10) * 10_000,
     }),
-    meta: { title: "체불임금 지연이자 계산 결과 | 연 20% 기준" },
+    meta: { title: "체불임금 지연이자 계산 결과 · 연 20% 기준" },
   },
   {
     path: "/eitc",
     name: "Eitc",
     component: () => import("@/views/EitcView.vue"),
-    meta: { title: "2026 근로장려금·자녀장려금 계산기 | 가구 유형별 지급액" },
+    meta: { title: pageTitle("/eitc") },
   },
   {
     path: "/eitc/:household(single|single-income|double-income)",
@@ -319,13 +325,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialHousehold: String(route.params.household),
     }),
-    meta: { title: "가구 유형별 근로장려금 계산 | 2026 지급액" },
+    meta: { title: "가구 유형별 근로장려금 계산 · 2026 지급액" },
   },
   {
     path: "/weekly-holiday-pay",
     name: "WeeklyHolidayPay",
     component: () => import("@/views/WeeklyHolidayPayView.vue"),
-    meta: { title: "2026 주휴수당 계산기 | 아르바이트 주휴수당·실질 시급" },
+    meta: { title: pageTitle("/weekly-holiday-pay") },
   },
   {
     path: "/weekly-holiday-pay/:amount(\\d+)",
@@ -334,13 +340,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialHourlyWage: Number.parseInt(String(route.params.amount), 10),
     }),
-    meta: { title: "2026 주휴수당 계산 결과 | 시급별 주휴수당" },
+    meta: { title: "2026 주휴수당 계산 결과 · 시급별 주휴수당" },
   },
   {
     path: "/wage-converter",
     name: "WageConverter",
     component: () => import("@/views/WageConverterView.vue"),
-    meta: { title: "2026 시급 월급 연봉 환산기 | 주휴수당 포함·미포함" },
+    meta: { title: pageTitle("/wage-converter") },
   },
   {
     path: "/wage-converter/:amount(\\d+)",
@@ -349,13 +355,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialHourlyWage: Number.parseInt(String(route.params.amount), 10),
     }),
-    meta: { title: "2026 시급 환산 결과 | 월급↔시급↔연봉" },
+    meta: { title: "2026 시급 환산 결과 · 월급↔시급↔연봉" },
   },
   {
     path: "/severance-pay",
     name: "SeverancePay",
     component: () => import("@/views/SeverancePayView.vue"),
-    meta: { title: "2026 퇴직금 계산기 | 퇴직소득세·실수령 퇴직금" },
+    meta: { title: pageTitle("/severance-pay") },
   },
   {
     path: "/severance-pay/:amount(\\d+)",
@@ -364,13 +370,13 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       initialYears: Number.parseInt(String(route.params.amount), 10),
     }),
-    meta: { title: "2026 퇴직금 계산 결과 | 월급별 퇴직금" },
+    meta: { title: "2026 퇴직금 계산 결과 · 월급별 퇴직금" },
   },
   {
     path: "/all",
     name: "AllCalculators",
     component: () => import("@/views/AllCalculatorsView.vue"),
-    meta: { title: `2026 세금·연봉·수당 계산기 모음 | ${CALCULATOR_COUNT}개 계산기` },
+    meta: { title: pageTitle("/all") },
   },
   {
     // 2027년 달라지는 세금·지원금 — 계산기가 아닌 안내 페이지(seo-routes NON_CALCULATOR_ROUTES).
@@ -378,59 +384,59 @@ const routes: RouteRecordRaw[] = [
     path: "/2027",
     name: "Changes2027",
     component: () => import("@/views/Changes2027View.vue"),
-    meta: { title: CHANGES_2027_META.title },
+    meta: { title: pageTitle("/2027") },
   },
   {
     path: "/guide/resignation",
     name: "GuideResignation",
     component: () => import("@/views/ScenarioChainView.vue"),
     props: { slug: "resignation" },
-    meta: { title: "퇴사 전 계산 순서 가이드 | 퇴직금→실업급여→건보료" },
+    meta: { title: pageTitle("/guide/resignation") },
   },
   {
     path: "/guide/job-change",
     name: "GuideJobChange",
     component: () => import("@/views/ScenarioChainView.vue"),
     props: { slug: "job-change" },
-    meta: { title: "이직 연봉 협상 계산 순서 | 실수령·4대보험·인상률" },
+    meta: { title: pageTitle("/guide/job-change") },
   },
   {
     path: "/guide/year-end",
     name: "GuideYearEnd",
     component: () => import("@/views/ScenarioChainView.vue"),
     props: { slug: "year-end" },
-    meta: { title: "연말정산 준비 순서 가이드 | 공제 계산기 5개 점검" },
+    meta: { title: pageTitle("/guide/year-end") },
   },
   {
     path: "/guide/part-time",
     name: "GuidePartTime",
     component: () => import("@/views/ScenarioChainView.vue"),
     props: { slug: "part-time" },
-    meta: { title: "알바 급여 계산 순서 | 시급 환산→주휴수당→연장수당" },
+    meta: { title: pageTitle("/guide/part-time") },
   },
   {
     path: "/about",
     name: "About",
     component: () => import("@/views/AboutView.vue"),
-    meta: { title: "서비스 안내 | 2026 연봉·건보료 계산기" },
+    meta: { title: pageTitle("/about") },
   },
   {
     path: "/terms",
     name: "Terms",
     component: () => import("@/views/TermsView.vue"),
-    meta: { title: "이용약관 | 2026 연봉·건보료 계산기" },
+    meta: { title: pageTitle("/terms") },
   },
   {
     path: "/privacy",
     name: "Privacy",
     component: () => import("@/views/PrivacyView.vue"),
-    meta: { title: "개인정보 처리방침 | 2026 연봉 실수령액 계산기" },
+    meta: { title: pageTitle("/privacy") },
   },
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
     component: () => import("@/views/NotFoundView.vue"),
-    meta: { title: "페이지를 찾을 수 없습니다 | ShakiLabs" },
+    meta: { title: NOT_FOUND_TITLE },
   },
 ];
 
@@ -465,12 +471,14 @@ const router = createRouter({
   },
 });
 
+// meta.title은 접미사 없는 페이지 제목이다. 프리렌더·useSEO와 같은 brandTitle로 붙여
+// 라우트 전환 직후(뷰 useHead가 덮기 전)에도 `<페이지 제목> | ShakiLabs` 레시피가 유지되게 한다.
+function routeTitle(meta: { title?: unknown }): string {
+  return brandTitle(typeof meta.title === "string" ? meta.title : pageTitle("/"));
+}
+
 router.beforeEach((to, _from, next) => {
-  const title =
-    typeof to.meta.title === "string"
-      ? to.meta.title
-      : "2026 연봉·세금·수당 계산기 | 실수령액·4대보험 계산";
-  document.title = title;
+  document.title = routeTitle(to.meta);
   next();
 });
 
@@ -495,7 +503,8 @@ router.afterEach((to, from, failure) => {
   clearRuntimeError();
   if (!shouldTrackPageView(to.path, from.path, from.matched.length > 0)) return;
 
-  const title = typeof to.meta.title === "string" ? to.meta.title : document.title;
+  // GA page_title도 탭 제목과 같은 문자열 — 첫 로드(프리렌더 <title>)와 SPA 전환이 같은 형식으로 찍힌다
+  const title = routeTitle(to.meta);
   void nextTick(() => {
     trackPageView(buildPublicPagePath("/finance", to.path), title);
   });

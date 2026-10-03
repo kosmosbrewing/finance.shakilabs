@@ -4,6 +4,7 @@ import CalculatorInteractionTracker from "@/components/analytics/CalculatorInter
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, withholdingVariantTitle } from "../../scripts/page-titles.mjs";
 import WithholdingInput from "@/components/withholding/WithholdingInput.vue";
 import WithholdingResult from "@/components/withholding/WithholdingResult.vue";
 import ShareModal from "@/components/share/ShareModal.vue";
@@ -114,8 +115,12 @@ const {
   getButtonTitle: () => "원천세 계산 결과 보기",
 });
 
+// 제목은 입력값이 아니라 라우트에서 정한다 — 프리렌더 <title>과 같은 함수(page-titles.mjs)를 써야
+// 크롤러가 받은 제목이 하이드레이션 뒤에도 그대로 남는다(입력값을 따라가던 때는 첫 화면부터 달랐다).
 const seoTitle = computed(() =>
-  `소득세 ${formatWon(monthlyIncomeTax.value)} → 연봉 계산 | 2026 원천세 계산기`
+  props.initialAmountWon
+    ? withholdingVariantTitle(props.initialAmountWon)
+    : pageTitle("/withholding")
 );
 
 const seoDescription = computed(() =>

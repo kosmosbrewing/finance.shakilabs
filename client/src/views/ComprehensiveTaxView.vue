@@ -4,6 +4,7 @@ import CalculatorInteractionTracker from "@/components/analytics/CalculatorInter
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { comprehensiveTaxVariantTitle, freelancerVariantTitle, pageTitle } from "../../scripts/page-titles.mjs";
 import IncomeSourceInput from "@/components/comprehensive-tax/IncomeSourceInput.vue";
 import ComprehensiveTaxResult from "@/components/comprehensive-tax/ComprehensiveTaxResult.vue";
 import SeparateTaxCompare from "@/components/comprehensive-tax/SeparateTaxCompare.vue";
@@ -227,18 +228,14 @@ const basePath = computed(() => isFreelancer.value ? "/freelancer" : "/comprehen
 const pageLabel = computed(() => isFreelancer.value ? "프리랜서 세금 계산기" : "종합소득세 계산기");
 const internalLinkKey = computed((): "freelancer" | "comprehensive-tax" => isFreelancer.value ? "freelancer" : "comprehensive-tax");
 
+// 제목은 입력값이 아니라 라우트에서 정한다 — 프리렌더 <title>과 같은 함수(page-titles.mjs)를 써야
+// 크롤러가 받은 제목이 하이드레이션 뒤에도 그대로 남는다(입력값을 따라가던 때는 첫 화면부터 달랐다).
 const seoTitle = computed(() => {
-  const totalManWon = Math.floor(result.value.totalRevenue / 10_000);
+  const amountManWon = props.initialBusinessAmountManWon;
   if (isFreelancer.value) {
-    if (totalManWon > 0) {
-      return `프리랜서 수입 ${formatManWonValue(totalManWon)} 세금 | 2026 3.3% 종합소득세`;
-    }
-    return "2026 프리랜서 세금 계산기 | 3.3% 종합소득세";
+    return amountManWon ? freelancerVariantTitle(amountManWon) : pageTitle("/freelancer");
   }
-  if (totalManWon > 0) {
-    return `종합소득 ${formatManWonValue(totalManWon)} 세금 계산 | 2026 종합소득세 계산기`;
-  }
-  return "2026 종합소득세 계산기 | 프리랜서·사업소득 세금";
+  return amountManWon ? comprehensiveTaxVariantTitle(amountManWon) : pageTitle("/comprehensive-tax");
 });
 
 const seoDescription = computed(() => {

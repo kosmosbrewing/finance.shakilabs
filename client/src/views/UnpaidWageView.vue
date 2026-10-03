@@ -4,6 +4,7 @@ import { ShButton, ShCalculatorSplit } from "@shakilabs/ui";
 import CalculatorPageHeader from "@/components/calculator/CalculatorPageHeader.vue";
 import CalculatorInteractionTracker from "@/components/analytics/CalculatorInteractionTracker.vue";
 import SEOHead from "@/components/common/SEOHead.vue";
+import { pageTitle, unpaidWageVariantTitle } from "../../scripts/page-titles.mjs";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import ScenarioField from "@/components/scenario/ScenarioField.vue";
 import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
@@ -39,9 +40,9 @@ const amountLabel = computed(() =>
 );
 
 const seoTitle = computed(() =>
-  amountLabel.value
-    ? `체불임금 ${amountLabel.value} 지연이자 계산기 | 연 20% 기준`
-    : "임금체불 지연이자 계산기 | 퇴직 후 연 20%·재직 5~6%",
+  props.initialAmount
+    ? unpaidWageVariantTitle(Math.floor(props.initialAmount / 10_000))
+    : pageTitle("/unpaid-wage"),
 );
 const seoDescription = computed(() =>
   amountLabel.value
