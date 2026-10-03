@@ -31,7 +31,6 @@ const props = withDefaults(
   },
 );
 
-const titleId = `breakdown-donut-title-${useId()}`;
 const descriptionId = `breakdown-donut-desc-${useId()}`;
 // 패키지 유틸은 제네릭이 아니라 color를 optional로 되돌린다. 구현이 입력을
 // 스프레드로 보존하므로 필수 color가 유지됨을 단언한다.
@@ -75,9 +74,9 @@ const arcs = computed(() =>
       :viewBox="`0 0 ${SIZE} ${SIZE}`"
       class="h-auto w-[176px] max-w-full shrink-0"
       role="img"
-      :aria-labelledby="`${titleId} ${descriptionId}`"
+      :aria-label="label"
+      :aria-describedby="descriptionId"
     >
-      <title :id="titleId">{{ label }}</title>
       <desc :id="descriptionId">{{ description }}</desc>
       <template v-for="arc in arcs" :key="arc.key">
         <circle
