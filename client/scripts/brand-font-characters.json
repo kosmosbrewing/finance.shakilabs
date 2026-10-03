@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "family": "GmarketSans",
-  "routes": 158,
-  "characterCount": 188,
-  "characters": " %()+,-./0123456789IPR~·—가간강개거건게격결계고공과관교구국근금급기나내녀년는능단담당대데돈드득랜레려력련령로료률르리만말맞먼명무문묻뮬민및바받방배법별보봉부분불비사산상생서설성세션소수순스시신실아알액야약양억업에여역연영예와용운원월유육율을의이익인일임입자작장재저적전절점정제조존종주준지직질차처천체초추출칙침크타퇴트판표프피하한할합항험협환황회후휴",
+  "routes": 159,
+  "characterCount": 190,
+  "characters": " %()+,-./0123456789IPR~·—가간강개거건격결계고공과관교구국근금급기내녀년는능단달담당대데돈동드득라랜레려력령로록료률르리만말맞명모목무문묻뮬민및바받방배법별보봉부분불비사산상생서설성세션소수순스시신실아알액야약양억업에여역연영예와용운원월유육율을음의이인일임입자작장재적전절점정제조존종주준지직질차처천청체초추출칙침크타퇴트판표프피한할합항험협혼환황회후휴",
   "sources": [
     {
       "selector": "h1.break-keep.text-h1.font-brand",
@@ -11,7 +11,11 @@
     },
     {
       "selector": "h1.retro-title",
-      "sample": "IRP·퇴직연금 세액공제"
+      "sample": "개인정보 처리방침"
+    },
+    {
+      "selector": "h1.sh-text.sh-text--display.break-keep",
+      "sample": "2026 세금·연봉·수당 계산기 모음"
     },
     {
       "selector": "h1.text-h1.font-brand",
@@ -31,7 +35,7 @@
     },
     {
       "selector": "p.text-display.font-bold.font-title.text-primary.tabular-nums",
-      "sample": "+264,198원"
+      "sample": "+1,183,420원"
     },
     {
       "selector": "span.hidden.sm:inline",
