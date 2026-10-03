@@ -528,6 +528,52 @@ function validateNoTinyTextUtilities() {
   );
 }
 
+// 빌드 CSS 전체 스캔(v8c 결함 수정, 2026-10-03).
+//
+// 왜: validateNoTinyTextUtilities는 소스의 Tailwind 유틸리티(.text-tiny, text-[Npx])만 본다.
+// `.eyebrow`(main.css, font-size:0.7rem=11.2px, STEP 1/2/3 배지·AboutView 날짜 라벨에 쓰임)는
+// 일반 CSS 클래스라 그 스캔의 사각지대였다 — getComputedStyle 실측(360·1280px)으로 11.2px가
+// 드러난 뒤에야 찾았다. 빌드된 CSS는 출처(Tailwind 유틸·일반 클래스·@shakilabs/ui 패키지)를
+// 가리지 않고 전부 한 파일에 모이므로, 여기서 한 번 더 보면 이런 사각지대가 다시 안 생긴다.
+//
+// 허용: 차트 전용(.text-\[12px\], result-visualization 디렉터리 — 소스 스캔이 이미 집행),
+// .retro-details-chevron(글리프), .text-xs(Tailwind 기본 유틸 — 별도 토큰 계열, 사용자 결정
+// 대기), .sh-*(@shakilabs/ui 패키지 전체 — 이 웨이브 범위 밖, 0.3.43 백로그). 그 외 13px
+// 미만 font-size가 하나라도 남으면 실패한다.
+function validateBuiltCssFontSizes() {
+  const cssDir = resolve(distRoot, "assets");
+  if (!existsSync(cssDir)) {
+    assert(false, "No built CSS directory to validate font sizes against");
+    return;
+  }
+  const cssFiles = readdirSync(cssDir).filter((name) => name.endsWith(".css"));
+  assert(cssFiles.length > 0, "No built CSS found to validate font sizes against");
+  const css = cssFiles.map((name) => readFileSync(resolve(cssDir, name), "utf8")).join("\n");
+
+  const allowedExact = new Set([".text-\\[12px\\]", ".retro-details-chevron", ".text-xs"]);
+  const offenders = [];
+  for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const [, selectorList, body] = match;
+    // !important 규칙은 responsive-accessibility.css의 ≤400px 정규화(이미 13px 이상)다.
+    if (/!important/.test(body)) continue;
+    const sizeMatch = body.match(/font-size:\s*([0-9.]+)(px|rem)/);
+    if (!sizeMatch) continue;
+    const px =
+      sizeMatch[2] === "rem" ? Number.parseFloat(sizeMatch[1]) * 16 : Number.parseFloat(sizeMatch[1]);
+    if (px >= 13) continue;
+    for (const selector of selectorList.split(",").map((s) => s.trim())) {
+      if (allowedExact.has(selector)) continue;
+      if (selector.startsWith(".sh-")) continue;
+      offenders.push(`${selector} { font-size: ${sizeMatch[1]}${sizeMatch[2]} } = ${px}px`);
+    }
+  }
+  assert(
+    offenders.length === 0,
+    "13px 미만 font-size가 빌드 CSS에 남아 있다(.sh-* 패키지·text-xs·차트 예외 제외):\n  " +
+      offenders.join("\n  "),
+  );
+}
+
 // llms.txt <-> sitemap.
 //
 // Why: llms.txt is the one shipped file that states, in plain text, how many calculators this site
@@ -723,6 +769,7 @@ validateRouterSitemapParity(validateSitemap());
 validateLlmsTxt();
 validateOpacityUtilitiesAreGenerated();
 validateNoTinyTextUtilities();
+validateBuiltCssFontSizes();
 validateNotFound();
 validateAdProvider();
 validateTableScrollWrappers();

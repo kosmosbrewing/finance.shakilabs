@@ -385,7 +385,12 @@ function buildSalaryContent(manWon) {
         <li style="${LI_STYLE}"><a href="https://www.nps.or.kr" target="_blank" rel="noopener noreferrer">국민연금공단</a> — 국민연금 요율·기준소득월액 상·하한</li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <!-- v8c 결함 수정(2026-10-03): "※ 법적 효력이 없는 참고용" 각주가 font-size:12px
+           인라인 style이었다 — Tailwind 클래스가 아니라 validateNoTinyTextUtilities가 못
+           보는 사각지대였고, 프리렌더 article이 하이드레이션 때 그대로 입양돼(prerenderFallback)
+           항상(뷰포트 무관) 12px로 보였다. 이 파일의 같은 각주 18곳 전부 13px로 올렸다
+           (hub-content.mjs가 쓰는 scripts/hub-styles.mjs의 NOTE_STYLE과 동일 값). -->
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 계산 결과는 2026년 국세청 근로소득 간이세액표와 국민건강보험공단·국민연금공단·고용노동부 고시를 기반으로 한
         추정값이며, 법적 효력이 없는 참고용입니다. 실제 급여명세서와 차이가 있을 수 있습니다.
       </p>
@@ -492,7 +497,7 @@ function buildFreelancerContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/regional-health">지역가입자 건보료 계산기</a></li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 단순경비율 적용 인적용역 기준 추정치입니다. 업종 코드·장부 작성 여부·다른 소득·부양가족에 따라 실제 세액이
         달라지며, 확정 금액은 국세청 홈택스 신고 화면에서 확인하세요.
       </p>
@@ -757,7 +762,7 @@ function buildEitcContent(householdSlug) {
       </ul>
       <p style="${P_STYLE}">다른 가구 유형으로 보기: ${otherLinks}</p>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 조세특례제한법 산식 기준 간이 추정치이며, 국세청 산정표·단수 조정, 국민연금 수급 등 제외 요건에 따라
         실제 지급액과 차이가 있을 수 있습니다. 확정 금액은 홈택스 모의계산을 이용하세요.
       </p>
@@ -870,7 +875,7 @@ function buildUnpaidWageContent(manWon) {
       </ul>
       <p style="${P_STYLE}">다른 체불액으로 보기: ${otherAmountLinks}</p>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 근로기준법·민법·상법·소송촉진법의 법정이율을 단순 적용한 참고용 추정치입니다.
         일부 변제, 지연이자 적용 제외 사유, 판결 주문에 따라 실제 금액은 달라질 수 있습니다.
       </p>
@@ -1402,7 +1407,7 @@ function buildInsuranceContent(fee) {
         <li style="${LI_STYLE}"><a href="https://www.4insure.or.kr" target="_blank" rel="noopener noreferrer">4대사회보험 정보연계센터</a> — 사업장 가입 내역·보수월액 확인</li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 국민건강보험공단 2026년 요율 고시를 기반으로 한 역산 추정치이며, 법적 효력이 없는 참고용입니다.
       </p>
     </article>`;
@@ -1836,7 +1841,7 @@ function buildComprehensiveTaxContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a> - 근로소득자</li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 계산은 인적용역 단순경비율(4천만원 이하 64.1%, 초과분 49.7%)·인적공제 1인 기준 단순 추정이며, 실제 경비율·공제는 업종과 장부 여부에 따라 달라집니다. 정확한 세액은 국세청 홈택스 모의계산 또는 세무대리인 상담이 필요합니다.
       </p>
     </article>`;
@@ -2185,7 +2190,7 @@ function buildCompareContent(aManWon, bManWon) {
         <li style="${LI_STYLE}"><a href="/finance/quit">퇴사 계산기</a> - 이직 준비 시 참고</li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 2026년 세율·요율 기준 추정치이며, 실제 급여명세와 차이가 있을 수 있습니다.
       </p>
     </article>`;
@@ -2359,7 +2364,7 @@ function buildQuitContent(years) {
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a> - 재취업 시 참고</li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 시뮬레이션은 평균 월급 300만원·표준 수급일수 가정의 추정이며, 실제 퇴직금·실업급여는 근로계약·이직사유·나이 등에 따라 달라집니다.
       </p>
     </article>`;
@@ -2502,7 +2507,7 @@ function buildUnemploymentContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/regional-health">지역가입자 건보료 계산기</a></li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 고용노동부 2026년 실업급여 고시 기준 추정이며, 실제 수급액은 고용센터 심사를 거쳐 확정됩니다.
       </p>
     </article>`;
@@ -2643,7 +2648,7 @@ function buildSeverancePayContent(years) {
         <li style="${LI_STYLE}"><a href="/finance/pension">국민연금 수령액 계산기</a></li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 평균 월급 300만원 가정의 단순 추정이며, 실제 퇴직금·퇴직소득세는 급여 구조와 근속연수에 따라 달라집니다.
       </p>
     </article>`;
@@ -2761,7 +2766,7 @@ function buildYearEndContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/irp">IRP 세액공제 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 표준 공제 시나리오 기준 추정이며, 정확한 환급액은 국세청 홈택스 연말정산 미리보기로 확인하세요.
       </p>
     </article>`;
@@ -2868,7 +2873,7 @@ function buildParentalLeaveContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/year-end-settlement">연말정산 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 2026년 고용노동부 육아휴직급여 고시 기준 추정이며, 사후지급분·특례 적용 여부에 따라 달라질 수 있습니다.
       </p>
     </article>`;
@@ -2949,7 +2954,7 @@ function buildWithholdingContent(amount) {
         <li style="${LI_STYLE}"><a href="/finance/insurance">건보료 역산 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/year-end-settlement">연말정산 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 국세청 근로소득 간이세액표를 기준으로 한 역산 추정치이며, 실제 연봉은 회사 급여 구조에 따라 달라집니다.
       </p>
     </article>`;
@@ -3050,7 +3055,7 @@ function buildWeeklyHolidayPayContent(hourly) {
         <li style="${LI_STYLE}"><a href="/finance/overtime">연장·야간·휴일수당 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/annual-leave">연차수당 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 근로기준법 제55조 주휴수당 규정 기준 계산이며, 실제 지급은 근로계약서와 사업장 정책에 따라 달라질 수 있습니다.
       </p>
     </article>`;
@@ -3155,7 +3160,7 @@ function buildWageConverterContent(hourly) {
         <li style="${LI_STYLE}"><a href="/finance/overtime">연장·야간·휴일수당</a></li>
         <li style="${LI_STYLE}"><a href="/finance/salary">연봉 실수령액 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 환산은 근로기준법 주휴수당 포함·주 40시간 기본 근로 기준이며, 실제 월급은 근로계약에 따라 달라질 수 있습니다.
       </p>
     </article>`;
@@ -3272,7 +3277,7 @@ function buildRegionalHealthContent(manWon) {
         <li style="${LI_STYLE}"><a href="/finance/insurance">건강보험료 역산 계산기</a></li>
         <li style="${LI_STYLE}"><a href="/finance/unemployment">실업급여 계산기</a></li>
       </ul>
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 결과는 소득 기준 단순 추정이며, 실제 지역가입자 건보료는 재산·자동차 포함 종합 산정이 필요합니다.
       </p>
     </article>`;
@@ -3463,7 +3468,7 @@ function buildAboutContent() {
         <li style="${LI_STYLE}"><strong>2025.11</strong> — 지역가입자 건보료·임의계속가입 비교 기능 추가</li>
       </ul>
 
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         본 서비스는 대한민국 근로자·프리랜서의 세금·연봉 이해도 향상을 목표로 비영리 개인 프로젝트로 운영되며,
         Google AdSense 광고 수익을 통해 운영비를 충당합니다.
       </p>
@@ -3966,7 +3971,7 @@ function buildLandingContent(route) {
       ${data.description ? `<p style="${P_STYLE}">${data.description}</p>` : ""}
       ${data.noticeLink ? `<p data-prerender-mirror style="${P_STYLE}"><a href="/finance${data.noticeLink.to}">${data.noticeLink.label}</a></p>` : ""}
       ${bodyHtml}
-      <p style="font-size:12px;color:hsl(var(--muted-foreground));margin-top:24px;">
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));margin-top:24px;">
         ※ 본 계산기는 2026년 공식 세율·요율 기반 추정치를 제공합니다. 법적 효력이 없는 참고용입니다.
       </p>
     </article>`;
