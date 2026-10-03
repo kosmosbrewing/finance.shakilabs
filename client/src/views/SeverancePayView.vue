@@ -175,7 +175,8 @@ watch(
           <div class="retro-panel-content">
             <p class="mb-2 text-caption font-semibold text-foreground">근속연수별 퇴직금 비교</p>
             <div class="overflow-x-auto">
-              <table aria-label="근속연수별 퇴직금 비교" class="w-full text-[11px] text-muted-foreground">
+              <!-- v8 결함 수정(2026-10-03): 11px였다 — 차트가 아닌 비교표라 13px 토큰(text-caption)으로. -->
+              <table aria-label="근속연수별 퇴직금 비교" class="w-full text-caption text-muted-foreground">
                 <thead>
                   <tr class="border-b border-border/40">
                     <th scope="col" class="py-1 text-left">근속연수</th>

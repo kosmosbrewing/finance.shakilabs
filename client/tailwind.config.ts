@@ -48,7 +48,12 @@ const config: Config = {
         heading: ["1rem", { lineHeight: "1.35", fontWeight: "600" }],
         body: ["0.875rem", { lineHeight: "1.5", fontWeight: "400" }],
         caption: ["0.8125rem", { lineHeight: "1.45", fontWeight: "400" }],
-        tiny: ["0.6875rem", { lineHeight: "1.35", fontWeight: "400" }],
+        // v8 결함 수정(2026-10-03): 0.6875rem(11px)이었다 — 보조 글자 ≥13px 기준 미달.
+        // text-tiny는 업종 주석·가이드 단계 설명·"N단계 · …" 등 18개 넘는 호출부가 공유하는
+        // 토큰이라 여기 한 곳만 고치면 전부 같이 올라간다(개별 엘리먼트 땜질 금지).
+        // caption과 값이 같아져도 두 토큰을 유지하는 이유: 폰트 굵기·line-height가 다르고,
+        // 호출부가 "본문보다 한 단계 작은 보조글" 의도를 그대로 쓰도록 이름을 바꾸지 않는다.
+        tiny: ["0.8125rem", { lineHeight: "1.45", fontWeight: "400" }],
       },
 
       colors: {

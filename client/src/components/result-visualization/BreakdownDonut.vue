@@ -96,12 +96,15 @@ const arcs = computed(() =>
           :stroke-width="STROKE_WIDTH"
         />
       </template>
+      <!-- v8 결함 수정(2026-10-03): 10px·11px였다 — text-tiny 토큰을 거치지 않는
+           화살표 값이라 토큰만 고쳐서는 안 잡혔다. 도넛 안쪽은 "범례" 자체는 아니지만
+           같은 차트 예외(최소 12px)를 적용한다 — 바깥 범례는 이미 text-caption(13px). -->
       <text
         v-if="centerLabel"
         :x="CENTER"
         :y="centerValue ? CENTER - 5 : CENTER + 3"
         text-anchor="middle"
-        class="fill-muted-foreground text-[10px]"
+        class="fill-muted-foreground text-[12px]"
       >
         {{ centerLabel }}
       </text>
@@ -110,7 +113,7 @@ const arcs = computed(() =>
         :x="CENTER"
         :y="CENTER + 12"
         text-anchor="middle"
-        class="fill-foreground text-[11px] font-bold tabular-nums"
+        class="fill-foreground text-[12px] font-bold tabular-nums"
       >
         {{ centerValue }}
       </text>

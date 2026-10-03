@@ -355,6 +355,62 @@ function validateOpacityUtilitiesAreGenerated() {
   );
 }
 
+// 11px 보조 글자 재발 방지 게이트(v8 결함 수정, 2026-10-03).
+//
+// 왜 소스를 보나(빌드 CSS·HTML이 아니라): /comprehensive-tax·/freelancer의 업종 주석,
+// /guide/*의 단계 설명·"N단계 · ", /all의 항목 설명은 모두 하이드레이션 뒤에만 DOM에
+// 들어오는 계산기 UI 안쪽 글자다. 이 앱의 크롤러용 정적 스냅샷(data-seo-prerender)은
+// 인라인 style로 구워 낸 별도 SEO 문단이라 Tailwind 클래스를 아예 안 쓴다 — 그래서
+// dist의 HTML·CSS를 대조해서는 이 결함을 재현도 재검증도 못 한다. 실제 방문자가 보는
+// 글자 크기는 소스의 tailwind.config.ts 토큰과 text-[...] 화살표 값이 전부이므로,
+// validateOpacityUtilitiesAreGenerated와 같은 방식으로 소스를 직접 스캔한다.
+//
+// 1) tiny 토큰(.text-tiny)이 다시 13px 밑으로 내려가면 실패 — 18곳이 넘는 호출부가
+//    공유하는 소스라 토큰 하나가 전체를 되돌릴 수 있다.
+// 2) text-[Npx]/text-[N.Mrem] 화살표 유틸은 전부 12px 이상이어야 하고, 12px대는
+//    src/components/result-visualization/(차트 전용 디렉터리) 밖에서 쓰이면 실패 —
+//    v8 공통 규칙 "13px 미만 글자(차트 범례 12px 제외)"를 디렉터리 경계로 집행한다.
+//    .text-xs(Tailwind 기본 유틸)는 이 결함과 다른 토큰 계열이라 범위 밖이다.
+function validateNoTinyTextUtilities() {
+  const tailwindConfigPath = resolve(projectRoot, "tailwind.config.ts");
+  const tailwindConfig = readFileSync(tailwindConfigPath, "utf8");
+  const tinyMatch = tailwindConfig.match(/tiny:\s*\[\s*"([0-9.]+)rem"/);
+  assert(tinyMatch !== null, "tailwind.config.ts: could not find the `tiny` fontSize token");
+  if (tinyMatch) {
+    const tinyPx = Number.parseFloat(tinyMatch[1]) * 16;
+    assert(
+      tinyPx >= 13,
+      `tailwind.config.ts: fontSize.tiny is ${tinyMatch[1]}rem (${tinyPx}px) — must stay >= 13px. ` +
+        "This is the token behind /comprehensive-tax·/freelancer's industry note, /guide/* step " +
+        "descriptions, and /all's item descriptions.",
+    );
+  }
+
+  const chartDir = resolve(projectRoot, "src", "components", "result-visualization");
+  const arbitraryPattern = /text-\[([0-9.]+)(px|rem)\]/g;
+  const offenders = [];
+  for (const file of collectSourceFiles(resolve(projectRoot, "src"))) {
+    const isChartFile = file === chartDir || file.startsWith(chartDir + "/");
+    for (const match of readFileSync(file, "utf8").matchAll(arbitraryPattern)) {
+      const [, rawValue, unit] = match;
+      const px = unit === "rem" ? Number.parseFloat(rawValue) * 16 : Number.parseFloat(rawValue);
+      if (px >= 13) continue;
+      if (px >= 12 && isChartFile) continue;
+      offenders.push(
+        `${file.slice(projectRoot.length + 1)}: text-[${rawValue}${unit}] = ${px}px` +
+          (px < 12
+            ? " (below the 12px chart-legend floor)"
+            : " (12px is only allowed inside src/components/result-visualization/)"),
+      );
+    }
+  }
+  assert(
+    offenders.length === 0,
+    "Sub-13px text utilities found (chart visualizations may use exactly 12px):\n  " +
+      offenders.join("\n  "),
+  );
+}
+
 // llms.txt <-> sitemap.
 //
 // Why: llms.txt is the one shipped file that states, in plain text, how many calculators this site
@@ -549,6 +605,7 @@ validateTitleRecipe();
 validateRouterSitemapParity(validateSitemap());
 validateLlmsTxt();
 validateOpacityUtilitiesAreGenerated();
+validateNoTinyTextUtilities();
 validateNotFound();
 validateAdProvider();
 validateTableScrollWrappers();
