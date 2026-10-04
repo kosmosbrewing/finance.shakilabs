@@ -86,7 +86,8 @@ const categories = [
          보조 섹션이 페이지 제목처럼 읽혔다(h1 top 451px). 문구는 <title>·프리렌더 h1과
          같은 문장을 쓴다 — 크롤러가 받는 제목과 독자가 보는 제목이 달라선 안 된다. -->
     <header class="space-y-1">
-      <h1 class="text-h1 font-brand">{{ pageHeading }}</h1>
+      <!-- v8c: 전체 계산기는 허브 — display 토큰(28px) -->
+      <h1 class="sh-text sh-text--display break-keep">{{ pageHeading }}</h1>
       <p class="text-caption text-muted-foreground">급여·세금·수당·퇴직·절세까지, {{ CALCULATOR_COUNT }}개 계산기를 한곳에서 확인하세요.</p>
     </header>
 
