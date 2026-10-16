@@ -38,7 +38,7 @@ const seoDescription = computed(
 
 <template>
   <div class="sh-container sh-container--tool space-y-4 py-6">
-    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(monthlyRentFaqs)" />
+    <SEOHead noindex :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(monthlyRentFaqs)" />
 
     <CalculatorPageHeader title="월세 세액공제 계산기" />
 

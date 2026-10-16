@@ -38,7 +38,7 @@ const seoDescription = computed(
 
 <template>
   <div class="sh-container sh-container--tool space-y-4 py-6">
-    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(irpFaqs)" />
+    <SEOHead noindex :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(irpFaqs)" />
 
     <CalculatorPageHeader title="IRP·퇴직연금 세액공제" />
 

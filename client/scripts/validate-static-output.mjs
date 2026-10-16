@@ -5,6 +5,8 @@
 //   (b) 157페이지 전부가 셸 <noscript>를 남겨 h1이 2개였다.
 // 두 결함 모두 04.card의 게이트가 이미 검사하던 항목이라, 코드가 아니라 게이트 부재가 원인이다.
 import { createHash } from "node:crypto";
+import { validateNoindex } from "./validate-noindex.mjs";
+import { NOINDEX_ROUTES as NOINDEX_ROUTES_FOR_GATE } from "./seo-routes.mjs";
 import { validateBuiltFontSizes } from "./validate-built-font-sizes.mjs";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -339,6 +341,8 @@ function validateRouterSitemapParity(listed) {
       );
       continue;
     }
+    // 색인 소거(2026-10-16): NOINDEX_ROUTES는 라우터에 있고 프리렌더되지만 사이트맵에 없다(validate-noindex.mjs가 noindex를 확인)
+    if (NOINDEX_ROUTES_FOR_GATE.includes(route.path)) continue;
     assert(
       listed.has(urlFor(route.path)),
       `Router route is missing from the sitemap: ${urlFor(route.path)}`,
@@ -793,3 +797,7 @@ console.log(
 // v8c(2026-10-04): 배포되는 CSS·HTML의 글자 크기를 직접 잰다 — 13px 미만은 차트 축 눈금(__scale)·차트 전용 text-[12px]만.
 const builtFontDeclarations = validateBuiltFontSizes({ distRoot: distRoot });
 console.log(`Validated built font sizes — ${builtFontDeclarations} declarations, 0 under 13px outside the chart-axis allowance.`);
+
+// 색인 소거 게이트(2026-10-16): 사이트맵 ⇔ noindex 없음, 사이트맵 밖 self-canonical ⇔ noindex, NOINDEX_ROUTES 전수 확인
+const noindexChecked = validateNoindex({ distRoot: distRoot, siteUrl: "https://shakilabs.com/finance", noindexRoutes: NOINDEX_ROUTES_FOR_GATE });
+console.log(`Validated noindex/sitemap consistency across ${noindexChecked} built pages (${NOINDEX_ROUTES_FOR_GATE.length} noindex routes).`);

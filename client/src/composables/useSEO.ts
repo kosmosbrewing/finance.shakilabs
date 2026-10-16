@@ -6,6 +6,11 @@ import {
 } from "@/utils/prerenderedJsonLd";
 import { consolidateCanonicalUrl } from "@/utils/canonicalConsolidation";
 import { brandTitle } from "../../scripts/page-titles.mjs";
+import { useRoute } from "vue-router";
+import { PARAM_ROUTES } from "../../scripts/seo-routes.mjs";
+
+// 통합 변형(canonical → 기본 계산기) 집합 — seo-routes.mjs의 PARAM_ROUTES가 단일 소스
+const PARAM_ROUTE_SET = new Set<string>(PARAM_ROUTES);
 
 type SEOOptions = {
   title: MaybeRefOrGetter<string>;
@@ -59,12 +64,15 @@ export function useSEO({
   noindex = false,
   jsonLd,
 }: SEOOptions): void {
+  const route = useRoute();
   useHead(() => {
     // 뷰는 접미사 없는 페이지 제목을 넘긴다. 프리렌더(applyMeta)와 같은 brandTitle로 붙여야
     // 하이드레이션 뒤에도 `<페이지 제목> | ShakiLabs`가 정확히 한 번 남는다.
     const resolvedTitle = brandTitle(toValue(title));
     const resolvedDescription = toValue(description);
-    const resolvedNoindex = Boolean(toValue(noindex));
+    // 색인 소거(2026-10-16): noindex는 self-canonical 페이지에만 — 통합 변형(/compare/3000-vs-4000 등)은 프리렌더가
+    // canonical을 기본 페이지로 두므로 런타임 head가 noindex로 그 신호와 충돌하지 않게 한다(변형은 Googlebot robots 차단).
+    const resolvedNoindex = Boolean(toValue(noindex)) && !PARAM_ROUTE_SET.has(route.path);
     const resolvedOgImage = toValue(ogImage);
     const resolvedJsonLd = toValue(jsonLd);
     const resolvedJsonLdArray = Array.isArray(resolvedJsonLd)

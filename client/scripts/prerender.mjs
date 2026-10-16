@@ -1,7 +1,7 @@
 // 빌드 후 라우트별 SEO HTML 생성
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { resolve, dirname } from "path";
-import { SEO_ROUTES, CALCULATOR_ROUTES, canonicalPathFor } from "./seo-routes.mjs";
+import { SEO_ROUTES, CALCULATOR_ROUTES, canonicalPathFor, NOINDEX_ROUTES } from "./seo-routes.mjs";
 import { CALCULATOR_CATALOG } from "./calculator-catalog.mjs";
 import { buildPrerenderHeader, buildPrerenderFooter } from "./prerender-layout.mjs";
 import { buildRichContent } from "./prerender-content.mjs";
@@ -1817,7 +1817,9 @@ for (const route of SEO_ROUTES) {
     }
   }
 
-  writeFileSync(filePath, html, "utf-8");
+  // 색인 소거(2026-10-16): NOINDEX_ROUTES는 크롤러가 읽는 정적 head에 robots noindex를 단다(뷰의 SEOHead noindex와 쌍)
+  const finalHtml = NOINDEX_ROUTES.includes(route) ? html.replace("</head>", '    <meta name="robots" content="noindex,nofollow" />\n  </head>') : html;
+  writeFileSync(filePath, finalHtml, "utf-8");
   console.log(`[prerender] ${route} -> ${filePath}`);
 }
 

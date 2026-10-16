@@ -39,7 +39,7 @@ const jsonLd = computed(() => chain.value
 
 <template>
   <div v-if="chain" class="sh-container sh-container--prose space-y-4 py-6">
-    <SEOHead :title="chain.seoTitle" :description="chain.seoDescription" :json-ld="jsonLd" />
+    <SEOHead noindex :title="chain.seoTitle" :description="chain.seoDescription" :json-ld="jsonLd" />
 
     <div class="retro-panel overflow-hidden">
       <div class="retro-titlebar rounded-t-2xl">

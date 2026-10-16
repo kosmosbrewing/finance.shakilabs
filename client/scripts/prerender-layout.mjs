@@ -45,7 +45,6 @@ const CURRENT_SERVICE = SERVICE_CATALOG.services.find((service) => service.app =
 const STATIC_THEME_TOGGLE = `<div class="sh-global-header__utility"><button type="button" class="sh-theme-toggle" aria-label="다크 모드로 전환" style="width:44px;min-height:44px;border:0;background:transparent;color:#fafafa;"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="20" height="20"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button></div>`;
 
 const SITE_LINKS = [
-  { href: "/blog", label: "블로그" },
   { href: "/finance/about", label: "소개" },
 ];
 
@@ -166,7 +165,6 @@ export function buildPrerenderFooter() {
           <a href="/finance/about" style="color:hsl(var(--muted-foreground));margin-right:12px;">서비스 소개</a>
           <a href="/finance/privacy" style="color:hsl(var(--muted-foreground));margin-right:12px;">개인정보처리방침</a>
           <a href="/finance/terms" style="color:hsl(var(--muted-foreground));margin-right:12px;">이용약관</a>
-          <a href="/blog" style="color:hsl(var(--muted-foreground));">블로그</a>
         </p>
         <p style="margin:0;">본 계산기는 2026년 최신 세율·요율을 기반으로 하며, 국세청 근로소득 간이세액표·국민건강보험공단 고시·고용노동부 고시를 참고합니다. 결과는 법적 효력이 없는 참고용 추정값입니다.</p>
       </div>
