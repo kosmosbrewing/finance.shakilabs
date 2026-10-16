@@ -291,7 +291,7 @@ watch(
 
 <template>
   <div class="sh-container sh-container--tool space-y-4 py-6">
-    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
+    <SEOHead noindex :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
 
     <h1 class="text-h1 font-brand">2026 이직 연봉 비교 계산기</h1>
 

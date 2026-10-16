@@ -73,7 +73,7 @@ const statItems = computed(() => [
 
 <template>
   <div class="sh-container sh-container--tool space-y-4 py-6">
-    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(unpaidWageFaqs)" />
+    <SEOHead noindex :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(unpaidWageFaqs)" />
 
     <CalculatorPageHeader title="임금체불 지연이자 계산기" />
 

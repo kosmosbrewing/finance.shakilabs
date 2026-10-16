@@ -41,6 +41,8 @@ const result = useEitcCalc(
   })),
 );
 
+// 색인 소거(2026-10-16): /eitc·/eitc/single-income만 색인, single·double-income은 noindex(62일 사용자 4·2명)
+const noindexHousehold = computed(() => household.value === "single" || household.value === "doubleIncome");
 const householdLabel = computed(() =>
   props.initialHousehold ? EITC_2026[resolvedInitial].label : null,
 );
@@ -84,7 +86,7 @@ const statItems = computed(() => [
 
 <template>
   <div class="sh-container sh-container--tool space-y-4 py-6">
-    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(eitcFaqs)" />
+    <SEOHead :noindex="noindexHousehold" :title="seoTitle" :description="seoDescription" :json-ld="buildFaqJsonLd(eitcFaqs)" />
 
     <CalculatorPageHeader title="근로장려금·자녀장려금 계산기" />
 

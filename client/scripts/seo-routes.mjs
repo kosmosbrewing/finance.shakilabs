@@ -210,7 +210,15 @@ for (const route of PARAM_ROUTES) {
 // The sitemap advertises only self-canonical pages. A consolidated variant still returns 200 and
 // still gets crawled through internal links — it just should not be *submitted*, because every
 // submitted URL that immediately points elsewhere spends crawl budget for nothing.
-export const SITEMAP_ROUTES = SEO_ROUTES.filter((route) => !PARAM_ROUTE_SET.has(route));
+
+// 색인 소거(2026-10-16, 사용자 승인): 62일 활성 사용자 8명 미만 + 네이버 TOP 30 밖인 계산기·가이드.
+// /2027(달라지는 것)은 고유 데이터 페이지라 사용자 수와 무관하게 색인을 유지한다.
+// 도구는 그대로 쓰이고(내부 링크 유지) 사이트맵·색인에서만 뺀다. 네이버 클릭이 월 10+ 되면 다시 넣는다.
+// validate-noindex.mjs가 사이트맵 ⇔ noindex 없음 / 사이트맵 밖 self-canonical ⇔ noindex를 빌드마다 대조한다.
+export const NOINDEX_ROUTES = ["/compare", "/dependent", "/eitc/double-income", "/eitc/single", "/guide/job-change", "/guide/part-time", "/guide/resignation", "/guide/year-end", "/irp", "/monthly-rent-deduction", "/unpaid-wage"];
+export const SITEMAP_ROUTES = SEO_ROUTES.filter(
+  (route) => !PARAM_ROUTE_SET.has(route) && !NOINDEX_ROUTES.includes(route),
+);
 
 // Everything in the sitemap that is not a calculator: the hub, the situation guides and the
 // policy pages. Listed by hand because it is the short, stable half — a new calculator must never
@@ -226,7 +234,8 @@ const NON_CALCULATOR_ROUTES = new Set(["/", "/all", "/2027", "/about", "/terms",
 //
 // Depth filter: a two-segment sitemap route is a sub-page of a calculator (/eitc/single is a
 // household variant of /eitc, /guide/* is a guide), never a calculator of its own.
-export const CALCULATOR_ROUTES = SITEMAP_ROUTES.filter(
+// 색인 소거(2026-10-16) 뒤에도 계산기 수는 서비스 수다 — 사이트맵(색인)과 noindex 계산기를 합쳐 센다.
+export const CALCULATOR_ROUTES = [...SITEMAP_ROUTES, ...NOINDEX_ROUTES].filter(
   (route) => route.split("/").length === 2 && !NON_CALCULATOR_ROUTES.has(route),
 );
 
