@@ -58,7 +58,8 @@ const seoDescription = computed(
     `${formatManWon(input.value.currentAnnual)}에서 ${formatPercent(
       input.value.raisePercent / 100,
       1
-    )} 인상 시 월 실수령 증가는 ${formatWon(result.value.monthlyNetDiff)}입니다.`
+    )} 인상 시 월 실수령 증가는 ${formatWon(result.value.monthlyNetDiff)}입니다. ` +
+    "인상 전후 월 실수령액과 4대보험·소득세 공제액, 연간 실수령 증가분을 2026년 요율로 비교해 인상분 중 실제로 손에 남는 금액을 보여 줍니다."
 );
 
 function buildShareState(): { path: string; query: Record<string, string> } {

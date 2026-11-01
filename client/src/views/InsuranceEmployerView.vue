@@ -39,7 +39,9 @@ const burdenSegments = computed(() => [
 ]);
 const seoTitle = computed(() => pageTitle("/4-insurance-employer"));
 const seoDescription = computed(
-  () => `월급 ${formatWon(input.value.monthlySalary)} 기준 사업주 월 부담금은 ${formatWon(result.value.totalMonthlyBurden)}입니다.`
+  () =>
+    `월급 ${formatWon(input.value.monthlySalary)} 기준 사업주 월 부담금은 ${formatWon(result.value.totalMonthlyBurden)}입니다. ` +
+    "국민연금 4.75%·건강보험 3.595%·장기요양보험의 사업주 부담분에 업종별로 조정한 고용·산재보험료를 더해 1인 고용 비용을 2026년 요율로 계산합니다."
 );
 </script>
 

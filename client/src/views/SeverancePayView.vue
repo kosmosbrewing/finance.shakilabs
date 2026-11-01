@@ -44,8 +44,8 @@ const seoTitle = computed(() =>
 );
 const seoDescription = computed(() =>
   props.initialYears
-    ? `${props.initialYears}년 근속 기준 퇴직금과 퇴직소득세를 계산합니다.`
-    : "월급과 근속연수를 입력하면 퇴직금, 퇴직소득세, 실수령 퇴직금을 계산합니다.",
+    ? `${props.initialYears}년 근속 기준 퇴직금과 퇴직소득세를 계산합니다. 평균임금으로 퇴직금을 구하고 근속연수공제를 적용한 퇴직소득세를 뺀 실수령 퇴직금을 보여 줍니다. 2026년 기준.`
+    : "월급과 근속연수를 입력하면 평균임금 기준 퇴직금, 근속연수공제를 적용한 퇴직소득세, 세후 실수령 퇴직금을 계산합니다. 근속연수별 비교표로 1년 더 다닐 때의 차이도 볼 수 있습니다.",
 );
 
 const { showShareModal, kakaoBusy, shareSummary, openShare, closeShare, shareKakao, copyLink } =

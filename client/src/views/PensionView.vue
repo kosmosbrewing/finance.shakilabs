@@ -43,7 +43,9 @@ const clampedIncome = computed(() =>
 );
 const seoTitle = computed(() => pageTitle("/pension"));
 const seoDescription = computed(
-  () => `가입 ${input.value.insuredYears}년 기준 예상 국민연금 월수령액은 ${formatWon(result.value.estimatedMonthlyPension)}입니다.`
+  () =>
+    `가입 ${input.value.insuredYears}년 기준 예상 국민연금 월수령액은 ${formatWon(result.value.estimatedMonthlyPension)}입니다. ` +
+    "평균소득·가입기간·청구 나이로 노령연금 월액을 추정하고, 조기 청구 감액과 연기 청구 가산, 10년 미만 가입 시 수급 요건도 함께 표시합니다."
 );
 </script>
 

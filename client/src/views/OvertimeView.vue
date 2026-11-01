@@ -67,7 +67,8 @@ const seoDescription = computed(
   () =>
     `추가 수당 총액 ${formatWon(result.value.totalExtraGross)} 중 월 실수령 증가는 ${formatWon(
       result.value.totalExtraNet
-    )}입니다.`
+    )}입니다. ` +
+    "월급을 통상시급으로 환산한 뒤 연장·야간·휴일 근무시간별 가산수당을 계산하고, 4대보험과 소득세 공제 후 실제로 늘어나는 월 실수령액까지 보여 줍니다."
 );
 
 function buildShareState(): { path: string; query: Record<string, string> } {
