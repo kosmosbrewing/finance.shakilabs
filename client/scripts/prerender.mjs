@@ -1818,7 +1818,7 @@ for (const route of SEO_ROUTES) {
   }
 
   // 색인 소거(2026-10-16): NOINDEX_ROUTES는 크롤러가 읽는 정적 head에 robots noindex를 단다(뷰의 SEOHead noindex와 쌍)
-  const finalHtml = NOINDEX_ROUTES.includes(route) ? html.replace("</head>", '    <meta name="robots" content="noindex,nofollow" />\n  </head>') : html;
+  const finalHtml = NOINDEX_ROUTES.includes(route) ? html.replace("</head>", '    <meta name="robots" content="noindex,follow" />\n  </head>') : html;
   writeFileSync(filePath, finalHtml, "utf-8");
   console.log(`[prerender] ${route} -> ${filePath}`);
 }

@@ -5,6 +5,14 @@ import { RouterLink } from "vue-router";
 import { SALARY_TABLE_PRESETS } from "@/data/insurancePresets";
 import { calculateSalaryBreakdown } from "@/utils/calculator";
 import { formatKrwCompact, formatManWon, formatPercent, formatWon, deductionToneClass } from "@/lib/utils";
+import { SALARY_AMOUNTS } from "../../../scripts/seo-routes.mjs";
+
+// 프리렌더된 금액(seo-routes SALARY_AMOUNTS)만 /salary/{금액}으로 링크한다. 정적 호스팅이라 그 밖의 금액은 404가 되고
+// 서치콘솔 '찾을 수 없음(404)'에 /salary/2400이 올라왔다(2026-11-01). 나머지 행은 같은 모양의 텍스트로 둔다.
+const PRERENDERED_SALARY_SET = new Set<number>(SALARY_AMOUNTS as number[]);
+function isPrerenderedSalary(manWon: number): boolean {
+  return PRERENDERED_SALARY_SET.has(manWon);
+}
 
 function formatMobileSalary(amount: number): string {
   return formatManWon(amount).replace("억원", "억").replace("만원", "만");
@@ -80,10 +88,18 @@ const rows = computed(() =>
             class="group even:bg-muted/10 transition-colors hover:bg-muted/40"
           >
             <td class="sticky left-0 z-10 border-t border-border/40 bg-card pl-2.5 pr-1.5 py-2 group-even:bg-muted/10 sm:px-3 md:px-3 md:py-2.5">
-              <RouterLink :to="`/salary/${row.manWon}`" class="whitespace-nowrap font-semibold text-link">
+              <RouterLink
+                v-if="isPrerenderedSalary(row.manWon)"
+                :to="`/salary/${row.manWon}`"
+                class="whitespace-nowrap font-semibold text-link"
+              >
                 <span class="md:hidden">{{ formatMobileSalary(row.annualSalary) }}</span>
                 <span class="hidden md:inline">{{ formatManWon(row.annualSalary) }}</span>
               </RouterLink>
+              <span v-else class="whitespace-nowrap font-semibold">
+                <span class="md:hidden">{{ formatMobileSalary(row.annualSalary) }}</span>
+                <span class="hidden md:inline">{{ formatManWon(row.annualSalary) }}</span>
+              </span>
             </td>
             <td class="border-t border-border/40 px-1.5 py-2 text-right tabular-nums whitespace-nowrap sm:px-3 md:px-3 md:py-2.5">
               <span class="md:hidden">{{ formatKrwCompact(row.totalDeduction) }}</span>

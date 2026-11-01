@@ -215,7 +215,10 @@ for (const route of PARAM_ROUTES) {
 // /2027(달라지는 것)은 고유 데이터 페이지라 사용자 수와 무관하게 색인을 유지한다.
 // 도구는 그대로 쓰이고(내부 링크 유지) 사이트맵·색인에서만 뺀다. 네이버 클릭이 월 10+ 되면 다시 넣는다.
 // validate-noindex.mjs가 사이트맵 ⇔ noindex 없음 / 사이트맵 밖 self-canonical ⇔ noindex를 빌드마다 대조한다.
-export const NOINDEX_ROUTES = ["/compare", "/dependent", "/eitc/double-income", "/eitc/single", "/guide/job-change", "/guide/part-time", "/guide/resignation", "/guide/year-end", "/irp", "/monthly-rent-deduction", "/unpaid-wage"];
+// 2026-11-01 색인 복귀: 10-16 소거(11개) 뒤 서치콘솔 색인은 여전히 1페이지(홈)였고 90일 크롤 통계는 HTML 하루 2건·발견 크롤 3%라
+// 사이트맵 크기는 크롤 배정과 무관했다. 반면 소거 페이지는 메뉴·푸터·관련 링크에서 1~28회 링크돼 "보이는 도구 ≠ 색인 도구"
+// 불일치만 남겼다. 가이드 4편(편집형 글)과 계산기 5개를 복귀시키고, /eitc 가구 변형 2개만 남긴다(본문이 /eitc와 같은 틀).
+export const NOINDEX_ROUTES = ["/eitc/double-income", "/eitc/single"];
 export const SITEMAP_ROUTES = SEO_ROUTES.filter(
   (route) => !PARAM_ROUTE_SET.has(route) && !NOINDEX_ROUTES.includes(route),
 );
