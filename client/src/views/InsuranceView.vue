@@ -23,6 +23,9 @@ import InternalLink from "@/components/common/InternalLink.vue";
 import CalculatorFeedbackRow from "@/components/calculator/CalculatorFeedbackRow.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import CalcSourceBox from "@/components/salary/CalcSourceBox.vue";
+import BenefitFaqPanel from "@/components/benefits/BenefitFaqPanel.vue";
+import { insuranceFaqs, salaryFaqs } from "@/data/laborFaqs";
+import { buildFaqJsonLd } from "@/lib/faqSeo";
 import { useInsuranceReverse } from "@/composables/useInsuranceReverse";
 import { useSalaryCalc } from "@/composables/useSalaryCalc";
 import type { SalaryCalcResult } from "@/composables/useSalaryCalc";
@@ -288,6 +291,9 @@ const activeCalc = computed(() =>
 );
 
 const isForwardMode = computed(() => mode.value === "forward");
+// FAQ는 모드별로 다른 문항 — 프리렌더(scripts/faq-data.mjs ROUTE_FAQS)와 문구가 글자 단위로 같아야 한다.
+const faqItems = computed(() => (isForwardMode.value ? salaryFaqs : insuranceFaqs));
+const seoJsonLd = computed(() => [breadcrumbJsonLd.value, buildFaqJsonLd(faqItems.value)]);
 const pageTitle = computed(() =>
   isForwardMode.value
     ? "연봉 실수령액 계산기"
@@ -383,7 +389,7 @@ watch(
 
 <template>
   <div class="text-resize-layout sh-container sh-container--tool space-y-4 py-6">
-    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="breadcrumbJsonLd" />
+    <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="seoJsonLd" />
 
     <CalculatorPageHeader :title="pageTitle">
       <template #control>
@@ -436,6 +442,8 @@ watch(
         <InstallHint />
       </template>
     </ShCalculatorSplit>
+
+    <BenefitFaqPanel :items="faqItems" />
 
     <!-- 계산기 아래 데이터 블록도 2열(ShPairRow) — 위 입력 | 결과와 같은 문법(사용자 결정 2026-09-25).
          순서는 그대로 두고 짧은 블록은 한 칸에 쌓는다. 관련 서비스(3열 카드)·광고·피드백은 전폭.
