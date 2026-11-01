@@ -31,8 +31,8 @@ const seoTitle = computed(() =>
 );
 const seoDesc = computed(() =>
   r.value.isRefund
-    ? `예상 환급액은 ${formatWon(Math.abs(r.value.settlementAmount))}입니다.`
-    : `예상 추가 납부액은 ${formatWon(r.value.settlementAmount)}입니다.`,
+    ? `예상 환급액은 ${formatWon(Math.abs(r.value.settlementAmount))}입니다. 총급여와 인적공제·보험료·의료비·교육비·기부금·월세 공제를 넣으면 결정세액과 기납부세액을 비교해 2026년 귀속 연말정산 환급액을 계산합니다.`
+    : `예상 추가 납부액은 ${formatWon(r.value.settlementAmount)}입니다. 총급여와 인적공제·보험료·의료비·교육비·기부금·월세 공제를 넣으면 결정세액과 기납부세액을 비교해 2026년 귀속 연말정산 추가 납부액을 계산합니다.`,
 );
 
 // The settlement amount itself is promoted to the ResultHero above the grid.

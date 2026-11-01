@@ -36,7 +36,8 @@ const seoDescription = computed(
   () =>
     `미사용 연차 ${result.value.payableDays}일 기준 예상 연차수당은 ${formatWon(
       result.value.totalAllowance
-    )}입니다.`
+    )}입니다. ` +
+    "월급과 고정수당을 209시간 기준 통상시급으로 환산해 1일 8시간 수당을 구하고, 1년 미만은 월 개근 1일·1년 이상은 15일과 2년마다 1일 가산 규칙으로 발생일수를 계산합니다."
 );
 </script>
 

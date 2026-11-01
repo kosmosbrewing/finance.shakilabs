@@ -56,8 +56,8 @@ const seoTitle = computed(() =>
 );
 const seoDescription = computed(() =>
   props.initialHourlyWage
-    ? `시급 ${props.initialHourlyWage.toLocaleString()}원을 월급·일급·연봉으로 환산합니다.`
-    : "시급↔월급↔연봉을 주휴수당 포함·미포함으로 양방향 환산합니다. 2026 최저시급 반영.",
+    ? `시급 ${props.initialHourlyWage.toLocaleString()}원을 주 40시간·주휴 8시간 기준으로 일급·월급·연봉으로 환산합니다. 주휴수당 포함·미포함 두 값을 나란히 보여 주며 2026년 최저시급과 비교합니다.`
+    : "시급·월급·연봉을 어느 쪽에서든 입력하면 주 40시간·주휴 8시간 기준으로 나머지를 환산합니다. 주휴수당 포함·미포함 두 값을 나란히 보여 주고 2026년 최저시급 10,320원과 비교합니다.",
 );
 
 const baseLabel = computed(() => (base.value === "hourly" ? "시급" : base.value === "monthly" ? "월급" : "연봉"));

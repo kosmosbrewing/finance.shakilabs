@@ -44,7 +44,8 @@ const seoTitle = computed(() =>
     : pageTitle("/parental-leave"),
 );
 const seoDesc = computed(() =>
-  `육아휴직 ${calc.months.value}개월 예상 총 급여는 ${formatWon(r.value.totalBenefit)}입니다.`,
+  `육아휴직 ${calc.months.value}개월 예상 총 급여는 ${formatWon(r.value.totalBenefit)}입니다. ` +
+  "통상임금과 휴직 개월 수로 월 급여 상한·하한을 적용한 육아휴직 급여를 계산하고, 부모가 함께 쓰는 6+6 부모육아휴직제 가산을 반영합니다. 2026년 기준.",
 );
 
 // The total benefit is promoted to the ResultHero above the grid.
