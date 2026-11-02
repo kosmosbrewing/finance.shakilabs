@@ -355,13 +355,6 @@ watch(
           업데이트 중
         </span>
       </div>
-      <!-- 입력이 11개다 — 다시 돌아와 조정할 값이 가장 많은 계산기 (v3 §7.3).
-           제목 오른쪽은 "업데이트 중" 상태가 이미 쓰고 있어 아래 줄에 둔다. -->
-      <div class="finance-page-header">
-        <div class="finance-page-header__control">
-          <CalculatorMemoryControl tool="quit" base-path="/quit" />
-        </div>
-      </div>
     </div>
 
     <ShCalculatorSplit>
@@ -382,6 +375,9 @@ watch(
             @range-apply="handleRangeApply"
           />
         </CalculatorInteractionTracker>
+        <!-- 입력이 11개라 다시 돌아와 조정할 값이 가장 많은 계산기 (v3 §7.3). 기억 토글은 입력 칸 맨 아래 —
+             제목 아래 한 줄을 차지하던 자리는 390px 첫 화면을 밀어냈다(2026-11 UI 감사). -->
+        <CalculatorMemoryControl tool="quit" base-path="/quit" />
       </template>
       <template #result>
         <QuitReceivables
