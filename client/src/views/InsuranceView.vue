@@ -391,11 +391,7 @@ watch(
   <div class="text-resize-layout sh-container sh-container--tool space-y-4 py-6">
     <SEOHead :title="seoTitle" :description="seoDescription" :json-ld="seoJsonLd" />
 
-    <CalculatorPageHeader :title="pageTitle">
-      <template #control>
-        <CalculatorMemoryControl :tool="memoryTool" :base-path="memoryBasePath" />
-      </template>
-    </CalculatorPageHeader>
+    <CalculatorPageHeader :title="pageTitle" />
 
     <!-- 홈 계산기와 같은 전환 — /insurance와 /salary는 검색어가 달라 URL은 둘로 두고 화면만 하나로 쓴다.
          바꾸면 아래 route 동기화 watch가 상대 URL로 replace한다(가족·비과세 입력은 쿼리로 이어진다). -->
@@ -414,6 +410,9 @@ watch(
             v-model:non-taxable-monthly="nonTaxableMonthly"
           />
         </CalculatorInteractionTracker>
+        <!-- "이 탭에 입력 기억하기"는 입력 칸 맨 아래 — 제목 오른쪽(모바일에선 H1 바로 아래 한 줄)에 있으면
+             390px 첫 화면에서 입력보다 먼저 보이는 유일한 컨트롤이 됐다(2026-11 UI 감사). -->
+        <CalculatorMemoryControl :tool="memoryTool" :base-path="memoryBasePath" />
       </template>
 
       <template #result>
