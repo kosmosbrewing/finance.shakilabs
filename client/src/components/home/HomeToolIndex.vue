@@ -22,7 +22,7 @@ defineProps<{
       <h2 id="home-hub-title" class="retro-title">{{ heading }}</h2>
     </div>
     <div class="retro-panel-content space-y-4">
-      <p class="break-keep text-caption text-muted-foreground">{{ intro }}</p>
+      <p v-if="intro" class="break-keep text-caption text-muted-foreground">{{ intro }}</p>
 
       <!-- 26줄이라 카드가 아니라 행이다. 카드 그리드로 깔면 한 화면에 5~6개밖에 안 들어와
            "전체 목록"이라는 약속을 화면이 못 지킨다. 행 끝 화살표가 카드의 "계산하기 →"와

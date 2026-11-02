@@ -44,9 +44,6 @@ declare module "*home-content.mjs" {
   export const HOME_INTRO: string;
   export const HOME_CHANGES_LINK: { to: string; label: string };
   export const HOME_SECTIONS: HomeSection[];
-  export const HOME_FAQS: HomeFaq[];
-  export const HOME_FAQ_H2: string;
-  export const HOME_FAQ_INTRO: string;
   export const HOME_GUIDE: HomeGuide;
   export const HOME_GUIDE_LINKS_H3: string;
   export const HOME_GUIDE_LINKS_INTRO: string;

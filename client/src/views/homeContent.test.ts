@@ -4,8 +4,6 @@ import { describe, expect, it } from "vitest";
 import { FOOTER_SECTIONS } from "@/data/footerNav";
 import {
   HOME_ALL_LINK,
-  HOME_FAQ_H2,
-  HOME_FAQS,
   HOME_GUIDE,
   HOME_H1,
   HOME_HUB_GROUPS,
@@ -38,17 +36,16 @@ describe("home content", () => {
       ...HOME_SECTIONS.slice(0, HOME_LINKS_AFTER_SECTION).map((section) => section.h2),
       HOME_LINKS_H2,
       ...HOME_SECTIONS.slice(HOME_LINKS_AFTER_SECTION).map((section) => section.h2),
-      HOME_FAQ_H2,
       HOME_GUIDE.h2,
     ];
     expect(extractHeadings(homeHtml, "h2")).toEqual(expected);
   });
 
-  it("홈은 도구 인덱스 화면이다 — 본문 h2가 네 개를 넘지 않는다", () => {
+  it("홈은 도구 인덱스 화면이다 — 본문 h2가 세 개를 넘지 않는다", () => {
     // 개편 전 홈은 안내 문단마다 h2를 달아 10개였다(프리렌더 9 + 관련 서비스). 그 상태가
     // "인덱스가 아니라 긴 글"의 실제 원인이었으므로, 제목 개수 자체를 게이트로 둔다.
-    // 프리렌더 h2 = 퀵계산기 · 도구 인덱스 · FAQ · 종합 가이드.
-    expect(extractHeadings(homeHtml, "h2")).toHaveLength(4);
+    // 프리렌더 h2 = 퀵계산기 · 도구 인덱스 · 종합 가이드(2026-11-02 홈 FAQ 제거).
+    expect(extractHeadings(homeHtml, "h2")).toHaveLength(3);
     expect(HOME_SECTIONS).toHaveLength(1);
   });
 
@@ -59,21 +56,6 @@ describe("home content", () => {
     expect(HOME_LINKS_AFTER_SECTION).toBeLessThanOrEqual(HOME_SECTIONS.length);
   });
 
-  it("FAQ 문답은 화면·정적 본문·스키마가 같은 배열에서 나온다", () => {
-    expect(HOME_FAQS.length).toBeGreaterThanOrEqual(4);
-    for (const faq of HOME_FAQS) {
-      expect(homeHtml).toContain(faq.q);
-      expect(homeHtml).toContain(faq.a);
-    }
-    // 질문을 제목 태그로 내보내면 화면(<summary>)에 없는 제목이 정적 HTML에만 생긴다.
-    const headings = [
-      ...extractHeadings(homeHtml, "h2"),
-      ...[...homeHtml.matchAll(/<h3[^>]*>([\s\S]*?)<\/h3>/g)].map((m) => m[1].trim()),
-    ];
-    for (const faq of HOME_FAQS) {
-      expect(headings).not.toContain(faq.q);
-    }
-  });
 
   it("종합 가이드 절은 h3로 나간다 — h2를 늘리면 안 된다", () => {
     const h3 = [...homeHtml.matchAll(/<h3[^>]*>([\s\S]*?)<\/h3>/g)].map((m) => m[1].trim());
@@ -129,14 +111,13 @@ describe("home content", () => {
     expect(homeViewSource.indexOf("<HomeInsuranceCalc")).toBeLessThan(
       homeViewSource.indexOf("<HomeToolIndex")
     );
+    // 2026-11-02: 홈 FAQ 제거 — 인덱스 다음은 곧바로 종합 가이드다. 목록 안내문(HOME_LINKS_INTRO)도 비웠다.
     expect(homeViewSource.indexOf("<HomeToolIndex")).toBeLessThan(
-      homeViewSource.indexOf("<HomeFaqPanel")
-    );
-    expect(homeViewSource.indexOf("<HomeFaqPanel")).toBeLessThan(
       homeViewSource.indexOf("<HomeSituationGuide")
     );
+    expect(homeViewSource).not.toContain("<HomeFaqPanel");
     expect(homeViewSource).toContain(':intro="HOME_LINKS_INTRO"');
-    expect(HOME_LINKS_INTRO.length).toBeGreaterThan(40);
+    expect(HOME_LINKS_INTRO).toBe("");
   });
 
   it("홈 본문은 /salary 본문과 문장을 공유하지 않는다", () => {
@@ -144,7 +125,6 @@ describe("home content", () => {
     const homeParagraphs = new Set([
       ...HOME_SECTIONS.map((section) => section.body),
       ...HOME_GUIDE.sections.map((section) => section.body),
-      ...HOME_FAQS.map((faq) => faq.a),
     ]);
     for (const paragraph of homeParagraphs) {
       expect(salaryHtml).not.toContain(paragraph);

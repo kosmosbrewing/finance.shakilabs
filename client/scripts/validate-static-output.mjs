@@ -43,6 +43,9 @@ import {
 // sitemap is a page we are actively asking a crawler to rank.
 const MIN_BODY_CHARS = 250;
 const SITEMAP_MIN_BODY_CHARS = 1500;
+// 홈("/")은 글이 아니라 도구 인덱스다(2026-11-02 홈 FAQ 제거 뒤 정적 본문 1,104자). 하이드레이션 뒤에는 계산기 입력·결과와
+// 26개 목록이 그 위에 더해지므로, 정적 본문의 하한만 인덱스 화면에 맞게 낮춘다. 다른 사이트맵 라우트는 그대로 1,500.
+const HUB_MIN_BODY_CHARS = 900;
 
 function bodyTextLength(html) {
   const blocks = [
@@ -212,7 +215,7 @@ function validateRoutes() {
     }
 
     const bodyChars = bodyTextLength(html);
-    const floor = sitemapRouteSet.has(route) ? SITEMAP_MIN_BODY_CHARS : MIN_BODY_CHARS;
+    const floor = route === "/" ? HUB_MIN_BODY_CHARS : sitemapRouteSet.has(route) ? SITEMAP_MIN_BODY_CHARS : MIN_BODY_CHARS;
     assert(
       bodyChars >= floor,
       `Thin body for ${route}: ${bodyChars} chars, need ${floor}`,

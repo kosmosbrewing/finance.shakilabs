@@ -8,12 +8,10 @@ import AdSlot from "@/components/common/AdSlot.vue";
 import RelatedServices from "@/components/common/RelatedServices.vue";
 import HomeInsuranceCalc from "@/components/home/HomeInsuranceCalc.vue";
 import HomeToolIndex from "@/components/home/HomeToolIndex.vue";
-import HomeFaqPanel from "@/components/home/HomeFaqPanel.vue";
 import HomeSituationGuide from "@/components/home/HomeSituationGuide.vue";
 import { DEFAULT_SITE_URL } from "@/lib/site";
 import {
   HOME_CHANGES_LINK,
-  HOME_FAQS,
   HOME_H1,
   HOME_INTRO,
   HOME_LINKS_H2,
@@ -28,8 +26,6 @@ const seoTitle = pageTitle("/");
 const seoDescription =
   "2026년 최신 세율 반영. 연봉 실수령액, 건보료 연봉 계산, 종합소득세, 이직 비교, 퇴사 시뮬레이션을 무료로 계산하세요.";
 
-// FAQPage는 화면 아코디언과 같은 배열에서 나온다. 스키마에만 있고 화면에 없는 문답은
-// 구조화 데이터 위반이므로, 두 곳이 갈라질 수 없게 소스를 하나로 묶어 둔다.
 const jsonLd = [
   {
     "@context": "https://schema.org",
@@ -37,15 +33,6 @@ const jsonLd = [
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "홈", item: DEFAULT_SITE_URL },
     ],
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: HOME_FAQS.map((faq) => ({
-      "@type": "Question",
-      name: faq.q,
-      acceptedAnswer: { "@type": "Answer", text: faq.a },
-    })),
   },
 ];
 
@@ -59,7 +46,7 @@ const quickCalcSection = computed(() => findSection("quick-calc"));
 </script>
 
 <template>
-  <!-- 홈은 도구 인덱스 화면이다(loan `/loan/` 패턴): 답 하나 → 26개 목록 → FAQ → 종합 가이드.
+  <!-- 홈은 도구 인덱스 화면이다(loan `/loan/` 패턴): 답 하나 → 26개 목록 → 종합 가이드(2026-11-02 FAQ 제거).
        요율 기준·근거·운영 방침·프리셋 안내처럼 "읽는 글"은 /all로 옮겼다 — 홈에 두면 h2가
        열 개로 불어나 인덱스가 산문 사이에 끼인 한 절이 된다(개편 전 상태). -->
   <div class="text-resize-layout sh-container sh-container--page space-y-4 py-6">
@@ -82,8 +69,6 @@ const quickCalcSection = computed(() => findSection("quick-calc"));
     <HomeToolIndex :heading="HOME_LINKS_H2" :intro="HOME_LINKS_INTRO" />
 
     <AdSlot unit="home-top" label="광고 · top" />
-
-    <HomeFaqPanel />
 
     <RelatedServices />
 

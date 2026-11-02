@@ -74,9 +74,6 @@ import {
 } from "./hub-digests.mjs";
 import {
   HOME_CHANGES_LINK,
-  HOME_FAQ_H2,
-  HOME_FAQ_INTRO,
-  HOME_FAQS,
   HOME_GUIDE,
   HOME_GUIDE_LINKS_H3,
   HOME_GUIDE_LINKS_INTRO,
@@ -3786,17 +3783,6 @@ function buildNextCalculatorsSection() {
   };
 }
 
-// 홈 FAQ 정적 본문. 질문을 제목 태그로 내보내지 않는 이유는 화면이 <summary>로 렌더하기
-// 때문이다 — 제목으로 쓰면 화면에 없는 제목이 정적 HTML에만 생긴다.
-function buildHomeFaqSection() {
-  const items = HOME_FAQS.map(
-    (faq) =>
-      `<p style="${P_STYLE}"><strong>${faq.q}</strong></p><p style="${P_STYLE}">${faq.a}</p>`,
-  ).join("");
-
-  return { h2: HOME_FAQ_H2, body: HOME_FAQ_INTRO, extra: items };
-}
-
 // 홈 종합 가이드 정적 본문. 절 제목은 화면과 같은 h3라서 하이드레이션 때 함께 걷힌다.
 // 상황별 가이드 4개 링크는 위 링크 블록(HOME_PRERENDER_LINKS)에 이미 있으므로 여기서
 // 다시 걸지 않는다 — 같은 페이지에 같은 링크를 두 번 내보내면 링크 수만 부풀린다.
@@ -3823,10 +3809,10 @@ const LANDING_CONTENT = {
     h1: HOME_H1,
     intro: HOME_INTRO,
     noticeLink: HOME_CHANGES_LINK,
-    // 읽기 순서는 화면과 같다: 퀵계산기 → 도구 인덱스(링크 블록) → FAQ → 종합 가이드.
+    // 읽기 순서는 화면과 같다: 퀵계산기 → 도구 인덱스(링크 블록) → 종합 가이드(2026-11-02 FAQ 제거).
     // FAQ·가이드는 화면 컴포넌트와 같은 배열에서 나오므로 하이드레이션 때 제목이 일치해
     // 통째로 걷힌다(utils/prerenderFallback.ts) — 사람에게 두 번 보이지 않는다.
-    sections: [...HOME_SECTIONS, buildHomeFaqSection(), buildHomeGuideSection()],
+    sections: [...HOME_SECTIONS, buildHomeGuideSection()],
     linksH2: HOME_LINKS_H2,
     linksIntro: HOME_LINKS_INTRO,
     linksAfterSection: HOME_LINKS_AFTER_SECTION,

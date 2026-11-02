@@ -18,6 +18,7 @@ import {
   type InsuranceCalcMode,
 } from "@/data/insurancePresets";
 import { buildQuery } from "@/lib/routeState";
+import { formatWon } from "@/lib/utils";
 
 const props = defineProps<{ heading: string; note: string }>();
 
@@ -123,6 +124,12 @@ const detailRoute = computed(() => {
         </RouterLink>
 
         <p class="break-keep text-caption leading-relaxed text-muted-foreground">{{ props.note }}</p>
+      </template>
+
+      <!-- 모바일 요약 바(ui 0.3.44): 입력 패널이 한 화면을 다 쓰는 390px에서 결과 숫자 하나를 아래에 고정한다 -->
+      <template #summary>
+        <template v-if="mode === 'reverse'">추정 연봉 <strong>{{ formatWon(reverse.estimatedAnnualGross.value) }}</strong></template>
+        <template v-else>월 실수령액 <strong>{{ formatWon(activeCalc.monthlyNet.value) }}</strong></template>
       </template>
     </ShCalculatorSplit>
   </section>
