@@ -47,15 +47,15 @@ const rows = computed(() =>
       <ChevronDown aria-hidden="true" class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" />
     </summary>
 
-    <!-- lg에선 아래 2열 반폭(478~542px)에 들어가므로 560px 하한을 푼다 — 4열이라 그 폭에 들어간다(실측).
-         모바일·태블릿은 560px 하한 + 가로 스크롤 그대로. -->
+    <!-- 폭 하한을 두지 않는다. 390px에서 560px 하한이 +211px 가로 스크롤을 만들었는데(2026-11 UI 감사),
+         모바일 셀은 이미 축약형("4,000만"·"292만원"·"비율")이라 4열이 358px 안에 들어간다. 스크롤 래퍼는 320px 보험. -->
     <div
       class="salary-table-scroll overflow-x-auto px-2 pb-1 pt-2 md:px-0 md:pb-0 md:pt-0"
       role="region"
       aria-label="연봉별 실수령액 비교 표"
       tabindex="0"
     >
-      <table aria-label="2026 연봉별 공제와 실수령액 비교" class="w-full min-w-[560px] table-fixed lg:min-w-0 border-separate border-spacing-0 text-xs md:text-caption">
+      <table aria-label="2026 연봉별 공제와 실수령액 비교" class="w-full table-fixed border-separate border-spacing-0 text-xs md:text-caption">
         <colgroup>
           <col class="w-[29%] md:w-auto" />
           <col class="w-[24%] md:w-auto" />
@@ -111,7 +111,7 @@ const rows = computed(() =>
             </td>
             <td class="border-t border-border/40 pl-1 pr-3 py-2 text-right tabular-nums sm:px-3 md:px-3 md:py-2.5">
               <span
-                class="inline-flex min-w-[52px] items-center justify-center rounded-full border px-1 py-0.5 text-xs font-semibold sm:min-w-[60px] sm:px-2 md:min-w-[72px]"
+                class="inline-flex min-w-[44px] items-center justify-center rounded-full border px-1 py-0.5 text-xs font-semibold sm:min-w-[60px] sm:px-2 md:min-w-[72px]"
                 :class="deductionToneClass(row.deductionRate)"
               >
                 {{ formatPercent(row.deductionRate, 1) }}
