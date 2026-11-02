@@ -18,7 +18,7 @@ import {
 import { appendGuideDeepDive } from "./guide-content.mjs";
 import { buildChanges2027Html, buildChanges2027Meta } from "./prerender-changes.mjs";
 import { FAQ_SOURCE_FILES, ROUTE_FAQS } from "./faq-data.mjs";
-import { HOME_FAQS, HOME_ITEM_LIST } from "./home-content.mjs";
+import { HOME_ITEM_LIST } from "./home-content.mjs";
 import {
   META_DESCRIPTIONS,
   NOT_FOUND_TITLE,
@@ -1024,17 +1024,6 @@ function buildMeta(route) {
             position: index + 1,
             name: item.name,
             url: `${SITE_URL}${item.path}`,
-          })),
-        },
-        // 화면 아코디언(HomeFaqPanel)과 같은 배열이다. 스키마에만 있고 화면에 없는 문답은
-        // 구조화 데이터 위반이므로 소스를 하나로 묶어 둔다.
-        {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: HOME_FAQS.map((faq) => ({
-            "@type": "Question",
-            name: faq.q,
-            acceptedAnswer: { "@type": "Answer", text: faq.a },
           })),
         },
       ],

@@ -441,6 +441,12 @@ watch(
 
         <InstallHint />
       </template>
+
+      <!-- 모바일 요약 바(ui 0.3.44): 결과 칸이 화면 밖일 때 핵심 숫자 하나 -->
+      <template #summary>
+        <template v-if="isForwardMode">월 실수령액 <strong>{{ formatWon(activeCalc.monthlyNet.value) }}</strong></template>
+        <template v-else>추정 연봉 <strong>{{ formatWon(reverse.estimatedAnnualGross.value) }}</strong></template>
+      </template>
     </ShCalculatorSplit>
 
     <BenefitFaqPanel :items="faqItems" />
